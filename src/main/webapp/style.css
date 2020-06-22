@@ -138,8 +138,11 @@ h1 {
   transform: translate(-50%, -50%);
 }
 
-/* event lists */
+.start-bttn img {
+  height: 75px;
+}
 
+/* event lists */
 .event-section {
   margin: 40px 20px 0 20px;
   font-weight: bold;
