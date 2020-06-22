@@ -17,8 +17,16 @@
  color: #93c47d;
 }
 
+.green-background {
+  background-color: #93c47d;
+}
+
 .blue {
   color: #6e9eeb;
+}
+
+.blue-background {
+  background-color: #6e9eeb;
 }
 
 
@@ -93,11 +101,11 @@ body {
   flex-flow: row nowrap;
   align-items: center;
   justify-content: space-around;
+  margin-bottom: 30px;
 }
 
 .event-image {
   /* left-hand part of an event list item, solid color or container for image */
-  background-color: #93c47d;
   width: 275px;
   height: 200px;
 }
@@ -140,11 +148,9 @@ body {
 
 .attendee-count {
   font-weight: bold;
-  color: #93c47d;
 }
 
 .tag {
-  background-color: #93c47d;
   color: white;
   border-radius: 5px;
   padding: 0 10px 0 10px;
