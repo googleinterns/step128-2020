@@ -136,7 +136,6 @@ body {
   justify-content: space-between;
   height: 100%;
   width: 100%;
-  overflow: scroll;
 }
 
 .event-item-header {
@@ -173,5 +172,5 @@ body {
 .tag {
   color: white;
   border-radius: 5px;
-  padding: 0 10px 0 10px;
+  padding: 5px 10px 5px 10px;
 }
