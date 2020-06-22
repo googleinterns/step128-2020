@@ -34,6 +34,8 @@
 
 body {
   font: 100%/1.6 "Google", "Trebuchet MS", Helvetica, sans-serif;
+  margin: 0px;
+  padding: 0px;
 }
 
 .header {
@@ -73,6 +75,55 @@ body {
   color: black;
   text-decoration: none;
 }
+
+h1 {
+  margin: 0px;
+  padding: 0px;
+  padding-top: 25px;
+  padding-bottom: 10px;
+}
+
+.search-page-content {
+  background-color: rgb(255, 217, 102);
+  min-height: 100%;
+  min-width: 100%;
+}
+
+.search-container {
+  margin-left: auto;
+  margin-right: auto;
+  width: 700px;
+}
+
+.search-container input[type=text] {
+  border: none;
+  border-radius: 10px;
+  font-size: 18px;
+  height: 25px;
+  margin-top: 8px;
+  outline: none;
+  padding: 6px;
+  padding-left: 15px;
+  width: 600px;
+}
+
+.search-container button {
+  background: rgb(245, 245, 245);
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  float: right;
+  font-size: 18px;
+  height: 40px;
+  margin-top: 8px;
+  margin-right: 16px;
+  padding: 6px 10px;
+}
+
+.search-container button:hover {
+  background: #ccc;
+}
+
 
 .hero-image {
   background-color: #ffd966;
