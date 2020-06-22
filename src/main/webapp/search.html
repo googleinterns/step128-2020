@@ -3,10 +3,33 @@
   <head>
     <meta charset = "UTF-8">
     <title>Search</title>
-    <link rel = "stylesheet" href = "style.css">
-    <script src = "script.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js"></script>
   </head>
   <body>
-    <p>Search</p>
+    <div class="header">
+      <div class="header-left">
+        <img src="images/uniteLogo.svg"></img>
+        <div>Home</div>
+        <div>Create</div>
+        <div>Find</div>
+      </div>
+      <div class="header-right">
+        <div>My Events</div>
+      </div>
+    </div>
+    <div class="page-content">
+      <div class="search-container">
+        <!-- use the CSS for the other similar pieces of text that someone else makes -->
+        <h1 style="text-align: center">Let’s find an event.</h2>
+        <form action="/search-data">
+          <input type="text" placeholder="Search..">
+          <button type="submit">Go</button>
+        </form>
+        <div class="tag-container">
+          <p>Add one or more tags to search for</p>
+        </div>
+      </div>
+    </div>
   </body>
 </html>
