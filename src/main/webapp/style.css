@@ -3,6 +3,27 @@
   src: url(font/ProductSans-Regular.woff);
 }
 
+/*color theme*/
+
+.red {
+  color: #cc0101;
+}
+
+.yellow {
+  color: #ffd966;
+}
+
+.green {
+ color: #6aa84f;
+}
+
+.blue {
+  color: #6e9eeb;
+}
+
+
+/*content*/
+
 body {
   font: 100%/1.6 "Google", "Trebuchet MS", Helvetica, sans-serif;
 }
@@ -37,4 +58,29 @@ body {
   max-width: 300px;
   height: 100px;
   margin-left: 10%;
+}
+
+.header a:link, a:visited {
+  color: black;
+  text-decoration: none;
+}
+
+.event-section {
+  margin: 40px 20px 0 20px;
+  font-weight: bold;
+}
+
+.event-section-header {
+  margin: 0 0 10px 0;
+  font-weight: bold;
+}
+
+.no-events {
+  background-color: #6e9eeb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  width: 100%;
+  height: 100px;
 }
