@@ -73,7 +73,19 @@ body {
   text-decoration: none;
 }
 
-/* event list display */
+.hero-image {
+  background-color: #ffd966;
+  height: 700px;
+}
+
+.hero-text {
+  left: 50%;
+  position: absolute;
+  text-align: center;
+  top: 450px;
+  transform: translate(-50%, -50%);
+}
+
 .event-section {
   margin: 40px 20px 0 20px;
   font-weight: bold;
