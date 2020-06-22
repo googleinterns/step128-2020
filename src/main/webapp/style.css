@@ -1,0 +1,40 @@
+@font-face {
+  font-family: Google;
+  src: url(font/ProductSans-Regular.woff);
+}
+
+body {
+  font: 100%/1.6 "Google", "Trebuchet MS", Helvetica, sans-serif;
+}
+
+.header {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-between;
+}
+
+.header-left {
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  justify-content: space-between;
+  width: 60%;
+  max-width: 700px;
+  height: 100px;
+  overflow: hidden;
+}
+
+.header-left img {
+  height: 150px;
+}
+
+.header-right {
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  justify-content: space-around;
+  width: 25%;
+  max-width: 300px;
+  height: 100px;
+  margin-left: 10%;
+}
