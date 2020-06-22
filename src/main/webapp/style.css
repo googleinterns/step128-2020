@@ -3,6 +3,35 @@
   src: url(font/ProductSans-Regular.woff);
 }
 
+/* color theme */
+
+.red {
+  color: #cc0101;
+}
+
+.yellow {
+  color: #ffd966;
+}
+
+.green {
+ color: #93c47d;
+}
+
+.green-background {
+  background-color: #93c47d;
+}
+
+.blue {
+  color: #6e9eeb;
+}
+
+.blue-background {
+  background-color: #6e9eeb;
+}
+
+
+/* content */
+
 body {
   font: 100%/1.6 "Google", "Trebuchet MS", Helvetica, sans-serif;
   margin: 0px;
@@ -23,11 +52,11 @@ body {
   width: 60%;
   max-width: 700px;
   height: 100px;
-  overflow: hidden;
 }
 
 .header-left img {
   height: 150px;
+  flex: 1 1 auto;
 }
 
 .header-right {
@@ -86,4 +115,104 @@ h1 {
 
 .search-container button:hover {
   background: #ccc;
+}
+
+.header a:link, a:visited {
+  color: black;
+  text-decoration: none;
+}
+
+.hero-image {
+  background-color: #ffd966;
+  height: 700px;
+}
+
+.hero-text {
+  left: 50%;
+  position: absolute;
+  text-align: center;
+  top: 450px;
+  transform: translate(-50%, -50%);
+}
+
+.event-section {
+  margin: 40px 20px 0 20px;
+  font-weight: bold;
+}
+
+.event-section-header {
+  margin: 0 0 20px 0;
+  font-weight: bold;
+}
+
+.no-events {
+  background-color: #6e9eeb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  width: 100%;
+  height: 100px;
+}
+
+.event-item {
+  height: 200px;
+  display: flex;
+  font-weight: normal;
+  flex-flow: row nowrap;
+  align-items: center;
+  justify-content: space-around;
+  margin-bottom: 30px;
+}
+
+.event-image {
+  /* left-hand part of an event list item, solid color or container for image */
+  width: 275px;
+  height: 200px;
+}
+
+.event-item-info {
+  /* right-hand part of an event list item with all text elements */
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: space-between;
+  height: 100%;
+  width: 70%;
+}
+
+.event-item-header {
+  /* top part of item info with title, date, location */
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-between;
+}
+
+.event-item-title {
+  font-weight: bold;
+}
+
+.event-item-details {
+  /* right part of item header with date and location */
+  display: flex;
+  flex-flow: column nowrap;
+  font-size: 14px;
+  text-align: right;
+}
+
+.event-item-footer {
+  /* bottom part of item info with attendee count and tags */
+  display: flex;
+  flex-flow: row nowrap;
+  font-size: 14px;
+  justify-content: space-between;
+}
+
+.attendee-count {
+  font-weight: bold;
+}
+
+.tag {
+  color: white;
+  border-radius: 5px;
+  padding: 0 10px 0 10px;
 }
