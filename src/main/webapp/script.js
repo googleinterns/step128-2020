@@ -11,3 +11,31 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
+var tagsAll = ['environment', 'blm', 'volunteer', 'education', 'LGBTQ+'];
+var tagsSearch = [];
+var tagsBar = [...tagsAll];
+
+function addTagBarToSearch(tag) {
+  var barIndex = tagsBar.indexOf(tag);
+  if (index > -1) {
+    tagsBar.splice(index, 1);
+  }
+  
+  tagsSearch.push(tag);
+}
+
+function addTagSearchToBar(tag) {
+  var searchIndex = tagsSearch.indexOf(tag);
+  if (index > -1) {
+    tagsSearch.splice(index, 1);
+  }
+  
+  tagsBar.splice(tagsAll.indexOf(tag), 0, tag);
+}
+
+function updateSearchBar() {
+}
+
+function updateTagBar() {
+}
