@@ -131,6 +131,7 @@ body {
 }
 
 .event-item-footer {
+  /* bottom part of item info with attendee count and tags */
   display: flex;
   flex-flow: row nowrap;
   font-size: 14px;
