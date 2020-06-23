@@ -384,10 +384,37 @@ input[type=text], textarea {
 
 .event-right-details {
   background-color: #eee;
+  font-size: 18px;
   margin: 0;
   width: 30%;
   flex: 0 0 auto;
   min-width: 350px;
   max-width: 500px;
   height: 100%;
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: center;
+  justify-content: center;
+}
+
+.event-time-location {
+  margin: 15px 15px 50px 15px;
+}
+
+.save-event, .go-back {
+  width: 200px;
+  height: 75px;
+  margin: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.save-event {
+  background-color: #ffd966;
+}
+
+.go-back {
+  background-color: white;
 }
