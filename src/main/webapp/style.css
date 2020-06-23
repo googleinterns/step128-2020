@@ -331,7 +331,7 @@ input[type=text], textarea {
   font-weight: bold;
 }
 
-.tag
+.tag {
   color: white;
   border-radius: 5px;
   padding: 5px 10px 5px 10px;
@@ -348,9 +348,38 @@ input[type=text], textarea {
 
 .event-left-details {
   height: 100%;
-  background-color: #ffd966;
   flex-grow: 1;
   overflow-y: scroll;
+  display: flex;
+  flex-flow: column nowrap;
+}
+
+.event-display-image {
+  height: 400px;
+  width: 100%;
+  background-color: #93c47d;
+  flex: 0 0 auto;
+}
+
+.event-left-text {
+  padding: 0 15px 30px 15px;
+}
+
+.event-display-header {
+  display: flex;    
+  flex-flow: row nowrap;
+  align-items: center;
+  justify-content: space-between;
+  padding: 30px 0 15px 0;
+}
+
+.event-display-title {
+  font-weight: bold;
+  font-size: 25px;
+}
+
+.event-display-description {
+  margin-bottom: 30px;
 }
 
 .event-right-details {
