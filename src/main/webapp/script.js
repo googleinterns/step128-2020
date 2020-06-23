@@ -15,6 +15,7 @@
 var tagsAll = ['environment', 'blm', 'volunteer', 'education', 'LGBTQ+'];
 var tagsSearch = [];
 var tagsBox = [...tagsAll];
+var tagsOnEvent = [];
 
 function addTagBoxToSearch(tag) {
   var boxIndex = tagsBox.indexOf(tag);
@@ -36,6 +37,15 @@ function addTagSearchToBox(tag) {
   tagsBox.splice(tagsAll.indexOf(tag), 0, tag);
   updateSearchBar();
   updateTagBox();
+}
+
+function toggleTagEvent(tag) {
+  var boxIndex = tagsBox.indexOf(tag);
+  if (boxIndex > -1) {
+    tagsOnEvent[boxIndex] = !tagsOnEvent[boxIndex];
+  }
+
+  updateEventTagBox();
 }
 
 function updateSearchBar() {
@@ -72,6 +82,32 @@ function updateTagBox() {
 
     tagBoxElement.appendChild(spanElement);
   });
+
+  generateRainbowTags();
+}
+
+function updateEventTagBox() {
+  const elements = document.getElementsByClassName('tag-box');
+  const tagBoxElement = elements[0];
+  tagBoxElement.innerHTML = '';
+  for (var i = 0; i < tagsBox.length; i++) {
+    var tag = tagsBox[i];
+    const spanElement = document.createElement('span');
+    spanElement.setAttribute('onclick', 'toggleTagEvent(\"' + tag + 
+        '\")');
+    // class name is now (for example) 'tag environment'
+    if (tag == 'LGBTQ+') spanElement.className = 'tag rainbow';
+    else spanElement.className = 'tag ' + tag;
+
+    // if tag is on the event, invert it
+    if (tagsOnEvent[i]) {
+      spanElement.className = spanElement.className + ' invert';
+      spanElement.innerText = '✓' + tag;
+    }
+    else spanElement.innerText = tag;
+
+    tagBoxElement.appendChild(spanElement);
+  }
 
   generateRainbowTags();
 }
