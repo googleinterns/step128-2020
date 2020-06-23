@@ -29,6 +29,29 @@
   background-color: #6e9eeb;
 }
 
+/* tag colors */
+
+.blm {
+  background-color: black;
+}
+
+.environment {
+  background-color: #93c47d;
+}
+
+.volunteer {
+  background-color: #ffb742;
+}
+
+.education {
+  background-color: #6e9eeb;
+}
+
+.rainbow {
+  background-color: #fdfdfd;
+  color: black;
+}
+
 
 /* content */
 
@@ -76,6 +99,7 @@ body {
   text-decoration: none;
 }
 
+/* search page */
 h1 {
   margin: 0px;
   padding: 0px;
@@ -85,29 +109,32 @@ h1 {
 
 .search-page-content {
   background-color: rgb(255, 217, 102);
-  min-height: 100%;
+  height: 90vh;
   min-width: 100%;
 }
 
-.search-container {
+.search-bar-container {
   margin-left: auto;
   margin-right: auto;
   width: 700px;
 }
 
-.search-container input[type=text] {
+.search-bar-container .search-bar {
   border: none;
   border-radius: 10px;
+  background-color: white;
   font-size: 18px;
   height: 25px;
   margin-top: 8px;
   outline: none;
+  overflow: hidden;
   padding: 6px;
   padding-left: 15px;
-  width: 600px;
+  padding-right: .5em;
+  width: 615px;
 }
 
-.search-container button {
+.search-bar-container button {
   background: rgb(245, 245, 245);
   border: none;
   border-radius: 10px;
@@ -116,14 +143,19 @@ h1 {
   font-size: 18px;
   height: 40px;
   margin-top: 8px;
-  margin-right: 16px;
+  margin-right: 10px;
   padding: 6px 10px;
 }
 
-.search-container button:hover {
+.search-bar-container button:hover {
   background: #ccc;
 }
 
+.search-bar-container .tag {
+  margin: 2px;
+}
+
+/* end of search page */
 
 .hero-image {
   background-color: #ffd966;
@@ -190,7 +222,6 @@ h1 {
   justify-content: space-between;
   height: 100%;
   width: 100%;
-  overflow: scroll;
 }
 
 .event-item-header {
@@ -227,5 +258,5 @@ h1 {
 .tag {
   color: white;
   border-radius: 5px;
-  padding: 0 10px 0 10px;
+  padding: 5px 10px 5px 10px;
 }
