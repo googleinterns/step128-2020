@@ -215,6 +215,25 @@ input[type=text], textarea {
   }
 }
 
+.form-buttons {
+  text-align: center;
+}
+
+.form-buttons img {
+  height: 50px;
+}
+
+.form-buttons a {
+  display: inline-block;
+  overflow: hidden;  
+}
+
+.divider {
+  display: inline-block;
+  height: auto;
+  margin: 50px;
+}
+
 /* event lists */
 .event-section {
   margin: 40px 20px 0 20px;
