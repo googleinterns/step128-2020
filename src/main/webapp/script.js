@@ -14,28 +14,56 @@
 
 var tagsAll = ['environment', 'blm', 'volunteer', 'education', 'LGBTQ+'];
 var tagsSearch = [];
-var tagsBar = [...tagsAll];
+var tagsBox = [...tagsAll];
 
-function addTagBarToSearch(tag) {
-  var barIndex = tagsBar.indexOf(tag);
-  if (index > -1) {
-    tagsBar.splice(index, 1);
+function addTagBoxToSearch(tag) {
+  var boxIndex = tagsBox.indexOf(tag);
+  if (boxIndex > -1) {
+    tagsBox.splice(boxIndex, 1);
   }
   
   tagsSearch.push(tag);
+  updateTagBox();
+  updateSearchBar();
 }
 
-function addTagSearchToBar(tag) {
+function addTagSearchToBox(tag) {
   var searchIndex = tagsSearch.indexOf(tag);
-  if (index > -1) {
-    tagsSearch.splice(index, 1);
+  if (searchIndex > -1) {
+    tagsSearch.splice(searchIndex, 1);
   }
   
-  tagsBar.splice(tagsAll.indexOf(tag), 0, tag);
+  tagsBox.splice(tagsAll.indexOf(tag), 0, tag);
+  updateSearchBar();
+  updateTagBox();
 }
 
 function updateSearchBar() {
+  const elements = document.getElementsByClassName('search-bar');
+  const searchBarElement = elements[0];
+  searchBarElement.innerHTML = '';
+  tagsSearch.forEach(function(tag) {
+    const spanElement = document.createElement('span');
+    spanElement.setAttribute('onclick', 'addTagSearchToBox(\"' + tag + 
+        '\")');
+    spanElement.className = 'tag ' + 'green-background';
+    spanElement.innerText = tag;
+
+    searchBarElement.appendChild(spanElement);
+  });
 }
 
-function updateTagBar() {
+function updateTagBox() {
+  const elements = document.getElementsByClassName('tag-box');
+  const tagBoxElement = elements[0];
+  tagBoxElement.innerHTML = '';
+  tagsBox.forEach(function(tag) {
+    const spanElement = document.createElement('span');
+    spanElement.setAttribute('onclick', 'addTagBoxToSearch(\"' + tag + 
+        '\")');
+    spanElement.className = 'tag ' + 'green-background';
+    spanElement.innerText = tag;
+
+    tagBoxElement.appendChild(spanElement);
+  });
 }
