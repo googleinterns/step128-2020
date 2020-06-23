@@ -146,7 +146,7 @@ const dummyText = "Suggested for you"; // TODO: come up with variety
  */
 async function getEvents(url, index, option) {
   const eventListElements = document.getElementsByClassName('event-list-container');
-  if(index === null || index >= eventListElements.length) {
+  if (index === null || index >= eventListElements.length) {
     index = 0;
   }
   var eventListElement = eventListElements[index];
@@ -171,7 +171,7 @@ async function getEvents(url, index, option) {
 
     const eventItemTitleElement = document.createElement('div');
     eventItemTitleElement.className = 'event-item-title';
-    if(option == 1 || option == 2) {
+    if (option == 1 || option == 2) {
       const eventItemTitleName = document.createElement('div');
       eventItemTitleName.innerText = event.title;
       const eventItemTitleAddr = document.createElement('div');
@@ -193,7 +193,7 @@ async function getEvents(url, index, option) {
     eventItemDetailsElement.appendChild(eventItemDateElement);
     const eventItemDistanceElement = document.createElement('div');
     eventItemDistanceElement.className = 'event-item-distance';
-    if(option == 1 || option == 2) {
+    if (option == 1 || option == 2) {
       eventItemDistanceElement.innerText = event.time;
     } else {
       eventItemDistanceElement.innerText = event.distance;
@@ -211,7 +211,7 @@ async function getEvents(url, index, option) {
 
     // decide which footer item to use
     const attendeeCountContainerElement = document.createElement('div');
-    if(option == 0) {
+    if (option == 0) {
       // "recommended for you"
       attendeeCountContainerElement.innerText = dummyText;
 
@@ -231,7 +231,6 @@ async function getEvents(url, index, option) {
       // TODO: set this href to edit-event page
       editEventLink.href = "/create-event-form.html";
       attendeeCountContainerElement.appendChild(editEventLink);
-    
     } else {
       // default: show attendee count
       attendeeCountContainerElement.className = 'attendee-count-container';
@@ -242,7 +241,6 @@ async function getEvents(url, index, option) {
       attendeeCountContainerElement.appendChild(attendeeCountElement);
       attendeeCountContainerElement.appendChild(
         document.createTextNode(' already attending'));
-
     }
     
     eventItemFooterElement.appendChild(attendeeCountContainerElement);
