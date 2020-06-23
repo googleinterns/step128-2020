@@ -76,6 +76,7 @@ body {
   text-decoration: none;
 }
 
+/* search page */
 h1 {
   margin: 0px;
   padding: 0px;
@@ -85,17 +86,17 @@ h1 {
 
 .search-page-content {
   background-color: rgb(255, 217, 102);
-  min-height: 100%;
+  height: 90vh;
   min-width: 100%;
 }
 
-.search-container {
+.search-bar-container {
   margin-left: auto;
   margin-right: auto;
   width: 700px;
 }
 
-.search-container .search-bar {
+.search-bar-container .search-bar {
   border: none;
   border-radius: 10px;
   background-color: white;
@@ -110,7 +111,7 @@ h1 {
   width: 615px;
 }
 
-.search-container button {
+.search-bar-container button {
   background: rgb(245, 245, 245);
   border: none;
   border-radius: 10px;
@@ -123,10 +124,11 @@ h1 {
   padding: 6px 10px;
 }
 
-.search-container button:hover {
+.search-bar-container button:hover {
   background: #ccc;
 }
 
+/* end of search page */
 
 .hero-image {
   background-color: #ffd966;
