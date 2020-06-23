@@ -100,14 +100,14 @@ body {
 }
 
 .header-right {
+  align-items: center;
   display: flex;
   flex-flow: row nowrap;
-  align-items: center;
   justify-content: space-around;
-  width: 25%;
-  max-width: 300px;
   height: 100px;
   margin-left: 10%;
+  max-width: 300px;
+  width: 25%;
 }
 
 a:link, a:visited {
@@ -252,51 +252,51 @@ input[type=text], textarea {
 
 /* event lists */
 .event-section {
-  margin: 40px 20px 0 20px;
   font-weight: bold;
+  margin: 40px 20px 0 20px;
 }
 
 .event-section-header {
-  margin: 0 0 20px 0;
   font-weight: bold;
+  margin: 0 0 20px 0;
 }
 
 .no-events {
-  background-color: #6e9eeb;
-  display: flex;
   align-items: center;
-  justify-content: center;
+  background-color: #6e9eeb;
   color: white;
-  width: 100%;
-  padding: 20px;
+  display: flex;
+  justify-content: center;
   min-height: 60px;
+  padding: 20px;
+  width: 100%;
 }
 
 .event-item {
+  align-items: center;
   height: 200px;
   display: flex;
-  font-weight: normal;
   flex-flow: row nowrap;
-  align-items: center;
+  font-weight: normal;
   justify-content: space-around;
   margin-bottom: 30px;
 }
 
 .event-image {
   /* left-hand part of an event list item, solid color or container for image */
-  width: 275px;
+  flex: 0 0 auto;
   height: 200px;
   margin: 10px;
-  flex: 0 0 auto;
+  width: 275px;
 }
 
 .event-item-info {
   /* right-hand part of an event list item with all text elements */
-  flex: 1 1 auto;
   display: flex;
+  flex: 1 1 auto;
   flex-flow: column nowrap;
-  justify-content: space-between;
   height: 100%;
+  justify-content: space-between;
   width: 100%;
 }
 
@@ -355,10 +355,10 @@ input[type=text], textarea {
 }
 
 .event-display-image {
-  height: 400px;
-  width: 100%;
   background-color: #93c47d;
   flex: 0 0 auto;
+  height: 400px;
+  width: 100%;
 }
 
 .event-left-text {
@@ -366,16 +366,16 @@ input[type=text], textarea {
 }
 
 .event-display-header {
+  align-items: center;
   display: flex;    
   flex-flow: row nowrap;
-  align-items: center;
   justify-content: space-between;
   padding: 30px 0 15px 0;
 }
 
 .event-display-title {
-  font-weight: bold;
   font-size: 25px;
+  font-weight: bold;
 }
 
 .event-display-description {
@@ -383,18 +383,18 @@ input[type=text], textarea {
 }
 
 .event-right-details {
+  align-items: center;
   background-color: #eee;
-  font-size: 18px;
-  margin: 0;
-  width: 30%;
-  flex: 0 0 auto;
-  min-width: 350px;
-  max-width: 500px;
-  height: 100%;
   display: flex;
   flex-flow: column nowrap;
-  align-items: center;
+  flex: 0 0 auto;
+  font-size: 18px;
+  height: 100%;
   justify-content: center;
+  margin: 0;
+  max-width: 500px;
+  min-width: 350px;
+  width: 30%;
 }
 
 .event-time-location {
@@ -402,13 +402,14 @@ input[type=text], textarea {
 }
 
 .save-event, .go-back {
-  width: 200px;
-  height: 75px;
-  margin: 15px;
-  display: flex;
   align-items: center;
-  justify-content: center;
   cursor: pointer;
+  display: flex;
+  height: 75px;
+  justify-content: center;
+  margin: 15px;
+  width: 200px;
+  
 }
 
 .save-event {
