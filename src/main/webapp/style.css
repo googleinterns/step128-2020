@@ -33,29 +33,6 @@
   background-color: #6e9eeb;
 }
 
-<<<<<<< HEAD
-/* tag colors */
-
-.blm {
-  background-color: black;
-}
-
-.environment {
-  background-color: #93c47d;
-}
-
-.volunteer {
-  background-color: #ffb742;
-}
-
-.education {
-  background-color: #6e9eeb;
-}
-
-.rainbow {
-  background-color: #fdfdfd;
-  color: black;
-}
 
 .blm-text {
   color: black;
@@ -96,18 +73,6 @@
 
 .rainbow.invert {
   color: black;
-=======
-.black {
-  color: black;
-}
-
-.black-background {
-  background-color: black;
-}
-
-.white-background {
-  background-color: white;
->>>>>>> Edit styling for tags
 }
 
 
@@ -395,6 +360,7 @@ input[type=text], textarea {
 
 .tag {
   color: white;
+  font-weight: bold;
   border-radius: 5px;
   margin: 2px;
   padding: 5px 10px 5px 10px;
@@ -529,6 +495,25 @@ input[type=text], textarea {
   width: 175px;
 }
 
-.black {
+/* tag colors */
+
+.blm {
+  background-color: black;
+}
+
+.environment {
+  background-color: #93c47d;
+}
+
+.volunteer {
+  background-color: #ffb742;
+}
+
+.education {
+  background-color: #6e9eeb;
+}
+
+.rainbow {
+  background-color: #fdfdfd;
   color: black;
 }
