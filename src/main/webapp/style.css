@@ -181,7 +181,7 @@ h1 {
   padding: 30px;
 }
 
-input[type=text], select, textarea {
+input[type=text], textarea {
   border: 1px solid #ccc;
   border-radius: 4px;
   padding: 10px;
