@@ -247,7 +247,7 @@ input[type=text], textarea {
 .divider {
   display: inline-block;
   height: auto;
-  margin: 50px;
+  margin: 25px;
 }
 
 /* event lists */
