@@ -157,6 +157,7 @@ h1 {
 
 /* end of search page */
 
+/* Create Page */
 .hero-image {
   background-color: #ffd966;
   height: 700px;
@@ -171,7 +172,66 @@ h1 {
 }
 
 .start-bttn img {
-  height: 75px;
+  height: 60px;
+}
+
+.form-container {
+  margin-left: 20px;
+  margin-right: 20px;
+  padding: 30px;
+}
+
+input[type=text], textarea {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 10px;
+  resize: vertical;
+  width: 100%;
+}
+
+.form-section {
+  display: flex;
+}
+
+.form-label {
+  flex: 10%;
+  padding: 10px;
+  white-space: nowrap;
+}
+
+.form-input {
+  flex: 90%;
+  padding: 10px;
+}
+
+@media screen and (max-width: 900px) {
+  .form-section {
+    flex-direction: column;
+  }
+
+  .form-label,
+  .form-input {
+    width: auto;
+  }
+}
+
+.form-buttons {
+  text-align: center;
+}
+
+.form-buttons img {
+  height: 50px;
+}
+
+.form-buttons a {
+  display: inline-block;
+  overflow: hidden;  
+}
+
+.divider {
+  display: inline-block;
+  height: auto;
+  margin: 50px;
 }
 
 /* event lists */
