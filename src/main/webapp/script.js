@@ -118,15 +118,19 @@ function updateEventTagBox() {
  * To have a rainbow tag generated, set its innerText to the tag name and give it
  * the class 'rainbow'
  */
+const colors = ['#FF0900', '#FF7F00', '#ffe600','#00F11D', '#0079FF', '#A800FF'];
 function generateRainbowTags() {
   const elements = document.getElementsByClassName('rainbow');
   for (var e = 0; e < elements.length; e++) {
     var tag = elements[e].innerText;
     var tagHTML = '';
-    var colors = ['#FF0900', '#FF7F00', '#ffe600','#00F11D', '#0079FF', '#A800FF'];
+    var colorIndex = 0;
     for (var i = 0; i < tag.length; i++) {
-      if (i >= colors.length) break;
-      tagHTML = tagHTML + '<span style=\"color: ' + colors[i] + '\">' + tag.charAt(i) + '</span>';
+      if (colorIndex >= colors.length) {
+        colorIndex = 0;
+      }
+      tagHTML = tagHTML + '<span style=\"color: ' + colors[colorIndex] + '\">' + tag.charAt(i) + '</span>';
+      colorIndex++;
     }
     elements[e].innerHTML = tagHTML;
   }
