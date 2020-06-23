@@ -134,15 +134,18 @@ var test2 = {title:'Book Drive',
             tags:['education']};
 var events = [test, test2];
 
-
+const dummyText = "Suggested for you"; // TODO: come up with variety
 /**
  * Fetches events from a specific url
  * 
  * Currently uses the events variable defined above
  */
-async function getEvents(url) {
+async function getEvents(url, index, option) {
   const eventListElements = document.getElementsByClassName('event-list-container');
-  var eventListElement = eventListElements[0];
+  if(index === null || index >= eventListElements.length) {
+    index = 0;
+  }
+  var eventListElement = eventListElements[index];
   eventListElement.innerHTML = '';
   console.log(eventListElement);
   events.forEach(function(event) {
@@ -188,15 +191,43 @@ async function getEvents(url) {
     eventItemFooterElement.className = 'event-item-footer';
     eventItemInfoElement.appendChild(eventItemFooterElement);
 
+    // decide which footer item to use
     const attendeeCountContainerElement = document.createElement('div');
-    attendeeCountContainerElement.className = 'attendee-count-container';
-    eventItemFooterElement.appendChild(attendeeCountContainerElement);
-    const attendeeCountElement = document.createElement('span');
-    attendeeCountElement.className = 'attendee-count ' + event.tags[0] + '-text';
-    attendeeCountElement.innerText = event.attendeeCount;
-    attendeeCountContainerElement.appendChild(attendeeCountElement);
-    attendeeCountContainerElement.appendChild(
+    if(option == 0) {
+      // "recommended for you"
+      attendeeCountContainerElement.innerText = dummyText;
+
+    } else if (option == 1) {
+      // unsave an event
+      attendeeCountContainerElement.className = 'edit-unsave-event';
+      attendeeCountContainerElement.innerText = "Unsave this event";
+      attendeeCountContainerElement.onclick = function() {
+          // TODO: unsave from datastore or make popup that confirms choice first
+      }
+    } else if (option == 2) {
+      // edit an event
+      attendeeCountContainerElement.className = 'edit-unsave-event';
+      const editEventLink = document.createElement("a");
+      editEventLink.innerText = "Edit this event";
+
+      // TODO: set this href to edit-event page
+      editEventLink.href = "/create-event-form.html";
+      attendeeCountContainerElement.appendChild(editEventLink);
+    
+    } else {
+      // default: show attendee count
+      attendeeCountContainerElement.className = 'attendee-count-container';
+    
+      const attendeeCountElement = document.createElement('span');
+      attendeeCountElement.className = 'attendee-count ' + event.tags[0] + '-text';
+      attendeeCountElement.innerText = event.attendeeCount;
+      attendeeCountContainerElement.appendChild(attendeeCountElement);
+      attendeeCountContainerElement.appendChild(
         document.createTextNode(' already attending'));
+
+    }
+    
+    eventItemFooterElement.appendChild(attendeeCountContainerElement);
 
     const tagsContainerElement = document.createElement('div');
     tagsContainerElement.className = 'tags-container';
