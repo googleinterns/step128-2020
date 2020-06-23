@@ -95,3 +95,20 @@ function generateRainbowTags() {
     elements[e].innerHTML = tagHTML;
   }
 }
+
+/**
+ * Placeholder function for search functionality
+ */
+function search() {
+  var url = '/search.html?tags=';
+  tagsSearch.forEach(function(tag) {
+    url += tag + ',';
+  });
+  // trim the last comma off
+  if (url.charAt(url.length - 1) == ',') {
+    url = url.substring(0, url.length - 1);
+  }
+
+  window.location.href(url);
+  //TODO fetch call to server with search parameters
+}
