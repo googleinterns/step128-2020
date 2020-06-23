@@ -204,9 +204,14 @@ input[type=text], textarea {
   padding: 10px;
 }
 
-@media screen and (max-width: 600px) {
-  .form-label, .form-input {
-    width: 100%;
+@media screen and (max-width: 900px) {
+  .form-section {
+    flex-direction: column;
+  }
+
+  .form-label,
+  .form-input {
+    width: auto;
   }
 }
 
