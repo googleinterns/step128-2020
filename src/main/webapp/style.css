@@ -33,30 +33,6 @@
   background-color: #6e9eeb;
 }
 
-/* tag colors */
-
-.blm {
-  background-color: black;
-}
-
-.environment {
-  background-color: #93c47d;
-}
-
-.volunteer {
-  background-color: #ffb742;
-}
-
-.education {
-  background-color: #6e9eeb;
-}
-
-.rainbow {
-  background-color: #fdfdfd;
-  color: black;
-}
-
-
 /* content */
 
 body {
@@ -262,6 +238,7 @@ h1 {
 
 .tag {
   color: white;
+  font-weight: bold;
   border-radius: 5px;
   padding: 5px 10px 5px 10px;
   margin: 5px;
@@ -304,6 +281,25 @@ h1 {
   width: 175px;
 }
 
-.black {
+/* tag colors */
+
+.blm {
+  background-color: black;
+}
+
+.environment {
+  background-color: #93c47d;
+}
+
+.volunteer {
+  background-color: #ffb742;
+}
+
+.education {
+  background-color: #6e9eeb;
+}
+
+.rainbow {
+  background-color: #fdfdfd;
   color: black;
 }
