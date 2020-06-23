@@ -58,7 +58,7 @@
 body {
   font: 100%/1.6 "Google", "Trebuchet MS", Helvetica, sans-serif;
   margin: 0px;
-  padding: 0px;
+  padding: 0 10px 0 10px;
 }
 
 .header {
@@ -255,8 +255,34 @@ h1 {
   font-weight: bold;
 }
 
-.tag {
+.tag
   color: white;
   border-radius: 5px;
   padding: 5px 10px 5px 10px;
+}
+
+/* individual event display */
+.event-display-container {
+  display: flex;
+  flex-flow: row nowrap;
+  height: calc(100% - 100px);
+  width: 100%;
+  position: fixed;
+}
+
+.event-left-details {
+  height: 100%;
+  background-color: #ffd966;
+  flex-grow: 1;
+  overflow-y: scroll;
+}
+
+.event-right-details {
+  background-color: #eee;
+  margin: 0;
+  width: 30%;
+  flex: 0 0 auto;
+  min-width: 350px;
+  max-width: 500px;
+  height: 100%;
 }
