@@ -68,6 +68,31 @@
   color: #6e9eeb;
 }
 
+.blm.invert {
+  background-color: white;
+  border-color: black;
+  color: black;
+}
+
+.environment.invert {
+  background-color: white;
+  color: #93c47d;
+}
+
+.volunteer.invert {
+  background-color: white;
+  color: #ffb742;
+}
+
+.education.invert {
+  background-color: white;
+  color: #6e9eeb;
+}
+
+.rainbow.invert {
+  color: black;
+}
+
 
 /* content */
 
@@ -334,6 +359,14 @@ input[type=text], textarea {
 
 .tag {
   color: white;
+  border-radius: 5px;
+  margin: 2px;
+  padding: 5px 10px 5px 10px;
+}
+
+.tag.invert {
+  border: 2px;
+  border-style: solid;
   border-radius: 5px;
   padding: 5px 10px 5px 10px;
 }
