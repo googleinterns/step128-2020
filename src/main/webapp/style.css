@@ -483,7 +483,7 @@ input[type=text], textarea {
   display: flex;
   flex-flow: row wrap;
   margin: auto;
-  width: 40%;
+  width: 60%;
   align-items: center;
   justify-content: space-around;
 }
