@@ -52,6 +52,22 @@
   color: black;
 }
 
+.blm-text {
+  color: black;
+}
+
+.environment-text {
+  color: #93c47d;
+}
+
+.volunteer-text {
+  color: #ffb742;
+}
+
+.education-text {
+  color: #6e9eeb;
+}
+
 
 /* content */
 
@@ -123,13 +139,13 @@ h1 {
   border: none;
   border-radius: 10px;
   background-color: white;
-  font-size: 18px;
-  height: 25px;
+  font-size: 16px;
+  height: 26px;
   margin-top: 8px;
   outline: none;
   overflow: hidden;
   padding: 6px;
-  padding-left: 15px;
+  padding-top: 8px;
   padding-right: .5em;
   width: 615px;
 }

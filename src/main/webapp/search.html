@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="style.css">
     <script src="script.js"></script>
   </head>
-  <body onload="updateSearchBar(); updateTagBox()">
+  <body onload="updateSearchBar(); updateTagBox(); getEvents()">
     <div class="header">
       <div class="header-left">
         <a href="/index.html">        
@@ -24,7 +24,7 @@
       <div class="search-bar-container">
         <!-- use the CSS for the other similar pieces of text that someone else makes -->
         <h1 style="text-align: center">Let’s find an event.</h2>
-        <button onclick="">Go</button>
+        <button onclick="search()">Go</button>
         <div class="search-bar">
         </div>
         <p>Add one or more tags to search for</p>
@@ -32,7 +32,10 @@
         </div>
       </div>
     </div>
-    <div class="search-results-container">
+    <div class="event-section search-results-container">
+        <div class="event-section-header">Search Results</div>
+        <div class="event-list-container">
+        </div>
     </div>
   </body>
 </html>
