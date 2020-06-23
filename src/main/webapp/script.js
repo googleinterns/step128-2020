@@ -109,6 +109,100 @@ function search() {
     url = url.substring(0, url.length - 1);
   }
 
-  window.location.href(url);
+  window.location.href = url;
   //TODO fetch call to server with search parameters
+}
+
+/* Two test examples to use with getEvents()
+var test = {title:'Beach clean up', 
+            description:'YEET', 
+            date:'Saturday, June 20, 2020', 
+            distance:'5 miles away', 
+            attendeeCount: 12,
+            tags:['environment']};
+var test2 = {title:'Book Drive', 
+            description:'YEET', 
+            date:'Sunday, June 21, 2020', 
+            distance:'6 miles away', 
+            attendeeCount: 12,
+            tags:['education']};
+var events = [test, test2];
+*/
+
+/**
+ * Fetches events from a specific url
+ * 
+ * Currently uses the events variable defined above
+ */
+async function getEvents(url) {
+  const eventListElements = document.getElementsByClassName('event-list-container');
+  var eventListElement = eventListElements[0];
+  eventListElement.innerHTML = '';
+  console.log(eventListElement);
+  events.forEach(function(event) {
+    const eventItemElement = document.createElement('div');
+    eventItemElement.className = 'event-item';
+    eventListElement.appendChild(eventItemElement);
+
+    const eventImageElement = document.createElement('div');
+    eventImageElement.className = 'event-image ' + event.tags[0];
+    eventItemElement.appendChild(eventImageElement);
+
+    const eventItemInfoElement = document.createElement('div');
+    eventItemInfoElement.className = 'event-item-info';
+    eventItemElement.appendChild(eventItemInfoElement);
+
+    const eventItemHeaderElement = document.createElement('div');
+    eventItemHeaderElement.className = 'event-item-header';
+    eventItemInfoElement.appendChild(eventItemHeaderElement);
+
+    const eventItemTitleElement = document.createElement('div');
+    eventItemTitleElement.className = 'event-item-title';
+    eventItemTitleElement.innerText = event.title;
+    eventItemHeaderElement.appendChild(eventItemTitleElement);
+
+    const eventItemDetailsElement = document.createElement('div');
+    eventItemDetailsElement.className = 'event-item-details';
+    eventItemHeaderElement.appendChild(eventItemDetailsElement);
+    const eventItemDateElement = document.createElement('div');
+    eventItemDateElement.className = 'event-item-date';
+    eventItemDateElement.innerText = event.date;
+    eventItemDetailsElement.appendChild(eventItemDateElement);
+    const eventItemDistanceElement = document.createElement('div');
+    eventItemDistanceElement.className = 'event-item-distance';
+    eventItemDistanceElement.innerText = event.distance;
+    eventItemDetailsElement.appendChild(eventItemDistanceElement);
+
+    const eventItemDescElement = document.createElement('div');
+    eventItemDescElement.className = 'event-item-description';
+    eventItemDescElement.innerText = event.description;
+    eventItemInfoElement.appendChild(eventItemDescElement);
+
+    const eventItemFooterElement = document.createElement('div');
+    eventItemFooterElement.className = 'event-item-footer';
+    eventItemInfoElement.appendChild(eventItemFooterElement);
+
+    const attendeeCountContainerElement = document.createElement('div');
+    attendeeCountContainerElement.className = 'attendee-count-container';
+    eventItemFooterElement.appendChild(attendeeCountContainerElement);
+    const attendeeCountElement = document.createElement('span');
+    attendeeCountElement.className = 'attendee-count ' + event.tags[0] + '-text';
+    attendeeCountElement.innerText = event.attendeeCount;
+    attendeeCountContainerElement.appendChild(attendeeCountElement);
+    attendeeCountContainerElement.appendChild(
+        document.createTextNode(' already attending'));
+
+    const tagsContainerElement = document.createElement('div');
+    tagsContainerElement.className = 'tags-container';
+    eventItemFooterElement.appendChild(tagsContainerElement);
+    event.tags.forEach(function(tag) {
+      const tagElement = document.createElement('span');
+      // class name is now (for example) 'tag environment'
+      if (tag == 'LGBTQ+') spanElement.className = 'tag rainbow';
+      else tagElement.className = 'tag ' + tag;
+      tagElement.innerText = tag;
+
+      tagsContainerElement.appendChild(tagElement);
+    });
+  });
 }
