@@ -74,7 +74,7 @@
 body {
   font: 100%/1.6 "Google", "Trebuchet MS", Helvetica, sans-serif;
   margin: 0px;
-  padding: 0px;
+  padding: 0 10px 0 10px;
 }
 
 .header {
@@ -100,17 +100,17 @@ body {
 }
 
 .header-right {
+  align-items: center;
   display: flex;
   flex-flow: row nowrap;
-  align-items: center;
   justify-content: space-around;
-  width: 25%;
-  max-width: 300px;
   height: 100px;
   margin-left: 10%;
+  max-width: 300px;
+  width: 25%;
 }
 
-.header a:link, a:visited {
+a:link, a:visited {
   color: black;
   text-decoration: none;
 }
@@ -252,51 +252,51 @@ input[type=text], textarea {
 
 /* event lists */
 .event-section {
-  margin: 40px 20px 0 20px;
   font-weight: bold;
+  margin: 40px 20px 0 20px;
 }
 
 .event-section-header {
-  margin: 0 0 20px 0;
   font-weight: bold;
+  margin: 0 0 20px 0;
 }
 
 .no-events {
-  background-color: #6e9eeb;
-  display: flex;
   align-items: center;
-  justify-content: center;
+  background-color: #6e9eeb;
   color: white;
-  width: 100%;
-  padding: 20px;
+  display: flex;
+  justify-content: center;
   min-height: 60px;
+  padding: 20px;
+  width: 100%;
 }
 
 .event-item {
+  align-items: center;
   height: 200px;
   display: flex;
-  font-weight: normal;
   flex-flow: row nowrap;
-  align-items: center;
+  font-weight: normal;
   justify-content: space-around;
   margin-bottom: 30px;
 }
 
 .event-image {
   /* left-hand part of an event list item, solid color or container for image */
-  width: 275px;
+  flex: 0 0 auto;
   height: 200px;
   margin: 10px;
-  flex: 0 0 auto;
+  width: 275px;
 }
 
 .event-item-info {
   /* right-hand part of an event list item with all text elements */
-  flex: 1 1 auto;
   display: flex;
+  flex: 1 1 auto;
   flex-flow: column nowrap;
-  justify-content: space-between;
   height: 100%;
+  justify-content: space-between;
   width: 100%;
 }
 
@@ -335,4 +335,87 @@ input[type=text], textarea {
   color: white;
   border-radius: 5px;
   padding: 5px 10px 5px 10px;
+}
+
+/* individual event display */
+.event-display-container {
+  display: flex;
+  flex-flow: row nowrap;
+  height: calc(100% - 100px);
+  width: 100%;
+  position: fixed;
+}
+
+.event-left-details {
+  height: 100%;
+  flex-grow: 1;
+  overflow-y: scroll;
+  display: flex;
+  flex-flow: column nowrap;
+}
+
+.event-display-image {
+  background-color: #93c47d;
+  flex: 0 0 auto;
+  height: 400px;
+  width: 100%;
+}
+
+.event-left-text {
+  padding: 0 15px 30px 15px;
+}
+
+.event-display-header {
+  align-items: center;
+  display: flex;    
+  flex-flow: row nowrap;
+  justify-content: space-between;
+  padding: 30px 0 15px 0;
+}
+
+.event-display-title {
+  font-size: 25px;
+  font-weight: bold;
+}
+
+.event-display-description {
+  margin-bottom: 30px;
+}
+
+.event-right-details {
+  align-items: center;
+  background-color: #eee;
+  display: flex;
+  flex-flow: column nowrap;
+  flex: 0 0 auto;
+  font-size: 18px;
+  height: 100%;
+  justify-content: center;
+  margin: 0;
+  max-width: 500px;
+  min-width: 350px;
+  width: 30%;
+}
+
+.event-time-location {
+  margin: 15px 15px 50px 15px;
+}
+
+.save-event, .go-back {
+  align-items: center;
+  cursor: pointer;
+  display: flex;
+  height: 75px;
+  justify-content: center;
+  margin: 15px;
+  width: 200px;
+  
+}
+
+.save-event {
+  background-color: #ffd966;
+}
+
+.go-back {
+  background-color: white;
 }
