@@ -47,15 +47,14 @@ function updateSearchBar() {
     spanElement.setAttribute('onclick', 'addTagSearchToBox(\"' + tag + 
         '\")');
     // class name is now (for example) 'tag environment'
-    spanElement.className = 'tag ' + tag;
-    if (tag == "LGBTQ+") {
-      for (var i = 0; i < tag.length; i++) {
-        spanElement.innerHTML = spanElement.innerHTML + '<span class=\"' + tag.charAt(i) + '\">' + tag.charAt(i) + '</span>';
-      }
-    } else spanElement.innerText = tag;
+    if (tag == 'LGBTQ+') spanElement.className = 'tag rainbow';
+    else spanElement.className = 'tag ' + tag;
+    spanElement.innerText = tag;
 
     searchBarElement.appendChild(spanElement);
   });
+
+  generateRainbowTags();
 }
 
 function updateTagBox() {
@@ -67,13 +66,32 @@ function updateTagBox() {
     spanElement.setAttribute('onclick', 'addTagBoxToSearch(\"' + tag + 
         '\")');
     // class name is now (for example) 'tag environment'
-    spanElement.className = 'tag ' + tag;
-    if (tag == "LGBTQ+") {
-      for (var i = 0; i < tag.length; i++) {
-        spanElement.innerHTML = spanElement.innerHTML + '<span class=\"' + tag.charAt(i) + '\">' + tag.charAt(i) + '</span>';
-      }
-    } else spanElement.innerText = tag;
+    if (tag == 'LGBTQ+') spanElement.className = 'tag rainbow';
+    else spanElement.className = 'tag ' + tag;
+    spanElement.innerText = tag;
 
     tagBoxElement.appendChild(spanElement);
   });
+
+  generateRainbowTags();
+}
+
+/**
+ * Generates all the rainbow tags on a page, currently made to be used with LGBTQ+
+ *
+ * To have a rainbow tag generated, set its innerText to the tag name and give it
+ * the class 'rainbow'
+ */
+function generateRainbowTags() {
+  const elements = document.getElementsByClassName('rainbow');
+  for (var e = 0; e < elements.length; e++) {
+    var tag = elements[e].innerText;
+    var tagHTML = '';
+    var colors = ['#FF0900', '#FF7F00', '#ffe600','#00F11D', '#0079FF', '#A800FF'];
+    for (var i = 0; i < tag.length; i++) {
+      if (i >= colors.length) break;
+      tagHTML = tagHTML + '<span style=\"color: ' + colors[i] + '\">' + tag.charAt(i) + '</span>';
+    }
+    elements[e].innerHTML = tagHTML;
+  }
 }
