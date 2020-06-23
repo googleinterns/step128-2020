@@ -182,16 +182,11 @@ h1 {
 }
 
 input[type=text], select, textarea {
-  width: 100%;
-  padding: 12px;
   border: 1px solid #ccc;
   border-radius: 4px;
+  padding: 10px;
   resize: vertical;
-}
-
-label {
-  padding: 12px 12px 12px 0;
-  display: inline-block;
+  width: 100%;
 }
 
 .form-section {
@@ -201,6 +196,7 @@ label {
 .form-label {
   flex: 10%;
   padding: 10px;
+  white-space: nowrap;
 }
 
 .form-input {
