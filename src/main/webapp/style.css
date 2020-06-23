@@ -309,6 +309,14 @@ input[type=text], textarea {
 
 .event-item-title {
   font-weight: bold;
+  font-size: 16px;
+  display: flex;
+  flex-flow: column nowrap;
+}
+
+.event-item-address {
+  font-weight: normal;
+  font-size: 14px;
 }
 
 .event-item-details {

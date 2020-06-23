@@ -120,7 +120,9 @@ var test = {title:'Beach clean up',
                 'Nunc sit amet semper urna, ac mollis dui. Aenean vitae imperdiet nisi, ' +
                 'sit amet mattis libero. Sed tincidunt arcu in justo...',
             date:'Saturday, June 20, 2020', 
+            time:'1:00 PM',
             distance:'5 miles away', 
+            address:'Main St, Venice, CA',
             attendeeCount: 12,
             tags:['environment']};
 var test2 = {title:'Book Drive', 
@@ -129,7 +131,9 @@ var test2 = {title:'Book Drive',
                 'Nunc sit amet semper urna, ac mollis dui. Aenean vitae imperdiet nisi, ' +
                 'sit amet mattis libero. Sed tincidunt arcu in justo...',
             date:'Sunday, June 21, 2020', 
+            time:'1:00 PM',
             distance:'6 miles away', 
+            address:'Main St, Los Angeles, CA',
             attendeeCount: 12,
             tags:['education']};
 var events = [test, test2];
@@ -167,7 +171,17 @@ async function getEvents(url, index, option) {
 
     const eventItemTitleElement = document.createElement('div');
     eventItemTitleElement.className = 'event-item-title';
-    eventItemTitleElement.innerText = event.title;
+    if(option == 2 || option == 3) {
+      const eventItemTitleName = document.createElement('div');
+      eventItemTitleName.innerText = event.title;
+      const eventItemTitleAddr = document.createElement('div');
+      eventItemTitleAddr.innerText = event.address;
+      eventItemTitleAddr.className = 'event-item-address';
+      eventItemTitleElement.appendChild(eventItemTitleName);
+      eventItemTitleElement.appendChild(eventItemTitleAddr);
+    } else {
+      eventItemTitleElement.innerText = event.title;
+    }
     eventItemHeaderElement.appendChild(eventItemTitleElement);
 
     const eventItemDetailsElement = document.createElement('div');
