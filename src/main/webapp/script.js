@@ -48,7 +48,11 @@ function updateSearchBar() {
         '\")');
     // class name is now (for example) 'tag environment'
     spanElement.className = 'tag ' + tag;
-    spanElement.innerText = tag;
+    if (tag == "LGBTQ+") {
+      for (var i = 0; i < tag.length; i++) {
+        spanElement.innerHTML = spanElement.innerHTML + '<span class=\"' + tag.charAt(i) + '\">' + tag.charAt(i) + '</span>';
+      }
+    } else spanElement.innerText = tag;
 
     searchBarElement.appendChild(spanElement);
   });
@@ -64,7 +68,11 @@ function updateTagBox() {
         '\")');
     // class name is now (for example) 'tag environment'
     spanElement.className = 'tag ' + tag;
-    spanElement.innerText = tag;
+    if (tag == "LGBTQ+") {
+      for (var i = 0; i < tag.length; i++) {
+        spanElement.innerHTML = spanElement.innerHTML + '<span class=\"' + tag.charAt(i) + '\">' + tag.charAt(i) + '</span>';
+      }
+    } else spanElement.innerText = tag;
 
     tagBoxElement.appendChild(spanElement);
   });
