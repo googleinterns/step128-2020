@@ -156,7 +156,9 @@ var test = {title:'Beach clean up',
                 'Nunc sit amet semper urna, ac mollis dui. Aenean vitae imperdiet nisi, ' +
                 'sit amet mattis libero. Sed tincidunt arcu in justo...',
             date:'Saturday, June 20, 2020', 
+            time:'1:00 PM',
             distance:'5 miles away', 
+            address:'Main St, Venice, CA',
             attendeeCount: 12,
             tags:['environment']};
 var test2 = {title:'Book Drive', 
@@ -165,20 +167,25 @@ var test2 = {title:'Book Drive',
                 'Nunc sit amet semper urna, ac mollis dui. Aenean vitae imperdiet nisi, ' +
                 'sit amet mattis libero. Sed tincidunt arcu in justo...',
             date:'Sunday, June 21, 2020', 
+            time:'1:00 PM',
             distance:'6 miles away', 
+            address:'Main St, Los Angeles, CA',
             attendeeCount: 12,
             tags:['education']};
 var events = [test, test2];
 
-
+const dummyText = "Suggested for you"; // TODO: come up with variety
 /**
  * Fetches events from a specific url
  * 
  * Currently uses the events variable defined above
  */
-async function getEvents(url) {
+async function getEvents(url, index, option) {
   const eventListElements = document.getElementsByClassName('event-list-container');
-  var eventListElement = eventListElements[0];
+  if (index === null || index >= eventListElements.length) {
+    index = 0;
+  }
+  var eventListElement = eventListElements[index];
   eventListElement.innerHTML = '';
   console.log(eventListElement);
   events.forEach(function(event) {
@@ -200,7 +207,17 @@ async function getEvents(url) {
 
     const eventItemTitleElement = document.createElement('div');
     eventItemTitleElement.className = 'event-item-title';
-    eventItemTitleElement.innerText = event.title;
+    if (option == 1 || option == 2) {
+      const eventItemTitleName = document.createElement('div');
+      eventItemTitleName.innerText = event.title;
+      const eventItemTitleAddr = document.createElement('div');
+      eventItemTitleAddr.innerText = event.address;
+      eventItemTitleAddr.className = 'event-item-address';
+      eventItemTitleElement.appendChild(eventItemTitleName);
+      eventItemTitleElement.appendChild(eventItemTitleAddr);
+    } else {
+      eventItemTitleElement.innerText = event.title;
+    }
     eventItemHeaderElement.appendChild(eventItemTitleElement);
 
     const eventItemDetailsElement = document.createElement('div');
@@ -212,7 +229,11 @@ async function getEvents(url) {
     eventItemDetailsElement.appendChild(eventItemDateElement);
     const eventItemDistanceElement = document.createElement('div');
     eventItemDistanceElement.className = 'event-item-distance';
-    eventItemDistanceElement.innerText = event.distance;
+    if (option == 1 || option == 2) {
+      eventItemDistanceElement.innerText = event.time;
+    } else {
+      eventItemDistanceElement.innerText = event.distance;
+    }
     eventItemDetailsElement.appendChild(eventItemDistanceElement);
 
     const eventItemDescElement = document.createElement('div');
@@ -224,15 +245,41 @@ async function getEvents(url) {
     eventItemFooterElement.className = 'event-item-footer';
     eventItemInfoElement.appendChild(eventItemFooterElement);
 
+    // decide which footer item to use
     const attendeeCountContainerElement = document.createElement('div');
-    attendeeCountContainerElement.className = 'attendee-count-container';
-    eventItemFooterElement.appendChild(attendeeCountContainerElement);
-    const attendeeCountElement = document.createElement('span');
-    attendeeCountElement.className = 'attendee-count ' + event.tags[0] + '-text';
-    attendeeCountElement.innerText = event.attendeeCount;
-    attendeeCountContainerElement.appendChild(attendeeCountElement);
-    attendeeCountContainerElement.appendChild(
+    if (option == 0) {
+      // "recommended for you"
+      attendeeCountContainerElement.innerText = dummyText;
+
+    } else if (option == 1) {
+      // unsave an event
+      attendeeCountContainerElement.className = 'edit-unsave-event';
+      attendeeCountContainerElement.innerText = "Unsave this event";
+      attendeeCountContainerElement.onclick = function() {
+          // TODO: unsave from datastore or make popup that confirms choice first
+      }
+    } else if (option == 2) {
+      // edit an event
+      attendeeCountContainerElement.className = 'edit-unsave-event';
+      const editEventLink = document.createElement("a");
+      editEventLink.innerText = "Edit this event";
+
+      // TODO: set this href to edit-event page
+      editEventLink.href = "/create-event-form.html";
+      attendeeCountContainerElement.appendChild(editEventLink);
+    } else {
+      // default: show attendee count
+      attendeeCountContainerElement.className = 'attendee-count-container';
+    
+      const attendeeCountElement = document.createElement('span');
+      attendeeCountElement.className = 'attendee-count ' + event.tags[0] + '-text';
+      attendeeCountElement.innerText = event.attendeeCount;
+      attendeeCountContainerElement.appendChild(attendeeCountElement);
+      attendeeCountContainerElement.appendChild(
         document.createTextNode(' already attending'));
+    }
+    
+    eventItemFooterElement.appendChild(attendeeCountContainerElement);
 
     const tagsContainerElement = document.createElement('div');
     tagsContainerElement.className = 'tags-container';

@@ -335,6 +335,14 @@ input[type=text], textarea {
 
 .event-item-title {
   font-weight: bold;
+  font-size: 16px;
+  display: flex;
+  flex-flow: column nowrap;
+}
+
+.event-item-address {
+  font-weight: normal;
+  font-size: 14px;
 }
 
 .event-item-details {
@@ -351,6 +359,16 @@ input[type=text], textarea {
   flex-flow: row nowrap;
   font-size: 14px;
   justify-content: space-between;
+}
+
+.edit-unsave-event {
+  color: #6e9eeb;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.edit-unsave-event a:link, .edit-unsave-event a:visited {
+  color: #6e9eeb;
 }
 
 .attendee-count {
