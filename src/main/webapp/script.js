@@ -171,7 +171,7 @@ async function getEvents(url, index, option) {
 
     const eventItemTitleElement = document.createElement('div');
     eventItemTitleElement.className = 'event-item-title';
-    if(option == 2 || option == 3) {
+    if(option == 1 || option == 2) {
       const eventItemTitleName = document.createElement('div');
       eventItemTitleName.innerText = event.title;
       const eventItemTitleAddr = document.createElement('div');
@@ -193,7 +193,11 @@ async function getEvents(url, index, option) {
     eventItemDetailsElement.appendChild(eventItemDateElement);
     const eventItemDistanceElement = document.createElement('div');
     eventItemDistanceElement.className = 'event-item-distance';
-    eventItemDistanceElement.innerText = event.distance;
+    if(option == 1 || option == 2) {
+      eventItemDistanceElement.innerText = event.time;
+    } else {
+      eventItemDistanceElement.innerText = event.distance;
+    }
     eventItemDetailsElement.appendChild(eventItemDistanceElement);
 
     const eventItemDescElement = document.createElement('div');
