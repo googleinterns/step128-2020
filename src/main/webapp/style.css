@@ -9,6 +9,10 @@
   color: #cc0101;
 }
 
+.orange-background {
+  background-color: #ff9902;
+}
+
 .yellow {
   color: #ffd966;
 }
@@ -66,6 +70,7 @@ body {
   flex-flow: row nowrap;
   justify-content: space-between;
   overflow: hidden;
+  position: sticky;
 }
 
 .header-left {
@@ -259,4 +264,46 @@ h1 {
   color: white;
   border-radius: 5px;
   padding: 5px 10px 5px 10px;
+  margin: 5px;
+}
+
+/* survey-page */
+
+.survey-background {
+  display: flex;
+  background-color: #ffd966;
+  align-items: center;
+  justify-content: center;
+  min-height: 700px;
+}
+
+.survey-container {
+  display: flex;
+  flex-flow: column nowrap;
+  /* height: 300px; */
+}
+
+#survey-header {
+  margin: 30px;
+  text-align: center;
+}
+
+.survey-tags-container {
+  display: flex;
+  flex-flow: row wrap;
+  margin: auto;
+  width: 40%;
+  align-items: center;
+  justify-content: space-around;
+}
+
+#survey-save {
+  align-self: center;
+  margin: 30px;
+  object-fit: contain;
+  width: 175px;
+}
+
+.black {
+  color: black;
 }
