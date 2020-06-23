@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="style.css">
     <script src="script.js"></script>
   </head>
-  <body>
+  <body onload="updateSearchBar(); updateTagBox()">
     <div class="header">
       <div class="header-left">
         <a href="/index.html">        
@@ -24,15 +24,11 @@
       <div class="search-container">
         <!-- use the CSS for the other similar pieces of text that someone else makes -->
         <h1 style="text-align: center">Let’s find an event.</h2>
-        <form action="/search-data">
-          <input type="text" placeholder="Search..">
-          <button type="submit">Go</button>
-        </form>
-        <div class="tag-container">
-          <p>Add one or more tags to search for</p>
-            <div class="tags-container">
-              <div class="tag green-background">environment</div>
-            </div>
+        <button onclick="">Go</button>
+        <div class="search-bar">
+        </div>
+        <p>Add one or more tags to search for</p>
+        <div class="tag-box">
         </div>
       </div>
     </div>

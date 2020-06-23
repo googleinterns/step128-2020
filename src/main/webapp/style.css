@@ -95,16 +95,19 @@ h1 {
   width: 700px;
 }
 
-.search-container input[type=text] {
+.search-container .search-bar {
   border: none;
   border-radius: 10px;
+  background-color: white;
   font-size: 18px;
   height: 25px;
   margin-top: 8px;
   outline: none;
+  overflow: hidden;
   padding: 6px;
   padding-left: 15px;
-  width: 600px;
+  padding-right: .5em;
+  width: 615px;
 }
 
 .search-container button {
@@ -116,7 +119,7 @@ h1 {
   font-size: 18px;
   height: 40px;
   margin-top: 8px;
-  margin-right: 16px;
+  margin-right: 10px;
   padding: 6px 10px;
 }
 
