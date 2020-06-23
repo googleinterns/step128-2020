@@ -113,21 +113,27 @@ function search() {
   //TODO fetch call to server with search parameters
 }
 
-/* Two test examples to use with getEvents()
+/* Two test examples to use with getEvents() */
 var test = {title:'Beach clean up', 
-            description:'YEET', 
+            description:'Lorem ipsum dolor sit amet, consectetur adipiscing elit. ' +
+                'Nam efficitur enim quis est mollis blandit. Integer vitae augue risus. ' +
+                'Nunc sit amet semper urna, ac mollis dui. Aenean vitae imperdiet nisi, ' +
+                'sit amet mattis libero. Sed tincidunt arcu in justo...',
             date:'Saturday, June 20, 2020', 
             distance:'5 miles away', 
             attendeeCount: 12,
             tags:['environment']};
 var test2 = {title:'Book Drive', 
-            description:'YEET', 
+            description:'Lorem ipsum dolor sit amet, consectetur adipiscing elit. ' +
+                'Nam efficitur enim quis est mollis blandit. Integer vitae augue risus. ' +
+                'Nunc sit amet semper urna, ac mollis dui. Aenean vitae imperdiet nisi, ' +
+                'sit amet mattis libero. Sed tincidunt arcu in justo...',
             date:'Sunday, June 21, 2020', 
             distance:'6 miles away', 
             attendeeCount: 12,
             tags:['education']};
 var events = [test, test2];
-*/
+
 
 /**
  * Fetches events from a specific url
