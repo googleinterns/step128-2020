@@ -252,7 +252,6 @@ h1 {
   align-items: center;
   justify-content: center;
   min-height: 700px;
-<<<<<<< HEAD
 }
 
 .survey-container {
@@ -302,38 +301,5 @@ h1 {
 
 .rainbow {
   background-color: #fdfdfd;
-  color: black;
-=======
->>>>>>> 4c39b37c2c03370ceae45a275df0c1b37dee7755
-}
-
-.survey-container {
-  display: flex;
-  flex-flow: column nowrap;
-  /* height: 300px; */
-}
-
-#survey-header {
-  margin: 30px;
-  text-align: center;
-}
-
-.survey-tags-container {
-  display: flex;
-  flex-flow: row wrap;
-  margin: auto;
-  width: 40%;
-  align-items: center;
-  justify-content: space-around;
-}
-
-#survey-save {
-  align-self: center;
-  margin: 30px;
-  object-fit: contain;
-  width: 175px;
-}
-
-.black {
   color: black;
 }
