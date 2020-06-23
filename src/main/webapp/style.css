@@ -29,6 +29,29 @@
   background-color: #6e9eeb;
 }
 
+/* tag colors */
+
+.blm {
+  background-color: black;
+}
+
+.environment {
+  background-color: #93c47d;
+}
+
+.volunteer {
+  background-color: #ffb742;
+}
+
+.education {
+  background-color: #6e9eeb;
+}
+
+.LGBTQ\+ {
+  background-color: #fdfdfd;
+  color: black;
+}
+
 
 /* content */
 
@@ -126,6 +149,10 @@ h1 {
 
 .search-bar-container button:hover {
   background: #ccc;
+}
+
+.search-bar-container .tag {
+  margin: 2px;
 }
 
 /* end of search page */

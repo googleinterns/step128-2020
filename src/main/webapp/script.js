@@ -46,7 +46,8 @@ function updateSearchBar() {
     const spanElement = document.createElement('span');
     spanElement.setAttribute('onclick', 'addTagSearchToBox(\"' + tag + 
         '\")');
-    spanElement.className = 'tag ' + 'green-background';
+    // class name is now (for example) 'tag environment'
+    spanElement.className = 'tag ' + tag;
     spanElement.innerText = tag;
 
     searchBarElement.appendChild(spanElement);
@@ -61,7 +62,8 @@ function updateTagBox() {
     const spanElement = document.createElement('span');
     spanElement.setAttribute('onclick', 'addTagBoxToSearch(\"' + tag + 
         '\")');
-    spanElement.className = 'tag ' + 'green-background';
+    // class name is now (for example) 'tag environment'
+    spanElement.className = 'tag ' + tag;
     spanElement.innerText = tag;
 
     tagBoxElement.appendChild(spanElement);
