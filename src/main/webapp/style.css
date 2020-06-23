@@ -327,6 +327,16 @@ input[type=text], textarea {
   justify-content: space-between;
 }
 
+.edit-unsave-event {
+  color: #6e9eeb;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.edit-unsave-event a:link, .edit-unsave-event a:visited {
+  color: #6e9eeb;
+}
+
 .attendee-count {
   font-weight: bold;
 }
