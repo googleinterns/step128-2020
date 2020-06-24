@@ -52,10 +52,11 @@ function generateNavBar() {
   headerRight.appendChild(myLink);
 
   const header = document.getElementsByClassName('header')[0];
-  header.textContent = "";
+  header.textContent = '';
   header.appendChild(headerLeft);
   header.appendChild(headerRight);
 
+    // creates this structure:
     //   <div class="header-left">
     //     <a href="/index.html">        
     //       <img src="images/uniteLogo.svg" alt="Unite by STEP logo.">
@@ -259,7 +260,7 @@ const dummyText = "Suggested for you"; // TODO: come up with variety
  */
 async function getEvents(url, index, option) {
   const eventListElements = document.getElementsByClassName('event-list-container');
-  url = "/display-event.html"; // use this for now
+  url = '/display-event.html'; // use this for now
   if (index === null || index >= eventListElements.length) {
     index = 0;
   }
