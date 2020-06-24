@@ -215,6 +215,12 @@ h1 {
   margin: 2px;
 }
 
+.location-settings {
+  float: right;
+  font-size: 16px;
+  margin: 40px 20px 0 20px;
+}
+
 /* end of search page */
 
 /* Create Page */

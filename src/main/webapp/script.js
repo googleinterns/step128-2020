@@ -132,6 +132,13 @@ function generateRainbowTags() {
   }
 }
 
+var searchDistance = 5;
+
+function changeSearchDistance() {
+  searchDistance = document.getElementById('searchDistance').value;
+  search();
+}
+
 /**
  * Placeholder function for search functionality
  */
@@ -144,6 +151,8 @@ function search() {
   if (url.charAt(url.length - 1) == ',') {
     url = url.substring(0, url.length - 1);
   }
+
+  url += '&searchDistance=' + searchDistance;
 
   window.location.href = url;
   //TODO fetch call to server with search parameters
