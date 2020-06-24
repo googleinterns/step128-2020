@@ -218,7 +218,12 @@ h1 {
 .location-settings {
   float: right;
   font-size: 16px;
-  margin: 40px 20px 0 20px;
+  margin: 20px 20px 0 20px;
+  text-align: right;
+}
+
+.location-settings a {
+  color: #6e9eeb;
 }
 
 /* end of search page */

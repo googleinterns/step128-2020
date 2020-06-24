@@ -325,9 +325,12 @@ async function getSearchDistanceSettings() {
   currentLocationElement.innerText = 'Current Location: ' 
       + 'Los Angeles, CA';
   locationSettingsElement.appendChild(currentLocationElement);
+  locationSettingsElement.appendChild(
+        document.createTextNode(' '));
 
   const changeLinkElement = document.createElement('a');
   changeLinkElement.setAttribute('href', '');
+  changeLinkElement.innerText = 'Change Location';
   locationSettingsElement.appendChild(changeLinkElement);
 
   const distanceElement = document.createElement('div');
