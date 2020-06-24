@@ -191,7 +191,7 @@ async function getEvents(url, index, option) {
   events.forEach(function(event) {
     const eventItemElement = document.createElement('div');
     eventItemElement.className = 'event-item';
-    eventItemElement.setAttribute("onclick", "openEvent()");
+    eventItemElement.setAttribute('onclick', 'openEvent()');
     eventListElement.appendChild(eventItemElement);
 
     const eventImageElement = document.createElement('div');
