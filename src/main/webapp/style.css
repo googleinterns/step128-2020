@@ -171,6 +171,17 @@ h1 {
   margin: 2px;
 }
 
+.location-settings {
+  float: right;
+  font-size: 16px;
+  margin: 20px 20px 0 20px;
+  text-align: right;
+}
+
+.location-settings a {
+  color: #6e9eeb;
+}
+
 /* end of search page */
 
 /* Create Page */

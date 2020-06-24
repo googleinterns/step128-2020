@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="style.css">
     <script src="script.js"></script>
   </head>
-  <body onload="updateSearchBar(); updateTagBox(); getEvents('test', 0, 3)">
+  <body onload="updateSearchBar(); updateTagBox(); getEvents('test', 0, 3); getSearchDistanceSettings()">
     <div class="header">
       <div class="header-left">
         <a href="/index.html">        
@@ -29,11 +29,13 @@
           <div class="search-bar">
           </div>
           <p>Add one or more tags to search for</p>
-          <div class="tag-box">
-          </div>
+          <div class="tag-box"></div>
         </div>
       </div>
     </div>
+    <div class="location-settings">
+    </div>
+    <br>
     <div class="event-section search-results-container">
         <div class="event-section-header">Search Results</div>
         <div class="event-list-container">

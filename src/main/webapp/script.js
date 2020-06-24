@@ -193,6 +193,13 @@ function generateRainbowTags() {
   }
 }
 
+var searchDistance = 5;
+
+function changeSearchDistance() {
+  searchDistance = document.getElementById('searchDistance').value;
+  search();
+}
+
 /**
  * Placeholder function for search functionality
  */
@@ -205,6 +212,8 @@ function search() {
   if (url.charAt(url.length - 1) == ',') {
     url = url.substring(0, url.length - 1);
   }
+
+  url += '&searchDistance=' + searchDistance;
 
   window.location.href = url;
   //TODO fetch call to server with search parameters
@@ -221,7 +230,8 @@ var test = {title:'Beach clean up',
             distance:'5 miles away', 
             address:'Main St, Venice, CA',
             attendeeCount: 12,
-            tags:['environment']};
+            tags:['environment'],
+            url:'/display-event.html'};
 var test2 = {title:'Book Drive', 
             description:'Lorem ipsum dolor sit amet, consectetur adipiscing elit. ' +
                 'Nam efficitur enim quis est mollis blandit. Integer vitae augue risus. ' +
@@ -232,7 +242,8 @@ var test2 = {title:'Book Drive',
             distance:'6 miles away', 
             address:'Main St, Los Angeles, CA',
             attendeeCount: 12,
-            tags:['education']};
+            tags:['education'],
+            url:'/display-event.html'};
 var events = [test, test2];
 
 const dummyText = "Suggested for you"; // TODO: come up with variety
@@ -254,12 +265,11 @@ async function getEvents(url, index, option) {
   }
   var eventListElement = eventListElements[index];
   eventListElement.innerHTML = '';
-  console.log(eventListElement);
   events.forEach(function(event) {
     const eventItemElement = document.createElement('a');
     eventItemElement.className = 'event-item';
-    eventItemElement.setAttribute('onclick', 'openEvent()');
-    eventItemElement.href = url;
+    eventItemElement.setAttribute('onclick', 'openEvent(\"' 
+        + event.url + '\")');
     eventListElement.appendChild(eventItemElement);
 
     const eventImageElement = document.createElement('div');
@@ -364,8 +374,54 @@ async function getEvents(url, index, option) {
   });
 }
 
-function openEvent() {
-  window.location.pathname = '/display-event.html'
+function openEvent(url) {
+  window.location.pathname = url;
+}
+
+/**
+ * Creates the search distance settings on the page
+ */
+async function getSearchDistanceSettings() {
+  const locationSettingsElements = document.getElementsByClassName('location-settings');
+  var locationSettingsElement = locationSettingsElements[0];
+
+  //TODO get from server where the user's location is to set by default
+  locationSettingsElement.innerHTML = '';
+  const currentLocationElement = document.createElement('div');
+  currentLocationElement.className = 'current-location';
+  currentLocationElement.innerText = 'Current Location: ' 
+      + 'Los Angeles, CA';
+  locationSettingsElement.appendChild(currentLocationElement);
+  locationSettingsElement.appendChild(
+        document.createTextNode(' '));
+
+  const changeLinkElement = document.createElement('a');
+  changeLinkElement.setAttribute('href', '');
+  changeLinkElement.innerText = 'Change Location';
+  locationSettingsElement.appendChild(changeLinkElement);
+
+  const distanceElement = document.createElement('div');
+  distanceElement.className = 'distance';
+  distanceElement.appendChild(
+        document.createTextNode('Searching within '));
+  locationSettingsElement.appendChild(distanceElement);
+
+  const selectElement = document.createElement('select');
+  selectElement.id = 'searchDistance';
+  selectElement.setAttribute('onchange', 'changeSearchDistance()');
+  distanceElement.appendChild(selectElement);
+
+  var distanceList = [5, 10, 25, 50];
+  distanceList.forEach(function(distance) {
+    const optionElement = document.createElement('option');
+    optionElement.value = distance;
+    optionElement.innerText = distance;
+    if (distance == searchDistance) optionElement.setAttribute('selected', 'true');
+    selectElement.appendChild(optionElement);
+  });
+
+  distanceElement.appendChild(
+        document.createTextNode(' mi'));
 }
 
 /**
