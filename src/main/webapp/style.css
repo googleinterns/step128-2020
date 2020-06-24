@@ -417,18 +417,19 @@ input[type=text], textarea {
 /* survey-page */
 
 .survey-background {
-  display: flex;
-  background-color: #ffd966;
   align-items: center;
+  background-color: #ffd966;
+  display: flex;
+  flex-flow: column nowrap;
   justify-content: center;
   min-height: 700px;
 }
 
-.survey-container {
+/* .survey-container {
   display: flex;
   flex-flow: column nowrap;
-  /* height: 300px; */
-}
+  height: 300px; 
+} */
 
 #survey-header {
   margin: 30px;
@@ -444,11 +445,39 @@ input[type=text], textarea {
   justify-content: space-around;
 }
 
+.survey-select-container {
+  align-items: center;
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: center;
+}
+
+.survey-item, .survey-label {
+  margin: 30px;
+}
+
+.survey-question {
+  font-size: 20px;
+  margin: 30px;
+  text-align: center;
+}
+
+.survey-select{
+  background-color: transparent;
+  border: 5px white solid;
+  border-radius: 50%;
+  cursor: pointer;
+  display: inline-block;
+  margin: 10px;
+  height: 30px;
+  width: 30px;
+}
+
 #survey-save {
   align-self: center;
   margin: 30px;
   object-fit: contain;
-  width: 175px;
+  width: 200px;
 }
 
 /* tag colors */
