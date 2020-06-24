@@ -173,6 +173,14 @@ h1 {
   min-width: 100%;
 }
 
+.search-tools {
+  left: 50%;
+  position: absolute;
+  text-align: center;
+  top: 425px;
+  transform: translate(-50%, -50%);
+}
+
 .search-bar-container {
   margin-left: auto;
   margin-right: auto;
