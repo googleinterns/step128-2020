@@ -1,8 +1,5 @@
-This directory is where you'll write all of your code!
+# Google Student Training in Engineering Program
 
-By default it contains a barebones web app. To run a local server, execute this
-command:
+This repo contains Helen, Nicole, and William's STEP capstone project:
 
-```bash
-mvn package appengine:run
-```
+![Unite by STEP](https://github.com/googleinterns/step128-2020/blob/master/src/main/webapp/images/uniteLogo.png)
