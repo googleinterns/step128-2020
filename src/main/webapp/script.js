@@ -160,7 +160,8 @@ var test = {title:'Beach clean up',
             distance:'5 miles away', 
             address:'Main St, Venice, CA',
             attendeeCount: 12,
-            tags:['environment']};
+            tags:['environment'],
+            url:'/display-event.html'};
 var test2 = {title:'Book Drive', 
             description:'Lorem ipsum dolor sit amet, consectetur adipiscing elit. ' +
                 'Nam efficitur enim quis est mollis blandit. Integer vitae augue risus. ' +
@@ -171,7 +172,8 @@ var test2 = {title:'Book Drive',
             distance:'6 miles away', 
             address:'Main St, Los Angeles, CA',
             attendeeCount: 12,
-            tags:['education']};
+            tags:['education'],
+            url:'/display-event.html'};
 var events = [test, test2];
 
 const dummyText = "Suggested for you"; // TODO: come up with variety
@@ -191,7 +193,8 @@ async function getEvents(url, index, option) {
   events.forEach(function(event) {
     const eventItemElement = document.createElement('div');
     eventItemElement.className = 'event-item';
-    eventItemElement.setAttribute('onclick', 'openEvent()');
+    eventItemElement.setAttribute('onclick', 'openEvent(\"' 
+        + event.url + '\")');
     eventListElement.appendChild(eventItemElement);
 
     const eventImageElement = document.createElement('div');
@@ -296,6 +299,6 @@ async function getEvents(url, index, option) {
   });
 }
 
-function openEvent() {
-  window.location.pathname = '/display-event.html'
+function openEvent(url) {
+  window.location.pathname = url;
 }
