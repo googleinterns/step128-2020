@@ -462,6 +462,22 @@ input[type=text], textarea {
   background-color: white;
 }
 
+.share-container {
+  margin: 20px;
+}
+
+.share-container img {
+  cursor: pointer;
+  height: 70px;
+}
+
+/* Footer */
+.footer {
+  margin-top: 200px;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
 /* survey-page */
 
 .survey-background {
@@ -507,6 +523,7 @@ input[type=text], textarea {
 }
 
 #survey-save {
+  margin-bottom: 10px;
   align-self: center;
   cursor: pointer;
   margin: 30px;
@@ -576,4 +593,3 @@ input[type=text], textarea {
 
 .rainbow.invert {
   color: black;
-}
