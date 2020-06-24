@@ -198,7 +198,6 @@ async function getEvents(url, index, option) {
   }
   var eventListElement = eventListElements[index];
   eventListElement.innerHTML = '';
-  console.log(eventListElement);
   events.forEach(function(event) {
     const eventItemElement = document.createElement('div');
     eventItemElement.className = 'event-item';
@@ -310,4 +309,47 @@ async function getEvents(url, index, option) {
 
 function openEvent(url) {
   window.location.pathname = url;
+}
+
+/**
+ * Creates the search distance settings on the page
+ */
+async function getSearchDistanceSettings() {
+  const locationSettingsElements = document.getElementsByClassName('location-settings');
+  var locationSettingsElement = locationSettingsElements[0];
+
+  //TODO get from server where the user's location is to set by default
+  locationSettingsElement.innerHTML = '';
+  const currentLocationElement = document.createElement('div');
+  currentLocationElement.className = 'current-location';
+  currentLocationElement.innerText = 'Current Location: ' 
+      + 'Los Angeles, CA';
+  locationSettingsElement.appendChild(currentLocationElement);
+
+  const changeLinkElement = document.createElement('a');
+  changeLinkElement.setAttribute('href', '');
+  locationSettingsElement.appendChild(changeLinkElement);
+
+  const distanceElement = document.createElement('div');
+  distanceElement.className = 'distance';
+  distanceElement.appendChild(
+        document.createTextNode('Searching within '));
+  locationSettingsElement.appendChild(distanceElement);
+
+  const selectElement = document.createElement('select');
+  selectElement.id = 'searchDistance';
+  selectElement.setAttribute('onchange', 'changeSearchDistance()');
+  distanceElement.appendChild(selectElement);
+
+  var distanceList = [5, 10, 25, 50];
+  distanceList.forEach(function(distance) {
+    const optionElement = document.createElement('option');
+    optionElement.value = distance;
+    optionElement.innerText = distance;
+    if (distance == searchDistance) optionElement.setAttribute('selected', 'true');
+    selectElement.appendChild(optionElement);
+  });
+
+  distanceElement.appendChild(
+        document.createTextNode(' mi'));
 }
