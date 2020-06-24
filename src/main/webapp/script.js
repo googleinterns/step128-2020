@@ -309,7 +309,6 @@ function openEvent() {
   window.location.pathname = '/display-event.html'
 }
 
-
 /**
  * Toggles the display of the survey page to indicate which option is selected,
  * while saving the survey responses.
