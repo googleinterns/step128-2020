@@ -191,6 +191,7 @@ const dummyText = "Suggested for you"; // TODO: come up with variety
  */
 async function getEvents(url, index, option) {
   const eventListElements = document.getElementsByClassName('event-list-container');
+  url = "/display-event.html"; // use this for now
   if (index === null || index >= eventListElements.length) {
     index = 0;
   }
@@ -198,9 +199,10 @@ async function getEvents(url, index, option) {
   eventListElement.innerHTML = '';
   console.log(eventListElement);
   events.forEach(function(event) {
-    const eventItemElement = document.createElement('div');
+    const eventItemElement = document.createElement('a');
     eventItemElement.className = 'event-item';
     eventItemElement.setAttribute('onclick', 'openEvent()');
+    eventItemElement.href = url;
     eventListElement.appendChild(eventItemElement);
 
     const eventImageElement = document.createElement('div');
