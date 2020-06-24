@@ -300,6 +300,19 @@ async function getEvents(url, index, option) {
   });
 }
 
+
 function openEvent() {
   window.location.pathname = '/display-event.html'
+}
+
+var surveyResponses = [-1, -1, -1, -1, -1];
+function toggleSurveyDisplay(question, index) {
+	const circle = document.getElementsByClassName('survey-select')[question*5 + index];
+	if(surveyResponses[question] >= 0) {
+		var oldIndex = surveyResponses[question];
+		const oldCircle = document.getElementsByClassName("survey-select")[question*5 + oldIndex];
+		oldCircle.style.backgroundColor = "transparent";
+	}
+	circle.style.backgroundColor = "white";
+	surveyResponses[question] = index;
 }
