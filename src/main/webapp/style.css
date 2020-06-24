@@ -140,6 +140,25 @@ a:link, a:visited {
   text-decoration: none;
 }
 
+/* Home Page */
+.hero-image {
+  background-color: #ffd966;
+  height: 90vh;
+  min-width: 100%;
+}
+
+.hero-text {
+  left: 50%;
+  position: absolute;
+  text-align: center;
+  top: 450px;
+  transform: translate(-50%, -50%);
+}
+
+.home-page-content {
+  padding: 30px;
+}
+
 /* search page */
 h1 {
   margin: 0px;
@@ -199,19 +218,6 @@ h1 {
 /* end of search page */
 
 /* Create Page */
-.hero-image {
-  background-color: #ffd966;
-  height: 700px;
-}
-
-.hero-text {
-  left: 50%;
-  position: absolute;
-  text-align: center;
-  top: 450px;
-  transform: translate(-50%, -50%);
-}
-
 .start-bttn img {
   height: 60px;
 }
