@@ -33,49 +33,6 @@
   background-color: #6e9eeb;
 }
 
-
-.blm-text {
-  color: black;
-}
-
-.environment-text {
-  color: #93c47d;
-}
-
-.volunteer-text {
-  color: #ffb742;
-}
-
-.education-text {
-  color: #6e9eeb;
-}
-
-.blm.invert {
-  background-color: white;
-  border-color: black;
-  color: black;
-}
-
-.environment.invert {
-  background-color: white;
-  color: #93c47d;
-}
-
-.volunteer.invert {
-  background-color: white;
-  color: #ffb742;
-}
-
-.education.invert {
-  background-color: white;
-  color: #6e9eeb;
-}
-
-.rainbow.invert {
-  color: black;
-}
-
-
 /* content */
 
 body {
@@ -515,5 +472,47 @@ input[type=text], textarea {
 
 .rainbow {
   background-color: #fdfdfd;
+  color: black;
+}
+
+
+.blm-text {
+  color: black;
+}
+
+.environment-text {
+  color: #93c47d;
+}
+
+.volunteer-text {
+  color: #ffb742;
+}
+
+.education-text {
+  color: #6e9eeb;
+}
+
+.blm.invert {
+  background-color: white;
+  border-color: black;
+  color: black;
+}
+
+.environment.invert {
+  background-color: white;
+  color: #93c47d;
+}
+
+.volunteer.invert {
+  background-color: white;
+  color: #ffb742;
+}
+
+.education.invert {
+  background-color: white;
+  color: #6e9eeb;
+}
+
+.rainbow.invert {
   color: black;
 }
