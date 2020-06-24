@@ -265,8 +265,7 @@ async function getEvents(url, index, option) {
       const editEventLink = document.createElement("a");
       editEventLink.innerText = "Edit this event";
 
-      // TODO: set this href to edit-event page
-      editEventLink.href = "/create-event-form.html";
+      editEventLink.href = "/edit-event-form.html";
       attendeeCountContainerElement.appendChild(editEventLink);
     } else {
       // default: show attendee count
