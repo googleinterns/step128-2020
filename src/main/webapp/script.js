@@ -194,6 +194,11 @@ const dummyText = "Suggested for you"; // TODO: come up with variety
  * Fetches events from a specific url
  * 
  * Currently uses the events variable defined above
+ *
+ * @param {string} url TODO - what is this for?
+ * @param {number} index To identify which event list container on the page to generate.
+ * @param {number} option To identify which format to generate -- attendee count, 
+ *		unsave/edit event, or a recommendation reason.
  */
 async function getEvents(url, index, option) {
   const eventListElements = document.getElementsByClassName('event-list-container');
@@ -359,4 +364,23 @@ async function getSearchDistanceSettings() {
 
   distanceElement.appendChild(
         document.createTextNode(' mi'));
+}
+
+/**
+ * Toggles the display of the survey page to indicate which option is selected,
+ * while saving the survey responses.
+ *
+ * @param {number} question The question number to apply the toggle.
+ * @param {number} index Which bubble on the question to apply the toggle to.
+ */
+var surveyResponses = [-1, -1, -1, -1, -1];
+function toggleSurveyDisplay(question, index) {
+	const circle = document.getElementsByClassName('survey-select')[question*5 + index];
+	if (surveyResponses[question] >= 0) {
+		var oldIndex = surveyResponses[question];
+		const oldCircle = document.getElementsByClassName('survey-select')[question*5 + oldIndex];
+		oldCircle.style.backgroundColor = 'transparent';
+	}
+	circle.style.backgroundColor = 'white';
+	surveyResponses[question] = index;
 }

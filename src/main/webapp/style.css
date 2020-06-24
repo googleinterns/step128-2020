@@ -359,6 +359,7 @@ input[type=text], textarea {
 
 /* individual event display */
 .event-display-container {
+  /* the container for the entire page, minus nav bar */
   display: flex;
   flex-flow: row nowrap;
   height: calc(100% - 100px);
@@ -367,6 +368,7 @@ input[type=text], textarea {
 }
 
 .event-left-details {
+  /* left side, with image, description, and tags */
   height: 100%;
   flex-grow: 1;
   overflow-y: scroll;
@@ -382,15 +384,17 @@ input[type=text], textarea {
 }
 
 .event-left-text {
+  /* all text elements below the image */
   padding: 0 15px 30px 15px;
 }
 
 .event-display-header {
+  /* header row with title and attendee count */
   align-items: center;
   display: flex;    
   flex-flow: row nowrap;
   justify-content: space-between;
-  padding: 30px 0 15px 0;
+	padding: 30px 0 15px 0;
 }
 
 .event-display-title {
@@ -403,6 +407,7 @@ input[type=text], textarea {
 }
 
 .event-right-details {
+	/* right side with date, time, location */
   align-items: center;
   background-color: #eee;
   display: flex;
@@ -451,12 +456,6 @@ input[type=text], textarea {
   min-height: 700px;
 }
 
-/* .survey-container {
-  display: flex;
-  flex-flow: column nowrap;
-  height: 300px; 
-} */
-
 #survey-header {
   margin: 30px;
   text-align: center;
@@ -485,13 +484,14 @@ input[type=text], textarea {
   border-radius: 50%;
   cursor: pointer;
   display: inline-block;
-  margin: 10px;
   height: 30px;
+  margin: 10px;
   width: 30px;
 }
 
 #survey-save {
   align-self: center;
+  cursor: pointer;
   margin: 30px;
   object-fit: contain;
   width: 200px;
@@ -519,7 +519,6 @@ input[type=text], textarea {
   background-color: #fdfdfd;
   color: black;
 }
-
 
 .blm-text {
   color: black;
