@@ -300,6 +300,7 @@ input[type=text], textarea {
 
 .event-item {
   align-items: center;
+  cursor: pointer;
   height: 200px;
   display: flex;
   flex-flow: row nowrap;
