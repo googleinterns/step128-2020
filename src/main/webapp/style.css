@@ -121,12 +121,34 @@ footer {
   padding: 30px;
 }
 
-.survey-link {
-  margin-bottom: 50px;
-}
-
 .survey-link a {
   color: #6e9eeb;
+}
+
+.page-header {
+  display: flex;
+  margin: 40px 10px 50px 10px;
+}
+
+.page-header-left {
+  flex: 50%;
+  padding: 10px;
+}
+
+.page-header-right {
+  flex: 50%;
+  padding: 10px;
+}
+
+@media screen and (max-width: 900px) {
+  .page-header {
+    flex-direction: column;
+  }
+
+  .page-header-left,
+  .page-header-right {
+    width: auto;
+  }
 }
 
 /* search page */
