@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="style.css">
     <script src="script.js"></script>
   </head>
-  <body onload="generateNavBar(); getEvents('test', 1, 0)">
+  <body onload="generateNavBar(); getEvents('test', 1, 0); getSearchDistanceSettings()">
     <div class="header"></div>
     <div class="hero-image">
       <div class="hero-text">
@@ -16,7 +16,9 @@
     <div class="home-page-content">
       <div class="location-settings"></div><br>
       <div class="event-section search-results-container">
-        <div class="event-section-header">Events Recommended For You</div>
+        <div class="event-section-header">
+          <h2>Events Recommended For You</h2>
+        </div>
         <a href="survey.html">Please take our survey for accurate recommendations</a>
         <div class="event-list-container"></div>
       </div>
