@@ -7,7 +7,21 @@
     <script src="script.js"></script>
   </head>
   <body id="body" onload="generateNavBar()">
-    <div class="header"></div>
+    <div class="header">
+      
+			<div class="header-left">
+        <a href="/index.html">        
+          <img src="images/uniteLogo.svg" alt="Unite by STEP logo.">
+        </a>
+        <a class="nav-item" href="/index.html">Home</a>
+        <a class="nav-item" href="/create-event.html">Create</a>
+        <a class="nav-item" href="/search.html">Find</a>
+      </div>
+      <div class="header-right">
+        <a class="nav-item" href="/my-events.html">My Events</a>
+      </div>
+
+    </div>
     <div class="event-display-container">
       <div class="event-left-details">
         <div class="event-display-image"></div>
@@ -51,24 +65,23 @@
           <p>Time: 1:00 PM</p>
           <p>Location: Venice Beach, California</p>
         </div>
-        <a href="my-events.html" class="save-event">
-            Save Event
-        </a>
-        <a href="index.html" class="go-back">
-          <div>Go Back</div>
-        </a><br>
-        <h3>Share</h3>
-        <div class="share-container">
-          <!-- hrefs will contain the correct link when the page is generated w/JS -->
-          <a href = "https://twitter.com/share?url=http://google.com/" target="_blank">
-            <img src="images/twitter.svg" alt="Twitter"/>
-          </a>
-          <a href='http://www.facebook.com/sharer.php?u=http://google.com/' target="_blank">
-            <img src="images/facebook.svg" alt="Facebook"/>
-          </a>
-          <a href="mailto:?subject=Unite by STEP Event&body=Check out this event!%0D%0A%0D%0Ahttp://google.com/" target="_blank">
-            <img src="images/gmail.svg" alt="Email"/>
-          </a>
+        <div class = "event-display-options">
+          <a href="my-events.html" class="save-event">Save Event</a>
+            <a href="index.html" class="go-back">Go Back</a>
+            <br>
+          <h3>Share</h3>
+          <div class="share-container">
+            <!-- hrefs will contain the correct link when the page is generated w/JS -->
+            <a href = "https://twitter.com/share?url=http://google.com/" target="_blank">
+              <img src="images/twitter.svg" alt="Twitter"/>
+            </a>
+            <a href='http://www.facebook.com/sharer.php?u=http://google.com/' target="_blank">
+              <img src="images/facebook.svg" alt="Facebook"/>
+            </a>
+            <a href="mailto:?subject=Unite by STEP Event&body=Check out this event!%0D%0A%0D%0Ahttp://google.com/" target="_blank">
+              <img src="images/gmail.svg" alt="Email"/>
+            </a>
+          </div>
         </div>
       </div>
     </div>
