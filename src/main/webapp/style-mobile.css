@@ -100,6 +100,7 @@ a:link, a:visited {
   /* the container for the entire page, minus nav bar */
   display: flex;
   flex-flow: column nowrap;
+  font-size: 3vw;
   height: 90%;
   width: 100%;
 }
@@ -132,12 +133,29 @@ a:link, a:visited {
 }
 
 .event-display-title {
-  font-size: 25px;
+  font-size: 5vw;
   font-weight: bold;
 }
 
 .event-display-description {
   margin-bottom: 30px;
+}
+
+.expand-details {
+  background-color: #eee;
+  cursor: pointer;
+  display: flex;
+  flex: 0 0 auto;
+  height: 3%;
+  justify-content: center;
+  object-fit: contain;
+  width: 100%;
+}
+
+.expand-details img {
+  height: 50%;
+  object-fit: contain;
+  margin: auto;
 }
 
 .event-right-details {
@@ -146,10 +164,10 @@ a:link, a:visited {
   background-color: #eee;
   display: flex;
   flex-flow: row nowrap;
-  flex: 1 1 auto;
-  font-size: 18px;
-  /* height: 100%; */
-  justify-content: center;
+  flex: 0 0 auto;
+  font-size: 3vw;
+  height: 25%;
+  justify-content: space-around;
   margin: 0;
   width: 100%;
 }
@@ -162,7 +180,7 @@ a:link, a:visited {
   display: flex;
   flex-flow: column nowrap;
   height: 100%;
-  justify-content: space-between;
+  justify-content: space-around;
 }
 
 .save-event, .go-back {
