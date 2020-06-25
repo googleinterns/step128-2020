@@ -442,8 +442,8 @@ input[type=text], textarea {
   justify-content: center;
   margin: 0;
   max-width: 400px;
-  min-width: 275px;
-  width: 30%;
+  min-width: 300px;
+  width: 40%;
 }
 
 .event-time-location {
@@ -458,7 +458,6 @@ input[type=text], textarea {
   justify-content: center;
   margin: 15px;
   width: 200px;
-  
 }
 
 .save-event {
