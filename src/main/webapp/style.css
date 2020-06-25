@@ -121,6 +121,10 @@ footer {
   padding: 30px;
 }
 
+.survey-link {
+  margin-bottom: 50px;
+}
+
 .survey-link a {
   color: #6e9eeb;
 }
