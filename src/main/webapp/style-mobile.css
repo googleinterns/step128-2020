@@ -1,0 +1,272 @@
+@font-face {
+  font-family: Google;
+  src: url(font/ProductSans-Regular.woff);
+}
+
+/* color theme */
+
+.red {
+  color: #cc0101;
+}
+
+.orange-background {
+  background-color: #ff9902;
+}
+
+.yellow {
+  color: #ffd966;
+}
+
+.green {
+ color: #93c47d;
+}
+
+.green-background {
+  background-color: #93c47d;
+}
+
+.blue {
+  color: #6e9eeb;
+}
+
+.blue-background {
+  background-color: #6e9eeb;
+}
+
+html, body {
+  font: 100%/1.6 "Google", "Trebuchet MS", Helvetica, sans-serif;
+  height: 100%;
+  margin: 0px;
+  padding: 0;
+}
+
+/* nav bar (MOSTLY UNCHANGED) */
+
+.header {
+  display: flex;
+  flex-flow: row nowrap;
+  height: 10%; /* note: 100px -> 10% */
+  justify-content: space-between;
+  overflow: hidden;
+  position: sticky;
+}
+
+.header-left {
+  display: flex;
+  flex: 1 1 auto;
+  flex-flow: row nowrap;
+  align-items: center;
+  justify-content: space-between;
+  width: 80%;
+  max-width: 700px;
+  height: 100%;
+}
+
+.header-left a {
+  height: 100%;
+}
+
+.header-left img {
+  height: 100%;
+  flex: 1 1 auto;
+}
+
+.header-right {
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  max-width: 300px;
+  width: 25%;
+}
+
+a:link, a:visited {
+  color: black;
+  text-decoration: none;
+}
+
+.nav-item {
+  align-items: center;
+  display: flex;
+  height: 100%;
+  justify-content: center;
+  padding: 0 20px 0 20px;
+}
+
+/* individual event display */
+
+.event-display-container {
+  /* the container for the entire page, minus nav bar */
+  display: flex;
+  flex-flow: column nowrap;
+  height: 90%;
+  width: 100%;
+}
+
+.event-left-details {
+  /* left (now top) side, with image, description, and tags */
+  flex-grow: 1;
+  overflow-y: scroll;
+  display: flex;
+  flex-flow: column nowrap;
+}
+
+.event-display-image {
+  background-color: #93c47d;
+  flex: 0 0 auto;
+  height: 45%;
+  width: 100%;
+}
+
+.event-left-text {
+  /* all text elements below the image */
+  padding: 0 15px 30px 15px;
+}
+
+.event-display-header {
+  /* header info with title and attendee count */
+  display: flex;    
+  flex-flow: column nowrap;
+  margin: 30px 0 15px 0;
+}
+
+.event-display-title {
+  font-size: 25px;
+  font-weight: bold;
+}
+
+.event-display-description {
+  margin-bottom: 30px;
+}
+
+.event-right-details {
+  /* right (now bottom) side with date, time, location */
+  align-items: center;
+  background-color: #eee;
+  display: flex;
+  flex-flow: row nowrap;
+  flex: 1 1 auto;
+  font-size: 18px;
+  /* height: 100%; */
+  justify-content: center;
+  margin: 0;
+  width: 100%;
+}
+
+.event-time-location {
+  margin: 15px 15px 50px 15px;
+}
+
+.event-display-options {
+  display: flex;
+  flex-flow: column nowrap;
+  height: 100%;
+  justify-content: space-between;
+}
+
+.save-event, .go-back {
+  align-items: center;
+  cursor: pointer;
+  display: flex;
+  height: 30%;
+  justify-content: center;
+  margin: 15px;
+  width: 200px;
+  
+}
+
+.save-event {
+  background-color: #ffd966;
+}
+
+.go-back {
+  background-color: white;
+}
+
+
+
+.attendee-count {
+  font-weight: bold;
+}
+
+
+/* tags and tag colors */
+
+.tag {
+  color: white;
+  font-weight: bold;
+  border-radius: 5px;
+  margin: 2px;
+  padding: 5px 10px 5px 10px;
+}
+
+.tag.invert {
+  border: 2px;
+  border-style: solid;
+  border-radius: 5px;
+  padding: 5px 10px 5px 10px;
+  margin: 5px;
+}
+
+.blm {
+  background-color: black;
+}
+
+.environment {
+  background-color: #93c47d;
+}
+
+.volunteer {
+  background-color: #ffb742;
+}
+
+.education {
+  background-color: #6e9eeb;
+}
+
+.rainbow {
+  background-color: #fdfdfd;
+  color: black;
+}
+
+.blm-text {
+  color: black;
+}
+
+.environment-text {
+  color: #93c47d;
+}
+
+.volunteer-text {
+  color: #ffb742;
+}
+
+.education-text {
+  color: #6e9eeb;
+}
+
+.blm.invert {
+  background-color: white;
+  border-color: black;
+  color: black;
+}
+
+.environment.invert {
+  background-color: white;
+  color: #93c47d;
+}
+
+.volunteer.invert {
+  background-color: white;
+  color: #ffb742;
+}
+
+.education.invert {
+  background-color: white;
+  color: #6e9eeb;
+}
+
+.rainbow.invert {
+  color: black;
+}
