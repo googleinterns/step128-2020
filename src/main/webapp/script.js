@@ -12,6 +12,64 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+function generateNavBar() {
+  const headerLeft = document.createElement('div');
+  headerLeft.className = 'header-left';
+
+  const logoLink = document.createElement('a');
+  logoLink.href = '/index.html';
+  const logo = document.createElement('img');
+  logo.src = 'images/uniteLogo.svg';
+  logo.alt = 'Unite by STEP logo.';
+  headerLeft.appendChild(logoLink);
+  logoLink.appendChild(logo);
+
+  const homeLink = document.createElement('a');
+  homeLink.className = 'nav-item';
+  homeLink.href = '/index.html';
+  homeLink.innerText = 'Home';
+  headerLeft.appendChild(homeLink);
+
+  const createLink = document.createElement('a');
+  createLink.className = 'nav-item';
+  createLink.href = '/create-event.html';
+  createLink.innerText = 'Create';
+  headerLeft.appendChild(createLink);
+
+  const findLink = document.createElement('a');
+  findLink.className = 'nav-item';
+  findLink.href = '/search.html';
+  findLink.innerText = 'Find';
+  headerLeft.appendChild(findLink);
+
+  const headerRight = document.createElement('div');
+  headerRight.className = 'header-right';
+
+  const myLink = document.createElement('a');
+  myLink.className = 'nav-item';
+  myLink.href = '/my-events.html';
+  myLink.innerText = 'My Events';
+  headerRight.appendChild(myLink);
+
+  const header = document.getElementsByClassName('header')[0];
+  header.textContent = '';
+  header.appendChild(headerLeft);
+  header.appendChild(headerRight);
+
+    // creates this structure:
+    //   <div class="header-left">
+    //     <a href="/index.html">        
+    //       <img src="images/uniteLogo.svg" alt="Unite by STEP logo.">
+    //     </a>
+    //     <a class="nav-item" href="/index.html">Home</a>
+    //     <a class="nav-item" href="/create-event.html">Create</a>
+    //     <a class="nav-item" href="/search.html">Find</a>
+    //   </div>
+    //   <div class="header-right">
+    //     <a class="nav-item" href="/my-events.html">My Events</a>
+    //   </div>
+}
+
 var tagsAll = ['environment', 'blm', 'volunteer', 'education', 'LGBTQ+'];
 var tagsSearch = [];
 var tagsBox = [...tagsAll];
@@ -202,13 +260,14 @@ const dummyText = "Suggested for you"; // TODO: come up with variety
  */
 async function getEvents(url, index, option) {
   const eventListElements = document.getElementsByClassName('event-list-container');
+  url = '/display-event.html'; // use this for now
   if (index === null || index >= eventListElements.length) {
     index = 0;
   }
   var eventListElement = eventListElements[index];
   eventListElement.innerHTML = '';
   events.forEach(function(event) {
-    const eventItemElement = document.createElement('div');
+    const eventItemElement = document.createElement('a');
     eventItemElement.className = 'event-item';
     eventItemElement.setAttribute('onclick', 'openEvent(\"' 
         + event.url + '\")');
