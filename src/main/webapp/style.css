@@ -80,6 +80,16 @@ a:link, a:visited {
   text-decoration: none;
 }
 
+footer {
+  background-color: #ffd966;
+  color: black;
+  height: 100px;
+  margin: 0px;
+  padding: 20px;
+  text-align: center;
+  /*width: 100%;*/
+}
+
 /* Home Page */
 .hero-image {
   background-color: #ffd966;
