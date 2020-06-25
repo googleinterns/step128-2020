@@ -122,14 +122,14 @@ a:link, a:visited {
 
 .event-left-text {
   /* all text elements below the image */
-  padding: 0 15px 30px 15px;
+  margin: 0 2% 5% 2%;
 }
 
 .event-display-header {
   /* header info with title and attendee count */
   display: flex;    
   flex-flow: column nowrap;
-  margin: 30px 0 15px 0;
+  margin-top: 5%;
 }
 
 .event-display-title {
@@ -138,7 +138,7 @@ a:link, a:visited {
 }
 
 .event-display-description {
-  margin-bottom: 30px;
+  margin-bottom: 5%;
 }
 
 .expand-details {
@@ -168,12 +168,13 @@ a:link, a:visited {
   font-size: 3vw;
   height: 25%;
   justify-content: space-around;
+  overflow: hidden;
   margin: 0;
   width: 100%;
 }
 
 .event-time-location {
-  margin: 15px 15px 50px 15px;
+  margin: 3% 5%;
 }
 
 .event-display-options {
@@ -181,6 +182,7 @@ a:link, a:visited {
   flex-flow: column nowrap;
   height: 100%;
   justify-content: space-around;
+  width: 40%;
 }
 
 .save-event, .go-back {
@@ -189,9 +191,7 @@ a:link, a:visited {
   display: flex;
   height: 30%;
   justify-content: center;
-  margin: 15px;
-  width: 200px;
-  
+  width: 80%;
 }
 
 .save-event {
@@ -201,8 +201,6 @@ a:link, a:visited {
 .go-back {
   background-color: white;
 }
-
-
 
 .attendee-count {
   font-weight: bold;
@@ -214,17 +212,17 @@ a:link, a:visited {
 .tag {
   color: white;
   font-weight: bold;
-  border-radius: 5px;
-  margin: 2px;
-  padding: 5px 10px 5px 10px;
+  border-radius: 1vw;
+  margin: .5vw;
+  padding: 1vw 2vw;
 }
 
 .tag.invert {
-  border: 2px;
+  border: .5vw;
   border-style: solid;
-  border-radius: 5px;
-  padding: 5px 10px 5px 10px;
-  margin: 5px;
+  border-radius: 1vw;
+  margin: .5vw;
+  padding: 1vw 2vw;
 }
 
 .blm {
