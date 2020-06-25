@@ -50,8 +50,6 @@ body {
 }
 
 .header-left {
-
-    border: 1px black solid;
   display: flex;
   flex: 1 1 auto;
   flex-flow: row nowrap;
@@ -72,9 +70,6 @@ body {
 }
 
 .header-right {
-        border: 1px blue solid;
-
-  
   display: flex;
   flex-flow: row nowrap;
   align-items: center;
