@@ -50,27 +50,36 @@ body {
 }
 
 .header-left {
+
+    border: 1px black solid;
   display: flex;
+  flex: 1 1 auto;
   flex-flow: row nowrap;
   align-items: center;
   justify-content: space-between;
-  width: 60%;
+  width: 80%;
   max-width: 700px;
   height: 100px;
 }
 
+.header-left a {
+  height: 100%;
+}
+
 .header-left img {
-  height: 150px;
+  height: 100%;
   flex: 1 1 auto;
 }
 
 .header-right {
-  align-items: center;
+        border: 1px blue solid;
+
+  
   display: flex;
   flex-flow: row nowrap;
-  justify-content: space-around;
+  align-items: center;
+  justify-content: center;
   height: 100px;
-  margin-left: 10%;
   max-width: 300px;
   width: 25%;
 }
@@ -81,6 +90,8 @@ a:link, a:visited {
 }
 
 .nav-item {
+    border: 1px red solid;
+
   align-items: center;
   display: flex;
   height: 100%;
