@@ -116,7 +116,7 @@ a:link, a:visited {
 .event-display-image {
   background-color: #93c47d;
   flex: 0 0 auto;
-  height: 45%;
+  height: 55vw;
   width: 100%;
 }
 
