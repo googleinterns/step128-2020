@@ -430,6 +430,10 @@ input[type=text], textarea {
   margin-bottom: 30px;
 }
 
+.expand-details {
+  display: none;
+}
+
 .event-right-details {
   /* right side with date, time, location */
   align-items: center;
