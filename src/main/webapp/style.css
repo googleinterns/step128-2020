@@ -121,6 +121,36 @@ footer {
   padding: 30px;
 }
 
+.survey-link a {
+  color: #6e9eeb;
+}
+
+.page-header {
+  display: flex;
+  margin: 40px 10px 50px 10px;
+}
+
+.page-header-left {
+  flex: 50%;
+  padding: 10px;
+}
+
+.page-header-right {
+  flex: 50%;
+  padding: 10px;
+}
+
+@media screen and (max-width: 900px) {
+  .page-header {
+    flex-direction: column;
+  }
+
+  .page-header-left,
+  .page-header-right {
+    width: auto;
+  }
+}
+
 /* search page */
 h1 {
   margin: 0px;
@@ -276,12 +306,10 @@ input[type=text], textarea {
 
 /* event lists */
 .event-section {
-  font-weight: bold;
   margin: 40px 20px 0 20px;
 }
 
 .event-section-header {
-  font-weight: bold;
   margin: 0 0 20px 0;
 }
 
@@ -439,6 +467,10 @@ input[type=text], textarea {
   margin-bottom: 30px;
 }
 
+.expand-details {
+  display: none;
+}
+
 .event-right-details {
   /* right side with date, time, location */
   align-items: center;
@@ -451,8 +483,8 @@ input[type=text], textarea {
   justify-content: center;
   margin: 0;
   max-width: 400px;
-  min-width: 275px;
-  width: 30%;
+  min-width: 300px;
+  width: 40%;
 }
 
 .event-time-location {
@@ -467,7 +499,6 @@ input[type=text], textarea {
   justify-content: center;
   margin: 15px;
   width: 200px;
-  
 }
 
 .save-event {

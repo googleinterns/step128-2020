@@ -6,20 +6,8 @@
     <link rel="stylesheet" href="style-mobile.css">
     <script src="script.js"></script>
   </head>
-  <body onload="updateSearchBar(); updateTagBox(); getEvents('test', 0, 3); getSearchDistanceSettings()">
-    <div class="header">
-      <div class="header-left">
-        <a href="/index.html">        
-          <img src="images/uniteLogo.svg" alt="Unite by STEP logo.">
-        </a>
-        <a class="nav-item" href="/index.html">Home</a>
-        <a class="nav-item" href="/create-event.html">Create</a>
-        <a class="nav-item" href="/search.html">Find</a>
-      </div>
-      <div class="header-right">
-        <a class="nav-item" href="/my-events.html">My Events</a>
-      </div>
-    </div>
+  <body onload="generateNavBar(); updateSearchBar(); updateTagBox(); getEvents('test', 0, 3); getSearchDistanceSettings()">
+    <div class="header"></div>
     <div class="search-page-content">
       <div class="search-tools">
         <!-- use the CSS for the other similar pieces of text that someone else makes -->
@@ -27,24 +15,27 @@
         <div class="search-bar-container">
           <div class="search-bar"></div>
           <button onclick="search()">Go</button>
-          </div>
+        </div>
         <p>Add one or more tags to search for</p>
         <div class="tag-box"></div>
       </div>
     </div>
-    <div class="location-settings">
-    </div>
-    <br>
-    <div class="event-section search-results-container">
-        <div class="event-section-header">Search Results</div>
-        <div class="event-list-container">
+    <div class="event-section">
+      <div class="page-header">
+        <div class="page-header-left">
+          <h2>Search Results</h2>
         </div>
+        <div class="page-header-right">
+          <div class="location-settings"></div><br>
+        </div>
+      </div>
+      <div class="event-list-container"></div>
     </div>
     <footer>
       <p>Made as part of Google's STEP Internship Program.</p>
       <h4>Copyright &copy; 2020 All Rights Reserved by 
          <a href="https://www.google.com/">Google</a>.
-            </h4>
+      </h4>
     </footer>
   </body>
 </html>

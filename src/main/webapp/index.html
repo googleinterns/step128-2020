@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="style.css">
     <script src="script.js"></script>
   </head>
-  <body onload="generateNavBar(); getEvents('test', 1, 0)">
+  <body onload="generateNavBar(); getEvents('test', 1, 0); getSearchDistanceSettings()">
     <div class="header"></div>
     <div class="hero-image">
       <div class="hero-text">
@@ -14,14 +14,28 @@
       </div>
     </div>
     <div class="home-page-content">
-      <a href="survey.html">survey</a>
-      <div class="event-list-container"></div>
+      <div class="page-header">
+        <div class="page-header-left">
+          <h2>Events Recommended For You</h2>
+          <div class="survey-link">
+            <a href="survey.html">
+                Click here to take our survey for more relevant recommendations.
+            </a>
+          </div>
+        </div>
+        <div class="page-header-right">
+          <div class="location-settings"></div><br>
+        </div>
+      </div>
+      <div class="event-section">
+        <div class="event-list-container"></div>
+      </div>
     </div>
     <footer>
       <p>Made as part of Google's STEP Internship Program.</p>
       <h4>Copyright &copy; 2020 All Rights Reserved by 
          <a href="https://www.google.com/">Google</a>.
-            </h4>
+      </h4>
     </footer>
   </body>
 </html>
