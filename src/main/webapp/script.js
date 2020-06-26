@@ -258,8 +258,7 @@ function verifyTags() {
 }
 
 /**
- * Verifies that at least one tag is selected. If not, cancel form submit
- * and display error.
+ * Creates a hidden input for the array of tags.
  */
 function createHiddenInput(jsonArray) {
   var tagsArray = document.createElement('input');
