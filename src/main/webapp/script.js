@@ -125,6 +125,10 @@ function addTagSearchToBox(tag) {
   updateTagBox();
 }
 
+/**
+ * Inverts the apperance of a selected tag and adds it to the list
+ * of selected tags
+ */
 function toggleTagEvent(tag) {
   var boxIndex = tagsBox.indexOf(tag);
   if (boxIndex > -1) {
@@ -140,6 +144,10 @@ function toggleTagEvent(tag) {
   updateEventTagBox();
 }
 
+/**
+ * Verifies that at least one tag is selected. If not, cancel form submit
+ * and display error.
+ */
 function verifyTags() {
   if (tagsSelected.length > 0) {
     tagsSelected.splice(0, tagsSelected.length);
