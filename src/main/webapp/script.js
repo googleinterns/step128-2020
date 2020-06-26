@@ -70,6 +70,21 @@ function generateNavBar() {
     //   </div>
 }
 
+/* expands and collapses details section on individual event display */
+function toggleDetails() {
+  const detailsBox = document.getElementsByClassName('event-right-details')[0];
+  const arrowIcon = document.getElementById('expand-arrow');
+  if(detailsBox.classList.contains('expand')) {
+    detailsBox.classList.remove('expand');
+    arrowIcon.src = 'images/arrow-up.svg';
+    arrowIcon.alt = 'Expand';
+  } else {
+    detailsBox.classList.add('expand');
+    arrowIcon.src = 'images/arrow-down.svg';
+    arrowIcon.alt = 'Collapse';
+  }
+}
+
 var tagsAll = ['environment', 'blm', 'volunteer', 'education', 'LGBTQ+'];
 var tagsSearch = [];
 var tagsBox = [...tagsAll];
