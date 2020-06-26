@@ -240,10 +240,17 @@ function toggleTagEvent(tag) {
  */
 function verifyTags() {
   if (tagsSelected.length > 0) {
-    tagsSelected.splice(0, tagsSelected.length);
+    var json_arr = JSON.stringify(tagsSelected);
+    var hiddenTags = document.createElement('input');
+    hiddenTags.setAttribute('type', 'hidden');
+    hiddenTags.setAttribute('name', 'all-tags');
+    hiddenTags.setAttribute('id', 'all-tags');
+    hiddenTags.setAttribute('value', json_arr);
+    document.getElementById("eventform").appendChild(hiddenTags);
     document.eventform.submit();
+    tagsSelected.splice(0, tagsSelected.length);
   } else {
-    tagBoxError = document.getElementById("tags-label");
+    var tagBoxError = document.getElementById("tags-label");
     tagBoxError.style.borderStyle = "solid"
     tagBoxError.style.borderColor = "red";
     event.preventDefault();
