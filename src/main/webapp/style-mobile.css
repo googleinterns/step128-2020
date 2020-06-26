@@ -202,11 +202,16 @@ a:link, a:visited {
 }
 
 .event-display-options {
+  align-items: center;
   display: flex;
   flex-flow: column nowrap;
   height: 100%;
   justify-content: space-around;
   width: 40%;
+}
+
+.event-display-options br {
+  display: none;
 }
 
 .save-event, .go-back {
@@ -226,20 +231,41 @@ a:link, a:visited {
   background-color: white;
 }
 
-.event-display-options h3 {
+.share-wrapper{
+  /* used in mobile style only */
+  display: flex;
+  flex-flow: row nowrap;
+  height: 15%;
+  justify-content: space-between;
+  margin: 0;
+  text-align: left;
   width: 80%;
+}
+
+.share-wrapper h3 {
+  display: inline;
+  font-size: 3vw;
+  margin: 0 5%;
 }
 
 .share-container {
+  align-items: right;
   display: flex;
   flex-flow: row nowrap;
+  flex-grow: 1;
   justify-content: space-around;
-  width: 80%;
+  margin: 0;
+}
+
+.share-container a {
+  cursor: pointer;
+  height: 4vw;
+  width: 4.5vw;
 }
 
 .share-container img {
-  cursor: pointer;
-  height: 5vw;
+  height: 100%;
+  object-fit: contain;
 }
 .attendee-count {
   font-weight: bold;
