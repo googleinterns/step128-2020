@@ -12,6 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/* determines which stylesheet to use and generates nav bar*/
+function loadActions() {
+  const styleSheetElement = document.getElementById('style');
+  if (window.innerWidth >= window.innerHeight) {
+    styleSheetElement.href = '/style.css';
+  } else {
+    styleSheetElement.href = 'style-mobile.css';
+  }
+
+  generateNavBar();
+}
+
 function generateNavBar() {
   const headerLeft = document.createElement('div');
   headerLeft.className = 'header-left';
@@ -323,7 +335,7 @@ async function getEvents(url, index, option) {
     const eventItemDetailsElement = document.createElement('div');
     eventItemDetailsElement.className = 'event-item-details';
     // determine order of elements depending on mobile or non-mobile layout
-    if(onMobile) {
+    if (onMobile) {
       // image is part of event-header, inside event-item-info
       // event-item-title is part of event-header, outside of event-item-details      
       eventItemElement.appendChild(eventItemInfoElement);
