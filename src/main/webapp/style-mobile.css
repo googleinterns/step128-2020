@@ -40,6 +40,14 @@ html, body {
   padding: 0;
 }
 
+footer {
+  background-color: #ffd966;
+  color: black;
+  height: 5%;
+  margin: 0px;
+  text-align: center;
+}
+
 /* nav bar (MOSTLY UNCHANGED) */
 
 .header {
@@ -101,7 +109,7 @@ a:link, a:visited {
   display: flex;
   flex-flow: column nowrap;
   font-size: 3vw;
-  height: 90%;
+  height: 85%;
   width: 100%;
 }
 
@@ -207,8 +215,34 @@ a:link, a:visited {
   background-color: white;
 }
 
+.event-display-options h3 {
+  width: 80%;
+}
+
+.share-container {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-around;
+  width: 80%;
+}
+
+.share-container img {
+  cursor: pointer;
+  height: 5vw;
+}
 .attendee-count {
   font-weight: bold;
+}
+
+/* Footer */
+.footer {
+  color: #aaa;
+  margin-top: 200px;
+  text-align: center;
+}
+
+.footer a {
+  color: #aaa;
 }
 
 
