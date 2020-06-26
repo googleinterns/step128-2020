@@ -101,6 +101,7 @@ var tagsAll = ['environment', 'blm', 'volunteer', 'education', 'LGBTQ+'];
 var tagsSearch = [];
 var tagsBox = [...tagsAll];
 var tagsOnEvent = [];
+var tagsSelected = [];
 
 function addTagBoxToSearch(tag) {
   var boxIndex = tagsBox.indexOf(tag);
@@ -128,9 +129,27 @@ function toggleTagEvent(tag) {
   var boxIndex = tagsBox.indexOf(tag);
   if (boxIndex > -1) {
     tagsOnEvent[boxIndex] = !tagsOnEvent[boxIndex];
+
+    if (tagsSelected.includes(tag)) {
+      tagsSelected.splice(boxIndex)
+    } else {
+      tagsSelected.push(tag)
+    }
   }
 
   updateEventTagBox();
+}
+
+function verifyTags() {
+  if (tagsSelected.length > 0) {
+    tagsSelected.splice(0, tagsSelected.length);
+    document.eventform.submit();
+  } else {
+    tagBoxError = document.getElementById("tags-label");
+    tagBoxError.style.borderStyle = "solid"
+    tagBoxError.style.borderColor = "red";
+    event.preventDefault();
+  }
 }
 
 function updateSearchBar() {
