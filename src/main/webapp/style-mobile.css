@@ -157,6 +157,86 @@ a:link, a:visited {
   height: 8vh;
 }
 
+.form-container {
+  margin-left: 20px;
+  margin-right: 20px;
+  padding: 30px;
+}
+
+.form-container h1 {
+  font-size: 3em;
+}
+
+input[type=text], textarea {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 2em;
+  padding: 10px;
+  resize: vertical;
+  width: 95%;
+}
+
+input[type="date"] {
+  font-size: 2em;
+}
+
+input[type="time"] {
+  font-size: 2em;
+}
+
+.form-section {
+  display: flex;
+}
+
+.form-label {
+  flex: 10%;
+  font-size: 2.5em;
+  padding: 10px;
+  white-space: nowrap;
+}
+
+.form-input {
+  flex: 90%;
+  padding: 10px;
+}
+
+.form-container .tag-box {
+  font-size: 2em;
+  height: 25vh;
+  overflow: scroll;
+}
+
+@media screen and (max-width: 900px) {
+  .form-section {
+    flex-direction: column;
+  }
+
+  .form-label,
+  .form-input {
+    width: auto;
+  }
+}
+
+.form-buttons {
+  margin-top: 50px;
+  text-align: center;
+}
+
+.form-buttons img {
+  height: 50px;
+}
+
+.form-buttons a {
+  display: inline-block;
+  overflow: hidden;  
+}
+
+.divider {
+  display: inline-block;
+  height: auto;
+  margin: 25px;
+}
+
 /* individual event display */
 
 .event-display-container {
