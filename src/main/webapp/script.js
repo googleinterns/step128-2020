@@ -307,6 +307,7 @@ async function getEvents(url, index, option) {
 
     const eventItemHeaderElement = document.createElement('div');
     eventItemHeaderElement.className = 'event-item-header';
+    eventItemInfoElement.appendChild(eventItemHeaderElement);
 
     const eventItemTitleElement = document.createElement('div');
     eventItemTitleElement.className = 'event-item-title';
@@ -326,21 +327,10 @@ async function getEvents(url, index, option) {
 
     const eventItemDetailsElement = document.createElement('div');
     eventItemDetailsElement.className = 'event-item-details';
-    const eventItemDateElement = document.createElement('div');
-    eventItemDateElement.className = 'event-item-date';
-    eventItemDateElement.innerText = event.date;
-    const eventItemDistanceElement = document.createElement('div');
-    eventItemDistanceElement.className = 'event-item-distance';
-    if (option == 1 || option == 2) {
-      eventItemDistanceElement.innerText = event.time;
-    } else {
-      eventItemDistanceElement.innerText = event.distance;
-    }
-
-    // determine order of these elements depending on mobile or non-mobile layout
+    // determine order of elements depending on mobile or non-mobile layout
     if(onMobile) {
       // image is part of event-header, inside event-item-info
-      // event-item-title is part of event-header, outside of event-item-details
+      // event-item-title is part of event-header, outside of event-item-details      
       eventItemElement.appendChild(eventItemInfoElement);
       eventItemHeaderElement.appendChild(eventItemDetailsElement);
       eventItemHeaderElement.appendChild(eventImageElement);
@@ -353,7 +343,18 @@ async function getEvents(url, index, option) {
       eventItemHeaderElement.appendChild(eventItemTitleElement);
       eventItemHeaderElement.appendChild(eventItemDetailsElement);
     }
+
+    const eventItemDateElement = document.createElement('div');
+    eventItemDateElement.className = 'event-item-date';
+    eventItemDateElement.innerText = event.date;
     eventItemDetailsElement.appendChild(eventItemDateElement);
+    const eventItemDistanceElement = document.createElement('div');
+    eventItemDistanceElement.className = 'event-item-distance';
+    if (option == 1 || option == 2) {
+      eventItemDistanceElement.innerText = event.time;
+    } else {
+      eventItemDistanceElement.innerText = event.distance;
+    }
     eventItemDetailsElement.appendChild(eventItemDistanceElement);
 
     const eventItemDescElement = document.createElement('div');
