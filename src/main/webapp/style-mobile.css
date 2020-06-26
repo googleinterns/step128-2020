@@ -231,7 +231,16 @@ input {
   height: 6vh;
 }
 
+.edit-form-buttons img {
+  height: 5vh;
+}
+
 .form-buttons a {
+  display: inline-block;
+  overflow: hidden;  
+}
+
+.edit-form-buttons a {
   display: inline-block;
   overflow: hidden;  
 }
