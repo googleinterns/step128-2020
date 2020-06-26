@@ -415,8 +415,11 @@ async function getEvents(url, index, option) {
     });
   });
 
-  // structure of generated elements:
+  // generates this structure:
+  //   
   //   <div class="event-item">
+  //
+  // DESKTOP:
   //     <div class="event-image green-background"></div>
   //     <div class="event-item-info">
   //       <div class="event-item-header">
@@ -426,6 +429,18 @@ async function getEvents(url, index, option) {
   //             <div>5 miles away</div>
   //         </div>
   //       </div>
+  // MOBILE:
+  //     
+  //     <div class="event-item-info">
+  //       <div class="event-item-header">
+  //         <div class="event-item-details">
+  //         <div class="event-item-title">Beach clean up</div>
+  //             <div>Saturday, June 20, 2020</div>
+  //             <div>5 miles away</div>
+  //         </div>
+  //         <div class="event-image green-background"></div>
+  //       </div>
+  //
   //       <div class="event-item-description">
   //         Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
   //         Nam efficitur enim quis est mollis blandit. Integer vitae augue risus. 
