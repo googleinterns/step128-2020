@@ -189,6 +189,11 @@ a:link, a:visited {
   justify-content: space-between;
 }
 
+.event-item-address {
+  font-weight: normal;
+  font-size: 3.3vw;
+}
+
 .event-item-details {
   /* top-left part of item header with date and location */
   display: flex;
