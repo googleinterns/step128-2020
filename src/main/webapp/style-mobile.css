@@ -102,6 +102,56 @@ a:link, a:visited {
   padding: 0 20px 0 20px;
 }
 
+/* Home Page */
+.hero-image {
+  background-color: #ffd966;
+  height: 90vh;
+  min-width: 100%;
+}
+
+.hero-text {
+  font-size: 2.5em;
+  left: 50%;
+  position: absolute;
+  text-align: center;
+  top: 50vh;
+  transform: translate(-50%, -50%);
+}
+
+.home-page-content {
+  padding: 30px;
+}
+
+.survey-link a {
+  color: #6e9eeb;
+}
+
+.page-header {
+  display: flex;
+  margin: 40px 10px 50px 10px;
+}
+
+.page-header-left {
+  flex: 50%;
+  padding: 10px;
+}
+
+.page-header-right {
+  flex: 50%;
+  padding: 10px;
+}
+
+@media screen and (max-width: 900px) {
+  .page-header {
+    flex-direction: column;
+  }
+
+  .page-header-left,
+  .page-header-right {
+    width: auto;
+  }
+}
+
 /* individual event display */
 
 .event-display-container {
