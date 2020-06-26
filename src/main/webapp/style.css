@@ -289,13 +289,8 @@ input[type=text], textarea {
   text-align: center;
 }
 
-.form-buttons img {
+.form-buttons img, input {
   height: 50px;
-}
-
-.form-buttons a {
-  display: inline-block;
-  overflow: hidden;  
 }
 
 .divider {

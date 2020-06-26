@@ -247,10 +247,6 @@ function search() {
   //TODO fetch call to server with search parameters
 }
 
-function submitEvent() {
-  document.eventform.submit() ;
-}
-
 /* Two test examples to use with getEvents() */
 var test = {title:'Beach clean up', 
             description:'Lorem ipsum dolor sit amet, consectetur adipiscing elit. ' +
