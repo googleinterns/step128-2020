@@ -125,41 +125,6 @@ function addTagSearchToBox(tag) {
   updateTagBox();
 }
 
-/**
- * Inverts the apperance of a selected tag and adds it to the list
- * of selected tags
- */
-function toggleTagEvent(tag) {
-  var boxIndex = tagsBox.indexOf(tag);
-  if (boxIndex > -1) {
-    tagsOnEvent[boxIndex] = !tagsOnEvent[boxIndex];
-
-    if (tagsSelected.includes(tag)) {
-      tagsSelected.splice(boxIndex)
-    } else {
-      tagsSelected.push(tag)
-    }
-  }
-
-  updateEventTagBox();
-}
-
-/**
- * Verifies that at least one tag is selected. If not, cancel form submit
- * and display error.
- */
-function verifyTags() {
-  if (tagsSelected.length > 0) {
-    tagsSelected.splice(0, tagsSelected.length);
-    document.eventform.submit();
-  } else {
-    tagBoxError = document.getElementById("tags-label");
-    tagBoxError.style.borderStyle = "solid"
-    tagBoxError.style.borderColor = "red";
-    event.preventDefault();
-  }
-}
-
 function updateSearchBar() {
   const elements = document.getElementsByClassName('search-bar');
   const searchBarElement = elements[0];
@@ -194,32 +159,6 @@ function updateTagBox() {
 
     tagBoxElement.appendChild(spanElement);
   });
-
-  generateRainbowTags();
-}
-
-function updateEventTagBox() {
-  const elements = document.getElementsByClassName('tag-box');
-  const tagBoxElement = elements[0];
-  tagBoxElement.innerHTML = '';
-  for (var i = 0; i < tagsBox.length; i++) {
-    var tag = tagsBox[i];
-    const spanElement = document.createElement('span');
-    spanElement.setAttribute('onclick', 'toggleTagEvent(\"' + tag + 
-        '\")');
-    // class name is now (for example) 'tag environment'
-    if (tag == 'LGBTQ+') spanElement.className = 'tag rainbow';
-    else spanElement.className = 'tag ' + tag;
-
-    // if tag is on the event, invert it
-    if (tagsOnEvent[i]) {
-      spanElement.className = spanElement.className + ' invert';
-      spanElement.innerText = '✓' + tag;
-    }
-    else spanElement.innerText = tag;
-
-    tagBoxElement.appendChild(spanElement);
-  }
 
   generateRainbowTags();
 }
@@ -272,6 +211,70 @@ function search() {
 
   window.location.href = url;
   //TODO fetch call to server with search parameters
+}
+
+/**
+ * Inverts the apperance of a selected tag and adds it to the list
+ * of selected tags
+ */
+function toggleTagEvent(tag) {
+  var boxIndex = tagsBox.indexOf(tag);
+  if (boxIndex > -1) {
+    tagsOnEvent[boxIndex] = !tagsOnEvent[boxIndex];
+
+    if (tagsSelected.includes(tag)) {
+      tagsSelected.splice(boxIndex)
+    } else {
+      tagsSelected.push(tag)
+    }
+  }
+
+  updateEventTagBox();
+}
+
+/**
+ * Verifies that at least one tag is selected. If not, cancel form submit
+ * and display error.
+ */
+function verifyTags() {
+  if (tagsSelected.length > 0) {
+    tagsSelected.splice(0, tagsSelected.length);
+    document.eventform.submit();
+  } else {
+    tagBoxError = document.getElementById("tags-label");
+    tagBoxError.style.borderStyle = "solid"
+    tagBoxError.style.borderColor = "red";
+    event.preventDefault();
+  }
+}
+
+/**
+ * Updates the tag box on the event form submit page.
+ */
+function updateEventTagBox() {
+  const elements = document.getElementsByClassName('tag-box');
+  const tagBoxElement = elements[0];
+  tagBoxElement.innerHTML = '';
+  for (var i = 0; i < tagsBox.length; i++) {
+    var tag = tagsBox[i];
+    const spanElement = document.createElement('span');
+    spanElement.setAttribute('onclick', 'toggleTagEvent(\"' + tag + 
+        '\")');
+    // class name is now (for example) 'tag environment'
+    if (tag == 'LGBTQ+') spanElement.className = 'tag rainbow';
+    else spanElement.className = 'tag ' + tag;
+
+    // if tag is on the event, invert it
+    if (tagsOnEvent[i]) {
+      spanElement.className = spanElement.className + ' invert';
+      spanElement.innerText = '✓' + tag;
+    }
+    else spanElement.innerText = tag;
+
+    tagBoxElement.appendChild(spanElement);
+  }
+
+  generateRainbowTags();
 }
 
 /* Two test examples to use with getEvents() */
