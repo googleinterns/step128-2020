@@ -173,15 +173,16 @@ input[type=text], textarea {
   font-size: 2em;
   padding: 10px;
   resize: vertical;
-  width: 95%;
+  width: 100%;
 }
 
-input[type="date"] {
+input[type=file] {
   font-size: 2em;
 }
 
-input[type="time"] {
-  font-size: 2em;
+/* for the other misc inputs (date, time, etc.) */
+input {
+  font-size: 3em;
 }
 
 .form-section {
@@ -202,8 +203,12 @@ input[type="time"] {
 
 .form-container .tag-box {
   font-size: 2em;
-  height: 25vh;
+  min-height: 2.5em;
   overflow: scroll;
+}
+
+.form-container .tag {
+  display: inline-block;
 }
 
 @media screen and (max-width: 900px) {
@@ -223,7 +228,7 @@ input[type="time"] {
 }
 
 .form-buttons img {
-  height: 50px;
+  height: 6vh;
 }
 
 .form-buttons a {
