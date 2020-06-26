@@ -323,7 +323,7 @@ async function getEvents(url, index, option) {
     const eventItemDetailsElement = document.createElement('div');
     eventItemDetailsElement.className = 'event-item-details';
     // determine order of elements depending on mobile or non-mobile layout
-    if(onMobile) {
+    if (onMobile) {
       // image is part of event-header, inside event-item-info
       // event-item-title is part of event-header, outside of event-item-details      
       eventItemElement.appendChild(eventItemInfoElement);
