@@ -47,6 +47,8 @@ public class EventServlet extends HttpServlet {
     String startTime = getParameter(request, "start-time", "");
     String endTime = getParameter(request, "end-time", "");
     String coverPhoto = getParameter(request, "cover-photo", "");
+    String tags = getParameter(request, "all-tags", "");
+
 
     Entity eventEntity = new Entity("Event");
     eventEntity.setProperty("eventName", eventName);
@@ -58,6 +60,8 @@ public class EventServlet extends HttpServlet {
     eventEntity.setProperty("startTime", startTime);
     eventEntity.setProperty("endTime", endTime);
     eventEntity.setProperty("coverPhoto", coverPhoto);
+    eventEntity.setProperty("tags", tags);
+
 
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     datastore.put(eventEntity);
