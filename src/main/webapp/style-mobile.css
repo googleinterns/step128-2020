@@ -152,6 +152,11 @@ a:link, a:visited {
   }
 }
 
+/* Create Page */
+.start-bttn img {
+  height: 8vh;
+}
+
 /* individual event display */
 
 .event-display-container {
