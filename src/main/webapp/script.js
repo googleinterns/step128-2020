@@ -388,6 +388,33 @@ async function getEvents(url, index, option) {
       tagsContainerElement.appendChild(tagElement);
     });
   });
+
+  // structure of generated elements:
+  //   <div class="event-item">
+  //     <div class="event-image green-background"></div>
+  //     <div class="event-item-info">
+  //       <div class="event-item-header">
+  //         <div class="event-item-title">Beach clean up</div>
+  //         <div class="event-item-details">
+  //             <div>Saturday, June 20, 2020</div>
+  //             <div>5 miles away</div>
+  //         </div>
+  //       </div>
+  //       <div class="event-item-description">
+  //         Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
+  //         Nam efficitur enim quis est mollis blandit. Integer vitae augue risus. 
+  //         Nunc sit amet semper urna, ac mollis dui. Aenean vitae imperdiet nisi, 
+  //         sit amet mattis libero. Sed tincidunt arcu in justo...</div>
+  //       <div class="event-item-footer">
+  //         <div class="attendee-count-container">     *this item depends on value of 'option'
+  //             <span class="attendee-count green">12</span> already attending
+  //         </div>
+  //         <div class="tags-container">
+  //             <span class="tag green-background">environment</span>
+  //         </div>
+  //       </div>
+  //     </div>
+  //   </div>
 }
 
 function openEvent(url) {
