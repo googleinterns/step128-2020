@@ -40,6 +40,10 @@ html, body {
   padding: 0;
 }
 
+.page-content{
+  min-height: 84%;
+}
+
 footer {
   background-color: #ffd966;
   color: black;
@@ -111,6 +115,126 @@ a:link, a:visited {
   justify-content: center;
   padding: 0 20px 0 20px;
 }
+
+/* event lists */
+.event-section {
+  font-weight: bold;
+  margin: 8vw 3vw 0 3vw;
+}
+
+.event-section-header {
+  font-size: 6vw;
+  font-weight: bold;
+  margin: 0 0 5vw 0;
+  text-align: center;
+}
+
+.event-list-container {
+  align-items: center;
+  display: flex;
+  flex-flow: column nowrap;
+}
+
+.no-events {
+  align-items: center;
+  background-color: #6e9eeb;
+  color: white;
+  display: flex;
+  font-size: 3vw;
+  justify-content: center;
+  min-height: 7vw;
+  width: 100%;
+}
+
+.no-events-text {
+  margin: 5vw;
+}
+
+.event-item {
+  align-items: center;
+  cursor: pointer;
+  height: 60vw;
+  display: flex;
+  flex-flow: column nowrap;
+  font-size: 3.3vw;
+  font-weight: normal;
+  justify-content: space-around;
+  margin-bottom: 15vw;
+  width: 90%;
+}
+
+.event-image {
+  /* top-right-hand part of an event list item, solid color or container for image */
+  flex: 0 0 auto;
+  height: 30vw;
+  margin: 2vw;
+  object-fit: contain;
+  width: 50%;
+}
+
+.event-item-info {
+  /* all contents of event item on mobile */
+  display: flex;
+  flex: 1 1 auto;
+  flex-flow: column nowrap;
+  height: 100%;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.event-item-header {
+  /* top part of item info with title, date, location, image */
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-between;
+}
+
+.event-item-details {
+  /* top-left part of item header with date and location */
+  display: flex;
+  flex-flow: column nowrap;
+  font-size: 3vw;
+  height: 100%;
+  justify-content: center;
+  text-align: left;
+}
+
+.event-item-title {
+  font-weight: bold;
+  font-size: 4vw;
+  margin: 3vw 0;
+}
+
+.event-item-footer {
+  /* bottom part of item info with attendee count and tags */
+  align-items: center;
+  display: flex;
+  flex-flow: row nowrap;
+  font-size: 3vw;
+  justify-content: space-between;
+  min-height: 15vw;
+}
+
+.edit-unsave-event {
+  color: #6e9eeb;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.edit-unsave-event a:link, .edit-unsave-event a:visited {
+  color: #6e9eeb;
+}
+
+.attendee-count {
+  font-weight: bold;
+}
+
+.event-item .tags-container {
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: space-around;
+}
+
 
 /* individual event display */
 
@@ -266,9 +390,6 @@ a:link, a:visited {
 .share-container img {
   height: 100%;
   object-fit: contain;
-}
-.attendee-count {
-  font-weight: bold;
 }
 
 /* Footer */
