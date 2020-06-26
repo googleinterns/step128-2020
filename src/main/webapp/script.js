@@ -12,6 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/* pick the stylesheet and nav bar */
+function loadActions() {
+
+}
+
 function generateNavBar() {
   const headerLeft = document.createElement('div');
   headerLeft.className = 'header-left';
@@ -279,6 +284,12 @@ async function getEvents(url, index, option) {
   if (index === null || index >= eventListElements.length) {
     index = 0;
   }
+
+  // check which stylesheet we are currently using
+  const styleLink = document.getElementById('style').href;
+  const styleName = styleLink.substring(styleLink.lastIndexOf('/') + 1);
+  var onMobile = (styleName.indexOf('mobile') >= 0);
+
   var eventListElement = eventListElements[index];
   eventListElement.innerHTML = '';
   events.forEach(function(event) {
@@ -290,18 +301,17 @@ async function getEvents(url, index, option) {
 
     const eventImageElement = document.createElement('div');
     eventImageElement.className = 'event-image ' + event.tags[0];
-    eventItemElement.appendChild(eventImageElement);
 
     const eventItemInfoElement = document.createElement('div');
     eventItemInfoElement.className = 'event-item-info';
-    eventItemElement.appendChild(eventItemInfoElement);
 
     const eventItemHeaderElement = document.createElement('div');
     eventItemHeaderElement.className = 'event-item-header';
-    eventItemInfoElement.appendChild(eventItemHeaderElement);
 
     const eventItemTitleElement = document.createElement('div');
     eventItemTitleElement.className = 'event-item-title';
+
+    // show event address if on the my-events page
     if (option == 1 || option == 2) {
       const eventItemTitleName = document.createElement('div');
       eventItemTitleName.innerText = event.title;
@@ -313,15 +323,12 @@ async function getEvents(url, index, option) {
     } else {
       eventItemTitleElement.innerText = event.title;
     }
-    eventItemHeaderElement.appendChild(eventItemTitleElement);
 
     const eventItemDetailsElement = document.createElement('div');
     eventItemDetailsElement.className = 'event-item-details';
-    eventItemHeaderElement.appendChild(eventItemDetailsElement);
     const eventItemDateElement = document.createElement('div');
     eventItemDateElement.className = 'event-item-date';
     eventItemDateElement.innerText = event.date;
-    eventItemDetailsElement.appendChild(eventItemDateElement);
     const eventItemDistanceElement = document.createElement('div');
     eventItemDistanceElement.className = 'event-item-distance';
     if (option == 1 || option == 2) {
@@ -329,6 +336,24 @@ async function getEvents(url, index, option) {
     } else {
       eventItemDistanceElement.innerText = event.distance;
     }
+
+    // determine order of these elements depending on mobile or non-mobile layout
+    if(onMobile) {
+      // image is part of event-header, inside event-item-info
+      // event-item-title is part of event-header, outside of event-item-details
+      eventItemElement.appendChild(eventItemInfoElement);
+      eventItemHeaderElement.appendChild(eventItemDetailsElement);
+      eventItemHeaderElement.appendChild(eventImageElement);
+      eventItemDetailsElement.appendChild(eventItemTitleElement);
+    } else {
+      // image is outisde of event-item-info
+      // event-item-title is part of event-item-details
+      eventItemElement.appendChild(eventImageElement);
+      eventItemElement.appendChild(eventItemInfoElement);
+      eventItemHeaderElement.appendChild(eventItemTitleElement);
+      eventItemHeaderElement.appendChild(eventItemDetailsElement);
+    }
+    eventItemDetailsElement.appendChild(eventItemDateElement);
     eventItemDetailsElement.appendChild(eventItemDistanceElement);
 
     const eventItemDescElement = document.createElement('div');
