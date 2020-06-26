@@ -240,21 +240,35 @@ function toggleTagEvent(tag) {
  */
 function verifyTags() {
   if (tagsSelected.length > 0) {
-    var json_arr = JSON.stringify(tagsSelected);
-    var hiddenTags = document.createElement('input');
-    hiddenTags.setAttribute('type', 'hidden');
-    hiddenTags.setAttribute('name', 'all-tags');
-    hiddenTags.setAttribute('id', 'all-tags');
-    hiddenTags.setAttribute('value', json_arr);
-    document.getElementById("eventform").appendChild(hiddenTags);
+    // Convert tags selected array into string
+    var jsonArray = JSON.stringify(tagsSelected);
+    var tags = createHiddenInput(jsonArray);
+
+    // Add string of tags to form for submission
+    document.getElementById("eventform").appendChild(tags);
     document.eventform.submit();
     tagsSelected.splice(0, tagsSelected.length);
   } else {
+    // Display error and prevent from sumbission
     var tagBoxError = document.getElementById("tags-label");
     tagBoxError.style.borderStyle = "solid"
     tagBoxError.style.borderColor = "red";
     event.preventDefault();
   }
+}
+
+/**
+ * Verifies that at least one tag is selected. If not, cancel form submit
+ * and display error.
+ */
+function createHiddenInput(jsonArray) {
+  var tagsArray = document.createElement('input');
+  tagsArray.setAttribute('type', 'hidden');
+  tagsArray.setAttribute('name', 'all-tags');
+  tagsArray.setAttribute('id', 'all-tags');
+  tagsArray.setAttribute('value', jsonArray);
+
+  return tagsArray;
 }
 
 /**
