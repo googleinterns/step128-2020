@@ -101,7 +101,6 @@ var tagsAll = ['environment', 'blm', 'volunteer', 'education', 'LGBTQ+'];
 var tagsSearch = [];
 var tagsBox = [...tagsAll];
 var tagsOnEvent = [];
-var tagsSelected = [];
 
 function addTagBoxToSearch(tag) {
   var boxIndex = tagsBox.indexOf(tag);
@@ -212,6 +211,9 @@ function search() {
   window.location.href = url;
   //TODO fetch call to server with search parameters
 }
+
+/* This is an array to keep track of the current form's selected tags. */
+var tagsSelected = [];
 
 /**
  * Inverts the apperance of a selected tag and adds it to the list
