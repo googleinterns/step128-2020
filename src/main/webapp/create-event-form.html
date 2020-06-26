@@ -10,7 +10,7 @@
     <div class="header"></div>
     <div class="form-container">
       <h1>Let's create an event.</h1>
-      <form>
+      <form action="/event" method="POST" name="eventform">
         <div class="form-section">
           <div class="form-label">
             <label for="event-name">*Event name:</label>
@@ -94,7 +94,7 @@
           </div>
         </div>
         <div class="form-buttons">
-          <a href="/my-events.html">
+          <a href="javascript:submitEvent()">
             <img src="images/submit-button.svg" alt="Submit button.">
           </a>
           <div class="divider"></div>
