@@ -43,9 +43,19 @@ html, body {
 footer {
   background-color: #ffd966;
   color: black;
-  height: 5%;
-  margin: 0px;
+  display: flex;
+  flex-flow: column nowrap;
+  font-size: 2vw;
+  height: 6%;
+  justify-content: center;
+  margin: 0;
   text-align: center;
+  padding: 0;
+}
+
+footer h4, footer p {
+  margin: 0;
+  padding: 0;
 }
 
 /* nav bar (MOSTLY UNCHANGED) */
@@ -109,7 +119,7 @@ a:link, a:visited {
   display: flex;
   flex-flow: column nowrap;
   font-size: 3vw;
-  height: 85%;
+  height: 84%;
   width: 100%;
 }
 
@@ -130,7 +140,7 @@ a:link, a:visited {
 
 .event-left-text {
   /* all text elements below the image */
-  margin: 0 2% 5% 2%;
+  margin: 0 2% 0 2%;
 }
 
 .event-display-header {
@@ -174,10 +184,11 @@ a:link, a:visited {
   flex-flow: row nowrap;
   flex: 0 0 auto;
   font-size: 3vw;
-  height: 0px;
+  height: 0;
   justify-content: space-around;
   margin: 0;
   overflow: hidden;
+  padding: 0;
   transition: height .5s;
   width: 100%;
 }
@@ -237,12 +248,17 @@ a:link, a:visited {
 /* Footer */
 .footer {
   color: #aaa;
-  margin-top: 200px;
+  margin-top: 10vw;
   text-align: center;
 }
 
 .footer a {
   color: #aaa;
+}
+
+.footer p {
+  margin: 0 0 3% 0;
+  padding: 0;
 }
 
 
