@@ -403,7 +403,7 @@ async function getEvents(url, index, option) {
       attendeeCountElement.innerText = event.attendeeCount;
       attendeeCountContainerElement.appendChild(attendeeCountElement);
       attendeeCountContainerElement.appendChild(
-        document.createTextNode(' already attending'));
+      document.createTextNode(' already attending'));
     }
     
     eventItemFooterElement.appendChild(attendeeCountContainerElement);
