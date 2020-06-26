@@ -74,7 +74,7 @@ function generateNavBar() {
 function toggleDetails() {
   const detailsBox = document.getElementsByClassName('event-right-details')[0];
   const arrowIcon = document.getElementById('expand-arrow');
-  if(detailsBox.classList.contains('expand')) {
+  if (detailsBox.classList.contains('expand')) {
     detailsBox.classList.remove('expand');
     arrowIcon.src = 'images/arrow-up.svg';
     arrowIcon.alt = 'Expand';
