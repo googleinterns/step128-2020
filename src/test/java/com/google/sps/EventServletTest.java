@@ -37,6 +37,9 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.mockito.Mock;
 
+import com.google.appengine.api.datastore.Cursor;
+import com.google.appengine.api.datastore.FetchOptions;
+
 /** */
 @RunWith(JUnit4.class)
 public final class EventServletTest {
@@ -101,5 +104,29 @@ public final class EventServletTest {
 
     DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
     assertEquals(3, ds.prepare(new Query("Event")).countEntities(withLimit(10)));
+  }
+
+  @Test
+  public void postEventWithEmptyFields() throws IOException {
+    HttpServletRequest request = mock(HttpServletRequest.class);       
+    HttpServletResponse response = mock(HttpServletResponse.class);    
+
+    // This request does not include optional fields end-time and cover-photo.
+    when(request.getParameter("event-name")).thenReturn("Lake Clean Up");
+    when(request.getParameter("event-description")).thenReturn("We're cleaning up the lake");
+    when(request.getParameter("street-address")).thenReturn("678 Lakeview Way");
+    when(request.getParameter("city")).thenReturn("Lakeside");
+    when(request.getParameter("state")).thenReturn("Michigan");
+    when(request.getParameter("date")).thenReturn("2020-17-05");
+    when(request.getParameter("start-time")).thenReturn("14:00");
+    when(request.getParameter("all-tags")).thenReturn("['environment']");
+
+    testEventServlet.doPost(request, response);
+
+    DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
+    Entity postedEntity = ds.prepare(new Query("Event")).asSingleEntity();
+    
+    assertEquals("", postedEntity.getProperty("endTime"));
+    assertEquals("", postedEntity.getProperty("coverPhoto"));
   }
 }
