@@ -18,13 +18,13 @@ import static com.google.appengine.api.datastore.FetchOptions.Builder.withLimit;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
 
-import com.google.sps.servlets.EventServlet;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
+import com.google.sps.servlets.EventServlet;
 import java.io.IOException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -34,19 +34,12 @@ import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.junit.Test;
-import org.mockito.Mockito;
-import org.mockito.Mock;
-
-import com.google.appengine.api.datastore.Cursor;
-import com.google.appengine.api.datastore.FetchOptions;
 
 /** */
 @RunWith(JUnit4.class)
 public final class EventServletTest {
   private final LocalServiceTestHelper helper =
       new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
-  private HttpServletRequest mockedRequest;
-  private HttpServletResponse mockedResponse;
   private EventServlet testEventServlet;
 
   @Before
@@ -62,9 +55,10 @@ public final class EventServletTest {
 
   @Test
   public void postOneEventToDatastore() throws IOException {
-    HttpServletRequest request = mock(HttpServletRequest.class);       
-    HttpServletResponse response = mock(HttpServletResponse.class);    
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpServletResponse response = mock(HttpServletResponse.class);
 
+    // Add a mock request to pass as a parameter to doPost.
     when(request.getParameter("event-name")).thenReturn("Lake Clean Up");
     when(request.getParameter("event-description")).thenReturn("We're cleaning up the lake");
     when(request.getParameter("street-address")).thenReturn("678 Lakeview Way");
@@ -76,17 +70,20 @@ public final class EventServletTest {
     when(request.getParameter("cover-photo")).thenReturn("/img-2030121");
     when(request.getParameter("all-tags")).thenReturn("[environment]");
 
+    // Post event to Datastore.
     testEventServlet.doPost(request, response);
 
+    // Assert only one Entity was posted to Datastore.
     DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
     assertEquals(1, ds.prepare(new Query("Event")).countEntities(withLimit(10)));
   }
 
   @Test
   public void postMultipleEventsToDatastore() throws IOException {
-    HttpServletRequest request = mock(HttpServletRequest.class);       
-    HttpServletResponse response = mock(HttpServletResponse.class);    
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpServletResponse response = mock(HttpServletResponse.class);
 
+    // Add a mock request to pass as a parameter to doPost.
     when(request.getParameter("event-name")).thenReturn("Lake Clean Up");
     when(request.getParameter("event-description")).thenReturn("We're cleaning up the lake");
     when(request.getParameter("street-address")).thenReturn("678 Lakeview Way");
@@ -98,18 +95,20 @@ public final class EventServletTest {
     when(request.getParameter("cover-photo")).thenReturn("/img-2030121");
     when(request.getParameter("all-tags")).thenReturn("['environment']");
 
+    // Post three events to Datastore.
     testEventServlet.doPost(request, response);
     testEventServlet.doPost(request, response);
     testEventServlet.doPost(request, response);
 
+    // Assert all three Entities were posted to Datastore.
     DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
     assertEquals(3, ds.prepare(new Query("Event")).countEntities(withLimit(10)));
   }
 
   @Test
   public void postEventWithAllFields() throws IOException {
-    HttpServletRequest request = mock(HttpServletRequest.class);       
-    HttpServletResponse response = mock(HttpServletResponse.class);    
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpServletResponse response = mock(HttpServletResponse.class);
 
     // Add a mock request to pass as a parameter to doPost.
     when(request.getParameter("event-name")).thenReturn("Lake Clean Up");
@@ -143,16 +142,16 @@ public final class EventServletTest {
     // Retrieve the Entity posted to Datastore.
     DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
     Entity postedEntity = ds.prepare(new Query("Event")).asSingleEntity();
-    
-    // Assert the Entity posted to data store has the same properties as the
-    // the goalEntity
+
+    // Assert the Entity posted to Datastore has the same properties as the
+    // the goalEntity.
     assertEquals(goalEntity.getProperties(), postedEntity.getProperties());
   }
 
   @Test
   public void postEventWithEmptyOptionalFields() throws IOException {
-    HttpServletRequest request = mock(HttpServletRequest.class);       
-    HttpServletResponse response = mock(HttpServletResponse.class);    
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpServletResponse response = mock(HttpServletResponse.class);
 
     // This mock request does not include optional fields end-time and cover-photo.
     when(request.getParameter("event-name")).thenReturn("Lake Clean Up");
@@ -170,8 +169,8 @@ public final class EventServletTest {
     // Retrieve the Entity posted to Datastore.
     DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
     Entity postedEntity = ds.prepare(new Query("Event")).asSingleEntity();
-    
-    // Assert the Entity posted to data store has empty properties for the
+
+    // Assert the Entity posted to Datastore has empty properties for the
     // parameters that were not in the request.
     assertEquals("", postedEntity.getProperty("endTime"));
     assertEquals("", postedEntity.getProperty("coverPhoto"));
