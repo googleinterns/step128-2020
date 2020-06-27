@@ -107,6 +107,49 @@ public final class EventServletTest {
   }
 
   @Test
+  public void postEventWithAllFields() throws IOException {
+    HttpServletRequest request = mock(HttpServletRequest.class);       
+    HttpServletResponse response = mock(HttpServletResponse.class);    
+
+    // Add a mock request to pass as a parameter to doPost.
+    when(request.getParameter("event-name")).thenReturn("Lake Clean Up");
+    when(request.getParameter("event-description")).thenReturn("We're cleaning up the lake");
+    when(request.getParameter("street-address")).thenReturn("678 Lakeview Way");
+    when(request.getParameter("city")).thenReturn("Lakeside");
+    when(request.getParameter("state")).thenReturn("Michigan");
+    when(request.getParameter("date")).thenReturn("2020-17-05");
+    when(request.getParameter("start-time")).thenReturn("14:00");
+    when(request.getParameter("end-time")).thenReturn("15:00");
+    when(request.getParameter("cover-photo")).thenReturn("/img-2030121");
+    when(request.getParameter("all-tags")).thenReturn("['environment']");
+
+    // Post event to Datastore.
+    testEventServlet.doPost(request, response);
+
+    // Create what the event Entity should look like, but do not post to 
+    // it to Datastore.
+    Entity goalEntity = new Entity("Event");
+    goalEntity.setProperty("eventName", "Lake Clean Up");
+    goalEntity.setProperty("eventDescription", "We're cleaning up the lake");
+    goalEntity.setProperty("streetAddress", "678 Lakeview Way");
+    goalEntity.setProperty("city", "Lakeside");
+    goalEntity.setProperty("state", "Michigan");
+    goalEntity.setProperty("date", "2020-17-05");
+    goalEntity.setProperty("startTime", "14:00");
+    goalEntity.setProperty("endTime", "15:00");
+    goalEntity.setProperty("coverPhoto", "/img-2030121");
+    goalEntity.setProperty("tags", "['environment']");
+
+    // Retrieve the Entity posted to Datastore.
+    DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
+    Entity postedEntity = ds.prepare(new Query("Event")).asSingleEntity();
+    
+    // Assert the Entity posted to data store has the same properties as the
+    // the goalEntity
+    assertEquals(goalEntity.getProperties(), postedEntity.getProperties());
+  }
+
+  @Test
   public void postEventWithEmptyFields() throws IOException {
     HttpServletRequest request = mock(HttpServletRequest.class);       
     HttpServletResponse response = mock(HttpServletResponse.class);    
