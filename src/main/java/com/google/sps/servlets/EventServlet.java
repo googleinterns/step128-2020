@@ -37,6 +37,19 @@ public class EventServlet extends HttpServlet {
 
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    Entity eventEntity = populateEvent(request);
+
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    datastore.put(eventEntity);
+
+    // Redirect back to the my-events HTML page.
+    response.sendRedirect("/my-events.html");
+  }
+
+  /**
+   * @return the Event entity
+   */
+  private Entity populateEvent(HttpServletRequest request) {
     // Get the input from the form.
     String eventName = getParameter(request, "event-name", "");
     String eventDescription = getParameter(request, "event-description", "");
@@ -48,7 +61,6 @@ public class EventServlet extends HttpServlet {
     String endTime = getParameter(request, "end-time", "");
     String coverPhoto = getParameter(request, "cover-photo", "");
     String tags = getParameter(request, "all-tags", "");
-
 
     Entity eventEntity = new Entity("Event");
     eventEntity.setProperty("eventName", eventName);
@@ -62,12 +74,7 @@ public class EventServlet extends HttpServlet {
     eventEntity.setProperty("coverPhoto", coverPhoto);
     eventEntity.setProperty("tags", tags);
 
-
-    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    datastore.put(eventEntity);
-
-    // Redirect back to the my-events HTML page.
-    response.sendRedirect("/my-events.html");
+    return eventEntity;
   }
 
   /**
