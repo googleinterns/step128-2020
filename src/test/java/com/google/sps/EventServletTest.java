@@ -150,7 +150,7 @@ public final class EventServletTest {
   }
 
   @Test
-  public void postEventWithEmptyFields() throws IOException {
+  public void postEventWithEmptyOptionalFields() throws IOException {
     HttpServletRequest request = mock(HttpServletRequest.class);       
     HttpServletResponse response = mock(HttpServletResponse.class);    
 
