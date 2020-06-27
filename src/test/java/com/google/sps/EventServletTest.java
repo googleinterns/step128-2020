@@ -154,7 +154,7 @@ public final class EventServletTest {
     HttpServletRequest request = mock(HttpServletRequest.class);       
     HttpServletResponse response = mock(HttpServletResponse.class);    
 
-    // This request does not include optional fields end-time and cover-photo.
+    // This mock request does not include optional fields end-time and cover-photo.
     when(request.getParameter("event-name")).thenReturn("Lake Clean Up");
     when(request.getParameter("event-description")).thenReturn("We're cleaning up the lake");
     when(request.getParameter("street-address")).thenReturn("678 Lakeview Way");
@@ -164,11 +164,15 @@ public final class EventServletTest {
     when(request.getParameter("start-time")).thenReturn("14:00");
     when(request.getParameter("all-tags")).thenReturn("['environment']");
 
+    // Post event to Datastore.
     testEventServlet.doPost(request, response);
 
+    // Retrieve the Entity posted to Datastore.
     DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
     Entity postedEntity = ds.prepare(new Query("Event")).asSingleEntity();
     
+    // Assert the Entity posted to data store has empty properties for the
+    // parameters that were not in the request.
     assertEquals("", postedEntity.getProperty("endTime"));
     assertEquals("", postedEntity.getProperty("coverPhoto"));
   }
