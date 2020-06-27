@@ -40,12 +40,26 @@ html, body {
   padding: 0;
 }
 
+.page-content{
+  min-height: 84%;
+}
+
 footer {
   background-color: #ffd966;
   color: black;
-  height: 5%;
-  margin: 0px;
+  display: flex;
+  flex-flow: column nowrap;
+  font-size: 2vw;
+  height: 6%;
+  justify-content: center;
+  margin: 0;
   text-align: center;
+  padding: 0;
+}
+
+footer h4, footer p {
+  margin: 0;
+  padding: 0;
 }
 
 /* nav bar (MOSTLY UNCHANGED) */
@@ -251,6 +265,130 @@ input {
   margin: 25px;
 }
 
+/* event lists */
+.event-section {
+  font-weight: bold;
+  margin: 8vw 3vw 0 3vw;
+}
+
+.event-section-header {
+  font-size: 6vw;
+  font-weight: bold;
+  margin: 0 0 5vw 0;
+  text-align: center;
+}
+
+.event-list-container {
+  align-items: center;
+  display: flex;
+  flex-flow: column nowrap;
+}
+
+.no-events {
+  align-items: center;
+  background-color: #6e9eeb;
+  color: white;
+  display: flex;
+  font-size: 3vw;
+  justify-content: center;
+  min-height: 7vw;
+  width: 100%;
+}
+
+.no-events-text {
+  margin: 5vw;
+}
+
+.event-item {
+  align-items: center;
+  cursor: pointer;
+  height: 60vw;
+  display: flex;
+  flex-flow: column nowrap;
+  font-size: 3.3vw;
+  font-weight: normal;
+  justify-content: space-around;
+  margin-bottom: 15vw;
+  width: 90%;
+}
+
+.event-image {
+  /* top-right-hand part of an event list item, solid color or container for image */
+  flex: 0 0 auto;
+  height: 30vw;
+  margin: 2vw;
+  object-fit: contain;
+  width: 50%;
+}
+
+.event-item-info {
+  /* all contents of event item on mobile */
+  display: flex;
+  flex: 1 1 auto;
+  flex-flow: column nowrap;
+  height: 100%;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.event-item-header {
+  /* top part of item info with title, date, location, image */
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-between;
+}
+
+.event-item-address {
+  font-weight: normal;
+  font-size: 3.3vw;
+}
+
+.event-item-details {
+  /* top-left part of item header with date and location */
+  display: flex;
+  flex-flow: column nowrap;
+  font-size: 3vw;
+  height: 100%;
+  justify-content: center;
+  text-align: left;
+}
+
+.event-item-title {
+  font-weight: bold;
+  font-size: 4vw;
+  margin: 3vw 0;
+}
+
+.event-item-footer {
+  /* bottom part of item info with attendee count and tags */
+  align-items: center;
+  display: flex;
+  flex-flow: row nowrap;
+  font-size: 3vw;
+  justify-content: space-between;
+  min-height: 15vw;
+}
+
+.edit-unsave-event {
+  color: #6e9eeb;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.edit-unsave-event a:link, .edit-unsave-event a:visited {
+  color: #6e9eeb;
+}
+
+.attendee-count {
+  font-weight: bold;
+}
+
+.event-item .tags-container {
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: space-around;
+}
+
 /* individual event display */
 
 .event-display-container {
@@ -258,7 +396,7 @@ input {
   display: flex;
   flex-flow: column nowrap;
   font-size: 3vw;
-  height: 85%;
+  height: 84%;
   width: 100%;
 }
 
@@ -279,7 +417,7 @@ input {
 
 .event-left-text {
   /* all text elements below the image */
-  margin: 0 2% 5% 2%;
+  margin: 0 2% 0 2%;
 }
 
 .event-display-header {
@@ -323,10 +461,11 @@ input {
   flex-flow: row nowrap;
   flex: 0 0 auto;
   font-size: 3vw;
-  height: 0px;
+  height: 0;
   justify-content: space-around;
   margin: 0;
   overflow: hidden;
+  padding: 0;
   transition: height .5s;
   width: 100%;
 }
@@ -340,11 +479,16 @@ input {
 }
 
 .event-display-options {
+  align-items: center;
   display: flex;
   flex-flow: column nowrap;
   height: 100%;
   justify-content: space-around;
   width: 40%;
+}
+
+.event-display-options br {
+  display: none;
 }
 
 .save-event, .go-back {
@@ -364,34 +508,118 @@ input {
   background-color: white;
 }
 
-.event-display-options h3 {
+.share-wrapper{
+  /* used in mobile style only */
+  display: flex;
+  flex-flow: row nowrap;
+  height: 15%;
+  justify-content: space-between;
+  margin: 0;
+  text-align: left;
   width: 80%;
+}
+
+.share-wrapper h3 {
+  display: inline;
+  font-size: 3vw;
+  margin: 0 5%;
 }
 
 .share-container {
+  align-items: right;
   display: flex;
   flex-flow: row nowrap;
+  flex-grow: 1;
   justify-content: space-around;
-  width: 80%;
+  margin: 0;
+}
+
+.share-container a {
+  cursor: pointer;
+  height: 4vw;
+  width: 4.5vw;
 }
 
 .share-container img {
-  cursor: pointer;
-  height: 5vw;
-}
-.attendee-count {
-  font-weight: bold;
+  height: 100%;
+  object-fit: contain;
 }
 
 /* Footer */
 .footer {
   color: #aaa;
-  margin-top: 200px;
+  margin-top: 10vw;
   text-align: center;
 }
 
 .footer a {
   color: #aaa;
+}
+
+.footer p {
+  margin: 0 0 3% 0;
+  padding: 0;
+}
+
+/* survey page */
+
+.survey-background {
+  align-items: center;
+  background-color: #ffd966;
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: center;
+  margin: 0;
+  min-height: 84%;
+}
+
+#survey-header {
+  margin-top: 10%;
+  text-align: center;
+}
+
+.survey-select-container {
+  align-items: center;
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: center;
+  width: 100%;
+}
+
+.survey-item {
+  margin: 1%;
+  width: 100%;
+}
+
+.survey-label {
+  font-size: 2vw;
+  margin: 5%;
+}
+
+.survey-question {
+  font-size: 2.5vw;
+  margin: 3vw;
+  text-align: center;
+}
+
+.survey-select{
+  background-color: transparent;
+  border: .5vw white solid;
+  border-radius: 50%;
+  cursor: pointer;
+  display: inline-block;
+  height: 3vw;
+  margin: 1vw;
+  width: 3vw;
+}
+
+#survey-save {
+  align-self: center;
+  cursor: pointer;
+  margin: 3vw;
+  margin-bottom: 5vw;
+  object-fit: contain;
+  width: 30vw;
 }
 
 
