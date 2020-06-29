@@ -590,8 +590,10 @@ function toggleSurveyDisplay(question, index) {
 }
 
 async function getMyEvents() {
-  document.getElementById("test").textContent = "";
   fetch("/user?get=saved").then(response => response.text()).then(function(text) {
+      document.getElementById("test").innerText = text;
+  });
+  fetch("/user?get=created").then(response => response.text()).then(function(text) {
       document.getElementById("test").innerText = text;
   });
 }
