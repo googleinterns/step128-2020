@@ -44,44 +44,46 @@ public class UserServlet extends HttpServlet {
         Entity entity = datastore.get(userKey);
         String eventsType = "";
 
-        if (entity != null) {
-            // get the lists
-            List<Entity> results = new ArrayList<>();
-            if(request.getParameter("get").equals("saved")) {
-                eventsType = "saved";
-                @SuppressWarnings("unchecked")
-                List<Long> savedEvents = (ArrayList<Long>) entity.getProperty("saved");
+        try {
+          // get the lists
+          List<Entity> results = new ArrayList<>();
+          if(request.getParameter("get").equals("saved")) {
+            eventsType = "saved";
+            @SuppressWarnings("unchecked")
+              List<Long> savedEvents = (ArrayList<Long>) entity.getProperty("saved");
+              if(savedEvents != null) {
                 for(long l: savedEvents) {
-                results.add(datastore.get(KeyFactory.createKey("Event", l)));
+                  results.add(datastore.get(KeyFactory.createKey("Event", l)));
                 }
+              }
             } else if(request.getParameter("get").equals("created")) {
-            eventsType = "created";
-            results = new ArrayList<>();
-            Query query = new Query("Event")
-                .setFilter(new Query.FilterPredicate("creator", Query.FilterOperator.EQUAL, userEmail));
-            PreparedQuery queried = datastore.prepare(query);
-            for(Entity e: queried.asIterable()) {
+              eventsType = "created";
+              results = new ArrayList<>();
+              Query query = new Query("Event")
+                    .setFilter(new Query.FilterPredicate("creator", Query.FilterOperator.EQUAL, userEmail));
+              PreparedQuery queried = datastore.prepare(query);
+              for(Entity e: queried.asIterable()) {
                 results.add(datastore.get(KeyFactory.createKey("Event", (long) e.getProperty("id"))));
-            }
+              }
             } else {
-            throw new IOException("invalid parameters");
+              throw new IOException("invalid parameters");
             }
 
             ResultObject info = new ResultObject(logoutUrl, eventsType, results);
             response.getWriter().println(gson.toJson(info));
             
-        } else {
-            entity = new Entity("User");
-            entity.setProperty("id", userEmail);
-            entity.setProperty("saved", new ArrayList<>());
-            datastore.put(entity);
-
-            ResultObject info = new ResultObject(logoutUrl, request.getParameter("get"), new ArrayList<>());
-            response.getWriter().println(gson.toJson(info));
+        } catch(EntityNotFoundException exception) {
+            LOGGER.info("entity not found");
         }
-        LOGGER.info("currently logged in to account " + userEmail + ". Created logout URL " + logoutUrl);
+        LOGGER.info("queried for " + eventsType+ " events @ account " + userEmail + ". Created logout URL " + logoutUrl);
       } catch(EntityNotFoundException exception) {
-        LOGGER.info("entity not found");
+        Entity entity = new Entity(userKey);
+        entity.setProperty("id", userEmail);
+        entity.setProperty("saved", new ArrayList<Long>());
+        datastore.put(entity);
+        
+        ResultObject info = new ResultObject(logoutUrl, request.getParameter("get"), new ArrayList<>());
+        response.getWriter().println(gson.toJson(info));
       }
     } else {
       String loginUrl = userService.createLoginURL("/");
@@ -106,11 +108,7 @@ public class UserServlet extends HttpServlet {
     private ResultObject(String url, String type, List<Entity> list) {
       this.url = url;
       eventType = type;
-      if(list == null) {
-        eventResults = new ArrayList<>();
-      } else {
-        eventResults = list;
-      }
+      eventResults = list;
     }
 
   }
