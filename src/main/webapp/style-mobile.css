@@ -241,8 +241,8 @@ input {
 }
 
 .form-input {
-  width: auto;
   padding: 10px;
+  width: auto;
 }
 
 .form-container .tag-box {
@@ -264,16 +264,7 @@ input {
   height: 6vh;
 }
 
-.edit-form-buttons img {
-  height: 5vh;
-}
-
 .form-buttons a {
-  display: inline-block;
-  overflow: hidden;  
-}
-
-.edit-form-buttons a {
   display: inline-block;
   overflow: hidden;  
 }
@@ -281,7 +272,27 @@ input {
 .divider {
   display: inline-block;
   height: auto;
-  margin: 25px;
+  margin: 2vh;
+}
+
+.edit-form-buttons {
+  margin: 10vh 0vh 10vh 0vh;
+  text-align: center;
+  width: 100%
+}
+
+.edit-form-buttons img {
+  height: 6vh;
+}
+
+.edit-form-buttons a {
+  display: inline-block;
+  overflow: hidden;  
+}
+
+.edit-divider {
+  height: auto;
+  padding: 2vh;
 }
 
 /* search page */
