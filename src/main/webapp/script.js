@@ -12,6 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/* determines which stylesheet to use and generates nav bar*/
+function loadActions() {
+  const styleSheetElement = document.getElementById('style');
+  if (window.innerWidth >= window.innerHeight) {
+    styleSheetElement.href = '/style.css';
+  } else {
+    styleSheetElement.href = 'style-mobile.css';
+  }
+
+  generateNavBar();
+}
+
 function generateNavBar() {
   const headerLeft = document.createElement('div');
   headerLeft.className = 'header-left';
@@ -391,7 +403,7 @@ async function getEvents(url, index, option) {
       attendeeCountElement.innerText = event.attendeeCount;
       attendeeCountContainerElement.appendChild(attendeeCountElement);
       attendeeCountContainerElement.appendChild(
-        document.createTextNode(' already attending'));
+      document.createTextNode(' already attending'));
     }
     
     eventItemFooterElement.appendChild(attendeeCountContainerElement);
