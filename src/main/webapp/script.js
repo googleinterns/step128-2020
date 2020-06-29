@@ -12,6 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+
+var url = "";
+var loggedIn = false;
+
 /* determines which stylesheet to use and generates nav bar*/
 function loadActions() {
   const styleSheetElement = document.getElementById('style');
@@ -21,7 +25,18 @@ function loadActions() {
     styleSheetElement.href = 'style-mobile.css';
   }
 
+  checkLogin();
+
   generateNavBar();
+}
+
+async function checkLogin() {
+ fetch('/auth').then(response => response.json()).then(function(responseJson) {
+    loggedIn = responseJson.loggedIn;
+    url = responseJson.url;
+
+    document.getElementById('test').innerText = url;
+  });
 }
 
 function generateNavBar() {
@@ -590,10 +605,12 @@ function toggleSurveyDisplay(question, index) {
 }
 
 async function getMyEvents() {
-  fetch("/user?get=saved").then(response => response.text()).then(function(text) {
-      document.getElementById("test").innerText = text;
-  });
-  fetch("/user?get=created").then(response => response.text()).then(function(text) {
-      document.getElementById("test").innerText = text;
-  });
+  if(loggedIn) {
+    fetch("/user?get=saved").then(response => response.text()).then(function(text) {
+        document.getElementById("test").innerText = text;
+    });
+    fetch("/user?get=created").then(response => response.text()).then(function(text) {
+        document.getElementById("test").innerText = text;
+    });
+  }
 }
