@@ -74,14 +74,14 @@ footer h4, footer p {
 }
 
 .header-left {
+  align-items: center;
   display: flex;
   flex: 1 1 auto;
   flex-flow: row nowrap;
-  align-items: center;
-  justify-content: space-between;
-  width: 80%;
-  max-width: 700px;
   height: 100%;
+  justify-content: space-between;
+  max-width: 700px;
+  width: 80%;
 }
 
 .header-left a {
@@ -89,16 +89,16 @@ footer h4, footer p {
 }
 
 .header-left img {
-  height: 100%;
   flex: 1 1 auto;
+  height: 100%;
 }
 
 .header-right {
+  align-items: center;
   display: flex;
   flex-flow: row nowrap;
-  align-items: center;
-  justify-content: center;
   height: 100%;
+  justify-content: center;
   max-width: 300px;
   width: 25%;
 }
@@ -114,6 +114,155 @@ a:link, a:visited {
   height: 100%;
   justify-content: center;
   padding: 0 20px 0 20px;
+}
+
+/* Home Page */
+.hero-image {
+  background-color: #ffd966;
+  height: 90vh;
+  min-width: 100%;
+}
+
+.hero-text {
+  font-size: 2.5em;
+  left: 50%;
+  position: absolute;
+  text-align: center;
+  top: 50vh;
+  transform: translate(-50%, -50%);
+}
+
+.home-page-content {
+  padding: 30px;
+}
+
+.survey-link a {
+  color: #6e9eeb;
+}
+
+.page-header {
+  display: flex;
+  margin: 40px 10px 50px 10px;
+}
+
+.page-header-left {
+  flex: 50%;
+  padding: 10px;
+}
+
+.page-header-right {
+  flex: 50%;
+  padding: 10px;
+}
+
+@media screen and (max-width: 900px) {
+  .page-header {
+    flex-direction: column;
+  }
+
+  .page-header-left,
+  .page-header-right {
+    width: auto;
+  }
+}
+
+/* Create Page */
+.start-bttn img {
+  height: 8vh;
+}
+
+.form-container {
+  margin-left: 20px;
+  margin-right: 20px;
+  padding: 30px;
+}
+
+.form-container h1 {
+  font-size: 3em;
+}
+
+input[type=text], textarea {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 2em;
+  padding: 10px;
+  resize: vertical;
+  width: 100%;
+}
+
+input[type=file] {
+  font-size: 2em;
+}
+
+/* for the other misc inputs (date, time, etc.) */
+input {
+  font-size: 3em;
+}
+
+.form-section {
+  display: flex;
+}
+
+.form-label {
+  flex: 10%;
+  font-size: 2.5em;
+  padding: 10px;
+  white-space: nowrap;
+}
+
+.form-input {
+  flex: 90%;
+  padding: 10px;
+}
+
+.form-container .tag-box {
+  font-size: 2em;
+  min-height: 2.5em;
+  overflow: scroll;
+}
+
+.form-container .tag {
+  display: inline-block;
+}
+
+@media screen and (max-width: 900px) {
+  .form-section {
+    flex-direction: column;
+  }
+
+  .form-label,
+  .form-input {
+    width: auto;
+  }
+}
+
+.form-buttons {
+  margin-top: 50px;
+  text-align: center;
+}
+
+.form-buttons img {
+  height: 6vh;
+}
+
+.edit-form-buttons img {
+  height: 5vh;
+}
+
+.form-buttons a {
+  display: inline-block;
+  overflow: hidden;  
+}
+
+.edit-form-buttons a {
+  display: inline-block;
+  overflow: hidden;  
+}
+
+.divider {
+  display: inline-block;
+  height: auto;
+  margin: 25px;
 }
 
 /* search page */
@@ -354,10 +503,10 @@ h1 {
 
 .event-left-details {
   /* left (now top) side, with image, description, and tags */
-  flex-grow: 1;
-  overflow-y: scroll;
   display: flex;
   flex-flow: column nowrap;
+  flex-grow: 1;
+  overflow-y: scroll;
 }
 
 .event-display-image {
@@ -401,8 +550,8 @@ h1 {
 
 .expand-details img {
   height: 50%;
-  object-fit: contain;
   margin: auto;
+  object-fit: contain;
 }
 
 .event-right-details {
@@ -579,8 +728,8 @@ h1 {
 
 .tag {
   color: white;
-  font-weight: bold;
   border-radius: 1vw;
+  font-weight: bold;
   margin: .5vw;
   padding: 1vw 2vw;
 }
