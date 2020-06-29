@@ -61,6 +61,9 @@ function generateNavBar() {
   myLink.className = 'nav-item';
   myLink.href = '/my-events.html';
   myLink.innerText = 'My Events';
+//   myLink.onclick = function() {
+//     getMyEvents();
+//   };
   headerRight.appendChild(myLink);
 
   const header = document.getElementsByClassName('header')[0];
@@ -584,4 +587,11 @@ function toggleSurveyDisplay(question, index) {
 	}
 	circle.style.backgroundColor = 'white';
 	surveyResponses[question] = index;
+}
+
+async function getMyEvents() {
+  document.getElementById("test").textContent = "";
+  fetch("/user?get=saved").then(response => response.text()).then(function(text) {
+      document.getElementById("test").innerText = text;
+  });
 }
