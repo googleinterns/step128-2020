@@ -69,7 +69,6 @@ footer h4, footer p {
   flex-flow: row nowrap;
   height: 10%; /* note: 100px -> 10% */
   justify-content: space-between;
-  overflow: hidden;
   position: sticky;
 }
 
@@ -109,11 +108,39 @@ a:link, a:visited {
 }
 
 .nav-item {
-  align-items: center;
-  display: flex;
-  height: 100%;
-  justify-content: center;
-  padding: 0 20px 0 20px;
+  display: none;
+}
+
+.icon-item img {
+  padding-top: 2vh;
+  height: 5vh;
+}
+
+.dropdown {
+  display: inline-block;
+  font-size: 3em;
+  list-style: none;
+  position: relative;
+}
+
+.dropdown-bar {
+  background-color: #f9f9f9;
+  box-shadow: 0vh 0.25vh 0.5vh 0vh rgba(0,0,0,0.2);
+  display: block;
+  min-width: 15vh;
+  padding-left: 3vh;
+  position: absolute;
+  right: 0;
+  z-index: 1;
+}
+
+.dropdown-bar li {
+  padding: 1vh 0vh 1vh 0vh;
+}
+
+.dropdown-item a {
+  display: block;
+  text-decoration: none;
 }
 
 /* Home Page */

@@ -93,6 +93,10 @@ a:link, a:visited {
   padding: 0 20px 0 20px;
 }
 
+.icon-item, dropdown {
+  display: none;
+}
+
 footer {
   background-color: #ffd966;
   color: black;
