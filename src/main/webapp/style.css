@@ -288,7 +288,8 @@ input[type=text], textarea {
   }
 }
 
-.form-buttons {
+.form-buttons, 
+.edit-form-buttons {
   margin-top: 50px;
   text-align: center;
 }
@@ -297,10 +298,21 @@ input[type=text], textarea {
   height: 50px;
 }
 
-.divider {
+.divider, 
+.edit-divider {
   display: inline-block;
   height: auto;
   margin: 25px;
+}
+
+
+.edit-form-buttons img {
+  height: 50px;
+}
+
+.edit-form-buttons a {
+  display: inline-block;
+  overflow: hidden;  
 }
 
 /* event lists */
