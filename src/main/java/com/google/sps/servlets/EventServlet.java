@@ -32,7 +32,7 @@ public class EventServlet extends HttpServlet {
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-
+    // TODO: Implement doGet function.
   }
 
   @Override
