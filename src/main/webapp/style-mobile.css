@@ -217,6 +217,31 @@ h1 {
   display: inline-block;
 }
 
+.location-settings {
+  float: right;
+  font-size: 2em;
+  margin: 20px 20px 0 20px;
+  position: absolute;
+  right: 2vw;
+  text-align: right;
+}
+
+.location-settings a {
+  color: #6e9eeb;
+}
+
+.location-settings select {
+  font-size: 1em;
+}
+
+.page-header {
+  display: inline-flex;
+}
+
+.page-header h2 {
+  font-size: 3em;
+}
+
 /* event lists */
 .event-section {
   font-weight: bold;
