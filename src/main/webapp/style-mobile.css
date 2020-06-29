@@ -131,7 +131,6 @@ a:link, a:visited {
   padding-left: 3vh;
   position: absolute;
   right: 0;
-  z-index: 1;
 }
 
 .dropdown-bar li {
