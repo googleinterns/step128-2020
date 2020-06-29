@@ -36,19 +36,15 @@ public class UserServlet extends HttpServlet {
 
     if (userService.isUserLoggedIn()) {
       String userEmail = userService.getCurrentUser().getEmail();
-      String logoutUrl = userService.createLogoutURL("/");
 
       DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
       Key userKey = KeyFactory.createKey("User", userEmail);
       try {
         Entity entity = datastore.get(userKey);
-        String eventsType = "";
-
         try {
-          // get the lists
           List<Entity> results = new ArrayList<>();
           if(request.getParameter("get").equals("saved")) {
-            eventsType = "saved";
+            // get the list of saved events (stored by id)
             @SuppressWarnings("unchecked")
               List<Long> savedEvents = (ArrayList<Long>) entity.getProperty("saved");
               if(savedEvents != null) {
@@ -57,7 +53,7 @@ public class UserServlet extends HttpServlet {
                 }
               }
             } else if(request.getParameter("get").equals("created")) {
-              eventsType = "created";
+              // query for events that were created by this user
               results = new ArrayList<>();
               Query query = new Query("Event")
                     .setFilter(new Query.FilterPredicate("creator", Query.FilterOperator.EQUAL, userEmail));
@@ -69,28 +65,23 @@ public class UserServlet extends HttpServlet {
               throw new IOException("invalid parameters");
             }
 
-            ResultObject info = new ResultObject(logoutUrl, eventsType, results);
-            response.getWriter().println(gson.toJson(info));
+            response.getWriter().println(gson.toJson(results));
             
         } catch(EntityNotFoundException exception) {
             LOGGER.info("entity not found");
         }
-        LOGGER.info("queried for " + eventsType+ " events @ account " + userEmail + ". Created logout URL " + logoutUrl);
+        LOGGER.info("queried for events @ account " + userEmail);
       } catch(EntityNotFoundException exception) {
+        // datastore entry has not been created yet for this user
         Entity entity = new Entity(userKey);
         entity.setProperty("id", userEmail);
         entity.setProperty("saved", new ArrayList<Long>());
         datastore.put(entity);
         
-        ResultObject info = new ResultObject(logoutUrl, request.getParameter("get"), new ArrayList<>());
-        response.getWriter().println(gson.toJson(info));
+        response.getWriter().println(gson.toJson(new ArrayList<>()));
       }
     } else {
-      String loginUrl = userService.createLoginURL("/");
-      LOGGER.info("not currently logged in. Created login URL " + loginUrl);
-
-      ResultObject info = new ResultObject(loginUrl, null, null);
-      response.getWriter().println(gson.toJson(info));
+      response.getWriter().println(gson.toJson(null));
     }
   }
 
@@ -100,16 +91,4 @@ public class UserServlet extends HttpServlet {
       // add event to a list
   }
 
-  private static class ResultObject {
-    private String url;
-    private String eventType;
-    private List<Entity> eventResults;
-
-    private ResultObject(String url, String type, List<Entity> list) {
-      this.url = url;
-      eventType = type;
-      eventResults = list;
-    }
-
-  }
 }
