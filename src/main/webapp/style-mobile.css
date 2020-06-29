@@ -205,7 +205,8 @@ a:link, a:visited {
 }
 
 .form-container h1 {
-  font-size: 3em;
+  font-size: 4em;
+  padding-bottom: 2em;
 }
 
 input[type=text], textarea {
@@ -228,17 +229,19 @@ input {
 
 .form-section {
   display: flex;
+  flex-direction: column;
+  margin-bottom: 4vh;
 }
 
 .form-label {
-  flex: 10%;
-  font-size: 2.5em;
+  font-size: 3.25em;
   padding: 10px;
   white-space: nowrap;
+  width: auto;
 }
 
 .form-input {
-  flex: 90%;
+  width: auto;
   padding: 10px;
 }
 
@@ -252,23 +255,12 @@ input {
   display: inline-block;
 }
 
-@media screen and (max-width: 900px) {
-  .form-section {
-    flex-direction: column;
-  }
-
-  .form-label,
-  .form-input {
-    width: auto;
-  }
-}
-
 .form-buttons {
-  margin-top: 50px;
+  margin: 10vh 0vh 20vh 0vh;
   text-align: center;
 }
 
-.form-buttons img {
+.form-buttons img, input {
   height: 6vh;
 }
 
