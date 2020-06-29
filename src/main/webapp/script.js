@@ -12,6 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/* determines which stylesheet to use and generates nav bar*/
+function loadActions() {
+  const styleSheetElement = document.getElementById('style');
+  if (window.innerWidth >= window.innerHeight) {
+    styleSheetElement.href = '/style.css';
+  } else {
+    styleSheetElement.href = 'style-mobile.css';
+  }
+
+  generateNavBar();
+}
+
 function generateNavBar() {
   const headerLeft = document.createElement('div');
   headerLeft.className = 'header-left';
@@ -112,15 +124,6 @@ function addTagSearchToBox(tag) {
   updateTagBox();
 }
 
-function toggleTagEvent(tag) {
-  var boxIndex = tagsBox.indexOf(tag);
-  if (boxIndex > -1) {
-    tagsOnEvent[boxIndex] = !tagsOnEvent[boxIndex];
-  }
-
-  updateEventTagBox();
-}
-
 function updateSearchBar() {
   const elements = document.getElementsByClassName('search-bar');
   const searchBarElement = elements[0];
@@ -155,32 +158,6 @@ function updateTagBox() {
 
     tagBoxElement.appendChild(spanElement);
   });
-
-  generateRainbowTags();
-}
-
-function updateEventTagBox() {
-  const elements = document.getElementsByClassName('tag-box');
-  const tagBoxElement = elements[0];
-  tagBoxElement.innerHTML = '';
-  for (var i = 0; i < tagsBox.length; i++) {
-    var tag = tagsBox[i];
-    const spanElement = document.createElement('span');
-    spanElement.setAttribute('onclick', 'toggleTagEvent(\"' + tag + 
-        '\")');
-    // class name is now (for example) 'tag environment'
-    if (tag == 'LGBTQ+') spanElement.className = 'tag rainbow';
-    else spanElement.className = 'tag ' + tag;
-
-    // if tag is on the event, invert it
-    if (tagsOnEvent[i]) {
-      spanElement.className = spanElement.className + ' invert';
-      spanElement.innerText = '✓' + tag;
-    }
-    else spanElement.innerText = tag;
-
-    tagBoxElement.appendChild(spanElement);
-  }
 
   generateRainbowTags();
 }
@@ -233,6 +210,93 @@ function search() {
 
   window.location.href = url;
   //TODO fetch call to server with search parameters
+}
+
+/* This is an array to keep track of the current form's selected tags. */
+var tagsSelected = [];
+
+/**
+ * Inverts the apperance of a selected tag and adds it to the list
+ * of selected tags
+ */
+function toggleTagEvent(tag) {
+  var boxIndex = tagsBox.indexOf(tag);
+  if (boxIndex > -1) {
+    tagsOnEvent[boxIndex] = !tagsOnEvent[boxIndex];
+
+    if (tagsSelected.includes(tag)) {
+      tagsSelected.splice(boxIndex)
+    } else {
+      tagsSelected.push(tag)
+    }
+  }
+
+  updateEventTagBox();
+}
+
+/**
+ * Verifies that at least one tag is selected. If not, cancel form submit
+ * and display error.
+ */
+function verifyTags() {
+  if (tagsSelected.length > 0) {
+    // Convert tags selected array into string
+    var jsonArray = JSON.stringify(tagsSelected);
+    var tags = createHiddenInput(jsonArray);
+
+    // Add string of tags to form for submission
+    document.getElementById("eventform").appendChild(tags);
+    document.eventform.submit();
+    tagsSelected.splice(0, tagsSelected.length);
+  } else {
+    // Display error and prevent from sumbission
+    var tagBoxError = document.getElementById("tags-label");
+    tagBoxError.style.borderStyle = "solid"
+    tagBoxError.style.borderColor = "red";
+    event.preventDefault();
+  }
+}
+
+/**
+ * Creates a hidden input for the array of tags.
+ */
+function createHiddenInput(jsonArray) {
+  var tagsArray = document.createElement('input');
+  tagsArray.setAttribute('type', 'hidden');
+  tagsArray.setAttribute('name', 'all-tags');
+  tagsArray.setAttribute('id', 'all-tags');
+  tagsArray.setAttribute('value', jsonArray);
+
+  return tagsArray;
+}
+
+/**
+ * Updates the tag box on the event form submit page.
+ */
+function updateEventTagBox() {
+  const elements = document.getElementsByClassName('tag-box');
+  const tagBoxElement = elements[0];
+  tagBoxElement.innerHTML = '';
+  for (var i = 0; i < tagsBox.length; i++) {
+    var tag = tagsBox[i];
+    const spanElement = document.createElement('span');
+    spanElement.setAttribute('onclick', 'toggleTagEvent(\"' + tag + 
+        '\")');
+    // class name is now (for example) 'tag environment'
+    if (tag == 'LGBTQ+') spanElement.className = 'tag rainbow';
+    else spanElement.className = 'tag ' + tag;
+
+    // if tag is on the event, invert it
+    if (tagsOnEvent[i]) {
+      spanElement.className = spanElement.className + ' invert';
+      spanElement.innerText = '✓' + tag;
+    }
+    else spanElement.innerText = tag;
+
+    tagBoxElement.appendChild(spanElement);
+  }
+
+  generateRainbowTags();
 }
 
 /* Two test examples to use with getEvents() */
@@ -391,7 +455,7 @@ async function getEvents(url, index, option) {
       attendeeCountElement.innerText = event.attendeeCount;
       attendeeCountContainerElement.appendChild(attendeeCountElement);
       attendeeCountContainerElement.appendChild(
-        document.createTextNode(' already attending'));
+      document.createTextNode(' already attending'));
     }
     
     eventItemFooterElement.appendChild(attendeeCountContainerElement);

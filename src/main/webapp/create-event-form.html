@@ -6,11 +6,11 @@
     <link id="style" rel="stylesheet" href="style.css">
     <script src="script.js"></script>
   </head>
-  <body onload="generateNavBar(); updateEventTagBox()">
+  <body onload="loadActions(); updateEventTagBox()">
     <div class="header"></div>
     <div class="form-container">
       <h1>Let's create an event.</h1>
-      <form>
+      <form action="/event" method="POST" id="eventform" name="eventform" onsubmit="verifyTags();">
         <div class="form-section">
           <div class="form-label">
             <label for="event-name">*Event name:</label>
@@ -78,11 +78,12 @@
         </div>
         <div class="form-section">
           <div class="form-label">
-            <label for="tags">*Tags:</label>
+            <div id="tags-label">
+              <label for="tags">*Tags:</label>
+            </div>
           </div>
           <div class="form-input">
-            <div class="tag-box">
-            </div>
+            <div class="tag-box"></div>
           </div>
         </div>
         <div class="form-section">
@@ -94,9 +95,7 @@
           </div>
         </div>
         <div class="form-buttons">
-          <a href="/my-events.html">
-            <img src="images/submit-button.svg" alt="Submit button.">
-          </a>
+          <input type=image src="images/submit-button.svg" alt="Submit button.">
           <div class="divider"></div>
           <a href="/index.html">
             <img src="images/cancel-button.svg" alt="Cancel button.">
