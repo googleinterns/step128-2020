@@ -1,25 +1,28 @@
 import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreService.KeyRangeState;
 import com.google.appengine.api.datastore.Index;
 import com.google.appengine.api.datastore.Index.IndexState;
 import com.google.appengine.api.datastore.DatastoreAttributes;
 import java.util.Map;
 import java.util.HashMap;
 
-public class MockDatastore implements DatastoreService {
+public class MockDatastore /*implements DatastoreService */{
 
   
-  @Override
-  public Map<Index,Index.IndexState> getIndexes() {
-     return new HashMap<>();
-  }
+//   @Override
+//   public Map<Index,Index.IndexState> getIndexes() {
+//      return new HashMap<>();
+//   }
 
-  @Override 
-  public DatastoreAttributes getDatastoreAttributes() {
-    return new DatastoreAttributes("");
-  }
+//   @Override 
+//   public DatastoreAttributes getDatastoreAttributes() {
+//     return new MockAttributes();
+//   }
 
-//   DatastoreService.KeyRangeState	allocateIdRange(KeyRange range)
-// This method allocates a user-specified contiguous range of unique IDs.
+//   @Override
+//   public DatastoreService.KeyRangeState allocateIdRange(KeyRange range) {
+//     return DatastoreService.KeyRangeState.CONTENTION;
+//   }
 // KeyRange	allocateIds(Key parent,java.lang.String kind,long num)
 // IDs are allocated within a namespace defined by a parent key and a kind.
 // KeyRange	allocateIds(java.lang.String kind,long num)
@@ -56,11 +59,17 @@ public class MockDatastore implements DatastoreService {
 // Exhibits the same behavior as put(Entity), but executes within the provided transaction.
 // java.util.List<Key>	put(Transaction txn,java.lang.Iterable<Entity> entities)
 
-  @Override 
   public static class DatastoreServiceFactory {
     
     public DatastoreService getDatastoreService() {
-      return new MockDatastore();
+    //   return new MockDatastore();
+    return null;
     }
   }
+
+//   public static class MockAttributes extends DatastoreAttributes {
+//     public MockAttributes() {
+
+//     }
+//   }
 }
