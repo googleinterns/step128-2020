@@ -29,11 +29,25 @@ public class SearchServlet extends HttpServlet {
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-
+    //get location
+    //filter by location and cutoff outside it
+    
+    //get tags
+    //drop all without first tag
+    //those with most tags in common with search go to top
+    //those closest to the user go to the top
   }
 
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
+  }
+
+  /**
+   * Returns keywords from an event (currently using just the title
+   * and description) based off an algorithm
+   */
+  public List<String> getKeywords(String title, String desc) {
+    
   }
 }
