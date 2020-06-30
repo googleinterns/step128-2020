@@ -22,6 +22,7 @@ import static org.mockito.Mockito.*;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
@@ -29,7 +30,6 @@ import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.sps.servlets.AuthServlet;
 import com.google.sps.MockedUserService;
 import com.google.gson.Gson;
-import java.io.IOException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -41,10 +41,12 @@ import org.junit.Test;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import java.io.IOException;
 import java.io.StringWriter;
 import java.io.PrintWriter;
 import java.io.BufferedReader;
 import java.io.StringReader;
+import java.util.ArrayList;
 import java.net.URL;
 import java.net.MalformedURLException;
 
@@ -146,9 +148,14 @@ public final class AuthServletTest {
       assertTrue(result.url.contains("logout"));
       assertEquals("test@example.com", mockService.getCurrentUser().getEmail());
 
-      // make sure has been added to datastore
+      // make sure exactly 1 user has been added to datastore
       DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
       assertEquals(1, ds.prepare(new Query("User")).countEntities());
+
+      // make sure that the posted user has the correct id and empty saved list
+      Entity postedEntity = ds.prepare(new Query("User")).asSingleEntity();
+      assertEquals("test@example.com", postedEntity.getKey().getName());
+      assertEquals("test@example.com", postedEntity.getProperty("id"));
     } catch (MalformedURLException e) {
       fail();
     } catch (IOException e) {

@@ -56,7 +56,6 @@ public class AuthServlet extends HttpServlet {
       } catch (EntityNotFoundException e) {
         Entity entity = new Entity(userKey);
         entity.setProperty("id", userEmail);
-        entity.setProperty("saved", new ArrayList<Long>());
         datastore.put(entity);
       }
       LoginObject info = new LoginObject(true, logoutUrl);
