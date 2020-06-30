@@ -36,6 +36,7 @@ import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.datastore.Query.FilterOperator;
+import com.google.gson.Gson;
 
 @WebServlet("/search")
 public class SearchServlet extends HttpServlet {
@@ -65,6 +66,10 @@ public class SearchServlet extends HttpServlet {
     //drop all without first tag
     //those with most tags in common with search go to top
     //those closest to the user go to the top
+    String json = Utility.convertToJson(events);
+
+    response.setContentType("application/json;");
+    response.getWriter().println(json);
   }
 
   @Override

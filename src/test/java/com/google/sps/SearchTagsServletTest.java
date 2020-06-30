@@ -25,6 +25,7 @@ import com.google.appengine.api.datastore.Query;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.sps.servlets.SearchServlet;
+import com.google.sps.servlets.Utility;
 import java.io.IOException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -41,11 +42,30 @@ public final class SearchTagsServletTest {
   private final LocalServiceTestHelper helper =
       new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
   private SearchServlet testSearchServlet;
+  private List<Entity> testEntities;
 
   @Before
   public void setUp() {
     helper.setUp();
     testSearchServlet = new SearchServlet();
+    List<String> possibleTags = new ArrayList<String>(Arrays.asList(
+        "environment", "blm", "education", "volunteer", "LGBTQ+"
+    ));
+    testEntities = new ArrayList<Entity>();
+    //single tag events
+    for (int i = 0; i < 5; i++) {
+      Entity e = new Entity("Event");
+      e.setProperty("eventName", i);
+      e.setIndexedProperty("tags", new ArrayList<String>(possibleTags[i]));
+      testEntities.add(e);
+    }
+    //double tag events
+    for (int i = 0; i < 4; i++) {
+      Entity e = new Entity("Event");
+      e.setProperty("eventName", i);
+      e.setIndexedProperty("tags", new ArrayList<String>(possibleTags[i], possibleTags[i+1]));
+      testEntities.add(e);
+    }
   }
 
   @After
@@ -54,125 +74,19 @@ public final class SearchTagsServletTest {
   }
 
   @Test
-  public void postOneEventToDatastore() throws IOException {
+  public void anyQueryAndOutput() throws IOException {
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
 
     // Add a mock request to pass as a parameter to doPost.
-    when(request.getParameter("event-name")).thenReturn("Lake Clean Up");
-    when(request.getParameter("event-description")).thenReturn("We're cleaning up the lake");
-    when(request.getParameter("street-address")).thenReturn("678 Lakeview Way");
-    when(request.getParameter("city")).thenReturn("Lakeside");
-    when(request.getParameter("state")).thenReturn("Michigan");
-    when(request.getParameter("date")).thenReturn("2020-17-05");
-    when(request.getParameter("start-time")).thenReturn("14:00");
-    when(request.getParameter("end-time")).thenReturn("15:00");
-    when(request.getParameter("cover-photo")).thenReturn("/img-2030121");
-    when(request.getParameter("all-tags")).thenReturn("[environment]");
+    when(request.getParameter("tags")).thenReturn("environment");
 
     // Post event to Datastore.
-    testSearchServlet.doPost(request, response);
+    String jsonResponse = testSearchServlet.doGet(request, response);
 
     // Assert only one Entity was posted to Datastore.
+    testEntities.get
     DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
     assertEquals(1, ds.prepare(new Query("Event")).countEntities(withLimit(10)));
-  }
-
-  @Test
-  public void postMultipleEventsToDatastore() throws IOException {
-    HttpServletRequest request = mock(HttpServletRequest.class);
-    HttpServletResponse response = mock(HttpServletResponse.class);
-
-    // Add a mock request to pass as a parameter to doPost.
-    when(request.getParameter("event-name")).thenReturn("Lake Clean Up");
-    when(request.getParameter("event-description")).thenReturn("We're cleaning up the lake");
-    when(request.getParameter("street-address")).thenReturn("678 Lakeview Way");
-    when(request.getParameter("city")).thenReturn("Lakeside");
-    when(request.getParameter("state")).thenReturn("Michigan");
-    when(request.getParameter("date")).thenReturn("2020-17-05");
-    when(request.getParameter("start-time")).thenReturn("14:00");
-    when(request.getParameter("end-time")).thenReturn("15:00");
-    when(request.getParameter("cover-photo")).thenReturn("/img-2030121");
-    when(request.getParameter("all-tags")).thenReturn("['environment']");
-
-    // Post three events to Datastore.
-    testSearchServlet.doPost(request, response);
-    testSearchServlet.doPost(request, response);
-    testSearchServlet.doPost(request, response);
-
-    // Assert all three Entities were posted to Datastore.
-    DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
-    assertEquals(3, ds.prepare(new Query("Event")).countEntities(withLimit(10)));
-  }
-
-  @Test
-  public void postEventWithAllFields() throws IOException {
-    HttpServletRequest request = mock(HttpServletRequest.class);
-    HttpServletResponse response = mock(HttpServletResponse.class);
-
-    // Add a mock request to pass as a parameter to doPost.
-    when(request.getParameter("event-name")).thenReturn("Lake Clean Up");
-    when(request.getParameter("event-description")).thenReturn("We're cleaning up the lake");
-    when(request.getParameter("street-address")).thenReturn("678 Lakeview Way");
-    when(request.getParameter("city")).thenReturn("Lakeside");
-    when(request.getParameter("state")).thenReturn("Michigan");
-    when(request.getParameter("date")).thenReturn("2020-17-05");
-    when(request.getParameter("start-time")).thenReturn("14:00");
-    when(request.getParameter("end-time")).thenReturn("15:00");
-    when(request.getParameter("cover-photo")).thenReturn("/img-2030121");
-    when(request.getParameter("all-tags")).thenReturn("['environment']");
-
-    // Post event to Datastore.
-    testSearchServlet.doPost(request, response);
-
-    // Create what the event Entity should look like, but do not post to 
-    // it to Datastore.
-    Entity goalEntity = new Entity("Event");
-    goalEntity.setProperty("eventName", "Lake Clean Up");
-    goalEntity.setProperty("eventDescription", "We're cleaning up the lake");
-    goalEntity.setProperty("streetAddress", "678 Lakeview Way");
-    goalEntity.setProperty("city", "Lakeside");
-    goalEntity.setProperty("state", "Michigan");
-    goalEntity.setProperty("date", "2020-17-05");
-    goalEntity.setProperty("startTime", "14:00");
-    goalEntity.setProperty("endTime", "15:00");
-    goalEntity.setProperty("coverPhoto", "/img-2030121");
-    goalEntity.setProperty("tags", "['environment']");
-
-    // Retrieve the Entity posted to Datastore.
-    DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
-    Entity postedEntity = ds.prepare(new Query("Event")).asSingleEntity();
-
-    // Assert the Entity posted to Datastore has the same properties as the
-    // the goalEntity.
-    assertEquals(goalEntity.getProperties(), postedEntity.getProperties());
-  }
-
-  @Test
-  public void postEventWithEmptyOptionalFields() throws IOException {
-    HttpServletRequest request = mock(HttpServletRequest.class);
-    HttpServletResponse response = mock(HttpServletResponse.class);
-
-    // This mock request does not include optional fields end-time and cover-photo.
-    when(request.getParameter("event-name")).thenReturn("Lake Clean Up");
-    when(request.getParameter("event-description")).thenReturn("We're cleaning up the lake");
-    when(request.getParameter("street-address")).thenReturn("678 Lakeview Way");
-    when(request.getParameter("city")).thenReturn("Lakeside");
-    when(request.getParameter("state")).thenReturn("Michigan");
-    when(request.getParameter("date")).thenReturn("2020-17-05");
-    when(request.getParameter("start-time")).thenReturn("14:00");
-    when(request.getParameter("all-tags")).thenReturn("['environment']");
-
-    // Post event to Datastore.
-    testSearchServlet.doPost(request, response);
-
-    // Retrieve the Entity posted to Datastore.
-    DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
-    Entity postedEntity = ds.prepare(new Query("Event")).asSingleEntity();
-
-    // Assert the Entity posted to Datastore has empty properties for the
-    // parameters that were not in the request.
-    assertEquals("", postedEntity.getProperty("endTime"));
-    assertEquals("", postedEntity.getProperty("coverPhoto"));
   }
 }
