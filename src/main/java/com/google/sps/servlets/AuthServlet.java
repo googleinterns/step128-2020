@@ -47,16 +47,16 @@ public class AuthServlet extends HttpServlet {
       String userEmail = userService.getCurrentUser().getEmail();
       String logoutUrl = userService.createLogoutURL("/");
 
-    //   DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    //   Key userKey = KeyFactory.createKey("User", userEmail);
-    //   try {
-    //     Entity entity = datastore.get(userKey);
-    //   } catch (EntityNotFoundException e) {
-    //     Entity entity = new Entity(userKey);
-    //     entity.setProperty("id", userEmail);
-    //     entity.setProperty("saved", new ArrayList<Long>());
-    //     datastore.put(entity);
-    //   }
+      DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+      Key userKey = KeyFactory.createKey("User", userEmail);
+      try {
+        Entity entity = datastore.get(userKey);
+      } catch (EntityNotFoundException e) {
+        Entity entity = new Entity(userKey);
+        entity.setProperty("id", userEmail);
+        entity.setProperty("saved", new ArrayList<Long>());
+        datastore.put(entity);
+      }
       LoginObject info = new LoginObject(true, logoutUrl);
       response.getWriter().println(gson.toJson(info));
     } else {
