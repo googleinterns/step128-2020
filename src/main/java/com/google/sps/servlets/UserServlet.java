@@ -42,7 +42,7 @@ public class UserServlet extends HttpServlet {
       try {
         Entity userEntity = datastore.get(userKey);
         List<Entity> results = new ArrayList<>();
-        if(request.getParameter("get").equals("saved")) {
+        if(request.getParameter("get")!= null && request.getParameter("get").equals("saved")) {
           // get the list of saved events (stored by id)
           @SuppressWarnings("unchecked")
             List<Long> savedEvents = (ArrayList<Long>) userEntity.getProperty("saved");
@@ -55,11 +55,13 @@ public class UserServlet extends HttpServlet {
               }
             }
           }
-        } else if(request.getParameter("get").equals("created")) {
+          // TODO: apply sort
+        } else if(request.getParameter("get") != null && request.getParameter("get").equals("created")) {
           // query for events that were created by this user
           results = new ArrayList<>();
           Query query = new Query("Event")
-                .setFilter(new Query.FilterPredicate("creator", Query.FilterOperator.EQUAL, userEmail));
+                .setFilter(new Query.FilterPredicate("creator", Query.FilterOperator.EQUAL, userEmail))
+                .addSort("eventName", SortDirection.ASCENDING);
           PreparedQuery queried = datastore.prepare(query);
           for(Entity e: queried.asIterable()) {
             long eventId = (long) e.getProperty("id");
@@ -69,6 +71,7 @@ public class UserServlet extends HttpServlet {
               LOGGER.info("entity not found for event id " + eventId);
             }
           }
+          // TODO: apply choices for sort
         } else {
           throw new IOException("missing parameters");
         }
@@ -79,7 +82,6 @@ public class UserServlet extends HttpServlet {
         // datastore entry has not been created yet for this user, create it now
         Entity entity = new Entity(userKey);
         entity.setProperty("id", userEmail);
-        entity.setProperty("saved", new ArrayList<Long>());
         datastore.put(entity);
         
         // new user will not have any saved or created events (empty list)
@@ -87,7 +89,7 @@ public class UserServlet extends HttpServlet {
       }
     } else {
       // return a list with all created events
-      PreparedQuery results = datastore.prepare(new Query("Event"));
+      PreparedQuery results = datastore.prepare(new Query("Event").addSort("eventName", SortDirection.ASCENDING));
       List<Entity> events = new ArrayList<>();
       for(Entity e: results.asIterable()) {
         events.add(e);
@@ -99,7 +101,7 @@ public class UserServlet extends HttpServlet {
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
-      // add event to a list
+      // TODO: add event to a list
       
   }
 
