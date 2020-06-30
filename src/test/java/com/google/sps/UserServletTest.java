@@ -107,6 +107,7 @@ public final class UserServletTest {
       Entity resultEntity = resultingEntities.get(i);
       Set<String> goalProperties = goal.getProperties().keySet();
       Set<String> resultProperties = goal.getProperties().keySet();
+      // checks along each of entity properties
       assertEquals(goalProperties.size(), resultProperties.size());
       for(String s: goalProperties) {
         assertEquals(goal.getProperty(s), resultEntity.getProperty(s));
