@@ -99,5 +99,4 @@ public class UserServlet extends HttpServlet {
       // TODO: add event to a list
       
   }
-
 }
