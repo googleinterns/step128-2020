@@ -30,12 +30,11 @@ function loadActions() {
   generateNavBar();
 }
 
+/* checks for login status and fetches login/logout url */
 async function checkLogin() {
  fetch('/auth').then(response => response.json()).then(function(responseJson) {
     loggedIn = responseJson.loggedIn;
     url = responseJson.url;
-
-    document.getElementById('test').innerText = url;
   });
 }
 
@@ -76,9 +75,6 @@ function generateNavBar() {
   myLink.className = 'nav-item';
   myLink.href = '/my-events.html';
   myLink.innerText = 'My Events';
-//   myLink.onclick = function() {
-//     getMyEvents();
-//   };
   headerRight.appendChild(myLink);
 
   const header = document.getElementsByClassName('header')[0];
@@ -602,15 +598,4 @@ function toggleSurveyDisplay(question, index) {
 	}
 	circle.style.backgroundColor = 'white';
 	surveyResponses[question] = index;
-}
-
-async function getMyEvents() {
-  if(loggedIn) {
-    fetch("/user?get=saved").then(response => response.text()).then(function(text) {
-        document.getElementById("test").innerText = text;
-    });
-    fetch("/user?get=created").then(response => response.text()).then(function(text) {
-        document.getElementById("test").innerText = text;
-    });
-  }
 }
