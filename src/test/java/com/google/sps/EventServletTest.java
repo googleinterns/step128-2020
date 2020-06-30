@@ -72,6 +72,8 @@ public final class EventServletTest {
 
   /**
    * Use the current url to login/logout
+   *
+   * @param email If logging in, will log into this user's account.
    */
   private void toggleLogin(String email) throws MalformedURLException, IOException {
     URL mockurl = PowerMockito.mock(URL.class);
