@@ -16,7 +16,11 @@ package com.google.sps.servlets;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
 import java.io.IOException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -32,17 +36,23 @@ public class LoadEventServlet extends HttpServlet {
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    // TODO: Implement doGet function.
+    Key keyRequested = getEventKey(request);
+    Query query = new Query("Event", keyRequested);
+
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    Entity eventRequested = datastore.prepare(query).asSingleEntity();
+    System.out.println(eventRequested);
   }
 
-  /** Returns the number of comments the user has chosen to display */
-  private int getEventKey(HttpServletRequest request) throws NumberFormatException {
-    // Get the input from the form.
-    String eventIdString = request.getParameter("key");
+  /**
+   * @return the key from the request parameter.
+   */ 
+  private Key getEventKey(HttpServletRequest request) {
+    // Get the string from the request.
+    String eventKeyString = request.getParameter("event");
 
-    // Convert the input to an int.
-    long eventId = Long.parseLong(eventIdString);
-
-    return eventId;
+    // Convert String to type Key.
+    Key eventKey = KeyFactory.stringToKey(eventKeyString);
+    return eventKey;
   }
 }
