@@ -28,7 +28,7 @@ import java.util.logging.Logger;
 @WebServlet("/load-event")
 public class LoadEventServlet extends HttpServlet {
 
-  private static final Logger LOGGER = Logger.getLogger(EventServlet.class.getName());
+  private static final Logger LOGGER = Logger.getLogger(LoadEventServlet.class.getName());
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
