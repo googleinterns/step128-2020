@@ -16,18 +16,20 @@ package com.google.sps.servlets;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
-import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
+import com.google.appengine.api.datastore.PreparedQuery;
+import com.google.appengine.api.datastore.Query;
 import java.io.IOException;
+import java.lang.IllegalArgumentException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
 
 @WebServlet("/load-event")
 public class LoadEventServlet extends HttpServlet {
@@ -47,7 +49,7 @@ public class LoadEventServlet extends HttpServlet {
   /**
    * @return the key from the request parameter.
    */ 
-  private Key getEventKey(HttpServletRequest request) {
+  private Key getEventKey(HttpServletRequest request) throws IllegalArgumentException {
     // Get the string from the request.
     String eventKeyString = request.getParameter("event");
 
