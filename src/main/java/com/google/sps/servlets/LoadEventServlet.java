@@ -21,6 +21,7 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
+import com.google.sps.data.Event;
 import java.io.IOException;
 import java.lang.IllegalArgumentException;
 import java.util.logging.Level;
@@ -29,7 +30,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
+import com.google.gson.Gson;
 
 @WebServlet("/load-event")
 public class LoadEventServlet extends HttpServlet {
@@ -43,7 +44,19 @@ public class LoadEventServlet extends HttpServlet {
 
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     Entity eventRequested = datastore.prepare(query).asSingleEntity();
+
+
     System.out.println(eventRequested);
+
+    Event event = new Event();
+
+    String eventName = (String) eventRequested.getProperty("eventName");
+    event.setName(eventName);
+
+    Gson gson = new Gson();
+
+    response.setContentType("application/json;");
+    response.getWriter().println(gson.toJson(event));
   }
 
   /**
