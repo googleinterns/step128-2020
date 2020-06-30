@@ -526,8 +526,9 @@ async function getSearchDistanceSettings() {
 
 function openLink(url) {
   window.location.pathname = url;
-  fetch('/load-event?key=5629499534213120').then(response => response.json()).then((event) => {
-    console.log(event)
+  fetch('/load-event?event=aglub19hcHBfaWRyEgsSBUV2ZW50GICAgICAgMAIDA')
+  .then(response => response.json()).then((event) => {
+
   });
 }
 
