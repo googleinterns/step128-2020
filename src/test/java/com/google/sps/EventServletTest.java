@@ -275,6 +275,7 @@ public final class EventServletTest {
     }
   }
 
+  /* the LoginObject structure used by AuthServlet */
   private static class LoginObject {
     private boolean loggedIn;
     private String url;
