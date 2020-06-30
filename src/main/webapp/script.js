@@ -599,3 +599,12 @@ function toggleSurveyDisplay(question, index) {
 	circle.style.backgroundColor = 'white';
 	surveyResponses[question] = index;
 }
+
+async function getMyEvents() {
+  fetch("/user?get=saved").then(response => response.text()).then(function(text) {
+      document.getElementById("test").innerText = text;
+  });
+  fetch("/user?get=created").then(response => response.text()).then(function(text) {
+      document.getElementById("test").innerText = text;
+  });
+}
