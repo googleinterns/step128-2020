@@ -230,7 +230,7 @@ public final class AuthServletTest {
       assertTrue(result.url.contains("logout"));
       assertEquals(currentEmail, mockService.getCurrentUser().getEmail());
 
-      // make only 1 user has been added to datastore
+      // make sure 2 different users have been added to datastore
       DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
       assertEquals(2, ds.prepare(new Query("User")).countEntities());
     } catch (MalformedURLException e) {
