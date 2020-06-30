@@ -64,12 +64,7 @@ public class UserServlet extends HttpServlet {
                 .addSort("eventName", SortDirection.ASCENDING);
           PreparedQuery queried = datastore.prepare(query);
           for(Entity e: queried.asIterable()) {
-            long eventId = (long) e.getProperty("id");
-            try {
-              results.add(datastore.get(KeyFactory.createKey("Event", eventId)));
-            } catch(EntityNotFoundException exception) {
-              LOGGER.info("entity not found for event id " + eventId);
-            }
+            results.add(e);
           }
           // TODO: apply choices for sort
         } else {
