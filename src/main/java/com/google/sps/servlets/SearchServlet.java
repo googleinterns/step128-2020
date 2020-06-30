@@ -28,11 +28,16 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.AbstractMap;
 
 @WebServlet("/search")
 public class SearchServlet extends HttpServlet {
 
   private static final Logger LOGGER = Logger.getLogger(SearchServlet.class.getName());
+  //this list is incomplete
+  private static final List<String> irrelevantWords = new ArrayList<String>(Arrays.asList(
+      "the", "is", "for", "in", "of", "so", "to"
+      ));
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -54,12 +59,14 @@ public class SearchServlet extends HttpServlet {
    * Returns keywords from an event (currently using just the title
    * and description) based off an algorithm
    */
-  public List<String> getKeywords(String title, String desc) {
+  public static List<String> getKeywords(String title, String desc) {
     //TODO: convert to lowercase in processing (figure out acronyms)
     List<String> titleWords = SearchServlet.getSeparateWords(title);
+    
     //process title words
     Map<String, Integer> titleMap = new HashMap<String, Integer>();
     for (String w : titleWords) {
+      w = w.toLowerCase();
       if (titleMap.containsKey(w)) {
         titleMap.put(w, titleMap.get(w) + 1);
       } else {
@@ -70,6 +77,7 @@ public class SearchServlet extends HttpServlet {
     //process desc words
     Map<String, Integer> descMap = new HashMap<String, Integer>();
     for (String w : descWords) {
+      w = w.toLowerCase();
       if (descMap.containsKey(w)) {
         descMap.put(w, descMap.get(w) + 1);
       } else {
@@ -78,27 +86,51 @@ public class SearchServlet extends HttpServlet {
     }
 
     List<Map.Entry<String, Integer>> titleMapList = new ArrayList<Map.Entry<String, Integer>>(titleMap.entrySet()); 
-    List<Map.Entry<String, Integer>> descMapList = new ArrayList<Map.Entry<String, Integer>>(descMap.entrySet());
 
     //merge lists
-    List<Map.Entry<String, Integer>> mergeList = new ArrayList<Map.Entry<String, Integer>>(descMapList);
-    for (Entry e : titleMapList) {
-      if (mergeList.contains(e.title.getKey().toLowerCase()) {
-        
-      } else {
-        mergeList.add(e);
+    List<Map.Entry<String, Integer>> mergeList = new ArrayList<Map.Entry<String, Integer>>(descMap.entrySet());
+    for (Map.Entry titleEntry : titleMapList) {
+      boolean found = false;
+      for (int i = 0; i < mergeList.size(); i++) {
+        Map.Entry mergeEntry = mergeList.get(i);
+        if (mergeEntry.getKey().toString().equals(titleEntry.getKey().toString())) {
+          mergeEntry.setValue(((int) mergeEntry.getValue()) + ((int) titleEntry.getValue() * 2));
+          found = true;
+        }
+      }
+      if (!found) {
+        Map.Entry<String,Integer> entry = 
+            new AbstractMap.SimpleEntry<String, Integer>(
+            titleEntry.getKey().toString(), ((int) titleEntry.getValue()) * 2 );
+        mergeList.add(entry);
       }
     }
 
     Collections.sort(mergeList, new Comparator<Map.Entry<String, Integer>>() { 
       public int compare(Map.Entry<String, Integer> o1,  
                          Map.Entry<String, Integer> o2) { 
-        return (o1.getValue()).compareTo(o2.getValue()); 
+        return (o2.getValue()).compareTo(o1.getValue()); 
       } 
     });
 
+    //add top results to the final list
+    List<String> finalList = new ArrayList<String>();
+    int count = 0;
+    //minimum number of instances to be considered a keyword
+    int cutoff = 2;
+    while (finalList.size() < 5) {
+      Map.Entry e = mergeList.get(count);
+      //exclude words with less appearances than the cutoff
+      if (((int) e.getValue()) < cutoff) break;
+      else if (count >= mergeList.size()) break;
+      //exclude common useless words (in, a, the, etc)
+      else if (!irrelevantWords.contains(e.getKey().toString())) {
+        finalList.add(e.getKey().toString());
+      }
+      count++;
+    }
 
-    return mergeList;
+    return finalList;
   }
 
   /**
