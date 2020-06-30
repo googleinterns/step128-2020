@@ -44,7 +44,7 @@ public class MockedUserService implements UserService {
 
   @Override
   public User getCurrentUser() {
-    if(!loggedIn) {
+    if (!loggedIn) {
       return null;
     }
     return currentUser;
@@ -61,7 +61,7 @@ public class MockedUserService implements UserService {
   }
 
   public URLConnection evaluateURL(String url) throws MalformedURLException {
-    if(url.contains("login")) {
+    if (url.contains("login")) {
       login(url.substring(url.indexOf(EMAIL_TAG) + EMAIL_TAG.length()));
     } else if (url.contains("logout")) {
       logout();
