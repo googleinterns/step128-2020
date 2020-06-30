@@ -34,4 +34,15 @@ public class LoadEventServlet extends HttpServlet {
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     // TODO: Implement doGet function.
   }
+
+  /** Returns the number of comments the user has chosen to display */
+  private int getEventKey(HttpServletRequest request) throws NumberFormatException {
+    // Get the input from the form.
+    String eventIdString = request.getParameter("key");
+
+    // Convert the input to an int.
+    long eventId = Long.parseLong(eventIdString);
+
+    return eventId;
+  }
 }
