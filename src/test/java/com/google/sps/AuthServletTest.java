@@ -28,7 +28,6 @@ import com.google.appengine.api.users.UserServiceFactory;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.sps.servlets.AuthServlet;
-import com.google.sps.MockedUserService;
 import com.google.gson.Gson;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -59,13 +58,6 @@ public final class AuthServletTest {
   private final Gson gson = new Gson();
   private AuthServlet testAuthServlet;
   private MockedUserService mockService;
-
-  /**
-   * makes a dummy URL using a url "base" with an intended user id
-   */
-  private String makeLoginURL(String url, String user) {
-    return url + "email=" + user;
-  }
 
   /** 
    * opens a url and performs a doGet request 
@@ -245,6 +237,13 @@ public final class AuthServletTest {
     } catch (IOException e) {
       fail();
     }
+  }
+
+  /**
+   * makes a dummy URL using a url "base" with an intended user id
+   */
+  public static String makeLoginURL(String url, String user) {
+    return url + "email=" + user;
   }
 
   /* the LoginObject structure used by AuthServlet */

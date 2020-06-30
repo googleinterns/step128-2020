@@ -30,7 +30,6 @@ import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.sps.servlets.EventServlet;
 import com.google.sps.servlets.AuthServlet;
 import com.google.gson.Gson;
-import com.google.sps.MockedUserService;
 import java.io.IOException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -64,20 +63,13 @@ public final class EventServletTest {
   private String activeUrl;
 
   /**
-   * makes a dummy URL using a url "base" with an intended user id
-   */
-  private String makeLoginURL(String url, String user) {
-    return url + "email=" + user;
-  }
-
-  /**
    * Use the current url to login/logout
    *
    * @param email If logging in, will log into this user's account.
    */
   private void toggleLogin(String email) throws MalformedURLException, IOException {
     URL mockurl = PowerMockito.mock(URL.class);
-    when(mockurl.openConnection()).thenReturn(mockService.evaluateURL(makeLoginURL(activeUrl, email)));
+    when(mockurl.openConnection()).thenReturn(mockService.evaluateURL(AuthServletTest.makeLoginURL(activeUrl, email)));
     mockurl.openConnection();
 
     HttpServletRequest request = mock(HttpServletRequest.class);
