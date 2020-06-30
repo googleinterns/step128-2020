@@ -204,10 +204,7 @@ public final class UserServletTest {
 
     testUserServlet.doGet(request, response);
     out.flush();
-    String result = out.toString();
-    // System.out.println("THIS IS THE RESULT: " + result);
-
-    List<Entity> resultingEntities = gson.fromJson(result, new TypeToken<ArrayList<Entity>>(){}.getType());
+    List<Entity> resultingEntities = gson.fromJson(out.toString(), new TypeToken<ArrayList<Entity>>(){}.getType());
 
     // create the expected resulting search results
     Entity goalEntity = new Entity("Event");
@@ -260,8 +257,57 @@ public final class UserServletTest {
 
   @Test
   public void getCreatedEvents() throws IOException {
+    // login as test@example.com and make sure method returns correct events
 
+    postEventsSetup();
+    toggleLogin("test@example.com");
+
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    when(request.getParameter("get")).thenReturn("created");
+
+    StringWriter out = new StringWriter();
+    PrintWriter writer = new PrintWriter(out);
+    when(response.getWriter()).thenReturn(writer);
+
+    testUserServlet.doGet(request, response);
+    out.flush();
+    List<Entity> resultingEntities = gson.fromJson(out.toString(), new TypeToken<ArrayList<Entity>>(){}.getType());
+    
+    Entity goalEntity = new Entity("Event");
+    goalEntity.setProperty("eventName", "Lake Clean Up");
+    goalEntity.setProperty("eventDescription", "We're cleaning up the lake");
+    goalEntity.setProperty("streetAddress", "678 Lakeview Way");
+    goalEntity.setProperty("city", "Lakeside");
+    goalEntity.setProperty("state", "Michigan");
+    goalEntity.setProperty("date", "2020-17-05");
+    goalEntity.setProperty("startTime", "14:00");
+    goalEntity.setProperty("endTime", "");
+    goalEntity.setProperty("coverPhoto", "");
+    goalEntity.setProperty("tags", "['environment']");
+    goalEntity.setProperty("creator", "test@example.com");
+
+    Entity goalEntity2 = new Entity("Event");
+    goalEntity2.setProperty("eventName", "BLM Protest");
+    goalEntity2.setProperty("eventDescription", "Fight for racial justice!");
+    goalEntity2.setProperty("streetAddress", "Main Street");
+    goalEntity2.setProperty("city", "Los Angeles");
+    goalEntity2.setProperty("state", "California");
+    goalEntity2.setProperty("date", "2020-17-05");
+    goalEntity2.setProperty("startTime", "13:00");
+    goalEntity2.setProperty("endTime", "");
+    goalEntity2.setProperty("coverPhoto", "");
+    goalEntity2.setProperty("tags", "['blm']");
+    goalEntity2.setProperty("creator", "test@example.com");
+
+    List<Entity> goalEntityList = new ArrayList<>();
+    goalEntityList.add(goalEntity2);
+    goalEntityList.add(goalEntity);
+
+    assertListsEqual(goalEntityList, resultingEntities);
   }
+
+  // TODO: no tests yet for saved events (no means of saving events yet)
 
 
   /* the LoginObject structure used by AuthServlet */
