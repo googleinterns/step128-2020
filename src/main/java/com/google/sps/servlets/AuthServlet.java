@@ -49,6 +49,8 @@ public class AuthServlet extends HttpServlet {
 
       DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
       Key userKey = KeyFactory.createKey("User", userEmail);
+
+      // make sure there is a datastore entry for each user
       try {
         Entity entity = datastore.get(userKey);
       } catch (EntityNotFoundException e) {
