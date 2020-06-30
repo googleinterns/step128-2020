@@ -149,4 +149,4 @@ public final class AuthServletTest {
     private boolean loggedIn;
     private String url;
   }
-}E
+}
