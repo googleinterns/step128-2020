@@ -7,17 +7,12 @@
     <link rel="icon" href="images/step-favicon.svg" type="image/svg" sizes="16x16">
     <script src="script.js"></script>
   </head>
-  <body onload="loadActions(); getEvents('test', 1, 2)">
+  <body onload="loadActions(); getMyEvents()">
     <div class="header"></div>
     <div class="page-content">
       <div class="event-section">
         <div class="event-section-header">Saved Events</div>
-        <div class="event-list-container">
-          <div class="no-events">
-            <div class="no-events-text">You have not saved any events yet! 
-                Click the 'Find' tab to find an event you would like to save.</div>
-            </div>
-        </div>
+        <div class="event-list-container"></div>
       </div>
       <div class="event-section">
         <div class="event-section-header">Events You Created</div>
