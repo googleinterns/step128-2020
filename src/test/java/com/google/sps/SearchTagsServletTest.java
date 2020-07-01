@@ -150,14 +150,12 @@ public final class SearchTagsServletTest {
     String result = sw.getBuffer().toString().trim();
     
     // Get the events we were expecting the search to return
-    // from the datastore
+    // from the datastore and assemble our expected
     List<Integer> ids = new ArrayList<Integer>(Arrays.asList(0, 1, 2, 5, 6, 7, 9, 10));
     Filter idFilter =
         new FilterPredicate("eventName", FilterOperator.IN, ids);
     Query query =
         new Query("Event").setFilter(idFilter);
-
-    // Assemble our expected
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     PreparedQuery results = datastore.prepare(query);
     List<Entity> events = new ArrayList<Entity>(
@@ -198,14 +196,12 @@ public final class SearchTagsServletTest {
     String result = sw.getBuffer().toString().trim();
     
     // Get the events we were expecting the search to return
-    // from the datastore
+    // from the datastore and assemble our expected
     List<Integer> ids = new ArrayList<Integer>(Arrays.asList(2, 6, 7, 9, 10));
     Filter idFilter =
         new FilterPredicate("eventName", FilterOperator.IN, ids);
     Query query =
         new Query("Event").setFilter(idFilter);
-
-    // Assemble our expected
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     PreparedQuery results = datastore.prepare(query);
     List<Entity> events = new ArrayList<Entity>(
