@@ -436,7 +436,7 @@ async function getEvents(url, index, option) {
   events.forEach(function(event) {
     const eventItemElement = document.createElement('a');
     eventItemElement.className = 'event-item';
-    eventItemElement.setAttribute('onclick', 'openEvent(\"' 
+    eventItemElement.setAttribute('onclick', 'openLink(\"' 
         + event.url + '\")');
     eventListElement.appendChild(eventItemElement);
 
@@ -599,7 +599,7 @@ async function getEvents(url, index, option) {
   //   </div>
 }
 
-function openEvent(url) {
+function openLink(url) {
   window.location.pathname = url;
 }
 
@@ -666,4 +666,23 @@ function toggleSurveyDisplay(question, index) {
 	}
 	circle.style.backgroundColor = 'white';
 	surveyResponses[question] = index;
+}
+
+function submitSurvey() {
+  if (loggedIn) {
+    var params = new URLSearchParams();
+    for (var i = 0; i < surveyResponses.length; i++) {
+      const score = surveyResponses[i];
+      if(score < 0) {
+        alert('Please finish the survey first!'); // TODO: streamline this probably
+        return;
+      } else {
+        params.append(tagsAll[i], score);
+      }
+    }
+    fetch(new Request("/user-interest", {method: "POST", body: params}));
+  } else {
+    // cannot submit while not logged in
+    alert('Please log in first!');
+  }
 }
