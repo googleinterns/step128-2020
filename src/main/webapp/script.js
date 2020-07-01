@@ -12,6 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+
+var url = "";
+var loggedIn = false;
+
 /* determines which stylesheet to use and generates nav bar*/
 function loadActions() {
   const styleSheetElement = document.getElementById('style');
@@ -21,7 +25,17 @@ function loadActions() {
     styleSheetElement.href = 'style-mobile.css';
   }
 
+  checkLogin();
+
   generateNavBar();
+}
+
+/* checks for login status and fetches login/logout url */
+async function checkLogin() {
+ fetch('/auth').then(response => response.json()).then(function(responseJson) {
+    loggedIn = responseJson.loggedIn;
+    url = responseJson.url;
+  });
 }
 
 function generateNavBar() {
