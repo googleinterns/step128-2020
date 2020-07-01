@@ -45,6 +45,15 @@ public class LoadEventServlet extends HttpServlet {
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     Entity eventRequested = datastore.prepare(query).asSingleEntity();
 
+    request = populateRequest(request, eventRequested);
+
+    request.getRequestDispatcher("/WEB-INF/html/display-event.jsp").forward(request, response);
+  }
+
+  /**
+   * @return the request with attributes set.
+   */ 
+  private HttpServletRequest populateRequest(HttpServletRequest request, Entity eventRequested) {
     String name = (String) eventRequested.getProperty("eventName");
     String description = (String) eventRequested.getProperty("eventDescription");
     String date = (String) eventRequested.getProperty("date");
@@ -63,8 +72,8 @@ public class LoadEventServlet extends HttpServlet {
     request.setAttribute("city", city);
     request.setAttribute("state", state);
 
-    request.getRequestDispatcher("/WEB-INF/html/display-event.jsp").forward(request, response);
-  }
+    return request;
+  } 
 
   /**
    * @return the key from the request parameter.
