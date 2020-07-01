@@ -23,7 +23,6 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
-import com.google.appengine.api.datastore.PreparedQuery.TooManyResultsException;
 import java.io.IOException;
 import java.lang.IllegalArgumentException;
 import java.util.logging.Level;
