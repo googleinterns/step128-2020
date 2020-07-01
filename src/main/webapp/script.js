@@ -673,7 +673,7 @@ function submitSurvey() {
     var params = new URLSearchParams();
     for (var i = 0; i < surveyResponses.length; i++) {
       const score = surveyResponses[i];
-      if(score < 0) {
+      if (score < 0) {
         alert('Please finish the survey first!'); // TODO: streamline this probably
         return;
       } else {
