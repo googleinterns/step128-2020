@@ -170,15 +170,7 @@ public final class SearchTagsServletTest {
     // Order results like sorting algorithm will
     List<String> desiredOrder = new ArrayList<String>(
         Arrays.asList("9", "5", "6", "10", "0", "1", "2", "7"));
-    List<Entity> orderedEvents = new ArrayList<Entity>();
-    for (int o = 0; o < desiredOrder.size(); o++) {
-      for (int i = 0; i < events.size(); i++) {
-        if (events.get(i).getProperty("eventName").toString().equals(
-            desiredOrder.get(o))) {
-          orderedEvents.add(events.get(i));
-        }
-      }
-    }
+    List<Entity> orderedEvents = orderEvents(desiredOrder, events);
 
     // Convert expected events to JSON for comparison
     String expected = Utility.convertToJson(orderedEvents);
@@ -219,15 +211,7 @@ public final class SearchTagsServletTest {
     // Order results like sorting algorithm will
     List<String> desiredOrder = new ArrayList<String>(
         Arrays.asList("2", "6", "7", "9", "10"));
-    List<Entity> orderedEvents = new ArrayList<Entity>();
-    for (int o = 0; o < desiredOrder.size(); o++) {
-      for (int i = 0; i < events.size(); i++) {
-        if (events.get(i).getProperty("eventName").toString().equals(
-            desiredOrder.get(o))) {
-          orderedEvents.add(events.get(i));
-        }
-      }
-    }
+    List<Entity> orderedEvents = orderEvents(desiredOrder, events);
 
     // Convert expected events to JSON for comparison
     String expected = Utility.convertToJson(orderedEvents);
@@ -262,5 +246,18 @@ public final class SearchTagsServletTest {
         new ArrayList<String>(Arrays.asList("environment", "blm", "volunteer"));
     int result = testSearchServlet.tagsInCommon(tagListA, tagListB);
     assertEquals(0, result);
+  }
+
+  private static List<Entity> orderEvents(List<String> desiredOrder, List<Entity> events) {
+    List<Entity> orderedEvents = new ArrayList<Entity>();
+    for (int o = 0; o < desiredOrder.size(); o++) {
+      for (int i = 0; i < events.size(); i++) {
+        if (events.get(i).getProperty("eventName").toString().equals(
+            desiredOrder.get(o))) {
+          orderedEvents.add(events.get(i));
+        }
+      }
+    }
+    return orderedEvents;
   }
 }
