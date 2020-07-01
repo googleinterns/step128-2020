@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8">
     <title>STEP Capstone</title>
-    <link id="style" rel="stylesheet" href="style-mobile.css">
+    <link id="style" rel="stylesheet" href="style.css">
     <script src="script.js"></script>
   </head>
   <body id="body" onload="loadActions();">
