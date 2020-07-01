@@ -14,45 +14,35 @@
 
 package com.google.sps;
 
-import static com.google.appengine.api.datastore.FetchOptions.Builder.withLimit;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
 
-import com.google.appengine.api.datastore.DatastoreService;
-import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.google.sps.servlets.AuthServlet;
 import com.google.sps.servlets.EventServlet;
 import com.google.sps.servlets.UserServlet;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import java.io.IOException;
-import javax.servlet.http.HttpServlet;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import java.io.StringWriter;
-import java.io.PrintWriter;
-import java.io.BufferedReader;
-import java.io.StringReader;
-import java.net.URL;
-import java.net.MalformedURLException;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Set;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({URL.class, UserServiceFactory.class})
@@ -74,7 +64,8 @@ public final class UserServletTest {
    */
   private void toggleLogin(String email) throws MalformedURLException, IOException {
     URL mockurl = PowerMockito.mock(URL.class);
-    when(mockurl.openConnection()).thenReturn(mockService.evaluateURL(AuthServletTest.makeLoginURL(activeUrl, email)));
+    when(mockurl.openConnection())
+        .thenReturn(mockService.evaluateURL(AuthServletTest.makeLoginURL(activeUrl, email)));
     mockurl.openConnection();
 
     HttpServletRequest request = mock(HttpServletRequest.class);
@@ -89,19 +80,17 @@ public final class UserServletTest {
     activeUrl = result.url;
   }
 
-  /**
-   * Checks for equality and order between two entity lists without checking the keys
-   */
+  /** Checks for equality and order between two entity lists without checking the keys */
   private void assertListsEqual(List<Entity> goalEntityList, List<Entity> resultingEntities) {
     assertEquals(goalEntityList.size(), resultingEntities.size());
-    for(int i = 0; i < goalEntityList.size(); i++) {
+    for (int i = 0; i < goalEntityList.size(); i++) {
       Entity goal = goalEntityList.get(i);
       Entity resultEntity = resultingEntities.get(i);
       Set<String> goalProperties = goal.getProperties().keySet();
       Set<String> resultProperties = goal.getProperties().keySet();
       // checks along each of entity properties
       assertEquals(goalProperties.size(), resultProperties.size());
-      for(String s: goalProperties) {
+      for (String s : goalProperties) {
         assertEquals(goal.getProperty(s), resultEntity.getProperty(s));
       }
     }
@@ -149,7 +138,8 @@ public final class UserServletTest {
 
     testUserServlet.doGet(request, response);
     out.flush();
-    List<Entity> resultingEntities = gson.fromJson(out.toString(), new TypeToken<ArrayList<Entity>>(){}.getType());
+    List<Entity> resultingEntities =
+        gson.fromJson(out.toString(), new TypeToken<ArrayList<Entity>>() {}.getType());
 
     // create the expected resulting search results
     Entity goalEntity = createLakeCleanupEvent();
@@ -182,8 +172,9 @@ public final class UserServletTest {
 
     testUserServlet.doGet(request, response);
     out.flush();
-    List<Entity> resultingEntities = gson.fromJson(out.toString(), new TypeToken<ArrayList<Entity>>(){}.getType());
-    
+    List<Entity> resultingEntities =
+        gson.fromJson(out.toString(), new TypeToken<ArrayList<Entity>>() {}.getType());
+
     Entity goalEntity = createLakeCleanupEvent();
     Entity goalEntity2 = createBlmProtestEvent();
 
@@ -196,9 +187,7 @@ public final class UserServletTest {
 
   // TODO: no tests yet for saved events (no means of saving events yet)
 
-  /**
-   * Logs in and out a few times, posting events to datastore
-   */
+  /** Logs in and out a few times, posting events to datastore */
   private void postEventsSetup() throws IOException {
     // posted by test@example.com
     toggleLogin("test@example.com");
@@ -294,7 +283,6 @@ public final class UserServletTest {
 
     return entity;
   }
-
 
   /* the LoginObject structure used by AuthServlet */
   private static class LoginObject {

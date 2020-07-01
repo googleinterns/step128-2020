@@ -26,8 +26,13 @@ import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
-import com.google.sps.servlets.AuthServlet;
 import com.google.gson.Gson;
+import com.google.sps.servlets.AuthServlet;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.net.MalformedURLException;
+import java.net.URL;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.junit.After;
@@ -37,14 +42,6 @@ import org.junit.runner.RunWith;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import java.io.IOException;
-import java.io.StringWriter;
-import java.io.PrintWriter;
-import java.io.BufferedReader;
-import java.io.StringReader;
-import java.util.ArrayList;
-import java.net.URL;
-import java.net.MalformedURLException;
 
 /** */
 @RunWith(PowerMockRunner.class)
@@ -55,11 +52,6 @@ public final class AuthServletTest {
   private final Gson gson = new Gson();
   private AuthServlet testAuthServlet;
   private MockedUserService mockService;
-
-  /** makes a dummy URL using a url "base" with an intended user id */
-  public static String makeLoginURL(String url, String user) {
-    return url + "email=" + user;
-  }
 
   /**
    * opens a url and performs a doGet request
@@ -243,9 +235,7 @@ public final class AuthServletTest {
     }
   }
 
-  /**
-   * makes a dummy URL using a url "base" with an intended user id
-   */
+  /** makes a dummy URL using a url "base" with an intended user id */
   public static String makeLoginURL(String url, String user) {
     return url + "email=" + user;
   }

@@ -14,29 +14,21 @@
 
 package com.google.sps;
 
-import static com.google.appengine.api.datastore.FetchOptions.Builder.withLimit;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
 
-import com.google.appengine.api.datastore.DatastoreService;
-import com.google.appengine.api.datastore.DatastoreServiceFactory;
-import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.Query;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.sps.servlets.SearchServlet;
 import java.io.IOException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import org.junit.Test;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Arrays;
 
 /** */
 @RunWith(JUnit4.class)
@@ -59,37 +51,49 @@ public final class SearchServletTest {
   @Test
   public void getsSeparateWordsCorrectly() throws IOException {
     String text = "The quick brown fox jumps over the lazy dog.";
-    List<String> correctList = new ArrayList<String>(
-        Arrays.asList("The","quick","brown","fox","jumps","over","the","lazy",
-        "dog"));  
+    List<String> correctList =
+        new ArrayList<String>(
+            Arrays.asList("The", "quick", "brown", "fox", "jumps", "over", "the", "lazy", "dog"));
     List<String> testList = SearchServlet.getSeparateWords(text);
     assertEquals(correctList, testList);
   }
 
   @Test
   public void handlesAllSeparatorsCorrectly() throws IOException {
-    String text = "Are you sure? I... well; I'm not:quite, "
-        + "personally(hehe)[okay]";
-    List<String> correctList = new ArrayList<String>(
-        Arrays.asList("Are","you","sure","I","well","I'm","not","quite",
-        "personally","hehe","okay"));  
+    String text = "Are you sure? I... well; I'm not:quite, " + "personally(hehe)[okay]";
+    List<String> correctList =
+        new ArrayList<String>(
+            Arrays.asList(
+                "Are",
+                "you",
+                "sure",
+                "I",
+                "well",
+                "I'm",
+                "not",
+                "quite",
+                "personally",
+                "hehe",
+                "okay"));
     List<String> testList = SearchServlet.getSeparateWords(text);
     assertEquals(correctList, testList);
   }
 
   @Test
   public void getsTitleAndDescKeywordsCorrectly() throws IOException {
-    String titleText = "Climate climate climate climate Protest! Climate "
-        + "protest: Protest protest!";
-    String descText = "Important! Please come out in support of the environment. The "
-        + "environment is so important to us! Protect the environment. Come!";
+    String titleText =
+        "Climate climate climate climate Protest! Climate " + "protest: Protest protest!";
+    String descText =
+        "Important! Please come out in support of the environment. The "
+            + "environment is so important to us! Protect the environment. Come!";
     // climate - 5, w/ weight 10
     // protest - 4, w/ weight 8
     // environment - 3
     // come - 2
     // important - 2
-    List<String> correctList = new ArrayList<String>(
-        Arrays.asList("climate", "protest", "environment", "come", "important"));  
+    List<String> correctList =
+        new ArrayList<String>(
+            Arrays.asList("climate", "protest", "environment", "come", "important"));
     List<String> testList = SearchServlet.getKeywords(titleText, descText);
     assertEquals(correctList, testList);
   }
@@ -97,15 +101,17 @@ public final class SearchServletTest {
   @Test
   public void getsTitleAndDescKeywordsCorrectlyWeighted() throws IOException {
     String titleText = "Climate! Climate change protest: Protest for our children!";
-    String descText = "Important! Please come out in support of the environment. The "
-        + "environment is so important important to us! Protect the environment. Come come!";
+    String descText =
+        "Important! Please come out in support of the environment. The "
+            + "environment is so important important to us! Protect the environment. Come come!";
     // climate - 4, w/o weight 2
     // protest - 4, w/o weight 2
     // environment - 3
     // come - 3
     // important - 3
-    List<String> correctList = new ArrayList<String>(
-        Arrays.asList("protest", "climate", "come", "important", "environment"));  
+    List<String> correctList =
+        new ArrayList<String>(
+            Arrays.asList("protest", "climate", "come", "important", "environment"));
     List<String> testList = SearchServlet.getKeywords(titleText, descText);
     assertEquals(correctList, testList);
   }
@@ -119,8 +125,8 @@ public final class SearchServletTest {
     // change - 2
     // climate - 2
     // support - 1, so its cut off
-    List<String> correctList = new ArrayList<String>(
-        Arrays.asList("protest", "environment", "change", "climate"));  
+    List<String> correctList =
+        new ArrayList<String>(Arrays.asList("protest", "environment", "change", "climate"));
     List<String> testList = SearchServlet.getKeywords(titleText, descText);
     assertEquals(correctList, testList);
   }
@@ -128,18 +134,20 @@ public final class SearchServletTest {
   @Test
   public void getKeywordsHasMax5() throws IOException {
     String titleText = "";
-    String descText = "Climate climate climate climate change change change"
-        + " protest protest protest for Earth Earth. Important movement "
-        + "movement to movement movement movement important important "
-        + "important important important.";
+    String descText =
+        "Climate climate climate climate change change change"
+            + " protest protest protest for Earth Earth. Important movement "
+            + "movement to movement movement movement important important "
+            + "important important important.";
     // important - 6
     // movement - 5
     // climate - 4
     // change - 3
     // protest - 3
     // earth should be cut off
-    List<String> correctList = new ArrayList<String>(
-        Arrays.asList("important","movement","climate", "change", "protest"));  
+    List<String> correctList =
+        new ArrayList<String>(
+            Arrays.asList("important", "movement", "climate", "change", "protest"));
     List<String> testList = SearchServlet.getKeywords(titleText, descText);
     assertEquals(correctList, testList);
   }

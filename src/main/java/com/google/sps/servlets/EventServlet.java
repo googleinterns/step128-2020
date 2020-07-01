@@ -14,11 +14,11 @@
 
 package com.google.sps.servlets;
 
-import com.google.appengine.api.users.UserService;
-import com.google.appengine.api.users.UserServiceFactory;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.users.UserService;
+import com.google.appengine.api.users.UserServiceFactory;
 import java.io.IOException;
 import java.util.logging.Logger;
 import javax.servlet.annotation.WebServlet;
@@ -43,12 +43,12 @@ public class EventServlet extends HttpServlet {
       String email = userService.getCurrentUser().getEmail();
       Entity eventEntity = populateEvent(request);
       eventEntity.setProperty("creator", email);
-      
+
       DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
       datastore.put(eventEntity);
 
     } else {
-      throw new IOException ("Cannot create an event while not logged in");
+      throw new IOException("Cannot create an event while not logged in");
     }
 
     // Redirect back to the my-events HTML page.
