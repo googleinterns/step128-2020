@@ -49,7 +49,7 @@ public class SearchServlet extends HttpServlet {
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     // List of all the tags we are searching for
-    List<String> searchTags = new ArrayList<String>(Arrays.asList(request.getParameter("tags")));
+    List<String> searchTags = new ArrayList<String>(Arrays.asList(request.getParameterValues("tags")));
     // Filter to check if the event has any of tags we're searching for
     Filter tagsFilter =
         new FilterPredicate("tags", FilterOperator.IN, searchTags);
@@ -66,13 +66,16 @@ public class SearchServlet extends HttpServlet {
     // get tags
     // drop all without first tag?
     // Sort list by most tags in common with search
-    /*Collections.sort(events, new Comparator<Entity>() { 
-      public int compare(Entity o1,  
-                         Entity o2) { 
-        return (o2.getProperty("tags")).compareTo(o1.getValue()); 
+    Collections.sort(events, new Comparator<Entity>() { 
+      public int compare(Entity o1, Entity o2) {
+        int condition = tagsInCommon((List<String>) o2.getProperty("tags"), searchTags).compareTo(
+            tagsInCommon((List<String>) o1.getProperty("tags"), searchTags));
+        if (condition == 0) {
+          return Integer.compare(Integer.parseInt(o1.getProperty("eventName").toString()),
+              Integer.parseInt(o2.getProperty("eventName").toString()));
+        } else return condition;
       } 
-    });*/
-    
+    });
     // those closest to the user go to the top
     
     // Convert events list to json
@@ -87,8 +90,9 @@ public class SearchServlet extends HttpServlet {
 
   }
 
-  public int tagsInCommon(List<String> tagListA, List<String> tagListB) {
-    tagListA.retainAll(tagListB);
-    return tagListA.size();
+  public Integer tagsInCommon(List<String> tagListA, List<String> tagListB) {
+    List<String> tagListC = new ArrayList<String>(tagListA);
+    tagListC.retainAll(tagListB);
+    return tagListC.size();
   }
 }

@@ -77,6 +77,13 @@ public final class SearchTagsServletTest {
       e.setIndexedProperty("tags", new ArrayList<String>(Arrays.asList(possibleTags.get(i-5), possibleTags.get(i-4))));
       testEntities.add(e);
     }
+    // Triple tag events
+    for (int i = 9; i < 11; i++) {
+      Entity e = new Entity("Event");
+      e.setProperty("eventName", i);
+      e.setIndexedProperty("tags", new ArrayList<String>(Arrays.asList(possibleTags.get(i-9), possibleTags.get(i-8), possibleTags.get(i-7))));
+      testEntities.add(e);
+    }
     // Add all the events to the mock Datastore
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     for (Entity e : testEntities) {
@@ -88,7 +95,7 @@ public final class SearchTagsServletTest {
   public void tearDown() {
     helper.tearDown();
   }
-
+/*
   @Test
   public void anyQueryAndOutput() throws IOException {
     HttpServletRequest request = mock(HttpServletRequest.class);
@@ -121,8 +128,104 @@ public final class SearchTagsServletTest {
     // Convert expected events to JSON for comparison
     String expected = Utility.convertToJson(events);
     assertEquals(expected, result);
+  }*/
+
+  @Test
+  public void checkSortedByCommonTags() throws IOException {
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpServletResponse response = mock(HttpServletResponse.class);
+
+    StringWriter sw = new StringWriter();
+    PrintWriter pw = new PrintWriter(sw);
+  
+    when(response.getWriter()).thenReturn(pw);
+
+    // Send the request to the servlet with param
+    String[] paramArr = {"environment","blm","education"};
+    when(request.getParameterValues("tags")).thenReturn(paramArr);
+    testSearchServlet.doGet(request, response);
+  
+    // Get the JSON response from the server
+    String result = sw.getBuffer().toString().trim();
+    
+    // Get the events we were expecting the search to return
+    // from the datastore
+    List<Integer> ids = new ArrayList<Integer>(Arrays.asList(0, 1, 2, 5, 6, 7, 9, 10));
+    Filter idFilter =
+        new FilterPredicate("eventName", FilterOperator.IN, ids);
+    Query query =
+        new Query("Event").setFilter(idFilter);
+
+    // Assemble our expected
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    PreparedQuery results = datastore.prepare(query);
+    List<Entity> events = new ArrayList<Entity>(
+        results.asList(FetchOptions.Builder.withDefaults()));
+    // Order results like sorting algorithm will
+    List<String> desiredOrder = new ArrayList<String>(
+        Arrays.asList("9", "5", "6", "10", "0", "1", "2", "7"));
+    List<Entity> orderedEvents = new ArrayList<Entity>();
+    for (int o = 0; o < desiredOrder.size(); o++) {
+      for (int i = 0; i < events.size(); i++) {
+        if (events.get(i).getProperty("eventName").toString().equals(desiredOrder.get(o))) {
+          orderedEvents.add(events.get(i));
+        }
+      }
+    }
+
+    // Convert expected events to JSON for comparison
+    String expected = Utility.convertToJson(orderedEvents);
+    assertEquals(expected, result);
   }
 
+  @Test
+  public void checkSingleTagSorted() throws IOException {
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpServletResponse response = mock(HttpServletResponse.class);
+
+    StringWriter sw = new StringWriter();
+    PrintWriter pw = new PrintWriter(sw);
+  
+    when(response.getWriter()).thenReturn(pw);
+
+    // Send the request to the servlet with param
+    String[] paramArr = {"education"};
+    when(request.getParameterValues("tags")).thenReturn(paramArr);
+    testSearchServlet.doGet(request, response);
+  
+    // Get the JSON response from the server
+    String result = sw.getBuffer().toString().trim();
+    
+    // Get the events we were expecting the search to return
+    // from the datastore
+    List<Integer> ids = new ArrayList<Integer>(Arrays.asList(2, 6, 7, 9, 10));
+    Filter idFilter =
+        new FilterPredicate("eventName", FilterOperator.IN, ids);
+    Query query =
+        new Query("Event").setFilter(idFilter);
+
+    // Assemble our expected
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    PreparedQuery results = datastore.prepare(query);
+    List<Entity> events = new ArrayList<Entity>(
+        results.asList(FetchOptions.Builder.withDefaults()));
+    // Order results like sorting algorithm will
+    List<String> desiredOrder = new ArrayList<String>(
+        Arrays.asList("2", "6", "7", "9", "10"));
+    List<Entity> orderedEvents = new ArrayList<Entity>();
+    for (int o = 0; o < desiredOrder.size(); o++) {
+      for (int i = 0; i < events.size(); i++) {
+        if (events.get(i).getProperty("eventName").toString().equals(desiredOrder.get(o))) {
+          orderedEvents.add(events.get(i));
+        }
+      }
+    }
+
+    // Convert expected events to JSON for comparison
+    String expected = Utility.convertToJson(orderedEvents);
+    assertEquals(expected, result);
+  }
+/*
   @Test
   public void correctNumberTagsInCommon() throws IOException {
     List<String> tagListA = 
@@ -151,5 +254,5 @@ public final class SearchTagsServletTest {
         new ArrayList<String>(Arrays.asList("environment", "blm", "volunteer"));
     int result = testSearchServlet.tagsInCommon(tagListA, tagListB);
     assertEquals(0, result);
-  }
+  }*/
 }
