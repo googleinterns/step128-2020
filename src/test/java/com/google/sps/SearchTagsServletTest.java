@@ -67,21 +67,26 @@ public final class SearchTagsServletTest {
     for (int i = 0; i < 5; i++) {
       Entity e = new Entity("Event");
       e.setProperty("eventName", i);
-      e.setIndexedProperty("tags", new ArrayList<String>(Arrays.asList(possibleTags.get(i))));
+      e.setIndexedProperty("tags", 
+          new ArrayList<String>(Arrays.asList(possibleTags.get(i))));
       testEntities.add(e);
     }
     // Double tag events
     for (int i = 5; i < 9; i++) {
       Entity e = new Entity("Event");
       e.setProperty("eventName", i);
-      e.setIndexedProperty("tags", new ArrayList<String>(Arrays.asList(possibleTags.get(i-5), possibleTags.get(i-4))));
+      e.setIndexedProperty("tags", 
+          new ArrayList<String>(Arrays.asList(possibleTags.get(i-5), 
+          possibleTags.get(i-4))));
       testEntities.add(e);
     }
     // Triple tag events
     for (int i = 9; i < 11; i++) {
       Entity e = new Entity("Event");
       e.setProperty("eventName", i);
-      e.setIndexedProperty("tags", new ArrayList<String>(Arrays.asList(possibleTags.get(i-9), possibleTags.get(i-8), possibleTags.get(i-7))));
+      e.setIndexedProperty("tags", 
+          new ArrayList<String>(Arrays.asList(possibleTags.get(i-9), 
+          possibleTags.get(i-8), possibleTags.get(i-7))));
       testEntities.add(e);
     }
     // Add all the events to the mock Datastore
@@ -151,7 +156,8 @@ public final class SearchTagsServletTest {
     
     // Get the events we were expecting the search to return
     // from the datastore and assemble our expected
-    List<Integer> ids = new ArrayList<Integer>(Arrays.asList(0, 1, 2, 5, 6, 7, 9, 10));
+    List<Integer> ids = 
+        new ArrayList<Integer>(Arrays.asList(0, 1, 2, 5, 6, 7, 9, 10));
     Filter idFilter =
         new FilterPredicate("eventName", FilterOperator.IN, ids);
     Query query =
@@ -160,13 +166,15 @@ public final class SearchTagsServletTest {
     PreparedQuery results = datastore.prepare(query);
     List<Entity> events = new ArrayList<Entity>(
         results.asList(FetchOptions.Builder.withDefaults()));
+
     // Order results like sorting algorithm will
     List<String> desiredOrder = new ArrayList<String>(
         Arrays.asList("9", "5", "6", "10", "0", "1", "2", "7"));
     List<Entity> orderedEvents = new ArrayList<Entity>();
     for (int o = 0; o < desiredOrder.size(); o++) {
       for (int i = 0; i < events.size(); i++) {
-        if (events.get(i).getProperty("eventName").toString().equals(desiredOrder.get(o))) {
+        if (events.get(i).getProperty("eventName").toString().equals(
+            desiredOrder.get(o))) {
           orderedEvents.add(events.get(i));
         }
       }
@@ -197,7 +205,8 @@ public final class SearchTagsServletTest {
     
     // Get the events we were expecting the search to return
     // from the datastore and assemble our expected
-    List<Integer> ids = new ArrayList<Integer>(Arrays.asList(2, 6, 7, 9, 10));
+    List<Integer> ids = 
+        new ArrayList<Integer>(Arrays.asList(2, 6, 7, 9, 10));
     Filter idFilter =
         new FilterPredicate("eventName", FilterOperator.IN, ids);
     Query query =
@@ -206,13 +215,15 @@ public final class SearchTagsServletTest {
     PreparedQuery results = datastore.prepare(query);
     List<Entity> events = new ArrayList<Entity>(
         results.asList(FetchOptions.Builder.withDefaults()));
+
     // Order results like sorting algorithm will
     List<String> desiredOrder = new ArrayList<String>(
         Arrays.asList("2", "6", "7", "9", "10"));
     List<Entity> orderedEvents = new ArrayList<Entity>();
     for (int o = 0; o < desiredOrder.size(); o++) {
       for (int i = 0; i < events.size(); i++) {
-        if (events.get(i).getProperty("eventName").toString().equals(desiredOrder.get(o))) {
+        if (events.get(i).getProperty("eventName").toString().equals(
+            desiredOrder.get(o))) {
           orderedEvents.add(events.get(i));
         }
       }

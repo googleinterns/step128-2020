@@ -49,7 +49,8 @@ public class SearchServlet extends HttpServlet {
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     // List of all the tags we are searching for
-    List<String> searchTags = new ArrayList<String>(Arrays.asList(request.getParameterValues("tags")));
+    List<String> searchTags = 
+        new ArrayList<String>(Arrays.asList(request.getParameterValues("tags")));
     // Filter to check if the event has any of tags we're searching for
     Filter tagsFilter =
         new FilterPredicate("tags", FilterOperator.IN, searchTags);
@@ -58,7 +59,8 @@ public class SearchServlet extends HttpServlet {
 
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     PreparedQuery results = datastore.prepare(query);
-    List<Entity> events = new ArrayList<Entity>(results.asList(FetchOptions.Builder.withDefaults()));
+    List<Entity> events = 
+        new ArrayList<Entity>(results.asList(FetchOptions.Builder.withDefaults()));
 
     // get location
     // filter by location and cutoff outside it
@@ -68,12 +70,14 @@ public class SearchServlet extends HttpServlet {
     // Sort list by most tags in common with search
     Collections.sort(events, new Comparator<Entity>() { 
       public int compare(Entity o1, Entity o2) {
-        int condition = tagsInCommon((List<String>) o2.getProperty("tags"), searchTags).compareTo(
+        int condition = 
+            tagsInCommon((List<String>) o2.getProperty("tags"), searchTags).compareTo(
             tagsInCommon((List<String>) o1.getProperty("tags"), searchTags));
         // For development purposes, if two events have the same number of tags
         // they are sorted by the event names (which in the test cases are integers)
         if (condition == 0) {
-          return Integer.compare(Integer.parseInt(o1.getProperty("eventName").toString()),
+          return Integer.compare(
+              Integer.parseInt(o1.getProperty("eventName").toString()),
               Integer.parseInt(o2.getProperty("eventName").toString()));
         } else return condition;
       } 
@@ -92,6 +96,13 @@ public class SearchServlet extends HttpServlet {
 
   }
 
+  /**
+   * Returns a count of the number of tags two lists have in common
+   *
+   * @return Integer count of number of tags in common
+   * @param tagListA List of tags to be compared
+   * @param tagListB List of tags to be compared
+   */
   public Integer tagsInCommon(List<String> tagListA, List<String> tagListB) {
     List<String> tagListC = new ArrayList<String>(tagListA);
     tagListC.retainAll(tagListB);
