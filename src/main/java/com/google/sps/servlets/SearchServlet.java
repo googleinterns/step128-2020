@@ -41,13 +41,13 @@ public class SearchServlet extends HttpServlet {
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    //get location
-    //filter by location and cutoff outside it
+    // get location
+    // filter by location and cutoff outside it
     
-    //get tags
-    //drop all without first tag
-    //those with most tags in common with search go to top
-    //those closest to the user go to the top
+    // get tags
+    // drop all without first tag
+    // those with most tags in common with search go to top
+    // those closest to the user go to the top
   }
 
   @Override
@@ -60,10 +60,10 @@ public class SearchServlet extends HttpServlet {
    * and description) based off an algorithm
    */
   public static List<String> getKeywords(String title, String desc) {
-    //TODO: convert to lowercase in processing (figure out acronyms)
+    // TODO: convert to lowercase in processing (figure out acronyms)
     List<String> titleWords = SearchServlet.getSeparateWords(title);
     
-    //process title words
+    // process title words
     Map<String, Integer> titleMap = new HashMap<String, Integer>();
     for (String w : titleWords) {
       w = w.toLowerCase();
@@ -74,7 +74,7 @@ public class SearchServlet extends HttpServlet {
       }
     }
     List<String> descWords = SearchServlet.getSeparateWords(desc);
-    //process desc words
+    // process desc words
     Map<String, Integer> descMap = new HashMap<String, Integer>();
     for (String w : descWords) {
       w = w.toLowerCase();
@@ -87,7 +87,7 @@ public class SearchServlet extends HttpServlet {
 
     List<Map.Entry<String, Integer>> titleMapList = new ArrayList<Map.Entry<String, Integer>>(titleMap.entrySet()); 
 
-    //merge lists
+    // merge lists
     List<Map.Entry<String, Integer>> mergeList = new ArrayList<Map.Entry<String, Integer>>(descMap.entrySet());
     for (Map.Entry titleEntry : titleMapList) {
       boolean found = false;
@@ -113,17 +113,17 @@ public class SearchServlet extends HttpServlet {
       } 
     });
 
-    //add top results to the final list
+    // add top results to the final list
     List<String> finalList = new ArrayList<String>();
     int count = 0;
-    //minimum number of instances to be considered a keyword
+    // minimum number of instances to be considered a keyword
     int cutoff = 2;
     while (finalList.size() < 5) {
       Map.Entry e = mergeList.get(count);
-      //exclude words with less appearances than the cutoff
+      // exclude words with less appearances than the cutoff
       if (((int) e.getValue()) < cutoff) break;
       else if (count >= mergeList.size()) break;
-      //exclude common useless words (in, a, the, etc)
+      // exclude common useless words (in, a, the, etc)
       else if (!irrelevantWords.contains(e.getKey().toString())) {
         finalList.add(e.getKey().toString());
       }
