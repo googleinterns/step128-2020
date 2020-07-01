@@ -64,14 +64,14 @@ public class SurveyServlet extends HttpServlet {
         userEntity.setProperty("id", userEmail);
       }
 
-			// save score of each survey metric as an entity property
-			for(String param: metrics) {
-				String score = request.getParameter(param);
-				if (score == null) {
-					throw new IOException("incomplete survey");
-				}
-				userEntity.setProperty(param, score);
-			}
+      // save score of each survey metric as an entity property
+      for(String param: metrics) {
+        String score = request.getParameter(param);
+        if (score == null) {
+          throw new IOException("incomplete survey");
+        }
+        userEntity.setProperty(param, score);
+      }
 
       datastore.put(userEntity);
       response.sendRedirect("/index.html");
@@ -80,31 +80,28 @@ public class SurveyServlet extends HttpServlet {
     }
   }
 
-	/**
-		* returns a map of a user's interest levels with respect to each tag 
-		* returns null if unsuccessful (user not found or survey not yet taken/incomplete)
-		*/
-	public static Map<String, Integer> getInterestMetrics(String userEmail) {
-		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-		Key userKey = KeyFactory.createKey("User", userEmail);
-
-		Map<String, Integer> result = new TreeMap<>();
-
-		// make sure there is a datastore entry for the user
-		Entity userEntity;
-		try {
-			userEntity = datastore.get(userKey);
-			for(String param: metrics) {
-				if (userEntity.hasProperty(param)) {
-					int score = Integer.parseInt(userEntity.getProperty(param).toString());
-					result.put(param, score);
-				} else {
-					return null;
-				}
-			}
-		} catch (EntityNotFoundException e) {
-			// do nothing else
-		}
-		return null;
-	}
+  /**
+   * returns a map of a user's interest levels with respect to each tag 
+   * returns null if unsuccessful (user not found or survey not yet taken/incomplete)
+   */
+  public static Map<String, Integer> getInterestMetrics(String userEmail) {
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    Key userKey = KeyFactory.createKey("User", userEmail);
+    Map<String, Integer> result = new TreeMap<>();
+    Entity userEntity;
+    try {
+      userEntity = datastore.get(userKey);
+      for(String param: metrics) {
+        if (userEntity.hasProperty(param)) {
+          int score = Integer.parseInt(userEntity.getProperty(param).toString());
+          result.put(param, score);
+        } else {
+          return null;
+        }
+      }
+    } catch (EntityNotFoundException e) {
+      // do nothing else
+    }
+    return null;
+  }
 }
