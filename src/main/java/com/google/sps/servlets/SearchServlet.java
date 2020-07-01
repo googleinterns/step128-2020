@@ -112,10 +112,12 @@ public class SearchServlet extends HttpServlet {
     // Split the string based on a regex: splits at every space and at
     // most common non-alphabet characters
     String[] list = str.split("([\\s.,!?:;()\\[\\]&\"\\s+])");
+    // Trim all whitespace
     for (int i = 0; i < list.length; i++) {
       list[i] = list[i].replaceAll("\\s+","");
     }
     List<String> listArr = new ArrayList<String>(Arrays.asList(list));
+    // Remove all empty strings
     listArr.removeAll(Arrays.asList("", null));
     return listArr;
   }
