@@ -15,8 +15,10 @@
           <div class="event-display-header">
             <div class = "event-display-title">${name}</div>
             <div class="attendee-count-container">
-              <span class="attendee-count environment-text">12</span> already attending</div>
+              <span class="attendee-count environment-text">12</span> 
+              already attending
             </div>
+          </div>
           <div id="event-display-description" class="event-display-description">
             ${description}
           </div>
@@ -51,13 +53,15 @@
             <div class="share-container">
               <!-- hrefs will contain the correct link when the page is generated w/JS -->
               <a href = "https://twitter.com/share?url=http://google.com/" target="_blank">
-                <img src="images/twitter.svg" alt="Twitter"/>
+                  <img src="images/twitter.svg" alt="Twitter"/>
               </a>
-              <a href='http://www.facebook.com/sharer.php?u=http://google.com/' target="_blank">
-                <img src="images/facebook.svg" alt="Facebook"/>
+              <a href='http://www.facebook.com/sharer.php?u=http://google.com/' 
+                  target="_blank">
+                  <img src="images/facebook.svg" alt="Facebook"/>
               </a>
-              <a href="mailto:?subject=Unite by STEP Event&body=Check out this event!%0D%0A%0D%0Ahttp://google.com/" target="_blank">
-                <img src="images/gmail.svg" alt="Email"/>
+              <a href="mailto:?subject=Unite by STEP Event&body=Check out this event!
+                  %0D%0A%0D%0Ahttp://google.com/" target="_blank">
+                  <img src="images/gmail.svg" alt="Email"/>
               </a>
             </div>
           </div>
