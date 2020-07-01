@@ -15,20 +15,18 @@
 package com.google.sps.servlets;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Logger;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.AbstractMap;
 
 @WebServlet("/search")
 public class SearchServlet extends HttpServlet {
@@ -40,15 +38,14 @@ public class SearchServlet extends HttpServlet {
   private static final int MIN_INSTANCES = 2;
   // List of words to ignore
   // This list is incomplete
-  private static final List<String> IRRELEVANT_WORDS = new ArrayList<String>(Arrays.asList(
-      "the", "is", "for", "in", "of", "so", "to"
-      ));
+  private static final List<String> IRRELEVANT_WORDS =
+      new ArrayList<String>(Arrays.asList("the", "is", "for", "in", "of", "so", "to"));
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     // get location
     // filter by location and cutoff outside it
-    
+
     // get tags
     // drop all without first tag
     // those with most tags in common with search go to top
@@ -56,14 +53,11 @@ public class SearchServlet extends HttpServlet {
   }
 
   @Override
-  public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-
-  }
+  public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {}
 
   /**
-   * Returns keywords from an event (currently using just the title
-   * and description) based off their frequency and appearance in
-   * the title vs in the description
+   * Returns keywords from an event (currently using just the title and description) based off their
+   * frequency and appearance in the title vs in the description
    *
    * @return List containing most important words from the string
    * @param title String representing the title text to be processed
@@ -76,17 +70,17 @@ public class SearchServlet extends HttpServlet {
 
     // Merge maps
     // Title occurrence values multiplied by 2 to give more weight than description
-    titleMap.forEach(
-      (key, value) -> descMap.merge(key, value * 2, (v1, v2) -> v1 + (v2 * 2)));
-    List<Map.Entry<String, Integer>> mergeList = 
+    titleMap.forEach((key, value) -> descMap.merge(key, value * 2, (v1, v2) -> v1 + (v2 * 2)));
+    List<Map.Entry<String, Integer>> mergeList =
         new ArrayList<Map.Entry<String, Integer>>(descMap.entrySet());
 
-    Collections.sort(mergeList, new Comparator<Map.Entry<String, Integer>>() { 
-      public int compare(Map.Entry<String, Integer> o1,  
-                         Map.Entry<String, Integer> o2) { 
-        return (o2.getValue()).compareTo(o1.getValue()); 
-      } 
-    });
+    Collections.sort(
+        mergeList,
+        new Comparator<Map.Entry<String, Integer>>() {
+          public int compare(Map.Entry<String, Integer> o1, Map.Entry<String, Integer> o2) {
+            return (o2.getValue()).compareTo(o1.getValue());
+          }
+        });
 
     // Add top results to the final list
     List<String> finalList = new ArrayList<String>();
@@ -121,7 +115,7 @@ public class SearchServlet extends HttpServlet {
     String[] list = str.split("([\\s.,!?:;()\\[\\]&\"\\s+])");
     // Trim all whitespace
     for (int i = 0; i < list.length; i++) {
-      list[i] = list[i].replaceAll("\\s+","");
+      list[i] = list[i].replaceAll("\\s+", "");
     }
     List<String> listArr = new ArrayList<String>(Arrays.asList(list));
     // Remove all empty strings
@@ -131,7 +125,7 @@ public class SearchServlet extends HttpServlet {
 
   /**
    * Returns a map of the occurrences of words in a string
-   * 
+   *
    * @return Map containing word keys and instance count values
    * @param input String to be processed
    */

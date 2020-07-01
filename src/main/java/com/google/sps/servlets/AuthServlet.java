@@ -24,7 +24,6 @@ import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.gson.Gson;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.logging.Logger;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -55,7 +54,6 @@ public class AuthServlet extends HttpServlet {
       } catch (EntityNotFoundException e) {
         Entity entity = new Entity(userKey);
         entity.setProperty("id", userEmail);
-        entity.setProperty("saved", new ArrayList<Long>());
         datastore.put(entity);
       }
       LoginObject info = new LoginObject(true, logoutUrl);

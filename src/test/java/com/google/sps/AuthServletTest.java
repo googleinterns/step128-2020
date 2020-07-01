@@ -21,6 +21,7 @@ import static org.mockito.Mockito.*;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
@@ -51,11 +52,6 @@ public final class AuthServletTest {
   private final Gson gson = new Gson();
   private AuthServlet testAuthServlet;
   private MockedUserService mockService;
-
-  /** makes a dummy URL using a url "base" with an intended user id */
-  public static String makeLoginURL(String url, String user) {
-    return url + "email=" + user;
-  }
 
   /**
    * opens a url and performs a doGet request
@@ -140,9 +136,14 @@ public final class AuthServletTest {
       assertTrue(result.url.contains("logout"));
       assertEquals("test@example.com", mockService.getCurrentUser().getEmail());
 
-      // make sure has been added to datastore
+      // make sure exactly 1 user has been added to datastore
       DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
       assertEquals(1, ds.prepare(new Query("User")).countEntities());
+
+      // make sure that the posted user has the correct id and empty saved list
+      Entity postedEntity = ds.prepare(new Query("User")).asSingleEntity();
+      assertEquals("test@example.com", postedEntity.getKey().getName());
+      assertEquals("test@example.com", postedEntity.getProperty("id"));
     } catch (MalformedURLException e) {
       fail();
     } catch (IOException e) {
@@ -232,6 +233,11 @@ public final class AuthServletTest {
     } catch (IOException e) {
       fail();
     }
+  }
+
+  /** makes a dummy URL using a url "base" with an intended user id */
+  public static String makeLoginURL(String url, String user) {
+    return url + "email=" + user;
   }
 
   /* the LoginObject structure used by AuthServlet */
