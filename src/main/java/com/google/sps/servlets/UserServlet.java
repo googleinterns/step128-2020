@@ -40,39 +40,16 @@ public class UserServlet extends HttpServlet {
       String userEmail = userService.getCurrentUser().getEmail();
       Key userKey = KeyFactory.createKey("User", userEmail);
       try {
-        Entity userEntity = datastore.get(userKey);
         List<Entity> results = new ArrayList<>();
-        if(request.getParameter("get")!= null && request.getParameter("get").equals("saved")) {
-          // get the list of saved events (stored by id)
-          @SuppressWarnings("unchecked")
-            List<Long> savedEvents = (ArrayList<Long>) userEntity.getProperty("saved");
-          if(savedEvents != null) {
-            for(long l: savedEvents) {
-              try {
-                results.add(datastore.get(KeyFactory.createKey("Event", l)));
-              } catch(EntityNotFoundException exception) {
-                LOGGER.info("entity not found for event id " + l);
-              }
-            }
-          }
-          // TODO: apply sort
-        } else if(request.getParameter("get") != null && request.getParameter("get").equals("created")) {
-          // query for events that were created by this user
-          results = new ArrayList<>();
-          Query query = new Query("Event")
-                .setFilter(new Query.FilterPredicate("creator", Query.FilterOperator.EQUAL, userEmail))
-                .addSort("eventName", SortDirection.ASCENDING);
-          PreparedQuery queried = datastore.prepare(query);
-          for(Entity e: queried.asIterable()) {
-            results.add(e);
-          }
-          // TODO: apply choices for sort
-        } else {
-          throw new IOException("missing parameters");
+        Entity userEntity = datastore.get(userKey);
+        switch(request.getParameter("get")) {
+          case "saved": results = handleSaved(userEntity); break;
+          case "created": results = handleCreated(userEmail); break;
+          default: throw new IOException("missing parameters");
         }
-        // return a list of saved or created event entities by this user
         response.getWriter().println(gson.toJson(results));
         LOGGER.info("queried for events @ account " + userEmail);
+
       } catch(EntityNotFoundException exception) {
         // datastore entry has not been created yet for this user, create it now
         Entity entity = new Entity(userKey);
@@ -91,6 +68,45 @@ public class UserServlet extends HttpServlet {
       }
       response.getWriter().println(gson.toJson(events));
     }
+  }
+
+  // returns a list of all events saved by a user entity
+  private List<Entity> handleSaved(Entity userEntity) {
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    List<Entity> results = new ArrayList<>();
+    // get the list of saved events (stored by id)
+    @SuppressWarnings("unchecked")
+      List<Long> savedEvents = (ArrayList<Long>) userEntity.getProperty("saved");
+    if(savedEvents != null) {
+      for(long l: savedEvents) {
+        try {
+          results.add(datastore.get(KeyFactory.createKey("Event", l)));
+        } catch(EntityNotFoundException exception) {
+          LOGGER.info("entity not found for event id " + l);
+        }
+      }
+    }
+    // TODO: apply sort param choices
+
+    return results;
+
+  }
+
+  // returns a list of all events created by a user (identified by email id)
+  private List<Entity> handleCreated(String userEmail) {
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    List<Entity> results = new ArrayList<>();
+
+    Query query = new Query("Event")
+        .setFilter(new Query.FilterPredicate("creator", Query.FilterOperator.EQUAL, userEmail))
+        .addSort("eventName", SortDirection.ASCENDING);
+    PreparedQuery queried = datastore.prepare(query);
+    for(Entity e: queried.asIterable()) {
+      results.add(e);
+    }
+    // TODO: apply sort param choices
+
+    return results;
   }
 
   @Override
