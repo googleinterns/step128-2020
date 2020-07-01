@@ -29,7 +29,7 @@ jobs:
           for file in $FILES; do
             echo -e "Running google-java-format on:\n $file\n"
             if ! java -jar ./google-java-format-1.8-all-deps.jar $file | diff -u $file -; then
-              echo "\nPlease format $file before submitting."
+              echo -e "\nPlease format $file before submitting."
               EXIT=1
             fi
             echo ""
