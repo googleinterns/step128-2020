@@ -77,13 +77,19 @@
       <artifactId>powermock-module-junit4</artifactId>
       <version>${powermock.version}</version>
       <scope>test</scope>
-   </dependency>
-   <dependency>
+    </dependency>
+    <dependency>
       <groupId>org.powermock</groupId>
       <artifactId>powermock-api-mockito2</artifactId>
       <version>${powermock.version}</version>
       <scope>test</scope>
-   </dependency>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.googlejavaformat</groupId>
+      <artifactId>google-java-format</artifactId>
+      <version>1.8</version>
+    </dependency>
 
   </dependencies>
 
