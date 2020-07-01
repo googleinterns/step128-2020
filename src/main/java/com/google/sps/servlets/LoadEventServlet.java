@@ -45,16 +45,28 @@ public class LoadEventServlet extends HttpServlet {
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     Entity eventRequested = datastore.prepare(query).asSingleEntity();
 
-
-    System.out.println(eventRequested);
+    String name = (String) eventRequested.getProperty("eventName");
+    String description = (String) eventRequested.getProperty("eventDescription");
+    String date = (String) eventRequested.getProperty("date");
+    String start = (String) eventRequested.getProperty("startTime");
+    String end = (String) eventRequested.getProperty("endTime");
+    String street = (String) eventRequested.getProperty("streetAddress");
+    String city = (String) eventRequested.getProperty("city");
+    String state = (String) eventRequested.getProperty("state");
+    String photo = (String) eventRequested.getProperty("coverPhoto");
 
     Event event = new Event();
-
-    String eventName = (String) eventRequested.getProperty("eventName");
-    event.setName(eventName);
+    event.setName(name);
+    event.setDescription(description);
+    event.setDate(date);
+    event.setStart(start);
+    event.setEnd(end);
+    event.setStreet(street);
+    event.setCity(city);
+    event.setState(state);
+    event.setPhoto(photo);
 
     Gson gson = new Gson();
-
     response.setContentType("application/json;");
     response.getWriter().println(gson.toJson(event));
   }
