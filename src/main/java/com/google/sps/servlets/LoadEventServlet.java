@@ -53,15 +53,15 @@ public class LoadEventServlet extends HttpServlet {
   /**
    * @return the request with attributes set.
    */ 
-  private HttpServletRequest populateRequest(HttpServletRequest request, Entity eventRequested) {
-    String name = (String) eventRequested.getProperty("eventName");
-    String description = (String) eventRequested.getProperty("eventDescription");
-    String date = (String) eventRequested.getProperty("date");
-    String start = (String) eventRequested.getProperty("startTime");
-    String end = (String) eventRequested.getProperty("endTime");
-    String street = (String) eventRequested.getProperty("streetAddress");
-    String city = (String) eventRequested.getProperty("city");
-    String state = (String) eventRequested.getProperty("state");
+  private HttpServletRequest populateRequest(HttpServletRequest request, Entity event) {
+    String name = (String) event.getProperty("eventName");
+    String description = (String) event.getProperty("eventDescription");
+    String date = (String) event.getProperty("date");
+    String start = (String) event.getProperty("startTime");
+    String end = (String) event.getProperty("endTime");
+    String street = (String) event.getProperty("streetAddress");
+    String city = (String) event.getProperty("city");
+    String state = (String) event.getProperty("state");
 
     request.setAttribute("name", name);
     request.setAttribute("description", description);
