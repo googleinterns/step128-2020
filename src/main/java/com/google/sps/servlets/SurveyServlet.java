@@ -96,12 +96,14 @@ public class SurveyServlet extends HttpServlet {
           int score = Integer.parseInt(userEntity.getProperty(param).toString());
           result.put(param, score);
         } else {
+          LOGGER.warning("ERROR: entity did not contain " + param);
           return null;
         }
       }
     } catch (EntityNotFoundException e) {
-      // do nothing else
+      LOGGER.warning("ERROR: email not found " + userEmail);
+      return null;
     }
-    return null;
+    return result;
   }
 }
