@@ -1,0 +1,38 @@
+name: Java Format Check
+
+# Triggers the workflow on push or pull request events.
+on: [push, pull_request]
+
+jobs:
+  JavaFormat:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      # Recommended: latest versions of Google Java Format require JDK 11+
+      - uses: actions/setup-java@v1
+        with:
+          java-version: "11"
+      - name: Download google-java-format 1.8
+        run: wget -q https://github.com/google/google-java-format/releases/download/google-java-format-1.8/google-java-format-1.8-all-deps.jar
+      # By default google-java-format outputs the reformatted code. Here we run
+      # diff to check if any changes were made, and if so, alert the user to fix
+      # formatting before submitting. Credit to @anbenson.
+      - name: Format with google-java-format 1.8
+        run: |
+          FILES=`find . -name "*.java" -type f`
+          echo "Found the following Java files:"
+          for file in $FILES; do
+            echo $file
+          done
+          echo ""
+          EXIT=0
+          for file in $FILES; do
+            echo -e "Running google-java-format on:\n $file\n"
+            if ! java -jar ./google-java-format-1.8-all-deps.jar $file | diff -u $file -; then
+              echo "\nPlease format $file before submitting."
+              EXIT=1
+            fi
+            echo ""
+          done
+          exit $EXIT
+        shell: bash
