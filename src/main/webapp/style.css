@@ -318,7 +318,7 @@ input[type=text], textarea {
 
 /* event lists */
 .event-section {
-  margin: 40px 20px 0 20px;
+  margin: 40px 20px 40px 20px;
 }
 
 .event-section-header {
