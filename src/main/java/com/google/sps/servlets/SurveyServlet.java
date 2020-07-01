@@ -65,7 +65,7 @@ public class SurveyServlet extends HttpServlet {
       }
 
       // save score of each survey metric as an entity property
-      for(String param: metrics) {
+      for (String param: metrics) {
         String score = request.getParameter(param);
         if (score == null) {
           throw new IOException("incomplete survey");
@@ -91,7 +91,7 @@ public class SurveyServlet extends HttpServlet {
     Entity userEntity;
     try {
       userEntity = datastore.get(userKey);
-      for(String param: metrics) {
+      for (String param: metrics) {
         if (userEntity.hasProperty(param)) {
           int score = Integer.parseInt(userEntity.getProperty(param).toString());
           result.put(param, score);
