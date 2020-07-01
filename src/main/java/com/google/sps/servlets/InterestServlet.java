@@ -33,7 +33,7 @@ import java.util.logging.Logger;
 import java.util.Map;
 import java.util.TreeMap;
 
-@WebServlet("/interest")
+@WebServlet("/user-interest")
 public class InterestServlet extends HttpServlet {
 
   private static final Logger LOGGER = Logger.getLogger(InterestServlet.class.getName());
