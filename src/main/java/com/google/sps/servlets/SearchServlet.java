@@ -57,37 +57,18 @@ public class SearchServlet extends HttpServlet {
 
   /**
    * Returns keywords from an event (currently using just the title
-   * and description) based off an algorithm
+   * and description) based off their frequency and appearance in
+   * the title vs in the description
    */
   public static List<String> getKeywords(String title, String desc) {
     // TODO: convert to lowercase in processing (figure out acronyms)
-    List<String> titleWords = SearchServlet.getSeparateWords(title);
-    
-    // process title words
-    Map<String, Integer> titleMap = new HashMap<String, Integer>();
-    for (String w : titleWords) {
-      w = w.toLowerCase();
-      if (titleMap.containsKey(w)) {
-        titleMap.put(w, titleMap.get(w) + 1);
-      } else {
-        titleMap.put(w, 1);
-      }
-    }
-    List<String> descWords = SearchServlet.getSeparateWords(desc);
-    // process desc words
-    Map<String, Integer> descMap = new HashMap<String, Integer>();
-    for (String w : descWords) {
-      w = w.toLowerCase();
-      if (descMap.containsKey(w)) {
-        descMap.put(w, descMap.get(w) + 1);
-      } else {
-        descMap.put(w, 1);
-      }
-    }
-
+    Map<String, Integer> titleMap = SearchServlet.wordCount(title);
+    Map<String, Integer> descMap = SearchServlet.wordCount(desc);
+   
     List<Map.Entry<String, Integer>> titleMapList = new ArrayList<Map.Entry<String, Integer>>(titleMap.entrySet()); 
 
     // merge lists
+    /*
     List<Map.Entry<String, Integer>> mergeList = new ArrayList<Map.Entry<String, Integer>>(descMap.entrySet());
     for (Map.Entry titleEntry : titleMapList) {
       boolean found = false;
@@ -104,7 +85,12 @@ public class SearchServlet extends HttpServlet {
             titleEntry.getKey().toString(), ((int) titleEntry.getValue()) * 2 );
         mergeList.add(entry);
       }
-    }
+    }*/
+
+    titleMap.forEach(
+      (key, value) -> descMap.merge(key, value * 2, (v1, v2) -> v1 + (v2 * 2)));
+
+    List<Map.Entry<String, Integer>> mergeList = new ArrayList<Map.Entry<String, Integer>>(descMap.entrySet());
 
     Collections.sort(mergeList, new Comparator<Map.Entry<String, Integer>>() { 
       public int compare(Map.Entry<String, Integer> o1,  
@@ -147,5 +133,20 @@ public class SearchServlet extends HttpServlet {
     List<String> listArr = new ArrayList<String>(Arrays.asList(list));
     listArr.removeAll(Arrays.asList("", null));
     return listArr;
+  }
+
+  public static Map<String, Integer> wordCount(String input) {
+    List<String> words = SearchServlet.getSeparateWords(input);
+    // process title words
+    Map<String, Integer> map = new HashMap<String, Integer>();
+    for (String w : words) {
+      w = w.toLowerCase();
+      if (map.containsKey(w)) {
+        map.put(w, map.get(w) + 1);
+      } else {
+        map.put(w, 1);
+      }
+    }
+    return map;
   }
 }
