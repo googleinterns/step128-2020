@@ -34,8 +34,11 @@ import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Query.Filter;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.datastore.Query.FilterOperator;
+import com.google.appengine.api.datastore.FetchOptions;
+import com.google.appengine.api.datastore.FetchOptions.Builder;
 import com.google.gson.Gson;
 
 @WebServlet("/search")
@@ -45,19 +48,17 @@ public class SearchServlet extends HttpServlet {
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    // List of all the tags we are searching for
     List<String> searchTags = new ArrayList<String>(Arrays.asList(request.getParameter("tags")));
-
+    // Filter to check if the event has any of tags we're searching for
     Filter tagsFilter =
         new FilterPredicate("tags", FilterOperator.IN, searchTags);
     Query query =
-        new Query("Event").setFilter(propertyFilter);
+        new Query("Event").setFilter(tagsFilter);
 
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    // PreparedQuery that contains all the comments inside it
     PreparedQuery results = datastore.prepare(query);
-
-    List<Entity> events = new ArrayList<Entity>(results.asList());
-    
+    List<Entity> events = new ArrayList<Entity>(results.asList(FetchOptions.Builder.withDefaults()));
 
     //get location
     //filter by location and cutoff outside it
@@ -66,8 +67,10 @@ public class SearchServlet extends HttpServlet {
     //drop all without first tag
     //those with most tags in common with search go to top
     //those closest to the user go to the top
+    
+    // Convert events list to json
     String json = Utility.convertToJson(events);
-
+    
     response.setContentType("application/json;");
     response.getWriter().println(json);
   }

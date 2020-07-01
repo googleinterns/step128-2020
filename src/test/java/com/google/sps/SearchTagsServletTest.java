@@ -22,6 +22,12 @@ import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Query.Filter;
+import com.google.appengine.api.datastore.PreparedQuery;
+import com.google.appengine.api.datastore.Query.FilterPredicate;
+import com.google.appengine.api.datastore.Query.FilterOperator;
+import com.google.appengine.api.datastore.FetchOptions;
+import com.google.appengine.api.datastore.FetchOptions.Builder;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.sps.servlets.SearchServlet;
@@ -35,6 +41,11 @@ import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.junit.Test;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Arrays;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 /** */
 @RunWith(JUnit4.class)
@@ -52,19 +63,24 @@ public final class SearchTagsServletTest {
         "environment", "blm", "education", "volunteer", "LGBTQ+"
     ));
     testEntities = new ArrayList<Entity>();
-    //single tag events
+    // Single tag events
     for (int i = 0; i < 5; i++) {
       Entity e = new Entity("Event");
       e.setProperty("eventName", i);
-      e.setIndexedProperty("tags", new ArrayList<String>(possibleTags[i]));
+      e.setIndexedProperty("tags", new ArrayList<String>(Arrays.asList(possibleTags.get(i))));
       testEntities.add(e);
     }
-    //double tag events
-    for (int i = 0; i < 4; i++) {
+    // Double tag events
+    for (int i = 5; i < 9; i++) {
       Entity e = new Entity("Event");
       e.setProperty("eventName", i);
-      e.setIndexedProperty("tags", new ArrayList<String>(possibleTags[i], possibleTags[i+1]));
+      e.setIndexedProperty("tags", new ArrayList<String>(Arrays.asList(possibleTags.get(i-5), possibleTags.get(i-4))));
       testEntities.add(e);
+    }
+    // Add all the events to the mock Datastore
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    for (Entity e : testEntities) {
+      datastore.put(e);
     }
   }
 
@@ -78,15 +94,32 @@ public final class SearchTagsServletTest {
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
 
-    // Add a mock request to pass as a parameter to doPost.
+    StringWriter sw = new StringWriter();
+    PrintWriter pw = new PrintWriter(sw);
+  
+    when(response.getWriter()).thenReturn(pw);
+
+    // Send the request to the servlet with param
     when(request.getParameter("tags")).thenReturn("environment");
+    testSearchServlet.doGet(request, response);
+  
+    // Get the JSON response from the server
+    String result = sw.getBuffer().toString().trim();
+    
+    // Get the events we were expecting the search to return
+    // from the datastore
+    List<Integer> ids = new ArrayList<Integer>(Arrays.asList(0, 5));
+    Filter idFilter =
+        new FilterPredicate("eventName", FilterOperator.IN, ids);
+    Query query =
+        new Query("Event").setFilter(idFilter);
 
-    // Post event to Datastore.
-    String jsonResponse = testSearchServlet.doGet(request, response);
-
-    // Assert only one Entity was posted to Datastore.
-    testEntities.get
-    DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
-    assertEquals(1, ds.prepare(new Query("Event")).countEntities(withLimit(10)));
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    PreparedQuery results = datastore.prepare(query);
+    List<Entity> events = new ArrayList<Entity>(
+        results.asList(FetchOptions.Builder.withDefaults()));
+    // Convert expected events to JSON for comparison
+    String expected = Utility.convertToJson(events);
+    assertEquals(expected, result);
   }
 }
