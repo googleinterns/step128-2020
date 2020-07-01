@@ -64,6 +64,10 @@ public class SearchServlet extends HttpServlet {
    * Returns keywords from an event (currently using just the title
    * and description) based off their frequency and appearance in
    * the title vs in the description
+   *
+   * @return List containing most important words from the string
+   * @param title String representing the title text to be processed
+   * @param desc String representing the description text to be processed
    */
   public static List<String> getKeywords(String title, String desc) {
     // TODO: convert to lowercase in processing (figure out acronyms)
@@ -104,6 +108,9 @@ public class SearchServlet extends HttpServlet {
 
   /**
    * Returns a list of words contained in a string
+   *
+   * @return List containing every word in a string
+   * @param str String to be processed
    */
   public static List<String> getSeparateWords(String str) {
     // TODO: handle single quoted strings (right now keeps them in for
@@ -122,6 +129,12 @@ public class SearchServlet extends HttpServlet {
     return listArr;
   }
 
+  /**
+   * Returns a map of the occurrences of words in a string
+   * 
+   * @return Map containing word keys and instance count values
+   * @param input String to be processed
+   */
   public static Map<String, Integer> wordCount(String input) {
     List<String> words = SearchServlet.getSeparateWords(input);
     // process title words
