@@ -109,6 +109,8 @@ public class SearchServlet extends HttpServlet {
     // TODO: handle single quoted strings (right now keeps them in for
     // the common case of contractions
 
+    // Split the string based on a regex: splits at every space and at
+    // most common non-alphabet characters
     String[] list = str.split("([\\s.,!?:;()\\[\\]&\"\\s+])");
     for (int i = 0; i < list.length; i++) {
       list[i] = list[i].replaceAll("\\s+","");
