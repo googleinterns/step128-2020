@@ -69,7 +69,6 @@ footer h4, footer p {
   flex-flow: row nowrap;
   height: 10%; /* note: 100px -> 10% */
   justify-content: space-between;
-  overflow: hidden;
   position: sticky;
 }
 
@@ -109,11 +108,38 @@ a:link, a:visited {
 }
 
 .nav-item {
-  align-items: center;
-  display: flex;
-  height: 100%;
-  justify-content: center;
-  padding: 0 20px 0 20px;
+  display: none;
+}
+
+.icon-item img {
+  padding-top: 2vh;
+  height: 5vh;
+}
+
+.dropdown {
+  display: inline-block;
+  font-size: 3em;
+  list-style: none;
+  position: relative;
+}
+
+.dropdown-bar {
+  background-color: #f9f9f9;
+  box-shadow: 0vh 0.25vh 0.5vh 0vh rgba(0,0,0,0.2);
+  display: block;
+  min-width: 15vh;
+  padding-left: 3vh;
+  position: absolute;
+  right: 0;
+}
+
+.dropdown-bar li {
+  padding: 1vh 0vh 1vh 0vh;
+}
+
+.dropdown-item a {
+  display: block;
+  text-decoration: none;
 }
 
 /* Home Page */
@@ -124,7 +150,7 @@ a:link, a:visited {
 }
 
 .hero-text {
-  font-size: 2.5em;
+  font-size: 1.2em;
   left: 50%;
   position: absolute;
   text-align: center;
@@ -178,7 +204,8 @@ a:link, a:visited {
 }
 
 .form-container h1 {
-  font-size: 3em;
+  font-size: 4em;
+  padding-bottom: 2em;
 }
 
 input[type=text], textarea {
@@ -201,18 +228,20 @@ input {
 
 .form-section {
   display: flex;
+  flex-direction: column;
+  margin-bottom: 4vh;
 }
 
 .form-label {
-  flex: 10%;
-  font-size: 2.5em;
+  font-size: 3.25em;
   padding: 10px;
   white-space: nowrap;
+  width: auto;
 }
 
 .form-input {
-  flex: 90%;
   padding: 10px;
+  width: auto;
 }
 
 .form-container .tag-box {
@@ -225,28 +254,13 @@ input {
   display: inline-block;
 }
 
-@media screen and (max-width: 900px) {
-  .form-section {
-    flex-direction: column;
-  }
-
-  .form-label,
-  .form-input {
-    width: auto;
-  }
-}
-
 .form-buttons {
-  margin-top: 50px;
+  margin: 10vh 0vh 20vh 0vh;
   text-align: center;
 }
 
-.form-buttons img {
+.form-buttons img, input {
   height: 6vh;
-}
-
-.edit-form-buttons img {
-  height: 5vh;
 }
 
 .form-buttons a {
@@ -254,15 +268,30 @@ input {
   overflow: hidden;  
 }
 
+.divider {
+  display: inline-block;
+  height: auto;
+  margin: 2vh;
+}
+
+.edit-form-buttons {
+  margin: 10vh 0vh 10vh 0vh;
+  text-align: center;
+  width: 100%
+}
+
+.edit-form-buttons img {
+  height: 6vh;
+}
+
 .edit-form-buttons a {
   display: inline-block;
   overflow: hidden;  
 }
 
-.divider {
-  display: inline-block;
+.edit-divider {
   height: auto;
-  margin: 25px;
+  padding: 2vh;
 }
 
 /* search page */
@@ -288,7 +317,7 @@ h1 {
   position: absolute;
   max-width: 700px;
   text-align: center;
-  top: 45vh;
+  top: 50vh;
   transform: translate(-50%, -50%);
   width: 70%;
 }

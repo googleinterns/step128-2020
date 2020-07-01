@@ -77,6 +77,20 @@ function generateNavBar() {
   myLink.innerText = 'My Events';
   headerRight.appendChild(myLink);
 
+  const dropdown = document.createElement('div');
+  dropdown.className = 'dropdown';
+
+  const iconLink = document.createElement('a');
+  iconLink.className = 'icon-item';
+  iconLink.href = 'javascript:void(0);';
+  iconLink.setAttribute('onclick', 'toggleNavMenu()');
+  const icon = document.createElement('img');
+  icon.src = 'images/menu.svg';
+  icon.alt = 'Menu drop down.';
+  iconLink.appendChild(icon);
+  dropdown.appendChild(iconLink);
+  headerRight.appendChild(dropdown);
+
   const header = document.getElementsByClassName('header')[0];
   header.textContent = '';
   header.appendChild(headerLeft);
@@ -109,6 +123,60 @@ function toggleDetails() {
     arrowIcon.src = 'images/arrow-down.svg';
     arrowIcon.alt = 'Collapse';
   }
+}
+
+/* Toggles the navigation menu for the mobile layout. */
+function toggleNavMenu() {
+  var exists = document.getElementById('dropdown-bar');
+
+  if (exists != null) {
+    document.getElementById('dropdown-bar').remove();
+  } else {
+    generateMobileNavLayout();
+  }
+}
+
+/* Generates the navigation menu layout on mobile. */
+function generateMobileNavLayout() {
+  const dropdownContainer = document.getElementsByClassName('dropdown')[0];
+
+  const dropdownBar = document.createElement('div');
+  dropdownBar.className = 'dropdown-bar';
+  dropdownBar.id = 'dropdown-bar';
+
+  const homeBullet = document.createElement('li');
+  const homeLink = document.createElement('a');
+  homeLink.className = 'dropdown-item';
+  homeLink.href = '/index.html';
+  homeLink.innerText = 'Home';
+  homeBullet.appendChild(homeLink)
+  dropdownBar.appendChild(homeBullet);
+
+  const createBullet = document.createElement('li');
+  const createLink = document.createElement('a');
+  createLink.className = 'dropdown-item';
+  createLink.href = '/create-event.html';
+  createLink.innerText = 'Create';
+  createBullet.appendChild(createLink);
+  dropdownBar.appendChild(createBullet);
+
+  const findBullet = document.createElement('li');
+  const findLink = document.createElement('a');
+  findLink.className = 'dropdown-item';
+  findLink.href = '/search.html';
+  findLink.innerText = 'Find';
+  findBullet.appendChild(findLink);
+  dropdownBar.appendChild(findBullet);
+
+  const myBullet = document.createElement('li');
+  const myLink = document.createElement('a');
+  myLink.className = 'dropdown-item';
+  myLink.href = '/my-events.html';
+  myLink.innerText = 'My Events';
+  myBullet.appendChild(myLink);
+  dropdownBar.appendChild(myBullet);
+
+  dropdownContainer.appendChild(dropdownBar);
 }
 
 var tagsAll = ['environment', 'blm', 'volunteer', 'education', 'LGBTQ+'];
@@ -368,7 +436,7 @@ async function getEvents(url, index, option) {
   events.forEach(function(event) {
     const eventItemElement = document.createElement('a');
     eventItemElement.className = 'event-item';
-    eventItemElement.setAttribute('onclick', 'openEvent(\"' 
+    eventItemElement.setAttribute('onclick', 'openLink(\"' 
         + event.url + '\")');
     eventListElement.appendChild(eventItemElement);
 
@@ -531,7 +599,7 @@ async function getEvents(url, index, option) {
   //   </div>
 }
 
-function openEvent(url) {
+function openLink(url) {
   window.location.pathname = url;
 }
 
@@ -598,6 +666,25 @@ function toggleSurveyDisplay(question, index) {
 	}
 	circle.style.backgroundColor = 'white';
 	surveyResponses[question] = index;
+}
+
+function submitSurvey() {
+  if (loggedIn) {
+    var params = new URLSearchParams();
+    for (var i = 0; i < surveyResponses.length; i++) {
+      const score = surveyResponses[i];
+      if (score < 0) {
+        alert('Please finish the survey first!'); // TODO: streamline this probably
+        return;
+      } else {
+        params.append(tagsAll[i], score);
+      }
+    }
+    fetch(new Request("/submit-survey", {method: "POST", body: params}));
+  } else {
+    // cannot submit while not logged in
+    alert('Please log in first!');
+  }
 }
 
 async function getMyEvents() {

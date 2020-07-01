@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Preference Survey</title>
     <link id="style" rel="stylesheet" href="style.css">
+    <link rel="icon" href="images/step-favicon.svg" type="image/svg" sizes="16x16">
     <script src="script.js"></script>
   </head>
   <body onload="loadActions(); generateRainbowTags()">
@@ -11,7 +12,7 @@
     <div class="survey-background">
       <h1 id="survey-header">What are you looking for?</h1>
       <div class="survey-item">
-        <div class="survey-question">I am looking for volunteer opportunities in my community.</div>
+        <div class="survey-question">I want to foster awareness about environmental issues.</div>
         <div class="survey-select-container">
           <label class="survey-label">Disagree</label>
           <div class="survey-select" onclick="toggleSurveyDisplay(0, 0)"></div>
@@ -35,7 +36,7 @@
         </div>
       </div>
       <div class="survey-item">
-        <div class="survey-question">I would like to show my support for the LGBTQ+ community.</div>
+        <div class="survey-question">I am looking for volunteer opportunities in my community.</div>
         <div class="survey-select-container">
           <label class="survey-label">Disagree</label>
           <div class="survey-select" onclick="toggleSurveyDisplay(2, 0)"></div>
@@ -59,7 +60,7 @@
         </div>
       </div>
       <div class="survey-item">
-        <div class="survey-question">I want to foster awareness about environmental issues.</div>
+        <div class="survey-question">I would like to show my support for the LGBTQ+ community.</div>
         <div class="survey-select-container">
           <label class="survey-label">Disagree</label>
           <div class="survey-select" onclick="toggleSurveyDisplay(4, 0)"></div>
@@ -70,9 +71,18 @@
           <label class="survey-label">Agree</label>
         </div>
       </div>
-      <img id="survey-save" src="images/save-bttn.svg" alt="Save"/>
+      <img id="survey-save" src="images/save-bttn.svg" alt="Save" onclick="submitSurvey()"/>
     </div>
     <footer>
+      <p>
+          Icons made by 
+          <a href="https://www.flaticon.com/authors/pixel-perfect" target="_blank">
+          Pixel Perfect</a> &#38;
+          <a href="https://www.flaticon.com/authors/freepik" target="_blank">
+          Freepik</a> from
+          <a href="https://www.flaticon.com/" title="Flaticon" target="_blank">
+          www.flaticon.com</a>
+      </p>
       <p>Made as part of Google's STEP Internship Program.</p>
       <h4>Copyright &copy; 2020 All Rights Reserved by 
          <a href="https://www.google.com/">Google</a>.

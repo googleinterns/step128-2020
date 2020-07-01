@@ -31,11 +31,11 @@ import com.google.sps.servlets.EventServlet;
 import com.google.sps.servlets.AuthServlet;
 import com.google.gson.Gson;
 import java.io.IOException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.junit.Test;
@@ -44,7 +44,6 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import java.io.StringWriter;
 import java.io.PrintWriter;
-import java.io.BufferedReader;
 import java.io.StringReader;
 import java.net.URL;
 import java.net.MalformedURLException;
@@ -188,7 +187,7 @@ public final class EventServletTest {
     // Post event to Datastore.
     testEventServlet.doPost(request, response);
 
-    // Create what the event Entity should look like, but do not post to 
+    // Create what the event Entity should look like, but do not post to
     // it to Datastore.
     Entity goalEntity = new Entity("Event");
     goalEntity.setProperty("eventName", "Lake Clean Up");
