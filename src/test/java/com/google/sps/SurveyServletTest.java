@@ -14,9 +14,7 @@
 
 package com.google.sps;
 
-import static com.google.appengine.api.datastore.FetchOptions.Builder.withLimit;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
 
@@ -27,29 +25,25 @@ import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
+import com.google.gson.Gson;
 import com.google.sps.servlets.AuthServlet;
 import com.google.sps.servlets.SurveyServlet;
-import com.google.gson.Gson;
 import java.io.IOException;
-import javax.servlet.http.HttpServlet;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Map;
+import java.util.TreeMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import java.io.StringWriter;
-import java.io.PrintWriter;
-import java.io.BufferedReader;
-import java.io.StringReader;
-import java.net.URL;
-import java.net.MalformedURLException;
-import java.util.Map;
-import java.util.TreeMap;
 
 /** */
 @RunWith(PowerMockRunner.class)
@@ -71,7 +65,8 @@ public final class SurveyServletTest {
    */
   private void toggleLogin(String email) throws MalformedURLException, IOException {
     URL mockurl = PowerMockito.mock(URL.class);
-    when(mockurl.openConnection()).thenReturn(mockService.evaluateURL(AuthServletTest.makeLoginURL(activeUrl, email)));
+    when(mockurl.openConnection())
+        .thenReturn(mockService.evaluateURL(AuthServletTest.makeLoginURL(activeUrl, email)));
     mockurl.openConnection();
 
     HttpServletRequest request = mock(HttpServletRequest.class);
@@ -207,7 +202,7 @@ public final class SurveyServletTest {
   }
 
   @Test
-  public void checkInterestMetrics() throws IOException{
+  public void checkInterestMetrics() throws IOException {
     // a basic test to make sure SurveyServlet.getInterestMetrics() works as intended
     String email = "test@example.com";
     toggleLogin(email);

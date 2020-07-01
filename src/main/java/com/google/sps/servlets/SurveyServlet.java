@@ -14,24 +14,23 @@
 
 package com.google.sps.servlets;
 
-import com.google.appengine.api.users.UserService;
-import com.google.appengine.api.users.UserServiceFactory;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
+import com.google.appengine.api.users.UserService;
+import com.google.appengine.api.users.UserServiceFactory;
+import com.google.gson.Gson;
 import java.io.IOException;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.logging.Logger;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import com.google.gson.Gson;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.Map;
-import java.util.TreeMap;
 
 @WebServlet("/submit-survey")
 public class SurveyServlet extends HttpServlet {
@@ -65,7 +64,7 @@ public class SurveyServlet extends HttpServlet {
       }
 
       // save score of each survey metric as an entity property
-      for (String param: metrics) {
+      for (String param : metrics) {
         String score = request.getParameter(param);
         if (score == null) {
           throw new IOException("incomplete survey");
@@ -76,13 +75,13 @@ public class SurveyServlet extends HttpServlet {
       datastore.put(userEntity);
       response.sendRedirect("/index.html");
     } else {
-      throw new IOException ("Cannot take survey while not logged in");
+      throw new IOException("Cannot take survey while not logged in");
     }
   }
 
   /**
-   * returns a map of a user's interest levels with respect to each tag 
-   * returns null if unsuccessful (user not found or survey not yet taken/incomplete)
+   * returns a map of a user's interest levels with respect to each tag returns null if unsuccessful
+   * (user not found or survey not yet taken/incomplete)
    */
   public static Map<String, Integer> getInterestMetrics(String userEmail) {
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
@@ -91,7 +90,7 @@ public class SurveyServlet extends HttpServlet {
     Entity userEntity;
     try {
       userEntity = datastore.get(userKey);
-      for (String param: metrics) {
+      for (String param : metrics) {
         if (userEntity.hasProperty(param)) {
           int score = Integer.parseInt(userEntity.getProperty(param).toString());
           result.put(param, score);

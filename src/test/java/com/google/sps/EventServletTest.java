@@ -26,14 +26,13 @@ import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestC
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.sps.servlets.EventServlet;
 import java.io.IOException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import org.junit.Test;
 
 /** */
 @RunWith(JUnit4.class)
@@ -125,7 +124,7 @@ public final class EventServletTest {
     // Post event to Datastore.
     testEventServlet.doPost(request, response);
 
-    // Create what the event Entity should look like, but do not post to 
+    // Create what the event Entity should look like, but do not post to
     // it to Datastore.
     Entity goalEntity = new Entity("Event");
     goalEntity.setProperty("eventName", "Lake Clean Up");
