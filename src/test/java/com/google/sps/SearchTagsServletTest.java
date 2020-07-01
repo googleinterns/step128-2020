@@ -95,7 +95,7 @@ public final class SearchTagsServletTest {
   public void tearDown() {
     helper.tearDown();
   }
-/*
+
   @Test
   public void anyQueryAndOutput() throws IOException {
     HttpServletRequest request = mock(HttpServletRequest.class);
@@ -107,7 +107,8 @@ public final class SearchTagsServletTest {
     when(response.getWriter()).thenReturn(pw);
 
     // Send the request to the servlet with param
-    when(request.getParameter("tags")).thenReturn("environment");
+    String[] paramArr = {"environment"};
+    when(request.getParameterValues("tags")).thenReturn(paramArr);
     testSearchServlet.doGet(request, response);
   
     // Get the JSON response from the server
@@ -115,7 +116,7 @@ public final class SearchTagsServletTest {
     
     // Get the events we were expecting the search to return
     // from the datastore
-    List<Integer> ids = new ArrayList<Integer>(Arrays.asList(0, 5));
+    List<Integer> ids = new ArrayList<Integer>(Arrays.asList(0, 5, 9));
     Filter idFilter =
         new FilterPredicate("eventName", FilterOperator.IN, ids);
     Query query =
@@ -128,7 +129,7 @@ public final class SearchTagsServletTest {
     // Convert expected events to JSON for comparison
     String expected = Utility.convertToJson(events);
     assertEquals(expected, result);
-  }*/
+  }
 
   @Test
   public void checkSortedByCommonTags() throws IOException {
@@ -225,7 +226,7 @@ public final class SearchTagsServletTest {
     String expected = Utility.convertToJson(orderedEvents);
     assertEquals(expected, result);
   }
-/*
+
   @Test
   public void correctNumberTagsInCommon() throws IOException {
     List<String> tagListA = 
@@ -254,5 +255,5 @@ public final class SearchTagsServletTest {
         new ArrayList<String>(Arrays.asList("environment", "blm", "volunteer"));
     int result = testSearchServlet.tagsInCommon(tagListA, tagListB);
     assertEquals(0, result);
-  }*/
+  }
 }

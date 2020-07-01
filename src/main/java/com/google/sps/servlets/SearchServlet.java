@@ -70,6 +70,8 @@ public class SearchServlet extends HttpServlet {
       public int compare(Entity o1, Entity o2) {
         int condition = tagsInCommon((List<String>) o2.getProperty("tags"), searchTags).compareTo(
             tagsInCommon((List<String>) o1.getProperty("tags"), searchTags));
+        // For development purposes, if two events have the same number of tags
+        // they are sorted by the event names which in the test cases are numbers
         if (condition == 0) {
           return Integer.compare(Integer.parseInt(o1.getProperty("eventName").toString()),
               Integer.parseInt(o2.getProperty("eventName").toString()));
