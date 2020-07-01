@@ -107,54 +107,6 @@ public final class UserServletTest {
     }
   }
 
-  /**
-   * Logs in and out a few times, posting events to datastore
-   */
-  private void postEventsSetup() throws IOException {
-
-    // posted by test@example.com
-    toggleLogin("test@example.com");
-    HttpServletRequest request = mock(HttpServletRequest.class);
-    HttpServletResponse response = mock(HttpServletResponse.class);
-    when(request.getParameter("event-name")).thenReturn("Lake Clean Up");
-    when(request.getParameter("event-description")).thenReturn("We're cleaning up the lake");
-    when(request.getParameter("street-address")).thenReturn("678 Lakeview Way");
-    when(request.getParameter("city")).thenReturn("Lakeside");
-    when(request.getParameter("state")).thenReturn("Michigan");
-    when(request.getParameter("date")).thenReturn("2020-17-05");
-    when(request.getParameter("start-time")).thenReturn("14:00");
-    when(request.getParameter("all-tags")).thenReturn("['environment']");
-    testEventServlet.doPost(request, response);
-
-    request = mock(HttpServletRequest.class);
-    response = mock(HttpServletResponse.class);
-    when(request.getParameter("event-name")).thenReturn("BLM Protest");
-    when(request.getParameter("event-description")).thenReturn("Fight for racial justice!");
-    when(request.getParameter("street-address")).thenReturn("Main Street");
-    when(request.getParameter("city")).thenReturn("Los Angeles");
-    when(request.getParameter("state")).thenReturn("California");
-    when(request.getParameter("date")).thenReturn("2020-17-05");
-    when(request.getParameter("start-time")).thenReturn("13:00");
-    when(request.getParameter("all-tags")).thenReturn("['blm']");
-    testEventServlet.doPost(request, response);
-    toggleLogin("test@example.com");
-
-    // posted by another@example.com
-    toggleLogin("another@example.com");
-    when(request.getParameter("event-name")).thenReturn("Book Drive");
-    when(request.getParameter("event-description")).thenReturn("Let's donate books for kids");
-    when(request.getParameter("street-address")).thenReturn("School Drive");
-    when(request.getParameter("city")).thenReturn("Los Angeles");
-    when(request.getParameter("state")).thenReturn("California");
-    when(request.getParameter("date")).thenReturn("2020-17-05");
-    when(request.getParameter("start-time")).thenReturn("10:00");
-    when(request.getParameter("all-tags")).thenReturn("['education']");
-    testEventServlet.doPost(request, response);
-
-    // logout
-    toggleLogin("another@example.com");
-  }
-
   @Before
   public void setUp() throws IOException {
     helper.setUp();
@@ -200,44 +152,9 @@ public final class UserServletTest {
     List<Entity> resultingEntities = gson.fromJson(out.toString(), new TypeToken<ArrayList<Entity>>(){}.getType());
 
     // create the expected resulting search results
-    Entity goalEntity = new Entity("Event");
-    goalEntity.setProperty("eventName", "Lake Clean Up");
-    goalEntity.setProperty("eventDescription", "We're cleaning up the lake");
-    goalEntity.setProperty("streetAddress", "678 Lakeview Way");
-    goalEntity.setProperty("city", "Lakeside");
-    goalEntity.setProperty("state", "Michigan");
-    goalEntity.setProperty("date", "2020-17-05");
-    goalEntity.setProperty("startTime", "14:00");
-    goalEntity.setProperty("endTime", "");
-    goalEntity.setProperty("coverPhoto", "");
-    goalEntity.setProperty("tags", "['environment']");
-    goalEntity.setProperty("creator", "test@example.com");
-
-    Entity goalEntity2 = new Entity("Event");
-    goalEntity2.setProperty("eventName", "BLM Protest");
-    goalEntity2.setProperty("eventDescription", "Fight for racial justice!");
-    goalEntity2.setProperty("streetAddress", "Main Street");
-    goalEntity2.setProperty("city", "Los Angeles");
-    goalEntity2.setProperty("state", "California");
-    goalEntity2.setProperty("date", "2020-17-05");
-    goalEntity2.setProperty("startTime", "13:00");
-    goalEntity2.setProperty("endTime", "");
-    goalEntity2.setProperty("coverPhoto", "");
-    goalEntity2.setProperty("tags", "['blm']");
-    goalEntity2.setProperty("creator", "test@example.com");
-
-    Entity goalEntity3 = new Entity("Event");
-    goalEntity3.setProperty("eventName", "Book Drive");
-    goalEntity3.setProperty("eventDescription", "Let's donate books for kids");
-    goalEntity3.setProperty("streetAddress", "School Drive");
-    goalEntity3.setProperty("city", "Los Angeles");
-    goalEntity3.setProperty("state", "California");
-    goalEntity3.setProperty("date", "2020-17-05");
-    goalEntity3.setProperty("startTime", "10:00");
-    goalEntity3.setProperty("endTime", "");
-    goalEntity3.setProperty("coverPhoto", "");
-    goalEntity3.setProperty("tags", "['education']");
-    goalEntity3.setProperty("creator", "another@example.com");
+    Entity goalEntity = createLakeCleanupEvent();
+    Entity goalEntity2 = createBlmProtestEvent();
+    Entity goalEntity3 = createBookDriveEvent();
 
     // goal list, should be sorted in ascending order by name
     List<Entity> goalEntityList = new ArrayList<>();
@@ -267,31 +184,8 @@ public final class UserServletTest {
     out.flush();
     List<Entity> resultingEntities = gson.fromJson(out.toString(), new TypeToken<ArrayList<Entity>>(){}.getType());
     
-    Entity goalEntity = new Entity("Event");
-    goalEntity.setProperty("eventName", "Lake Clean Up");
-    goalEntity.setProperty("eventDescription", "We're cleaning up the lake");
-    goalEntity.setProperty("streetAddress", "678 Lakeview Way");
-    goalEntity.setProperty("city", "Lakeside");
-    goalEntity.setProperty("state", "Michigan");
-    goalEntity.setProperty("date", "2020-17-05");
-    goalEntity.setProperty("startTime", "14:00");
-    goalEntity.setProperty("endTime", "");
-    goalEntity.setProperty("coverPhoto", "");
-    goalEntity.setProperty("tags", "['environment']");
-    goalEntity.setProperty("creator", "test@example.com");
-
-    Entity goalEntity2 = new Entity("Event");
-    goalEntity2.setProperty("eventName", "BLM Protest");
-    goalEntity2.setProperty("eventDescription", "Fight for racial justice!");
-    goalEntity2.setProperty("streetAddress", "Main Street");
-    goalEntity2.setProperty("city", "Los Angeles");
-    goalEntity2.setProperty("state", "California");
-    goalEntity2.setProperty("date", "2020-17-05");
-    goalEntity2.setProperty("startTime", "13:00");
-    goalEntity2.setProperty("endTime", "");
-    goalEntity2.setProperty("coverPhoto", "");
-    goalEntity2.setProperty("tags", "['blm']");
-    goalEntity2.setProperty("creator", "test@example.com");
+    Entity goalEntity = createLakeCleanupEvent();
+    Entity goalEntity2 = createBlmProtestEvent();
 
     List<Entity> goalEntityList = new ArrayList<>();
     goalEntityList.add(goalEntity2);
@@ -301,6 +195,105 @@ public final class UserServletTest {
   }
 
   // TODO: no tests yet for saved events (no means of saving events yet)
+
+  /**
+   * Logs in and out a few times, posting events to datastore
+   */
+  private void postEventsSetup() throws IOException {
+    // posted by test@example.com
+    toggleLogin("test@example.com");
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    when(request.getParameter("event-name")).thenReturn("Lake Clean Up");
+    when(request.getParameter("event-description")).thenReturn("We're cleaning up the lake");
+    when(request.getParameter("street-address")).thenReturn("678 Lakeview Way");
+    when(request.getParameter("city")).thenReturn("Lakeside");
+    when(request.getParameter("state")).thenReturn("Michigan");
+    when(request.getParameter("date")).thenReturn("2020-17-05");
+    when(request.getParameter("start-time")).thenReturn("14:00");
+    when(request.getParameter("all-tags")).thenReturn("['environment']");
+    testEventServlet.doPost(request, response);
+
+    request = mock(HttpServletRequest.class);
+    response = mock(HttpServletResponse.class);
+    when(request.getParameter("event-name")).thenReturn("BLM Protest");
+    when(request.getParameter("event-description")).thenReturn("Fight for racial justice!");
+    when(request.getParameter("street-address")).thenReturn("Main Street");
+    when(request.getParameter("city")).thenReturn("Los Angeles");
+    when(request.getParameter("state")).thenReturn("California");
+    when(request.getParameter("date")).thenReturn("2020-17-05");
+    when(request.getParameter("start-time")).thenReturn("13:00");
+    when(request.getParameter("all-tags")).thenReturn("['blm']");
+    testEventServlet.doPost(request, response);
+    toggleLogin("test@example.com");
+
+    // posted by another@example.com
+    toggleLogin("another@example.com");
+    when(request.getParameter("event-name")).thenReturn("Book Drive");
+    when(request.getParameter("event-description")).thenReturn("Let's donate books for kids");
+    when(request.getParameter("street-address")).thenReturn("School Drive");
+    when(request.getParameter("city")).thenReturn("Los Angeles");
+    when(request.getParameter("state")).thenReturn("California");
+    when(request.getParameter("date")).thenReturn("2020-17-05");
+    when(request.getParameter("start-time")).thenReturn("10:00");
+    when(request.getParameter("all-tags")).thenReturn("['education']");
+    testEventServlet.doPost(request, response);
+
+    // logout
+    toggleLogin("another@example.com");
+  }
+
+  // entities to compare against postSetup() method
+  private static Entity createLakeCleanupEvent() {
+    Entity entity = new Entity("Event");
+    entity.setProperty("eventName", "Lake Clean Up");
+    entity.setProperty("eventDescription", "We're cleaning up the lake");
+    entity.setProperty("streetAddress", "678 Lakeview Way");
+    entity.setProperty("city", "Lakeside");
+    entity.setProperty("state", "Michigan");
+    entity.setProperty("date", "2020-17-05");
+    entity.setProperty("startTime", "14:00");
+    entity.setProperty("endTime", "");
+    entity.setProperty("coverPhoto", "");
+    entity.setProperty("tags", "['environment']");
+    entity.setProperty("creator", "test@example.com");
+
+    return entity;
+  }
+
+  private static Entity createBlmProtestEvent() {
+    Entity entity = new Entity("Event");
+    entity.setProperty("eventName", "BLM Protest");
+    entity.setProperty("eventDescription", "Fight for racial justice!");
+    entity.setProperty("streetAddress", "Main Street");
+    entity.setProperty("city", "Los Angeles");
+    entity.setProperty("state", "California");
+    entity.setProperty("date", "2020-17-05");
+    entity.setProperty("startTime", "13:00");
+    entity.setProperty("endTime", "");
+    entity.setProperty("coverPhoto", "");
+    entity.setProperty("tags", "['blm']");
+    entity.setProperty("creator", "test@example.com");
+
+    return entity;
+  }
+
+  private static Entity createBookDriveEvent() {
+    Entity entity = new Entity("Event");
+    entity.setProperty("eventName", "Book Drive");
+    entity.setProperty("eventDescription", "Let's donate books for kids");
+    entity.setProperty("streetAddress", "School Drive");
+    entity.setProperty("city", "Los Angeles");
+    entity.setProperty("state", "California");
+    entity.setProperty("date", "2020-17-05");
+    entity.setProperty("startTime", "10:00");
+    entity.setProperty("endTime", "");
+    entity.setProperty("coverPhoto", "");
+    entity.setProperty("tags", "['education']");
+    entity.setProperty("creator", "another@example.com");
+
+    return entity;
+  }
 
 
   /* the LoginObject structure used by AuthServlet */
