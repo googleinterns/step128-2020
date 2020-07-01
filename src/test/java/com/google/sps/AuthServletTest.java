@@ -61,7 +61,7 @@ public final class AuthServletTest {
   /**
    * makes a dummy URL using a url "base" with an intended user id
    */
-  private String makeLoginURL(String url, String user) {
+  public static String makeLoginURL(String url, String user) {
     return url + "email=" + user;
   }
 
