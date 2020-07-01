@@ -3,35 +3,22 @@
   <head>
     <meta charset="UTF-8">
     <title>STEP Capstone</title>
-    <link id="style" rel="stylesheet" href="style.css">
-    <link rel="icon" href="images/step-favicon.svg" type="image/svg" sizes="16x16">
+    <link id="style" rel="stylesheet" href="style-mobile.css">
     <script src="script.js"></script>
   </head>
-  <body id="body" onload="loadActions(generateRainbowTags)">
+  <body id="body" onload="loadActions();">
     <div class="header"></div>
     <div class="event-display-container">
       <div class="event-left-details">
         <div class="event-display-image"></div>
         <div class = "event-left-text">
           <div class="event-display-header">
-            <div class = "event-display-title">Beach Clean Up</div>
+            <div class = "event-display-title">${name}</div>
             <div class="attendee-count-container">
               <span class="attendee-count environment-text">12</span> already attending</div>
             </div>
-          <div class="event-display-description">
-            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
-                Nam efficitur enim quis est mollis blandit. Integer vitae 
-                augue risus. Nunc sit amet semper urna, ac mollis dui. Aenean vitae 
-                imperdiet nisi, sit amet mattis libero. Sed tincidunt arcu in 
-                justo sodales efficitur. Donec consectetur nunc eget lectus faucibus, 
-                semper placerat libero dignissim. Proin in vestibulum neque.</p>
-            <p>Fusce eu eros eros. Quisque tempor turpis velit, vitae convallis dolor 
-                auctor ac. Ut imperdiet sagittis felis id porta. Aenean sed felis pharetra, 
-                suscipit nunc vel, vehicula diam. Morbi sed neque tellus. Sed tempus porttitor 
-                accumsan. Proin in augue neque. Class aptent taciti sociosqu ad litora 
-                torquent per conubia nostra, per inceptos himenaeos. Nunc semper, 
-                est eu consequat tincidunt, enim urna tempor quam, id malesuada risus velit 
-                tempor justo.</p>
+          <div id="event-display-description" class="event-display-description">
+            ${description}
           </div>
           <div class="tags-container">Tags:
             <span class="tag environment">environment</span>
@@ -39,12 +26,9 @@
         </div>
         <div class="footer">
           <p>
-              Icons made by 
-              <a href="https://www.flaticon.com/authors/pixel-perfect" target="_blank">
-              Pixel Perfect</a> &#38;
-              <a href="https://www.flaticon.com/authors/freepik" target="_blank">
-              Freepik</a> from
-              <a href="https://www.flaticon.com/" title="Flaticon" target="_blank">
+              <a href="https://www.flaticon.com/authors/freepik"
+              title="Freepik"> Freepik</a> from
+              <a href="https://www.flaticon.com/" title="Flaticon">
               www.flaticon.com</a>
           </p>
         </div>
@@ -54,9 +38,9 @@
       </div>
       <div class="event-right-details">
         <div class="event-time-location">
-          <p>Date: Saturday, June 20, 2020</p>
-          <p>Time: 1:00 PM</p>
-          <p>Location: Venice Beach, California</p>
+          <p>Date: ${date}</p>
+          <p>Time: ${start}</p>
+          <p>Location: ${street}, ${city}, ${state}</p>
         </div>
         <div class = "event-display-options">
           <a href="my-events.html" class="save-event">Save Event</a>

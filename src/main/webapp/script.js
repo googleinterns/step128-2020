@@ -479,6 +479,16 @@ function changeSearchDistance() {
 }
 
 /**
+ * Opens an event via its key name.
+ */
+function openLink(key) {
+  const path = '/load-event?Event='
+  var search = 'aglub19hcHBfaWRyEgsSBUV2ZW50GICAgICAgMAIDA';
+  var url = path.concat(search);
+  window.location.href = url;
+}
+
+/**
  * Creates the search distance settings on the page
  */
 async function getSearchDistanceSettings() {

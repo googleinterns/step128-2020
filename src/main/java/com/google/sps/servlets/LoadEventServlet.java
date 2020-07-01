@@ -21,7 +21,6 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
-import com.google.sps.data.Event;
 import java.io.IOException;
 import java.lang.IllegalArgumentException;
 import java.util.logging.Level;
@@ -30,6 +29,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.ServletException;
 import com.google.gson.Gson;
 
 @WebServlet("/load-event")
@@ -38,7 +38,7 @@ public class LoadEventServlet extends HttpServlet {
   private static final Logger LOGGER = Logger.getLogger(LoadEventServlet.class.getName());
 
   @Override
-  public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+  public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     Key keyRequested = getEventKey(request);
     Query query = new Query("Event", keyRequested);
 
@@ -53,22 +53,17 @@ public class LoadEventServlet extends HttpServlet {
     String street = (String) eventRequested.getProperty("streetAddress");
     String city = (String) eventRequested.getProperty("city");
     String state = (String) eventRequested.getProperty("state");
-    String photo = (String) eventRequested.getProperty("coverPhoto");
 
-    Event event = new Event();
-    event.setName(name);
-    event.setDescription(description);
-    event.setDate(date);
-    event.setStart(start);
-    event.setEnd(end);
-    event.setStreet(street);
-    event.setCity(city);
-    event.setState(state);
-    event.setPhoto(photo);
+    request.setAttribute("name", name);
+    request.setAttribute("description", description);
+    request.setAttribute("date", date);
+    request.setAttribute("start", start);
+    request.setAttribute("end", end);
+    request.setAttribute("street", street);
+    request.setAttribute("city", city);
+    request.setAttribute("state", state);
 
-    Gson gson = new Gson();
-    response.setContentType("application/json;");
-    response.getWriter().println(gson.toJson(event));
+    request.getRequestDispatcher("/WEB-INF/html/event.jsp").forward(request, response);
   }
 
   /**
