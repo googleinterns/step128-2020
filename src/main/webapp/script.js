@@ -382,27 +382,31 @@ function updateEventTagBox() {
 }
 
 /* Two test examples to use with getEvents() */
-var test = {title:'Beach clean up', 
-            description:'Lorem ipsum dolor sit amet, consectetur adipiscing elit. ' +
+var test = {eventName:'Beach clean up', 
+            eventDescription:'Lorem ipsum dolor sit amet, consectetur adipiscing elit. ' +
                 'Nam efficitur enim quis est mollis blandit. Integer vitae augue risus. ' +
                 'Nunc sit amet semper urna, ac mollis dui. Aenean vitae imperdiet nisi, ' +
                 'sit amet mattis libero. Sed tincidunt arcu in justo...',
             date:'Saturday, June 20, 2020', 
-            time:'1:00 PM',
+            startTime:'1:00 PM',
             distance:'5 miles away', 
-            address:'Main St, Venice, CA',
+            streetAddress:'Main St',
+            city: 'Venice',
+            state: 'CA',
             attendeeCount: 12,
             tags:['environment'],
             url:'/display-event.html'};
-var test2 = {title:'Book Drive', 
-            description:'Lorem ipsum dolor sit amet, consectetur adipiscing elit. ' +
+var test2 = {eventName:'Book Drive', 
+            eventDescription:'Lorem ipsum dolor sit amet, consectetur adipiscing elit. ' +
                 'Nam efficitur enim quis est mollis blandit. Integer vitae augue risus. ' +
                 'Nunc sit amet semper urna, ac mollis dui. Aenean vitae imperdiet nisi, ' +
                 'sit amet mattis libero. Sed tincidunt arcu in justo...',
             date:'Sunday, June 21, 2020', 
-            time:'1:00 PM',
+            startTime:'1:00 PM',
             distance:'6 miles away', 
-            address:'Main St, Los Angeles, CA',
+            streetAddress:'Main St',
+            city: 'Los Angeles',
+            state: 'CA',
             attendeeCount: 12,
             tags:['education'],
             url:'/display-event.html'};
@@ -431,6 +435,12 @@ async function getEvents(url, index, option) {
   const styleName = styleLink.substring(styleLink.lastIndexOf('/') + 1);
   var onMobile = (styleName.indexOf('mobile') >= 0);
 
+  // event servlet returns tags as string right now -- ['tag1', 'tag2', etc]
+  if(typeof event.tags === 'string') {
+    var tagsString = event.tags.substring(1, event.tags.length - 1);
+    event.tags = tagsString.split(', ');
+  }
+
   var eventListElement = eventListElements[index];
   eventListElement.innerHTML = '';
   events.forEach(function(event) {
@@ -456,14 +466,14 @@ async function getEvents(url, index, option) {
     // show event address if on the my-events page
     if (option == 1 || option == 2) {
       const eventItemTitleName = document.createElement('div');
-      eventItemTitleName.innerText = event.title;
+      eventItemTitleName.innerText = event.eventName;
       const eventItemTitleAddr = document.createElement('div');
-      eventItemTitleAddr.innerText = event.address;
+      eventItemTitleAddr.innerText = event.streetAddress  + ', ' + event.city + ', ' + event.state;
       eventItemTitleAddr.className = 'event-item-address';
       eventItemTitleElement.appendChild(eventItemTitleName);
       eventItemTitleElement.appendChild(eventItemTitleAddr);
     } else {
-      eventItemTitleElement.innerText = event.title;
+      eventItemTitleElement.innerText = event.eventName;
     }
 
     const eventItemDetailsElement = document.createElement('div');
@@ -492,15 +502,20 @@ async function getEvents(url, index, option) {
     const eventItemDistanceElement = document.createElement('div');
     eventItemDistanceElement.className = 'event-item-distance';
     if (option == 1 || option == 2) {
-      eventItemDistanceElement.innerText = event.time;
+      eventItemDistanceElement.innerText = event.startTime;
     } else {
-      eventItemDistanceElement.innerText = event.distance;
+      // TODO: calculate distance
+      if (event.distance != null){
+        eventItemDistanceElement.innerText = event.distance;
+      } else {
+        eventItemDistanceElement.innerText = event.streetAddress  + ', ' + event.city + ', ' + event.state;
+      }
     }
     eventItemDetailsElement.appendChild(eventItemDistanceElement);
 
     const eventItemDescElement = document.createElement('div');
     eventItemDescElement.className = 'event-item-description';
-    eventItemDescElement.innerText = event.description;
+    eventItemDescElement.innerText = event.eventDescription;
     eventItemInfoElement.appendChild(eventItemDescElement);
 
     const eventItemFooterElement = document.createElement('div');
@@ -530,6 +545,9 @@ async function getEvents(url, index, option) {
       attendeeCountContainerElement.appendChild(editEventLink);
     } else {
       // default: show attendee count
+      if(event.attendeeCount == null) {
+        event.attendeeCount = 0;
+      }
       attendeeCountContainerElement.className = 'attendee-count-container';
     
       const attendeeCountElement = document.createElement('span');
