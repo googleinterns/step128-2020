@@ -16,6 +16,11 @@
 var url = "";
 var loggedIn = false;
 
+// option constants to use with getEvents
+const recommendedForYou = 0;
+const savedEvents = 1;
+const createdEvents = 2;
+
 /* determines which stylesheet to use and generates nav bar*/
 function loadActions() {
   const styleSheetElement = document.getElementById('style');
@@ -410,7 +415,7 @@ var test2 = {eventName:'Book Drive',
             attendeeCount: 12,
             tags:['education'],
             url:'/display-event.html'};
-var events = [test, test2];
+var dummyEvents = [test, test2];
 
 const dummyText = "Suggested for you"; // TODO: come up with variety
 /**
@@ -418,15 +423,15 @@ const dummyText = "Suggested for you"; // TODO: come up with variety
  * 
  * Currently uses the events variable defined above
  *
- * @param {string} url TODO - what is this for?
+ * @param {array} events The list of events to display
  * @param {number} index To identify which event list container on the page to generate.
  * @param {number} option To identify which format to generate -- attendee count, 
  *		unsave/edit event, or a recommendation reason.
  */
-async function getEvents(url, index, option) {
+async function getEvents(events, index, option) {
   const eventListElements = document.getElementsByClassName('event-list-container');
   url = '/display-event.html'; // use this for now
-  if (index === null || index >= eventListElements.length) {
+  if (index == null || index >= eventListElements.length) {
     index = 0;
   }
 
@@ -435,15 +440,35 @@ async function getEvents(url, index, option) {
   const styleName = styleLink.substring(styleLink.lastIndexOf('/') + 1);
   var onMobile = (styleName.indexOf('mobile') >= 0);
 
-  // event servlet returns tags as string right now -- ['tag1', 'tag2', etc]
-  if(typeof event.tags === 'string') {
-    var tagsString = event.tags.substring(1, event.tags.length - 1);
-    event.tags = tagsString.split(', ');
-  }
-
   var eventListElement = eventListElements[index];
   eventListElement.innerHTML = '';
+
+  if(events.length == 0) {
+    const noElementsBox = document.createElement('div');
+    noElementsBox.className = 'no-events';
+    const noElementsText = document.createElement('div');
+    noElementsText.className = 'no-events-text';
+    if(option == savedEvents) {
+      noElementsText.innerText = 'You have not saved any events yet! Click the ‘Find’ tab to to find an event you would like to save.';
+    } else if (option == createdEvents) {
+      noElementsText.innerText = 'You have not created an event yet! Click the ‘Create’ tab to create your first event.';
+    } else {
+      noElementsText.innerText = 'No events to see! Create one now.';
+    }
+
+    noElementsBox.appendChild(noElementsText);
+    eventListElement.appendChild(noElementsBox);
+    return;
+  }
+
   events.forEach(function(event) {
+
+// TODO: may need to adjust for string parsing depending on how servlet returns the data
+//   if(typeof event.tags === 'string') {
+//     var tagsString = event.tags.substring(1, event.tags.length - 1);
+//     event.tags = tagsString.split(', ');
+//   }
+
     const eventItemElement = document.createElement('a');
     eventItemElement.className = 'event-item';
     eventItemElement.setAttribute('onclick', 'openLink(\"' 
@@ -464,7 +489,7 @@ async function getEvents(url, index, option) {
     eventItemTitleElement.className = 'event-item-title';
 
     // show event address if on the my-events page
-    if (option == 1 || option == 2) {
+    if (option == createdEvents || option == savedEvents) {
       const eventItemTitleName = document.createElement('div');
       eventItemTitleName.innerText = event.eventName;
       const eventItemTitleAddr = document.createElement('div');
@@ -501,7 +526,7 @@ async function getEvents(url, index, option) {
     eventItemDetailsElement.appendChild(eventItemDateElement);
     const eventItemDistanceElement = document.createElement('div');
     eventItemDistanceElement.className = 'event-item-distance';
-    if (option == 1 || option == 2) {
+    if (option == savedEvents || option == createdEvents) {
       eventItemDistanceElement.innerText = event.startTime;
     } else {
       // TODO: calculate distance
@@ -524,18 +549,18 @@ async function getEvents(url, index, option) {
 
     // decide which footer item to use
     const attendeeCountContainerElement = document.createElement('div');
-    if (option == 0) {
+    if (option == recommendedForYou) {
       // "recommended for you"
       attendeeCountContainerElement.innerText = dummyText;
 
-    } else if (option == 1) {
+    } else if (option == savedEvents) {
       // unsave an event
       attendeeCountContainerElement.className = 'edit-unsave-event';
       attendeeCountContainerElement.innerText = "Unsave this event";
       attendeeCountContainerElement.onclick = function() {
-          // TODO: unsave from datastore or make popup that confirms choice first
+          // TODO: unsave from datastore and/or make popup that confirms choice first
       }
-    } else if (option == 2) {
+    } else if (option == createdEvents) {
       // edit an event
       attendeeCountContainerElement.className = 'edit-unsave-event';
       const editEventLink = document.createElement("a");
@@ -548,6 +573,7 @@ async function getEvents(url, index, option) {
       if(event.attendeeCount == null) {
         event.attendeeCount = 0;
       }
+
       attendeeCountContainerElement.className = 'attendee-count-container';
     
       const attendeeCountElement = document.createElement('span');
@@ -569,7 +595,6 @@ async function getEvents(url, index, option) {
       if (tag == 'LGBTQ+') spanElement.className = 'tag rainbow';
       else tagElement.className = 'tag ' + tag;
       tagElement.innerText = tag;
-
       tagsContainerElement.appendChild(tagElement);
     });
   });
@@ -706,10 +731,12 @@ function submitSurvey() {
 }
 
 async function getMyEvents() {
-  fetch("/user?get=saved").then(response => response.text()).then(function(text) {
-      document.getElementById("test").innerText = text;
+    document.getElementsByClassName('event-list-container')[0] = 'hello';
+    document.getElementsByClassName('event-list-container')[1] = 'hello';
+  fetch("/user?get=saved").then(response => response.json()).then(function(js) {
+      getEvents(js, 0, 1);
   });
-  fetch("/user?get=created").then(response => response.text()).then(function(text) {
-      document.getElementById("test").innerText = text;
+  fetch("/user?get=created").then(response => response.json()).then(function(js) {
+      getEvents(js, 1, 2);
   });
 }
