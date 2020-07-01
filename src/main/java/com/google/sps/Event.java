@@ -19,11 +19,49 @@ package com.google.sps.data;
  * event with JavaScript.
  */
 public final class Event {
-  private String eventName;
-  private String eventDescription;
-  private String eventDate;
+  private String name;
+  private String description;
+  private String date;
+  private String start;
+  private String end;
+  private String street;
+  private String city;
+  private String state;
+  private String tags;
 
   public void setName(String name) {
-    this.eventName = name;
+    this.name = name;
+  }
+
+  public void setDescription(String description) {
+    this.description = description;
+  }
+
+  public void setDate(String date) {
+    this.date = date;
+  }
+
+  public void setStart(String start) {
+    this.start = start;
+  }
+
+  public void setEnd(String end) {
+    this.end = end;
+  }
+
+  public void setStreet(String street) {
+    this.street = street;
+  }
+
+  public void setCity(String city) {
+    this.city = city;
+  }
+
+  public void setState(String state) {
+    this.state = state;
+  }
+
+  public void setTag(String tag) {
+    this.tag = tag;
   }
 }
