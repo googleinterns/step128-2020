@@ -680,7 +680,7 @@ function submitSurvey() {
         params.append(tagsAll[i], score);
       }
     }
-    fetch(new Request("/user-interest", {method: "POST", body: params}));
+    fetch(new Request("/submit-survey", {method: "POST", body: params}));
   } else {
     // cannot submit while not logged in
     alert('Please log in first!');
