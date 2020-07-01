@@ -63,7 +63,7 @@ public class LoadEventServlet extends HttpServlet {
     request.setAttribute("city", city);
     request.setAttribute("state", state);
 
-    request.getRequestDispatcher("/WEB-INF/html/event.jsp").forward(request, response);
+    request.getRequestDispatcher("/WEB-INF/html/display-event.jsp").forward(request, response);
   }
 
   /**
