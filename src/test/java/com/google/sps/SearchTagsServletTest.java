@@ -122,4 +122,34 @@ public final class SearchTagsServletTest {
     String expected = Utility.convertToJson(events);
     assertEquals(expected, result);
   }
+
+  @Test
+  public void correctNumberTagsInCommon() throws IOException {
+    List<String> tagListA = 
+        new ArrayList<String>(Arrays.asList("blm"));
+    List<String> tagListB = 
+        new ArrayList<String>(Arrays.asList("environment", "blm", "volunteer"));
+    int result = testSearchServlet.tagsInCommon(tagListA, tagListB);
+    assertEquals(1, result);
+  }
+
+  @Test
+  public void tagsInCommonHandlesNoTags() throws IOException {
+    List<String> tagListA = 
+        new ArrayList<String>();
+    List<String> tagListB = 
+        new ArrayList<String>();
+    int result = testSearchServlet.tagsInCommon(tagListA, tagListB);
+    assertEquals(0, result);
+  }
+
+  @Test
+  public void handlesNoTagsInCommon() throws IOException {
+    List<String> tagListA = 
+        new ArrayList<String>(Arrays.asList("education"));
+    List<String> tagListB = 
+        new ArrayList<String>(Arrays.asList("environment", "blm", "volunteer"));
+    int result = testSearchServlet.tagsInCommon(tagListA, tagListB);
+    assertEquals(0, result);
+  }
 }

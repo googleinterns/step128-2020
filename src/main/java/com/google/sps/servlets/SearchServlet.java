@@ -60,13 +60,20 @@ public class SearchServlet extends HttpServlet {
     PreparedQuery results = datastore.prepare(query);
     List<Entity> events = new ArrayList<Entity>(results.asList(FetchOptions.Builder.withDefaults()));
 
-    //get location
-    //filter by location and cutoff outside it
+    // get location
+    // filter by location and cutoff outside it
     
-    //get tags
-    //drop all without first tag
-    //those with most tags in common with search go to top
-    //those closest to the user go to the top
+    // get tags
+    // drop all without first tag?
+    // Sort list by most tags in common with search
+    /*Collections.sort(events, new Comparator<Entity>() { 
+      public int compare(Entity o1,  
+                         Entity o2) { 
+        return (o2.getProperty("tags")).compareTo(o1.getValue()); 
+      } 
+    });*/
+    
+    // those closest to the user go to the top
     
     // Convert events list to json
     String json = Utility.convertToJson(events);
@@ -78,5 +85,10 @@ public class SearchServlet extends HttpServlet {
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
+  }
+
+  public int tagsInCommon(List<String> tagListA, List<String> tagListB) {
+    tagListA.retainAll(tagListB);
+    return tagListA.size();
   }
 }
