@@ -91,8 +91,8 @@ public class LoadEventServlet extends HttpServlet {
     Key eventKey = null;
     // Get the string from the request.
     try {
-      if (request.getParameterMap().containsKey("event")) {
-        String eventKeyString = request.getParameter("event");
+      if (request.getParameterMap().containsKey("Event")) {
+        String eventKeyString = request.getParameter("Event");
         if (eventKeyString instanceof String) {
           // Convert String to type Key.
           eventKey = KeyFactory.stringToKey(eventKeyString);
@@ -100,7 +100,7 @@ public class LoadEventServlet extends HttpServlet {
           throw new IllegalArgumentException("Not a valid key");
         }
       } else {
-        throw new IOException("Request is missing parameters");
+        throw new IOException("Request is missing parameter");
       }
     } catch (Exception e) {
       LOGGER.info("Could not retrieve event key: " + e);

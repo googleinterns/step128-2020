@@ -483,7 +483,7 @@ function changeSearchDistance() {
  */
 function openLink(key) {
   const path = '/load-event?Event='
-  var search = 'aglub19hcHBfaWRyEgsSBUV2ZW50GICAgICAgMAIDA';
+  var search = 'aglub19hcHBfaWRyEgsSBUV2ZW50GICAgICAgIAKDA';
   var url = path.concat(search);
   window.location.href = url;
 }
