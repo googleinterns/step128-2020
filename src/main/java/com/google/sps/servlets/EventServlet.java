@@ -17,13 +17,14 @@ package com.google.sps.servlets;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.users.UserService;
+import com.google.appengine.api.users.UserServiceFactory;
 import java.io.IOException;
+import java.util.logging.Logger;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 @WebServlet("/event")
 public class EventServlet extends HttpServlet {
@@ -37,18 +38,24 @@ public class EventServlet extends HttpServlet {
 
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    Entity eventEntity = populateEvent(request);
+    UserService userService = UserServiceFactory.getUserService();
+    if (userService.isUserLoggedIn()) {
+      String email = userService.getCurrentUser().getEmail();
+      Entity eventEntity = populateEvent(request);
+      eventEntity.setProperty("creator", email);
 
-    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    datastore.put(eventEntity);
+      DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+      datastore.put(eventEntity);
+
+    } else {
+      throw new IOException("Cannot create an event while not logged in");
+    }
 
     // Redirect back to the my-events HTML page.
     response.sendRedirect("/my-events.html");
   }
 
-  /**
-   * @return the Event entity
-   */
+  /** @return the Event entity */
   private Entity populateEvent(HttpServletRequest request) {
     // Get the input from the form.
     String eventName = getParameter(request, "event-name", "");
@@ -78,8 +85,8 @@ public class EventServlet extends HttpServlet {
   }
 
   /**
-   * @return the request parameter, or the default value if the parameter
-   *         was not specified by the client
+   * @return the request parameter, or the default value if the parameter was not specified by the
+   *     client
    */
   private String getParameter(HttpServletRequest request, String name, String defaultValue) {
     String value = request.getParameter(name);

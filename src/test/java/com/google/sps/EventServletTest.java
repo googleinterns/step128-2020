@@ -16,47 +16,103 @@ package com.google.sps;
 
 import static com.google.appengine.api.datastore.FetchOptions.Builder.withLimit;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.users.UserServiceFactory;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
+import com.google.gson.Gson;
+import com.google.sps.servlets.AuthServlet;
 import com.google.sps.servlets.EventServlet;
 import java.io.IOException;
-import javax.servlet.http.HttpServlet;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.net.MalformedURLException;
+import java.net.URL;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 /** */
-@RunWith(JUnit4.class)
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({URL.class, UserServiceFactory.class})
 public final class EventServletTest {
   private final LocalServiceTestHelper helper =
       new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
+  private final Gson gson = new Gson();
   private EventServlet testEventServlet;
+  private AuthServlet testAuthServlet;
+  private MockedUserService mockService;
+
+  private String activeUrl;
+
+  /**
+   * Use the current url to login/logout
+   *
+   * @param email If logging in, will log into this user's account.
+   */
+  private void toggleLogin(String email) throws MalformedURLException, IOException {
+    URL mockurl = PowerMockito.mock(URL.class);
+    when(mockurl.openConnection())
+        .thenReturn(mockService.evaluateURL(AuthServletTest.makeLoginURL(activeUrl, email)));
+    mockurl.openConnection();
+
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    StringWriter out = new StringWriter();
+    PrintWriter writer = new PrintWriter(out);
+    when(response.getWriter()).thenReturn(writer);
+
+    testAuthServlet.doGet(request, response);
+    out.flush();
+    LoginObject result = gson.fromJson(out.toString(), LoginObject.class);
+    activeUrl = result.url;
+  }
 
   @Before
-  public void setUp() {
+  public void setUp() throws IOException {
     helper.setUp();
+    PowerMockito.mockStatic(UserServiceFactory.class);
+    mockService = new MockedUserService();
+    when(UserServiceFactory.getUserService()).thenReturn(mockService);
     testEventServlet = new EventServlet();
+    testAuthServlet = new AuthServlet();
+
+    // get the initial login url
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    StringWriter out = new StringWriter();
+    PrintWriter writer = new PrintWriter(out);
+    when(response.getWriter()).thenReturn(writer);
+    testAuthServlet.doGet(request, response);
+    out.flush();
+
+    LoginObject result = gson.fromJson(out.toString(), LoginObject.class);
+    activeUrl = result.url;
   }
 
   @After
   public void tearDown() {
     helper.tearDown();
+    activeUrl = "";
   }
 
   @Test
   public void postOneEventToDatastore() throws IOException {
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
+    toggleLogin("test@example.com");
 
     // Add a mock request to pass as a parameter to doPost.
     when(request.getParameter("event-name")).thenReturn("Lake Clean Up");
@@ -82,6 +138,7 @@ public final class EventServletTest {
   public void postMultipleEventsToDatastore() throws IOException {
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
+    toggleLogin("test@example.com");
 
     // Add a mock request to pass as a parameter to doPost.
     when(request.getParameter("event-name")).thenReturn("Lake Clean Up");
@@ -109,6 +166,8 @@ public final class EventServletTest {
   public void postEventWithAllFields() throws IOException {
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
+    String creatorEmail = "test@example.com";
+    toggleLogin(creatorEmail);
 
     // Add a mock request to pass as a parameter to doPost.
     when(request.getParameter("event-name")).thenReturn("Lake Clean Up");
@@ -125,7 +184,7 @@ public final class EventServletTest {
     // Post event to Datastore.
     testEventServlet.doPost(request, response);
 
-    // Create what the event Entity should look like, but do not post to 
+    // Create what the event Entity should look like, but do not post to
     // it to Datastore.
     Entity goalEntity = new Entity("Event");
     goalEntity.setProperty("eventName", "Lake Clean Up");
@@ -138,6 +197,7 @@ public final class EventServletTest {
     goalEntity.setProperty("endTime", "15:00");
     goalEntity.setProperty("coverPhoto", "/img-2030121");
     goalEntity.setProperty("tags", "['environment']");
+    goalEntity.setProperty("creator", creatorEmail);
 
     // Retrieve the Entity posted to Datastore.
     DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
@@ -152,6 +212,7 @@ public final class EventServletTest {
   public void postEventWithEmptyOptionalFields() throws IOException {
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
+    toggleLogin("test@example.com");
 
     // This mock request does not include optional fields end-time and cover-photo.
     when(request.getParameter("event-name")).thenReturn("Lake Clean Up");
@@ -174,5 +235,37 @@ public final class EventServletTest {
     // parameters that were not in the request.
     assertEquals("", postedEntity.getProperty("endTime"));
     assertEquals("", postedEntity.getProperty("coverPhoto"));
+  }
+
+  @Test
+  public void postEventWithoutLoggingIn() throws IOException {
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpServletResponse response = mock(HttpServletResponse.class);
+
+    when(request.getParameter("event-name")).thenReturn("Lake Clean Up");
+    when(request.getParameter("event-description")).thenReturn("We're cleaning up the lake");
+    when(request.getParameter("street-address")).thenReturn("678 Lakeview Way");
+    when(request.getParameter("city")).thenReturn("Lakeside");
+    when(request.getParameter("state")).thenReturn("Michigan");
+    when(request.getParameter("date")).thenReturn("2020-17-05");
+    when(request.getParameter("start-time")).thenReturn("14:00");
+    when(request.getParameter("all-tags")).thenReturn("['environment']");
+
+    try {
+      testEventServlet.doPost(request, response);
+      // doPost should throw an error because it is not logged in
+      fail();
+    } catch (IOException e) {
+      // no entities should have been posted
+
+      DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
+      assertEquals(0, ds.prepare(new Query("Event")).countEntities());
+    }
+  }
+
+  /* the LoginObject structure used by AuthServlet */
+  private static class LoginObject {
+    private boolean loggedIn;
+    private String url;
   }
 }
