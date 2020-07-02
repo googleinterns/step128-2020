@@ -86,7 +86,8 @@ public final class SearchTagsServletTest {
       e.setProperty("eventName", i);
       e.setIndexedProperty("tags", 
           new ArrayList<String>(Arrays.asList(possibleTags.get(i-9), 
-          possibleTags.get(i-8), possibleTags.get(i-7))));
+          possibleTags.get(i-8), 
+          possibleTags.get(i-7))));
       testEntities.add(e);
     }
     // Add all the events to the mock Datastore
@@ -122,15 +123,8 @@ public final class SearchTagsServletTest {
     // Get the events we were expecting the search to return
     // from the datastore
     List<Integer> ids = new ArrayList<Integer>(Arrays.asList(0, 5, 9));
-    Filter idFilter =
-        new FilterPredicate("eventName", FilterOperator.IN, ids);
-    Query query =
-        new Query("Event").setFilter(idFilter);
-
-    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    PreparedQuery results = datastore.prepare(query);
-    List<Entity> events = new ArrayList<Entity>(
-        results.asList(FetchOptions.Builder.withDefaults()));
+    List<Entity> events = fetchIDsFromDataStore(ids);
+    
     // Convert expected events to JSON for comparison
     String expected = Utility.convertToJson(events);
     assertEquals(expected, result);
@@ -158,14 +152,7 @@ public final class SearchTagsServletTest {
     // from the datastore and assemble our expected
     List<Integer> ids = 
         new ArrayList<Integer>(Arrays.asList(0, 1, 2, 5, 6, 7, 9, 10));
-    Filter idFilter =
-        new FilterPredicate("eventName", FilterOperator.IN, ids);
-    Query query =
-        new Query("Event").setFilter(idFilter);
-    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    PreparedQuery results = datastore.prepare(query);
-    List<Entity> events = new ArrayList<Entity>(
-        results.asList(FetchOptions.Builder.withDefaults()));
+    List<Entity> events = fetchIDsFromDataStore(ids);
 
     // Order results like sorting algorithm will
     List<String> desiredOrder = new ArrayList<String>(
@@ -199,14 +186,7 @@ public final class SearchTagsServletTest {
     // from the datastore and assemble our expected
     List<Integer> ids = 
         new ArrayList<Integer>(Arrays.asList(2, 6, 7, 9, 10));
-    Filter idFilter =
-        new FilterPredicate("eventName", FilterOperator.IN, ids);
-    Query query =
-        new Query("Event").setFilter(idFilter);
-    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    PreparedQuery results = datastore.prepare(query);
-    List<Entity> events = new ArrayList<Entity>(
-        results.asList(FetchOptions.Builder.withDefaults()));
+    List<Entity> events = fetchIDsFromDataStore(ids);
 
     // Order results like sorting algorithm will
     List<String> desiredOrder = new ArrayList<String>(
@@ -259,5 +239,17 @@ public final class SearchTagsServletTest {
       }
     }
     return orderedEvents;
+  }
+
+  private static List<Entity> fetchIDsFromDataStore(List<Integer> ids) {
+    Filter idFilter =
+        new FilterPredicate("eventName", FilterOperator.IN, ids);
+    Query query =
+        new Query("Event").setFilter(idFilter);
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    PreparedQuery results = datastore.prepare(query);
+    List<Entity> events = new ArrayList<Entity>(
+        results.asList(FetchOptions.Builder.withDefaults()));
+    return events;
   }
 }
