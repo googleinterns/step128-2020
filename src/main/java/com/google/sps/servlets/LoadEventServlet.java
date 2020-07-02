@@ -14,24 +14,19 @@
 
 package com.google.sps.servlets;
 
-import static com.google.appengine.api.datastore.FetchOptions.Builder.withLimit;
-
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
-import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
 import java.io.IOException;
-import java.lang.IllegalArgumentException;
-import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.ServletException;
 
 @WebServlet("/load-event")
 public class LoadEventServlet extends HttpServlet {
@@ -39,7 +34,8 @@ public class LoadEventServlet extends HttpServlet {
   private static final Logger LOGGER = Logger.getLogger(LoadEventServlet.class.getName());
 
   @Override
-  public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+  public void doGet(HttpServletRequest request, HttpServletResponse response)
+      throws ServletException, IOException {
     try {
       Key keyRequested = getEventKey(request);
       if (keyRequested == null) {
@@ -51,17 +47,15 @@ public class LoadEventServlet extends HttpServlet {
         Entity eventRequested = datastore.prepare(query).asSingleEntity();
         request = populateRequest(request, eventRequested);
 
-        request.getRequestDispatcher("/WEB-INF/html/display-event.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/jsp/display-event.jsp").forward(request, response);
       }
     } catch (Exception e) {
       LOGGER.info("Could not retrieve event " + e);
-      request.getRequestDispatcher("/WEB-INF/html/event-not-found.jsp").forward(request, response);
+      request.getRequestDispatcher("/WEB-INF/jsp/event-not-found.jsp").forward(request, response);
     }
   }
 
-  /**
-   * @return the request with attributes set.
-   */ 
+  /** @return the request with attributes set. */
   private HttpServletRequest populateRequest(HttpServletRequest request, Entity event) {
     String name = (String) event.getProperty("eventName");
     String description = (String) event.getProperty("eventDescription");
@@ -82,16 +76,14 @@ public class LoadEventServlet extends HttpServlet {
     request.setAttribute("state", state);
 
     return request;
-  } 
+  }
 
-  /**
-   * @return the key from the request parameter.
-   */ 
+  /** @return the key from the request parameter. */
   private Key getEventKey(HttpServletRequest request) throws IllegalArgumentException, IOException {
     Key eventKey = null;
     // Get the string from the request.
     try {
-      if (request.getParameterMap().containsKey("Event")) {
+      if (request.getParameter("Event") != null) {
         String eventKeyString = request.getParameter("Event");
         if (eventKeyString instanceof String) {
           // Convert String to type Key.

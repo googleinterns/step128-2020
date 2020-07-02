@@ -14,48 +14,45 @@
 
 package com.google.sps;
 
-import static com.google.appengine.api.datastore.FetchOptions.Builder.withLimit;
-import static org.junit.Assert.assertEquals;
+// import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.sps.servlets.LoadEventServlet;
 import java.io.IOException;
-import javax.servlet.http.HttpServlet;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.ServletException;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import org.junit.Test;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /** */
 @RunWith(JUnit4.class)
 public final class LoadEventServletTest {
   private final LocalServiceTestHelper helper =
       new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
-  private LoadEventServlet testLoadEventServlet;
+  private LoadEventServlet testServlet;
   private Entity goalEntity;
+  private String goalKeyString;
 
   @Before
   public void setUp() {
     helper.setUp();
-    testLoadEventServlet = new LoadEventServlet();
+    testServlet = new LoadEventServlet();
 
     DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
 
-    goalEntity = new Entity("Event", "aglub19hcHBfaWRyEgsSBUV2ZW50GICAgICAgIAKDA");
+    goalEntity = new Entity("Event");
     goalEntity.setProperty("eventName", "Lake Clean Up");
     goalEntity.setProperty("eventDescription", "We're cleaning up the lake");
     goalEntity.setProperty("streetAddress", "678 Lakeview Way");
@@ -67,6 +64,8 @@ public final class LoadEventServletTest {
     goalEntity.setProperty("coverPhoto", "/img-2030121");
     goalEntity.setProperty("tags", "['environment']");
     ds.put(goalEntity);
+    Key goalKey = goalEntity.getKey();
+    goalKeyString = KeyFactory.keyToString(goalKey);
   }
 
   @After
@@ -75,8 +74,16 @@ public final class LoadEventServletTest {
   }
 
   @Test
-  public void postOneEventToDatastore() throws IOException, ServletException {
+  public void sendRequestWithCorrectKey() throws IOException, ServletException {
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
+    RequestDispatcher dispatcher = mock(RequestDispatcher.class);
+
+    when(request.getParameter("Event")).thenReturn(goalKeyString);
+    when(request.getRequestDispatcher("/WEB-INF/jsp/display-event.jsp")).thenReturn(dispatcher);
+
+    testServlet.doGet(request, response);
+
+    // assertEquals("Lake Clean Up", request.getAttribute());
   }
 }
