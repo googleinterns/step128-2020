@@ -124,7 +124,7 @@ public final class SearchTagsServletTest {
     // from the datastore
     List<Integer> ids = new ArrayList<Integer>(Arrays.asList(0, 5, 9));
     List<Entity> events = fetchIDsFromDataStore(ids);
-    
+
     // Convert expected events to JSON for comparison
     String expected = Utility.convertToJson(events);
     assertEquals(expected, result);
@@ -228,6 +228,13 @@ public final class SearchTagsServletTest {
     assertEquals(0, result);
   }
 
+  /**
+   * Orders a list of events by a given order
+   *
+   * @return List containing the events ordered
+   * @param desiredOrder List containing the eventNames in the order they should be in
+   * @param events List of events to be ordered
+   */
   private static List<Entity> orderEvents(List<String> desiredOrder, List<Entity> events) {
     List<Entity> orderedEvents = new ArrayList<Entity>();
     for (int o = 0; o < desiredOrder.size(); o++) {
@@ -241,6 +248,12 @@ public final class SearchTagsServletTest {
     return orderedEvents;
   }
 
+  /**
+   * Fetches entities from the datastore according to ids
+   *
+   * @return List containing the requested entities
+   * @param ids List containing the ids of the entities to fetch from the Datastore
+   */
   private static List<Entity> fetchIDsFromDataStore(List<Integer> ids) {
     Filter idFilter =
         new FilterPredicate("eventName", FilterOperator.IN, ids);
