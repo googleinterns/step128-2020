@@ -54,7 +54,10 @@ public class LoadEventServlet extends HttpServlet {
     }
   }
 
-  /** @return the request with attributes set. */
+  /**
+  * Supplies the request with attributes from the event requested.
+  * @return the request with attributes set.
+  */
   private HttpServletRequest populateRequest(HttpServletRequest request, Entity event) {
     String name = (String) event.getProperty("eventName");
     String description = (String) event.getProperty("eventDescription");
@@ -77,7 +80,11 @@ public class LoadEventServlet extends HttpServlet {
     return request;
   }
 
-  /** @return the key from the request parameter. */
+  /**
+  * Retrieves the key string (if any) from the request parameter and converts 
+  * it to type Key.
+  * @return the key from the request parameter.
+  */
   private Key getEventKey(HttpServletRequest request) throws IllegalArgumentException, IOException {
     Key eventKey = null;
     // Get the string from the request.
