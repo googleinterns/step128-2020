@@ -52,9 +52,7 @@ public final class SearchTagsServletTest {
   private SearchServlet testSearchServlet;
   private List<Entity> testEntities;
 
-  /**
-   * Sets up the tests with sample events put into the test datastore.
-   */
+  /** Sets up the tests with sample events put into the test datastore. */
   @Before
   public void setUp() {
     helper.setUp();
