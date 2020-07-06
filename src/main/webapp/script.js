@@ -114,7 +114,7 @@ function generateNavBar() {
 
   // creates this structure:
   //   <div class="header-left">
-  //     <a href="/index.html">        
+  //     <a href="/index.html">
   //       <img src="images/uniteLogo.svg" alt="Unite by STEP logo.">
   //     </a>
   //     <a class="nav-item" href="/index.html">Home</a>
@@ -144,7 +144,7 @@ function toggleDetails() {
 }
 
 /**
- * Toggles the navigation menu for the mobile layout. 
+ * Toggles the navigation menu for the mobile layout.
  */
 function toggleNavMenu() {
   const exists = document.getElementById('dropdown-bar');
@@ -157,7 +157,7 @@ function toggleNavMenu() {
 }
 
 /**
- * Generates the navigation menu layout on mobile. 
+ * Generates the navigation menu layout on mobile.
  */
 function generateMobileNavLayout() {
   const dropdownContainer = document.getElementsByClassName('dropdown')[0];
@@ -202,9 +202,9 @@ function generateMobileNavLayout() {
 }
 
 /** *********************************************************************
- * Loading methods for event search/display -- distance settings, 
+ * Loading methods for event search/display -- distance settings,
  * rainbow tags, event lists
- ***********************************************************************/ 
+ ***********************************************************************/
 
 // option constants to use with getEvents
 const recommendedForYou = 0;
@@ -212,46 +212,48 @@ const savedEvents = 1;
 const createdEvents = 2;
 
 // Two test examples to use with getEvents()
-const test = {eventName:'Beach clean up', 
-            eventDescription:'Lorem ipsum dolor sit amet, consectetur adipiscing elit. ' +
-                'Nam efficitur enim quis est mollis blandit. Integer vitae augue risus. ' +
-                'Nunc sit amet semper urna, ac mollis dui. Aenean vitae imperdiet nisi, ' +
-                'sit amet mattis libero. Sed tincidunt arcu in justo...',
-            date:'Saturday, June 20, 2020', 
-            startTime:'1:00 PM',
-            distance:'5 miles away', 
-            streetAddress:'Main St',
-            city: 'Venice',
-            state: 'CA',
-            attendeeCount: 12,
-            tags:['environment'],
-            url:'/display-event.html'};
-const test2 = {eventName:'Book Drive', 
-            eventDescription:'Lorem ipsum dolor sit amet, consectetur adipiscing elit. ' +
-                'Nam efficitur enim quis est mollis blandit. Integer vitae augue risus. ' +
-                'Nunc sit amet semper urna, ac mollis dui. Aenean vitae imperdiet nisi, ' +
-                'sit amet mattis libero. Sed tincidunt arcu in justo...',
-            date:'Sunday, June 21, 2020', 
-            startTime:'1:00 PM',
-            distance:'6 miles away', 
-            streetAddress:'Main St',
-            city: 'Los Angeles',
-            state: 'CA',
-            attendeeCount: 12,
-            tags:['education'],
-            url:'/display-event.html'};
+const test = { eventName:'Beach clean up', 
+  eventDescription:'Lorem ipsum dolor sit amet, consectetur adipiscing elit. ' +
+      'Nam efficitur enim quis est mollis blandit. Integer vitae augue risus. ' +
+      'Nunc sit amet semper urna, ac mollis dui. Aenean vitae imperdiet nisi, ' +
+      'sit amet mattis libero. Sed tincidunt arcu in justo...', 
+  date:'Saturday, June 20, 2020', 
+  startTime:'1:00 PM', 
+  distance:'5 miles away', 
+  streetAddress:'Main St', 
+  city: 'Venice', 
+  state: 'CA', 
+  attendeeCount: 12, 
+  tags:['environment'], 
+  url:'/display-event.html'};
+const test2 = { eventName:'Book Drive', 
+  eventDescription:'Lorem ipsum dolor sit amet, consectetur adipiscing elit. ' +
+      'Nam efficitur enim quis est mollis blandit. Integer vitae augue risus. ' +
+      'Nunc sit amet semper urna, ac mollis dui. Aenean vitae imperdiet nisi, ' +
+      'sit amet mattis libero. Sed tincidunt arcu in justo...', 
+  date:'Sunday, June 21, 2020', 
+  startTime:'1:00 PM', 
+  distance:'6 miles away', 
+  streetAddress:'Main St', 
+  city: 'Los Angeles', 
+  state: 'CA', 
+  attendeeCount: 12, 
+  tags:['education'], 
+  url:'/display-event.html'};
 const dummyEvents = [test, test2];
+const dummyText = 'Suggested for you'; // TODO: come up with variety
 
-const dummyText = "Suggested for you"; // TODO: come up with variety
 /**
  * Fetches events from a specific url
- * 
+ *
  * Currently uses the events variable defined above
  *
  * @param {array} events The list of events to display
- * @param {number} index To identify which event list container on the page to generate.
- * @param {number} option To identify which format to generate -- attendee count, 
- *		unsave/edit event, or a recommendation reason.
+ * @param {number} index To identify which event list container
+ *                           on the page to generate.
+ * @param {number} option To identify which format to generate--
+ *                           attendee count, unsave/edit event,
+ *                           or a recommendation reason.
  */
 async function getEvents(events, index, option) {
   const eventListElements = document.getElementsByClassName('event-list-container');
@@ -274,9 +276,11 @@ async function getEvents(events, index, option) {
     const noElementsText = document.createElement('div');
     noElementsText.className = 'no-events-text';
     if (option == savedEvents) {
-      noElementsText.innerText = 'You have not saved any events yet! Click the ‘Find’ tab to to find an event you would like to save.';
+      noElementsText.innerText = 'You have not saved any events yet! '
+          + 'Click the ‘Find’ tab to to find an event you would like to save.';
     } else if (option == createdEvents) {
-      noElementsText.innerText = 'You have not created an event yet! Click the ‘Create’ tab to create your first event.';
+      noElementsText.innerText = 'You have not created an event yet! '
+          + 'Click the ‘Create’ tab to create your first event.';
     } else {
       noElementsText.innerText = 'No events to see! Create one now.';
     }
