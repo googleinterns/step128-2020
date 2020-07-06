@@ -13,13 +13,17 @@
 // limitations under the License.
 
 
-/***********************************************************************
+/** *********************************************************************
  * Utility methods/onload methods (all pages)
- ***********************************************************************/ 
-var url = "";
-var loggedIn = false;
+ ***********************************************************************/
+let url = '';
+let loggedIn = false;
 
-/* determines which stylesheet to use and generates nav bar*/
+/**
+ * determines which stylesheet to use and generates nav bar
+ *
+ * @param {function} doAfter used to specify actions during checkLogin() 
+ */
 function loadActions(doAfter) {
   const styleSheetElement = document.getElementById('style');
   if (window.innerWidth >= window.innerHeight) {
@@ -33,9 +37,10 @@ function loadActions(doAfter) {
   generateNavBar();
 }
 
-/** checks for login status and fetches login/logout url 
+/** 
+ * checks for login status and fetches login/logout url 
  *
- * @param {function} doAfter Will call this function after handling login 
+ * @param {function} doAfter Will call this function after handling login
  *                           Helps with chaining async functions and cleaning up code
  */
 async function checkLogin(doAfter) {
