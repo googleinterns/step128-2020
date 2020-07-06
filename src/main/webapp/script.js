@@ -676,14 +676,6 @@ async function getSearchDistanceSettings() {
       document.createTextNode(' mi'));
 }
 
-function openLink(url) {
-  window.location.pathname = url;
-  fetch('/load-event?event=aglub19hcHBfaWRyEgsSBUV2ZW50GICAgICAgMAIDA')
-  .then(response => response.json()).then((event) => {
-
-  });
-}
-
 /**
  * Generates all the rainbow tags on a page, currently made to be used with LGBTQ+
  *
