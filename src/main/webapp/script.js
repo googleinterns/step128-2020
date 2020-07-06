@@ -13,16 +13,14 @@
 // limitations under the License.
 
 
+/***********************************************************************
+ * Utility methods/onload methods (all pages)
+ ***********************************************************************/ 
 var url = "";
 var loggedIn = false;
 
-// option constants to use with getEvents
-const recommendedForYou = 0;
-const savedEvents = 1;
-const createdEvents = 2;
-
 /* determines which stylesheet to use and generates nav bar*/
-function loadActions() {
+function loadActions(doAfter) {
   const styleSheetElement = document.getElementById('style');
   if (window.innerWidth >= window.innerHeight) {
     styleSheetElement.href = '/style.css';
@@ -30,16 +28,21 @@ function loadActions() {
     styleSheetElement.href = 'style-mobile.css';
   }
 
-  checkLogin();
+  checkLogin(doAfter);
 
   generateNavBar();
 }
 
-/* checks for login status and fetches login/logout url */
-async function checkLogin() {
+/** checks for login status and fetches login/logout url 
+ *
+ * @param {function} doAfter Will call this function after handling login 
+ *                           Helps with chaining async functions and cleaning up code
+ */
+async function checkLogin(doAfter) {
  fetch('/auth').then(response => response.json()).then(function(responseJson) {
     loggedIn = responseJson.loggedIn;
     url = responseJson.url;
+    doAfter();
   });
 }
 
@@ -184,6 +187,10 @@ function generateMobileNavLayout() {
   dropdownContainer.appendChild(dropdownBar);
 }
 
+/***********************************************************************
+ * Functions for search page
+ ***********************************************************************/ 
+
 var tagsAll = ['environment', 'blm', 'volunteer', 'education', 'LGBTQ+'];
 var tagsSearch = [];
 var tagsBox = [...tagsAll];
@@ -296,8 +303,12 @@ function search() {
   url += '&searchDistance=' + searchDistance;
 
   window.location.href = url;
-  //TODO fetch call to server with search parameters
+  // TODO fetch call to server with search parameters
 }
+
+/***********************************************************************
+ * Methods for create-event-form and edit-event form
+ ***********************************************************************/ 
 
 /* This is an array to keep track of the current form's selected tags. */
 var tagsSelected = [];
@@ -385,6 +396,16 @@ function updateEventTagBox() {
 
   generateRainbowTags();
 }
+
+
+/***********************************************************************
+ * Loading methods for any page with event lists
+ ***********************************************************************/ 
+
+/* option constants to use with getEvents */
+const recommendedForYou = 0;
+const savedEvents = 1;
+const createdEvents = 2;
 
 /* Two test examples to use with getEvents() */
 var test = {eventName:'Beach clean up', 
@@ -642,10 +663,6 @@ async function getEvents(events, index, option) {
   //   </div>
 }
 
-function openLink(url) {
-  window.location.pathname = url;
-}
-
 /**
  * Creates the search distance settings on the page
  */
@@ -692,6 +709,14 @@ async function getSearchDistanceSettings() {
         document.createTextNode(' mi'));
 }
 
+function openLink(url) {
+  window.location.pathname = url;
+}
+
+/***********************************************************************
+ * Methods for survey.html
+ ***********************************************************************/ 
+
 /**
  * Toggles the display of the survey page to indicate which option is selected,
  * while saving the survey responses.
@@ -730,13 +755,39 @@ function submitSurvey() {
   }
 }
 
+/***********************************************************************
+ * Methods for index.html
+ ***********************************************************************/ 
+
+ /** onload actions for index.html
+  * fetches events from server, calls getEvents with correct options and loads search distance options*/
+async function getRecommendedEvents() {
+  if(loggedIn) {
+    fetch("/user?get=saved").then(response => response.json()).then(function(js) {
+      getEvents(js, 1, 0);
+    });
+  } else {
+    alert('Please log in first!');
+  }
+  getSearchDistanceSettings();
+}
+
+
+
+/***********************************************************************
+ * Methods for my-events.html
+ ***********************************************************************/ 
+
+/* on loading my-events.html, fetches events from server and calls getEvents with correct options */
 async function getMyEvents() {
-    document.getElementsByClassName('event-list-container')[0] = 'hello';
-    document.getElementsByClassName('event-list-container')[1] = 'hello';
-  fetch("/user?get=saved").then(response => response.json()).then(function(js) {
+  if(loggedIn) {
+    fetch("/user?get=saved").then(response => response.json()).then(function(js) {
       getEvents(js, 0, 1);
-  });
-  fetch("/user?get=created").then(response => response.json()).then(function(js) {
+    });
+    fetch("/user?get=created").then(response => response.json()).then(function(js) {
       getEvents(js, 1, 2);
-  });
+    });
+  } else {
+    alert('Please log in first!');
+  }
 }
