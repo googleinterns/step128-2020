@@ -8,5 +8,8 @@
   },
   "parserOptions": {
     "ecmaVersion": 8
+  },
+  "globals": {
+    "document": "readonly"
   }
 }
