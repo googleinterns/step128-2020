@@ -170,13 +170,21 @@ public class UserServlet extends HttpServlet {
 
   // adds event id to list if it is not already present
   private void postHandleSave(List<Long> saved, long eventId) {
-    for (int i = 0; i < saved.size(); i++) {
-      if (saved.get(i) == eventId) {
-        LOGGER.info("event " + eventId + " has already been saved");
-        return;
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    Key eventKey = KeyFactory.createKey("Event", eventId);
+    try {
+      Entity eventEntity = datastore.get(eventKey);
+
+      for (int i = 0; i < saved.size(); i++) {
+        if (saved.get(i) == eventId) {
+          LOGGER.info("event " + eventId + " has already been saved");
+          return;
+        }
       }
+      saved.add(eventId);
+    } catch (EntityNotFoundException e) {
+      LOGGER.info("event " + eventId + " does not exist");
     }
-    saved.add(eventId);
   }
 
   // removes event id from list if it is present
