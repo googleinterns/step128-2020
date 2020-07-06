@@ -552,7 +552,7 @@ async function getEvents(events, index, option) {
       attendeeCountContainerElement.appendChild(
           document.createTextNode(' already attending'));
     }
-    
+
     eventItemFooterElement.appendChild(attendeeCountContainerElement);
 
     const tagsContainerElement = document.createElement('div');
@@ -569,7 +569,7 @@ async function getEvents(events, index, option) {
   });
 
   // generates this structure:
-  //   
+  // 
   //   <div class="event-item">
   //
   // DESKTOP:
@@ -583,7 +583,7 @@ async function getEvents(events, index, option) {
   //         </div>
   //       </div>
   // MOBILE:
-  //     
+  // 
   //     <div class="event-item-info">
   //       <div class="event-item-header">
   //         <div class="event-item-details">
@@ -595,12 +595,13 @@ async function getEvents(events, index, option) {
   //       </div>
   //
   //       <div class="event-item-description">
-  //         Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
-  //         Nam efficitur enim quis est mollis blandit. Integer vitae augue risus. 
-  //         Nunc sit amet semper urna, ac mollis dui. Aenean vitae imperdiet nisi, 
+  //         Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+  //         Nam efficitur enim quis est mollis blandit. Integer vitae.
+  //         Nunc sit amet semper urna, ac mollis dui. Aenean vitae imperdiet,
   //         sit amet mattis libero. Sed tincidunt arcu in justo...</div>
   //       <div class="event-item-footer">
-  //         <div class="attendee-count-container">     *this item depends on value of 'option'
+  //         *this item depends on value of 'option'*
+  //         <div class="attendee-count-container">
   //             <span class="attendee-count green">12</span> already attending
   //         </div>
   //         <div class="tags-container">
@@ -635,15 +636,15 @@ async function getSearchDistanceSettings() {
   const locationSettingsElements = document.getElementsByClassName('location-settings');
   var locationSettingsElement = locationSettingsElements[0];
 
-  //TODO get from server where the user's location is to set by default
+  // TODO get from server where the user's location is to set by default.
   locationSettingsElement.innerHTML = '';
   const currentLocationElement = document.createElement('div');
   currentLocationElement.className = 'current-location';
-  currentLocationElement.innerText = 'Current Location: ' 
-      + 'Los Angeles, CA';
+  currentLocationElement.innerText = 'Current Location: ' +
+     'Los Angeles, CA';
   locationSettingsElement.appendChild(currentLocationElement);
   locationSettingsElement.appendChild(
-        document.createTextNode(' '));
+      document.createTextNode(' '));
 
   const changeLinkElement = document.createElement('a');
   changeLinkElement.setAttribute('href', '');
@@ -653,7 +654,7 @@ async function getSearchDistanceSettings() {
   const distanceElement = document.createElement('div');
   distanceElement.className = 'distance';
   distanceElement.appendChild(
-        document.createTextNode('Searching within '));
+      document.createTextNode('Searching within '));
   locationSettingsElement.appendChild(distanceElement);
 
   const selectElement = document.createElement('select');
@@ -666,12 +667,13 @@ async function getSearchDistanceSettings() {
     const optionElement = document.createElement('option');
     optionElement.value = distance;
     optionElement.innerText = distance;
-    if (distance == searchDistance) optionElement.setAttribute('selected', 'true');
+    if (distance == searchDistance) optionElement.setAttribute('selected',
+       'true');
     selectElement.appendChild(optionElement);
   });
 
   distanceElement.appendChild(
-        document.createTextNode(' mi'));
+      document.createTextNode(' mi'));
 }
 
 function openLink(url) {
@@ -943,14 +945,14 @@ function search() {
  */
 var surveyResponses = [-1, -1, -1, -1, -1];
 function toggleSurveyDisplay(question, index) {
-	const circle = document.getElementsByClassName('survey-select')[question*5 + index];
-	if (surveyResponses[question] >= 0) {
-		var oldIndex = surveyResponses[question];
-		const oldCircle = document.getElementsByClassName('survey-select')[question*5 + oldIndex];
-		oldCircle.style.backgroundColor = 'transparent';
+  const circle = document.getElementsByClassName('survey-select')[question*5 + index];
+  if (surveyResponses[question] >= 0) {
+    var oldIndex = surveyResponses[question];
+    const oldCircle = document.getElementsByClassName('survey-select')[question*5 + oldIndex];
+    oldCircle.style.backgroundColor = 'transparent';
 	}
-	circle.style.backgroundColor = 'white';
-	surveyResponses[question] = index;
+  circle.style.backgroundColor = 'white';
+  surveyResponses[question] = index;
 }
 
 function submitSurvey() {
