@@ -239,7 +239,7 @@ const test2 = {eventName: 'Book Drive',
   state: 'CA',
   attendeeCount: 12,
   tags: ['education'],
-  url:'/display-event.html'};
+  url: '/display-event.html'};
 const dummyEvents = [test, test2];
 const dummyText = 'Suggested for you'; // TODO: come up with variety
 
