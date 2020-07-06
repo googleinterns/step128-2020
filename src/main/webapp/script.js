@@ -378,6 +378,16 @@ var test2 = {title:'Book Drive',
             key: 'aglub19hcHBfaWRyEgsSBUV2ZW50GICAgICAgIAKDA'};
 var events = [test, test2];
 
+/**
+ * Opens an event via its key name.
+ * @param {string} key web safe key string.
+ */
+function openLink(key) {
+  const path = '/load-event?Event=';
+  const url = path.concat(key);
+  window.location.href = url;
+}
+
 const dummyText = "Suggested for you"; // TODO: come up with variety
 /**
 >>>>>>> Add dummy key which only works locally for now
@@ -614,16 +624,6 @@ var searchDistance = 5;
 function changeSearchDistance() {
   searchDistance = document.getElementById('searchDistance').value;
   search();
-}
-
-/**
- * Opens an event via its key name.
- * @param {string} key web safe key string.
- */
-function openLink(key) {
-  const path = '/load-event?Event=';
-  const url = path.concat(key);
-  window.location.href = url;
 }
 
 /**
