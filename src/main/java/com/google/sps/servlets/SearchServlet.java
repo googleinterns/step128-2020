@@ -27,6 +27,9 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import com.google.maps.model.DistanceMatrix;
+import com.google.maps.model.DistanceMatrixElementStatus;
+import com.google.maps.model.LatLng;
 
 @WebServlet("/search")
 public class SearchServlet extends HttpServlet {
@@ -40,10 +43,27 @@ public class SearchServlet extends HttpServlet {
   // This list is incomplete
   private static final List<String> IRRELEVANT_WORDS =
       new ArrayList<String>(Arrays.asList("the", "is", "for", "in", "of", "so", "to"));
+  private static final String MAPS_API_KEY = 
+      "AIzaSyCKIb4ChiPZYbj5Gce75aEKahQ34OXu3v4";
+  private static final GeoApiContext context = 
+      new GeoApiContext().setApiKey(MAPS_API_KEY);
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     // get location
+    String location = Utility.getParameter(request, "location", "");
+
+    try {
+      DistanceMatrix result = DistanceMatrixApi.newRequest(context)
+        .origins(new LatLng(-31.9522, 115.8589))
+        .destinations(new LatLng(-25.344677, 131.036692))
+        .await();
+    } catch (Exception e) {
+        System.out.println(e.getMessage());
+    }
+
+    String json = result;
+    DistanceMatrix dm = gson.fromJson(json, DistanceMatrix.class);
     // filter by location and cutoff outside it
 
     // get tags
@@ -53,7 +73,9 @@ public class SearchServlet extends HttpServlet {
   }
 
   @Override
-  public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {}
+  public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+
+  }
 
   /**
    * Returns keywords from an event (currently using just the title and description) based off their
