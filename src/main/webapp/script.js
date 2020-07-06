@@ -396,7 +396,7 @@ const dummyText = "Suggested for you"; // TODO: come up with variety
 async function getEvents(events, index, option) {
   const eventListElements =
       document.getElementsByClassName('event-list-container');
-  key = 'aglub19hcHBfaWRyEgsSBUV2ZW50GICAgICAgIAKDA'; // use this for now
+
   if (index == null || index >= eventListElements.length) {
     index = 0;
   }
@@ -474,7 +474,7 @@ async function getEvents(events, index, option) {
     if (onMobile) {
       // image is part of event-header, inside event-item-info
       // event-item-title is part of event-header, outside of
-      // event-item-details  
+      // event-item-details
       eventItemElement.appendChild(eventItemInfoElement);
       eventItemHeaderElement.appendChild(eventItemDetailsElement);
       eventItemHeaderElement.appendChild(eventImageElement);
@@ -668,7 +668,7 @@ async function getSearchDistanceSettings() {
     optionElement.value = distance;
     optionElement.innerText = distance;
     if (distance == searchDistance) optionElement.setAttribute('selected',
-       'true');
+        'true');
     selectElement.appendChild(optionElement);
   });
 
