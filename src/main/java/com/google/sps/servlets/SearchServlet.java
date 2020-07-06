@@ -83,7 +83,9 @@ public class SearchServlet extends HttpServlet {
               return Integer.compare(
                   Integer.parseInt(o1.getProperty("eventName").toString()),
                   Integer.parseInt(o2.getProperty("eventName").toString()));
-            } else return condition;
+            } else {
+              return condition;
+            }
           }
         });
     // those closest to the user go to the top
@@ -99,11 +101,11 @@ public class SearchServlet extends HttpServlet {
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {}
 
   /**
-   * Returns a count of the number of tags two lists have in common
+   * Returns a count of the number of tags two lists have in common.
    *
-   * @return Integer count of number of tags in common
    * @param tagListA List of tags to be compared
    * @param tagListB List of tags to be compared
+   * @return Integer count of number of tags in common
    */
   public Integer intersection(List<String> tagListA, List<String> tagListB) {
     List<String> tagListC = new ArrayList<String>(tagListA);
@@ -113,11 +115,11 @@ public class SearchServlet extends HttpServlet {
 
   /**
    * Returns keywords from an event (currently using just the title and description) based off their
-   * frequency and appearance in the title vs in the description
+   * frequency and appearance in the title vs in the description.
    *
-   * @return List containing most important words from the string
    * @param title String representing the title text to be processed
    * @param desc String representing the description text to be processed
+   * @return List containing most important words from the string
    */
   public static List<String> getKeywords(String title, String desc) {
     // TODO: convert to lowercase in processing (figure out acronyms)
@@ -157,10 +159,10 @@ public class SearchServlet extends HttpServlet {
   }
 
   /**
-   * Returns a list of words contained in a string
+   * Returns a list of words contained in a string.
    *
-   * @return List containing every word in a string
    * @param str String to be processed
+   * @return List containing every word in a string
    */
   public static List<String> getSeparateWords(String str) {
     // TODO: handle single quoted strings (right now keeps them in for
@@ -180,10 +182,10 @@ public class SearchServlet extends HttpServlet {
   }
 
   /**
-   * Returns a map of the occurrences of words in a string
+   * Returns a map of the occurrences of words in a string.
    *
-   * @return Map containing word keys and instance count values
    * @param input String to be processed
+   * @return Map containing word keys and instance count values
    */
   public static Map<String, Integer> wordCount(String input) {
     List<String> words = SearchServlet.getSeparateWords(input);

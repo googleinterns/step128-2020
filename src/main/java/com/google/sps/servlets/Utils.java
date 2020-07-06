@@ -22,8 +22,8 @@ public class Utils {
   /**
    * Converts an Object instance into a JSON string using the Gson library.
    *
-   * @return String containing converted JSON
    * @param o Object to be converted to JSON
+   * @return String containing converted JSON
    */
   public static String convertToJson(Object o) {
     Gson gson = new Gson();
@@ -32,11 +32,13 @@ public class Utils {
   }
 
   /**
-   * @return the request parameter, or the default value if the parameter was not specified by the
-   *     client
+   * Gets a parameter from an HTTP request or returns the default value.
+   *
    * @param request HTTP request to get the parameter from
    * @param name String containing the name of the parameter to get
    * @param defaultValue String containing a default value to return if there is no parameter
+   * @return the request parameter, or the default value if the parameter was not specified by the
+   *     client
    */
   public static String getParameter(HttpServletRequest request, String name, String defaultValue) {
     String value = request.getParameter(name);

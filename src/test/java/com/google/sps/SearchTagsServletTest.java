@@ -15,7 +15,8 @@
 package com.google.sps;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
@@ -217,11 +218,11 @@ public final class SearchTagsServletTest {
   }
 
   /**
-   * Orders a list of events by a given order
+   * Orders a list of events by a given order.
    *
-   * @return List containing the events ordered
    * @param desiredOrder List containing the eventNames in the order they should be in
    * @param events List of events to be ordered
+   * @return List containing the events ordered
    */
   private static List<Entity> orderEvents(List<String> desiredOrder, List<Entity> events) {
     List<Entity> orderedEvents = new ArrayList<Entity>();
