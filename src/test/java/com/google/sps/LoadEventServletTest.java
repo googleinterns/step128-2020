@@ -14,7 +14,7 @@
 
 package com.google.sps;
 
-// import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
 
 import com.google.appengine.api.datastore.DatastoreService;
@@ -73,17 +73,86 @@ public final class LoadEventServletTest {
     helper.tearDown();
   }
 
-  @Test
-  public void sendRequestWithCorrectKey() throws IOException, ServletException {
+  @Test(expected = NullPointerException.class)
+  public void sendRequestWithNoParameter() throws IOException, ServletException {
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
     RequestDispatcher dispatcher = mock(RequestDispatcher.class);
 
-    when(request.getParameter("Event")).thenReturn(goalKeyString);
+    // There is no event parameter in the request.
     when(request.getRequestDispatcher("/WEB-INF/jsp/display-event.jsp")).thenReturn(dispatcher);
 
     testServlet.doGet(request, response);
+    fail("Expected exception");
+  }
 
-    // assertEquals("Lake Clean Up", request.getAttribute());
+  @Test(expected = NullPointerException.class)
+  public void sendRequestWithParameterAndNoKey() throws IOException, ServletException {
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    RequestDispatcher dispatcher = mock(RequestDispatcher.class);
+
+    // There is no Key associated with the event parameter in the request.
+    when(request.getParameter("Event")).thenReturn("");
+    when(request.getRequestDispatcher("/WEB-INF/jsp/display-event.jsp")).thenReturn(dispatcher);
+
+    testServlet.doGet(request, response);
+    fail("Expected exception");
+  }
+
+  @Test(expected = NullPointerException.class)
+  public void sendRequestWithLowercaseParameterAndValidKey() throws IOException, ServletException {
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    RequestDispatcher dispatcher = mock(RequestDispatcher.class);
+
+    // The event parameter is lowercase in the request.
+    when(request.getParameter("event")).thenReturn("agR0ZXN0cgsLEgVFdmVudBgBDA");
+    when(request.getRequestDispatcher("/WEB-INF/jsp/display-event.jsp")).thenReturn(dispatcher);
+
+    testServlet.doGet(request, response);
+    fail("Expected exception");
+  }
+
+  @Test(expected = NullPointerException.class)
+  public void sendRequestWithInvalidLongerKey() throws IOException, ServletException {
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    RequestDispatcher dispatcher = mock(RequestDispatcher.class);
+
+    // The goal Key String is 'agR0ZXN0cgsLEgVFdmVudBgBDA', an extra character has been added.
+    when(request.getParameter("Event")).thenReturn("agR0ZXN0cgsLEgVFdmVudBgBDAX");
+    when(request.getRequestDispatcher("/WEB-INF/jsp/display-event.jsp")).thenReturn(dispatcher);
+
+    testServlet.doGet(request, response);
+    fail("Expected exception");
+  }
+
+  @Test(expected = NullPointerException.class)
+  public void sendRequestWithInvalidShorterKey() throws IOException, ServletException {
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    RequestDispatcher dispatcher = mock(RequestDispatcher.class);
+
+    // The goal Key String is 'agR0ZXN0cgsLEgVFdmVudBgBDA', a character has been removed.
+    when(request.getParameter("Event")).thenReturn("agR0ZXN0cgsLEgVFdmVudBgBD");
+    when(request.getRequestDispatcher("/WEB-INF/jsp/display-event.jsp")).thenReturn(dispatcher);
+
+    testServlet.doGet(request, response);
+    fail("Expected exception");
+  }
+
+  @Test(expected = NullPointerException.class)
+  public void sendRequestWithValidKeyNotInDatastore() throws IOException, ServletException {
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    RequestDispatcher dispatcher = mock(RequestDispatcher.class);
+
+    // Key is replaced the valid key not in Datastore.
+    when(request.getParameter("Event")).thenReturn("agR0ZXN0cgsLEgVFdmVudBgBDZ");
+    when(request.getRequestDispatcher("/WEB-INF/jsp/display-event.jsp")).thenReturn(dispatcher);
+
+    testServlet.doGet(request, response);
+    fail("Expected exception");
   }
 }
