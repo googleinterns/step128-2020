@@ -254,12 +254,12 @@ async function getEvents(events, index, option) {
   var eventListElement = eventListElements[index];
   eventListElement.innerHTML = '';
 
-  if(events.length == 0) {
+  if (events.length == 0) {
     const noElementsBox = document.createElement('div');
     noElementsBox.className = 'no-events';
     const noElementsText = document.createElement('div');
     noElementsText.className = 'no-events-text';
-    if(option == savedEvents) {
+    if (option == savedEvents) {
       noElementsText.innerText = 'You have not saved any events yet! Click the ‘Find’ tab to to find an event you would like to save.';
     } else if (option == createdEvents) {
       noElementsText.innerText = 'You have not created an event yet! Click the ‘Create’ tab to create your first event.';
@@ -275,7 +275,7 @@ async function getEvents(events, index, option) {
   events.forEach(function(event) {
 
 // TODO: may need to adjust for string parsing depending on how servlet returns the data
-//   if(typeof event.tags === 'string') {
+//   if (typeof event.tags === 'string') {
 //     var tagsString = event.tags.substring(1, event.tags.length - 1);
 //     event.tags = tagsString.split(', ');
 //   }
@@ -381,7 +381,7 @@ async function getEvents(events, index, option) {
       attendeeCountContainerElement.appendChild(editEventLink);
     } else {
       // default: show attendee count
-      if(event.attendeeCount == null) {
+      if (event.attendeeCount == null) {
         event.attendeeCount = 0;
       }
 
@@ -637,7 +637,7 @@ function updateEventTagBox() {
  /** onload actions for index.html
   * fetches events from server, calls getEvents with correct options and loads search distance options*/
 async function getRecommendedEvents() {
-  if(loggedIn) {
+  if (loggedIn) {
     fetch("/user?get=saved").then(response => response.json()).then(function(js) {
       // TODO: change this fetch call to get recommendations instead
       getEvents(dummyEvents, 1, 0);
@@ -656,7 +656,7 @@ async function getRecommendedEvents() {
 
 /* on loading my-events.html, fetches events from server and calls getEvents with correct options */
 async function getMyEvents() {
-  if(loggedIn) {
+  if (loggedIn) {
     fetch("/user?get=saved").then(response => response.json()).then(function(js) {
       getEvents(js, 0, 1);
     });
