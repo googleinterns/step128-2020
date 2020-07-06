@@ -363,7 +363,7 @@ var test = {title:'Beach clean up',
             address:'Main St, Venice, CA',
             attendeeCount: 12,
             tags:['environment'],
-            key:'aglub19hcHBfaWRyEgsSBUV2ZW50GICAgICAgIAKDA'};
+            key: 'aglub19hcHBfaWRyEgsSBUV2ZW50GICAgICAgIAKDA'};
 var test2 = {title:'Book Drive', 
             description:'Lorem ipsum dolor sit amet, consectetur adipiscing elit. ' +
                 'Nam efficitur enim quis est mollis blandit. Integer vitae augue risus. ' +
@@ -375,7 +375,7 @@ var test2 = {title:'Book Drive',
             address:'Main St, Los Angeles, CA',
             attendeeCount: 12,
             tags:['education'],
-            key:'aglub19hcHBfaWRyEgsSBUV2ZW50GICAgICAgIAKDA'};
+            key: 'aglub19hcHBfaWRyEgsSBUV2ZW50GICAgICAgIAKDA'};
 var events = [test, test2];
 
 const dummyText = "Suggested for you"; // TODO: come up with variety
