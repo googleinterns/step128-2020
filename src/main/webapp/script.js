@@ -244,6 +244,143 @@ const dummyEvents = [test, test2];
 const dummyText = 'Suggested for you'; // TODO: come up with variety
 
 /**
+<<<<<<< HEAD
+=======
+ * Placeholder function for search functionality
+ */
+function search() {
+  var url = '/search.html?tags=';
+  tagsSearch.forEach(function(tag) {
+    url += tag + ',';
+  });
+  // trim the last comma off
+  if (url.charAt(url.length - 1) == ',') {
+    url = url.substring(0, url.length - 1);
+  }
+
+  url += '&searchDistance=' + searchDistance;
+
+  window.location.href = url;
+  //TODO fetch call to server with search parameters
+}
+
+/* This is an array to keep track of the current form's selected tags. */
+var tagsSelected = [];
+
+/**
+ * Inverts the apperance of a selected tag and adds it to the list
+ * of selected tags
+ */
+function toggleTagEvent(tag) {
+  var boxIndex = tagsBox.indexOf(tag);
+  if (boxIndex > -1) {
+    tagsOnEvent[boxIndex] = !tagsOnEvent[boxIndex];
+
+    if (tagsSelected.includes(tag)) {
+      tagsSelected.splice(boxIndex)
+    } else {
+      tagsSelected.push(tag)
+    }
+  }
+
+  updateEventTagBox();
+}
+
+/**
+ * Verifies that at least one tag is selected. If not, cancel form submit
+ * and display error.
+ */
+function verifyTags() {
+  if (tagsSelected.length > 0) {
+    // Convert tags selected array into string
+    var jsonArray = JSON.stringify(tagsSelected);
+    var tags = createHiddenInput(jsonArray);
+
+    // Add string of tags to form for submission
+    document.getElementById("eventform").appendChild(tags);
+    document.eventform.submit();
+    tagsSelected.splice(0, tagsSelected.length);
+  } else {
+    // Display error and prevent from sumbission
+    var tagBoxError = document.getElementById("tags-label");
+    tagBoxError.style.borderStyle = "solid"
+    tagBoxError.style.borderColor = "red";
+    event.preventDefault();
+  }
+}
+
+/**
+ * Creates a hidden input for the array of tags.
+ */
+function createHiddenInput(jsonArray) {
+  var tagsArray = document.createElement('input');
+  tagsArray.setAttribute('type', 'hidden');
+  tagsArray.setAttribute('name', 'all-tags');
+  tagsArray.setAttribute('id', 'all-tags');
+  tagsArray.setAttribute('value', jsonArray);
+
+  return tagsArray;
+}
+
+/**
+ * Updates the tag box on the event form submit page.
+ */
+function updateEventTagBox() {
+  const elements = document.getElementsByClassName('tag-box');
+  const tagBoxElement = elements[0];
+  tagBoxElement.innerHTML = '';
+  for (var i = 0; i < tagsBox.length; i++) {
+    var tag = tagsBox[i];
+    const spanElement = document.createElement('span');
+    spanElement.setAttribute('onclick', 'toggleTagEvent(\"' + tag + 
+        '\")');
+    // class name is now (for example) 'tag environment'
+    if (tag == 'LGBTQ+') spanElement.className = 'tag rainbow';
+    else spanElement.className = 'tag ' + tag;
+
+    // if tag is on the event, invert it
+    if (tagsOnEvent[i]) {
+      spanElement.className = spanElement.className + ' invert';
+      spanElement.innerText = '✓' + tag;
+    }
+    else spanElement.innerText = tag;
+
+    tagBoxElement.appendChild(spanElement);
+  }
+
+  generateRainbowTags();
+}
+
+/* Two test examples to use with getEvents() */
+var test = {title:'Beach clean up', 
+            description:'Lorem ipsum dolor sit amet, consectetur adipiscing elit. ' +
+                'Nam efficitur enim quis est mollis blandit. Integer vitae augue risus. ' +
+                'Nunc sit amet semper urna, ac mollis dui. Aenean vitae imperdiet nisi, ' +
+                'sit amet mattis libero. Sed tincidunt arcu in justo...',
+            date:'Saturday, June 20, 2020', 
+            time:'1:00 PM',
+            distance:'5 miles away', 
+            address:'Main St, Venice, CA',
+            attendeeCount: 12,
+            tags:['environment'],
+            key:'aglub19hcHBfaWRyEgsSBUV2ZW50GICAgICAgIAKDA'};
+var test2 = {title:'Book Drive', 
+            description:'Lorem ipsum dolor sit amet, consectetur adipiscing elit. ' +
+                'Nam efficitur enim quis est mollis blandit. Integer vitae augue risus. ' +
+                'Nunc sit amet semper urna, ac mollis dui. Aenean vitae imperdiet nisi, ' +
+                'sit amet mattis libero. Sed tincidunt arcu in justo...',
+            date:'Sunday, June 21, 2020', 
+            time:'1:00 PM',
+            distance:'6 miles away', 
+            address:'Main St, Los Angeles, CA',
+            attendeeCount: 12,
+            tags:['education'],
+            key:'aglub19hcHBfaWRyEgsSBUV2ZW50GICAgICAgIAKDA'};
+var events = [test, test2];
+
+const dummyText = "Suggested for you"; // TODO: come up with variety
+/**
+>>>>>>> Add dummy key which only works locally for now
  * Fetches events from a specific url
  *
  * Currently uses the events variable defined above
@@ -255,10 +392,11 @@ const dummyText = 'Suggested for you'; // TODO: come up with variety
  *                           attendee count, unsave/edit event,
  *                           or a recommendation reason.
  */
+
 async function getEvents(events, index, option) {
   const eventListElements =
       document.getElementsByClassName('event-list-container');
-  url = '/display-event.html'; // use this for now
+  key = 'aglub19hcHBfaWRyEgsSBUV2ZW50GICAgICAgIAKDA'; // use this for now
   if (index == null || index >= eventListElements.length) {
     index = 0;
   }
@@ -301,7 +439,7 @@ async function getEvents(events, index, option) {
     const eventItemElement = document.createElement('a');
     eventItemElement.className = 'event-item';
     eventItemElement.setAttribute('onclick', 'openLink(\"' 
-        + event.url + '\")');
+        + event.key + '\")');
     eventListElement.appendChild(eventItemElement);
 
     const eventImageElement = document.createElement('div');
@@ -483,8 +621,7 @@ function changeSearchDistance() {
  */
 function openLink(key) {
   const path = '/load-event?Event='
-  var search = 'aglub19hcHBfaWRyEgsSBUV2ZW50GICAgICAgIAKDA';
-  var url = path.concat(search);
+  var url = path.concat(key);
   window.location.href = url;
 }
 
