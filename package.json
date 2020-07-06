@@ -1,0 +1,8 @@
+{
+  "name": "step128-2020",
+  "version": "1.0.0",
+  "devDependencies": {
+    "eslint": "^7.3.1",
+    "eslint-config-google": "^0.14.0"
+  }
+}
