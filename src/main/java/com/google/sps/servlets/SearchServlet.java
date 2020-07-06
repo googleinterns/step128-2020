@@ -15,7 +15,6 @@
 package com.google.sps.servlets;
 
 import java.io.IOException;
-
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -100,53 +99,8 @@ public class SearchServlet extends HttpServlet {
     response.getWriter().println(json);
   }
 
- @Override
+  @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-  }
-
-  /**
-   * Returns keywords from an event (currently using just the title and description) based off their
-   * frequency and appearance in the title vs in the description
-   *
-   * @return List containing most important words from the string
-   * @param title String representing the title text to be processed
-   * @param desc String representing the description text to be processed
-   */
-  public static List<String> getKeywords(String title, String desc) {
-    // TODO: convert to lowercase in processing (figure out acronyms)
-    Map<String, Integer> titleMap = SearchServlet.wordCount(title);
-    Map<String, Integer> descMap = SearchServlet.wordCount(desc);
-
-    // Merge maps
-    // Title occurrence values multiplied by 2 to give more weight than description
-    titleMap.forEach((key, value) -> descMap.merge(key, value * 2, (v1, v2) -> v1 + (v2 * 2)));
-    List<Map.Entry<String, Integer>> mergeList =
-        new ArrayList<Map.Entry<String, Integer>>(descMap.entrySet());
-
-    Collections.sort(
-        mergeList,
-        new Comparator<Map.Entry<String, Integer>>() {
-          public int compare(Map.Entry<String, Integer> o1, Map.Entry<String, Integer> o2) {
-            return (o2.getValue()).compareTo(o1.getValue());
-          }
-        });
-
-    // Add top results to the final list
-    List<String> finalList = new ArrayList<String>();
-    int count = 0;
-    while (finalList.size() < NUM_KEYWORDS) {
-      Map.Entry e = mergeList.get(count);
-      // Exclude words with less appearances than the cutoff
-      if (((int) e.getValue()) < MIN_INSTANCES) break;
-      else if (count >= mergeList.size()) break;
-      // Exclude common useless words (in, a, the, etc)
-      else if (!IRRELEVANT_WORDS.contains(e.getKey().toString())) {
-        finalList.add(e.getKey().toString());
-      }
-      count++;
-    }
-
-    return finalList;
   }
   
   /**
