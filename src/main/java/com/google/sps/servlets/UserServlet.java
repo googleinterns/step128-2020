@@ -30,9 +30,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.logging.Logger;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -60,13 +58,13 @@ public class UserServlet extends HttpServlet {
         Entity userEntity = datastore.get(userKey);
         switch (request.getParameter("get")) {
           case "saved":
-            events = handleSaved(userEntity);
+            events = getHandleSaved(userEntity);
             break;
           case "created":
-            events = handleCreated(userEmail);
+            events = getHandleCreated(userEmail);
             break;
           default:
-            throw new IOException("missing parameters");
+            throw new IOException("missing or invalid parameters");
         }
         LOGGER.info("queried for events @ account " + userEmail);
 
@@ -75,10 +73,6 @@ public class UserServlet extends HttpServlet {
         Entity entity = new Entity(userKey);
         entity.setProperty("id", userEmail);
         datastore.put(entity);
-
-        // new user will not have any saved or created events (empty list)
-        // response.getWriter().println(gson.toJson(new ArrayList<>()));
-        // return;
       }
     } else {
       // return a list with all created events
@@ -94,12 +88,12 @@ public class UserServlet extends HttpServlet {
   }
 
   // returns a list of all events saved by a user entity
-  private List<Entity> handleSaved(Entity userEntity) {
+  private List<Entity> getHandleSaved(Entity userEntity) {
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     List<Entity> results = new ArrayList<>();
     // get the list of saved events (stored by id)
     @SuppressWarnings("unchecked")
-    Set<Long> savedEvents = (HashSet<Long>) userEntity.getProperty("saved");
+    List<Long> savedEvents = (ArrayList<Long>) userEntity.getProperty("saved");
     if (savedEvents != null) {
       for (long l : savedEvents) {
         try {
@@ -113,7 +107,7 @@ public class UserServlet extends HttpServlet {
   }
 
   // returns a list of all events created by a user (identified by email id)
-  private List<Entity> handleCreated(String userEmail) {
+  private List<Entity> getHandleCreated(String userEmail) {
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     List<Entity> results = new ArrayList<>();
 
@@ -130,12 +124,74 @@ public class UserServlet extends HttpServlet {
 
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    // adds or removes events from saved list
+    // adds or removes events from user's saved events list
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    UserService userService = UserServiceFactory.getUserService();
 
+    if (userService.isUserLoggedIn()) {
+      String userEmail = userService.getCurrentUser().getEmail();
+
+      if (request.getParameter("event") != null) {
+        Long eventId = Long.parseLong(request.getParameter("event"));
+        Key userKey = KeyFactory.createKey("User", userEmail);
+
+        try {
+          Entity userEntity = datastore.get(userKey);
+          List<Long> saved = (ArrayList<Long>) userEntity.getProperty("saved");
+          if (saved == null) {
+            saved = new ArrayList<>();
+          }
+          switch (request.getParameter("action")) {
+            case "save":
+              postHandleSave(saved, eventId);
+              break;
+            case "unsave":
+              postHandleUnsave(saved, eventId);
+              break;
+            default:
+              throw new IOException("missing or invalid parameters");
+          }
+          userEntity.setProperty("saved", saved);
+          datastore.put(userEntity);
+        } catch (EntityNotFoundException exception) {
+          // datastore entry has not been created yet for this user, create it now
+          Entity entity = new Entity(userKey);
+          entity.setProperty("id", userEmail);
+          datastore.put(entity);
+        }
+
+      } else {
+        throw new IOException("no event key specified");
+      }
+    } else {
+      throw new IOException("must be logged in");
+    }
+  }
+
+  // adds event id to list if it is not already present
+  private void postHandleSave(List<Long> saved, long eventId) {
+    for (int i = 0; i < saved.size(); i++) {
+      if (saved.get(i) == eventId) {
+        LOGGER.info("event " + eventId + " has already been saved");
+        return;
+      }
+    }
+    saved.add(eventId);
+  }
+
+  // removes event id from list if it is present
+  private void postHandleUnsave(List<Long> saved, long eventId) {
+    for (int i = 0; i < saved.size(); i++) {
+      if (saved.get(i) == eventId) {
+        saved.remove(i);
+        return;
+      }
+    }
+    LOGGER.info("event " + eventId + " has not been saved yet");
   }
 
   // comparators to apply sort to results
-  private static final Comparator<Entity> ORDER_BY_NAME =
+  public static final Comparator<Entity> ORDER_BY_NAME =
       new Comparator<Entity>() {
         @Override
         public int compare(Entity a, Entity b) {
