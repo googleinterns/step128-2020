@@ -438,8 +438,8 @@ async function getEvents(events, index, option) {
 
     const eventItemElement = document.createElement('a');
     eventItemElement.className = 'event-item';
-    eventItemElement.setAttribute('onclick', 'openLink(\"'
-        + event.key + '\")');
+    eventItemElement.setAttribute('onclick', 'openLink(\"' +
+        event.key + '\")');
     eventListElement.appendChild(eventItemElement);
 
     const eventImageElement = document.createElement('div');
@@ -473,7 +473,8 @@ async function getEvents(events, index, option) {
     // determine order of elements depending on mobile or non-mobile layout
     if (onMobile) {
       // image is part of event-header, inside event-item-info
-      // event-item-title is part of event-header, outside of event-item-details      
+      // event-item-title is part of event-header, outside of
+      // event-item-details  
       eventItemElement.appendChild(eventItemInfoElement);
       eventItemHeaderElement.appendChild(eventItemDetailsElement);
       eventItemHeaderElement.appendChild(eventImageElement);
@@ -530,10 +531,10 @@ async function getEvents(events, index, option) {
     } else if (option == createdEvents) {
       // edit an event
       attendeeCountContainerElement.className = 'edit-unsave-event';
-      const editEventLink = document.createElement("a");
-      editEventLink.innerText = "Edit this event";
+      const editEventLink = document.createElement('a');
+      editEventLink.innerText = 'Edit this event';
 
-      editEventLink.href = "/edit-event-form.html";
+      editEventLink.href = '/edit-event-form.html';
       attendeeCountContainerElement.appendChild(editEventLink);
     } else {
       // default: show attendee count
@@ -544,11 +545,12 @@ async function getEvents(events, index, option) {
       attendeeCountContainerElement.className = 'attendee-count-container';
     
       const attendeeCountElement = document.createElement('span');
-      attendeeCountElement.className = 'attendee-count ' + event.tags[0] + '-text';
+      attendeeCountElement.className = 'attendee-count ' + event.tags[0] +
+          '-text';
       attendeeCountElement.innerText = event.attendeeCount;
       attendeeCountContainerElement.appendChild(attendeeCountElement);
       attendeeCountContainerElement.appendChild(
-      document.createTextNode(' already attending'));
+          document.createTextNode(' already attending'));
     }
     
     eventItemFooterElement.appendChild(attendeeCountContainerElement);
