@@ -45,7 +45,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/** */
 @RunWith(JUnit4.class)
 public final class SearchTagsServletTest {
   private final LocalServiceTestHelper helper =
@@ -53,6 +52,9 @@ public final class SearchTagsServletTest {
   private SearchServlet testSearchServlet;
   private List<Entity> testEntities;
 
+  /**
+   * Sets up the tests with sample events put into the test datastore.
+   */
   @Before
   public void setUp() {
     helper.setUp();
@@ -237,10 +239,10 @@ public final class SearchTagsServletTest {
   }
 
   /**
-   * Fetches entities from the datastore according to ids
+   * Fetches entities from the datastore according to ids.
    *
-   * @return List containing the requested entities
    * @param ids List containing the ids of the entities to fetch from the Datastore
+   * @return List containing the requested entities
    */
   private static List<Entity> fetchIDsFromDataStore(List<Integer> ids) {
     Filter idFilter = new FilterPredicate("eventName", FilterOperator.IN, ids);
