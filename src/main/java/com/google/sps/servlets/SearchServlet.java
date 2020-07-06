@@ -211,6 +211,13 @@ public class SearchServlet extends HttpServlet {
     return map;
   }
 
+  /**
+   * Calculates the distance between two locations using the Google Maps API.
+   *
+   * @param from Latitude and longitude of the beginning location
+   * @param from Latitude and longitude of the ending location
+   * @return the distance in km between the two locations
+   */
   public static int getDistance(LatLng from, LatLng to) {
     DistanceMatrix result = null;
     try {
