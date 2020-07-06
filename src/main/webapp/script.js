@@ -22,7 +22,7 @@ let loggedIn = false;
 /**
  * determines which stylesheet to use and generates nav bar
  *
- * @param {function} doAfter used to specify actions during checkLogin() 
+ * @param {function} doAfter used to specify actions during checkLogin()
  */
 function loadActions(doAfter) {
   const styleSheetElement = document.getElementById('style');
@@ -37,20 +37,23 @@ function loadActions(doAfter) {
   generateNavBar();
 }
 
-/** 
- * checks for login status and fetches login/logout url 
+/**
+ * checks for login status and fetches login/logout url
  *
  * @param {function} doAfter Will call this function after handling login
- *                           Helps with chaining async functions and cleaning up code
+ *      Helps with chaining async functions and cleaning up code
  */
 async function checkLogin(doAfter) {
- fetch('/auth').then(response => response.json()).then(function(responseJson) {
+  fetch('/auth').then(response => response.json()).then(function(responseJson) {
     loggedIn = responseJson.loggedIn;
     url = responseJson.url;
     doAfter();
   });
 }
 
+/**
+ * Generates navigation bar for the page
+ */
 function generateNavBar() {
   const headerLeft = document.createElement('div');
   headerLeft.className = 'header-left';
@@ -109,21 +112,23 @@ function generateNavBar() {
   header.appendChild(headerLeft);
   header.appendChild(headerRight);
 
-    // creates this structure:
-    //   <div class="header-left">
-    //     <a href="/index.html">        
-    //       <img src="images/uniteLogo.svg" alt="Unite by STEP logo.">
-    //     </a>
-    //     <a class="nav-item" href="/index.html">Home</a>
-    //     <a class="nav-item" href="/create-event.html">Create</a>
-    //     <a class="nav-item" href="/search.html">Find</a>
-    //   </div>
-    //   <div class="header-right">
-    //     <a class="nav-item" href="/my-events.html">My Events</a>
-    //   </div>
+  // creates this structure:
+  //   <div class="header-left">
+  //     <a href="/index.html">        
+  //       <img src="images/uniteLogo.svg" alt="Unite by STEP logo.">
+  //     </a>
+  //     <a class="nav-item" href="/index.html">Home</a>
+  //     <a class="nav-item" href="/create-event.html">Create</a>
+  //     <a class="nav-item" href="/search.html">Find</a>
+  //   </div>
+  //   <div class="header-right">
+  //     <a class="nav-item" href="/my-events.html">My Events</a>
+  //   </div>
 }
 
-/* expands and collapses details section on individual event display */
+/**
+ * expands and collapses details section on individual event display
+ */
 function toggleDetails() {
   const detailsBox = document.getElementsByClassName('event-right-details')[0];
   const arrowIcon = document.getElementById('expand-arrow');
@@ -138,9 +143,11 @@ function toggleDetails() {
   }
 }
 
-/* Toggles the navigation menu for the mobile layout. */
+/**
+ * Toggles the navigation menu for the mobile layout. 
+ */
 function toggleNavMenu() {
-  var exists = document.getElementById('dropdown-bar');
+  const exists = document.getElementById('dropdown-bar');
 
   if (exists != null) {
     document.getElementById('dropdown-bar').remove();
@@ -149,7 +156,9 @@ function toggleNavMenu() {
   }
 }
 
-/* Generates the navigation menu layout on mobile. */
+/**
+ * Generates the navigation menu layout on mobile. 
+ */
 function generateMobileNavLayout() {
   const dropdownContainer = document.getElementsByClassName('dropdown')[0];
 
@@ -162,7 +171,7 @@ function generateMobileNavLayout() {
   homeLink.className = 'dropdown-item';
   homeLink.href = '/index.html';
   homeLink.innerText = 'Home';
-  homeBullet.appendChild(homeLink)
+  homeBullet.appendChild(homeLink);
   dropdownBar.appendChild(homeBullet);
 
   const createBullet = document.createElement('li');
@@ -192,18 +201,18 @@ function generateMobileNavLayout() {
   dropdownContainer.appendChild(dropdownBar);
 }
 
-/***********************************************************************
+/** *********************************************************************
  * Loading methods for event search/display -- distance settings, 
  * rainbow tags, event lists
  ***********************************************************************/ 
 
-/* option constants to use with getEvents */
+// option constants to use with getEvents
 const recommendedForYou = 0;
 const savedEvents = 1;
 const createdEvents = 2;
 
-/* Two test examples to use with getEvents() */
-var test = {eventName:'Beach clean up', 
+// Two test examples to use with getEvents()
+const test = {eventName:'Beach clean up', 
             eventDescription:'Lorem ipsum dolor sit amet, consectetur adipiscing elit. ' +
                 'Nam efficitur enim quis est mollis blandit. Integer vitae augue risus. ' +
                 'Nunc sit amet semper urna, ac mollis dui. Aenean vitae imperdiet nisi, ' +
@@ -217,7 +226,7 @@ var test = {eventName:'Beach clean up',
             attendeeCount: 12,
             tags:['environment'],
             url:'/display-event.html'};
-var test2 = {eventName:'Book Drive', 
+const test2 = {eventName:'Book Drive', 
             eventDescription:'Lorem ipsum dolor sit amet, consectetur adipiscing elit. ' +
                 'Nam efficitur enim quis est mollis blandit. Integer vitae augue risus. ' +
                 'Nunc sit amet semper urna, ac mollis dui. Aenean vitae imperdiet nisi, ' +
@@ -231,7 +240,7 @@ var test2 = {eventName:'Book Drive',
             attendeeCount: 12,
             tags:['education'],
             url:'/display-event.html'};
-var dummyEvents = [test, test2];
+const dummyEvents = [test, test2];
 
 const dummyText = "Suggested for you"; // TODO: come up with variety
 /**
