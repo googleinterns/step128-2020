@@ -15,9 +15,15 @@
 package com.google.sps;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
 
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.EntityNotFoundException;
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
@@ -32,6 +38,7 @@ import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
@@ -80,9 +87,15 @@ public final class UserServletTest {
     activeUrl = result.url;
   }
 
-  /** Checks for equality and order between two entity lists without checking the keys */
+  /** Checks for equivalent content between two entity lists */
   private void assertListsEqual(List<Entity> goalEntityList, List<Entity> resultingEntities) {
+    if (goalEntityList == null || resultingEntities == null) {
+      fail();
+    }
     assertEquals(goalEntityList.size(), resultingEntities.size());
+    Collections.sort(goalEntityList, UserServlet.ORDER_BY_NAME);
+    Collections.sort(resultingEntities, UserServlet.ORDER_BY_NAME);
+
     for (int i = 0; i < goalEntityList.size(); i++) {
       Entity goal = goalEntityList.get(i);
       Entity resultEntity = resultingEntities.get(i);
@@ -92,6 +105,22 @@ public final class UserServletTest {
       assertEquals(goalProperties.size(), resultProperties.size());
       for (String s : goalProperties) {
         assertEquals(goal.getProperty(s), resultEntity.getProperty(s));
+      }
+    }
+  }
+
+  /** Checks for equality between two numeric lists (event ids) */
+  private void assertIdListsEqual(List<Long> goalIds, List<Long> resultIds) {
+    if (goalIds == null || resultIds == null) {
+      fail();
+    }
+    assertEquals(goalIds.size(), resultIds.size());
+    Collections.sort(goalIds);
+    Collections.sort(resultIds);
+    // add to sorted lists, then use assertListsEqual
+    for (int i = 0; i < goalIds.size(); i++) {
+      if (goalIds.get(i) != resultIds.get(i)) {
+        fail();
       }
     }
   }
@@ -151,7 +180,6 @@ public final class UserServletTest {
     goalEntityList.add(goalEntity2);
     goalEntityList.add(goalEntity3);
     goalEntityList.add(goalEntity);
-
     assertListsEqual(goalEntityList, resultingEntities);
   }
 
@@ -181,8 +209,52 @@ public final class UserServletTest {
     List<Entity> goalEntityList = new ArrayList<>();
     goalEntityList.add(goalEntity2);
     goalEntityList.add(goalEntity);
-
     assertListsEqual(goalEntityList, resultingEntities);
+  }
+
+  @Test
+  public void saveAnEvent() throws IOException {
+    postEventsSetup();
+
+    // get list of existing entities with their auto-assigned keys
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    StringWriter out = new StringWriter();
+    PrintWriter writer = new PrintWriter(out);
+    when(response.getWriter()).thenReturn(writer);
+    testUserServlet.doGet(request, response);
+    out.flush();
+    List<Entity> resultingEntities =
+        gson.fromJson(out.toString(), new TypeToken<ArrayList<Entity>>() {}.getType());
+
+    Entity entityToSave = resultingEntities.get(0);
+    long id = entityToSave.getKey().getId();
+    List<Long> goalList = new ArrayList<>();
+    goalList.add(id);
+
+    // login and add BLM event to user's saved events
+    toggleLogin("test@example.com");
+    request = mock(HttpServletRequest.class);
+    response = mock(HttpServletResponse.class);
+    when(request.getParameter("event")).thenReturn(id + "");
+    when(request.getParameter("action")).thenReturn("save");
+
+    out = new StringWriter();
+    writer = new PrintWriter(out);
+    when(response.getWriter()).thenReturn(writer);
+
+    testUserServlet.doPost(request, response);
+    out.flush();
+
+    DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
+    Key userKey = KeyFactory.createKey("User", "test@example.com");
+    try {
+      Entity userEntity = ds.get(userKey);
+      assertIdListsEqual(goalList, (ArrayList<Long>) userEntity.getProperty("saved"));
+    } catch (EntityNotFoundException exception) {
+      // user should have been created during previous get/post calls
+      fail();
+    }
   }
 
   // TODO: no tests yet for saved events (no means of saving events yet)
