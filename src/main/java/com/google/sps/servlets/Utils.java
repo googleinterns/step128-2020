@@ -14,18 +14,14 @@
 
 package com.google.sps.servlets;
 
-import java.io.IOException;
 import com.google.gson.Gson;
-import java.util.List;
-import java.util.ArrayList;
 import javax.servlet.http.HttpServletRequest;
 
-
-public class Utility {
+public class Utils {
 
   /**
    * Converts an Object instance into a JSON string using the Gson library.
-   * 
+   *
    * @return String containing converted JSON
    * @param o Object to be converted to JSON
    */
@@ -36,8 +32,8 @@ public class Utility {
   }
 
   /**
-   * @return the request parameter, or the default value if the parameter
-   *         was not specified by the client
+   * @return the request parameter, or the default value if the parameter was not specified by the
+   *     client
    * @param request HTTP request to get the parameter from
    * @param name String containing the name of the parameter to get
    * @param defaultValue String containing a default value to return if there is no parameter
