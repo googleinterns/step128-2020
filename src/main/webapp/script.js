@@ -212,33 +212,33 @@ const savedEvents = 1;
 const createdEvents = 2;
 
 // Two test examples to use with getEvents()
-const test = { eventName:'Beach clean up', 
-  eventDescription:'Lorem ipsum dolor sit amet, consectetur adipiscing elit. ' +
+const test = {eventName: 'Beach clean up',
+  eventDescription: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. ' +
       'Nam efficitur enim quis est mollis blandit. Integer vitae augue risus. ' +
       'Nunc sit amet semper urna, ac mollis dui. Aenean vitae imperdiet nisi, ' +
-      'sit amet mattis libero. Sed tincidunt arcu in justo...', 
-  date:'Saturday, June 20, 2020', 
-  startTime:'1:00 PM', 
-  distance:'5 miles away', 
-  streetAddress:'Main St', 
-  city: 'Venice', 
-  state: 'CA', 
-  attendeeCount: 12, 
-  tags:['environment'], 
-  url:'/display-event.html'};
-const test2 = { eventName:'Book Drive', 
-  eventDescription:'Lorem ipsum dolor sit amet, consectetur adipiscing elit. ' +
+      'sit amet mattis libero. Sed tincidunt arcu in justo...',
+  date: 'Saturday, June 20, 2020',
+  startTime: '1:00 PM',
+  distance: '5 miles away',
+  streetAddress: 'Main St',
+  city: 'Venice',
+  state: 'CA',
+  attendeeCount: 12,
+  tags: ['environment'],
+  url: '/display-event.html'};
+const test2 = {eventName: 'Book Drive', 
+  eventDescription: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. ' +
       'Nam efficitur enim quis est mollis blandit. Integer vitae augue risus. ' +
       'Nunc sit amet semper urna, ac mollis dui. Aenean vitae imperdiet nisi, ' +
-      'sit amet mattis libero. Sed tincidunt arcu in justo...', 
-  date:'Sunday, June 21, 2020', 
-  startTime:'1:00 PM', 
-  distance:'6 miles away', 
-  streetAddress:'Main St', 
-  city: 'Los Angeles', 
-  state: 'CA', 
-  attendeeCount: 12, 
-  tags:['education'], 
+      'sit amet mattis libero. Sed tincidunt arcu in justo...',
+  date: 'Sunday, June 21, 2020',
+  startTime: '1:00 PM',
+  distance: '6 miles away',
+  streetAddress: 'Main St',
+  city: 'Los Angeles',
+  state: 'CA',
+  attendeeCount: 12,
+  tags: ['education'],
   url:'/display-event.html'};
 const dummyEvents = [test, test2];
 const dummyText = 'Suggested for you'; // TODO: come up with variety
@@ -256,7 +256,8 @@ const dummyText = 'Suggested for you'; // TODO: come up with variety
  *                           or a recommendation reason.
  */
 async function getEvents(events, index, option) {
-  const eventListElements = document.getElementsByClassName('event-list-container');
+  const eventListElements =
+      document.getElementsByClassName('event-list-container');
   url = '/display-event.html'; // use this for now
   if (index == null || index >= eventListElements.length) {
     index = 0;
@@ -265,9 +266,9 @@ async function getEvents(events, index, option) {
   // check which stylesheet we are currently using
   const styleLink = document.getElementById('style').href;
   const styleName = styleLink.substring(styleLink.lastIndexOf('/') + 1);
-  var onMobile = (styleName.indexOf('mobile') >= 0);
+  const onMobile = (styleName.indexOf('mobile') >= 0);
 
-  var eventListElement = eventListElements[index];
+  const eventListElement = eventListElements[index];
   eventListElement.innerHTML = '';
 
   if (events.length == 0) {
@@ -276,11 +277,11 @@ async function getEvents(events, index, option) {
     const noElementsText = document.createElement('div');
     noElementsText.className = 'no-events-text';
     if (option == savedEvents) {
-      noElementsText.innerText = 'You have not saved any events yet! '
-          + 'Click the ‘Find’ tab to to find an event you would like to save.';
+      noElementsText.innerText = 'You have not saved any events yet! ' +
+          'Click the ‘Find’ tab to to find an event you would like to save.';
     } else if (option == createdEvents) {
-      noElementsText.innerText = 'You have not created an event yet! '
-          + 'Click the ‘Create’ tab to create your first event.';
+      noElementsText.innerText = 'You have not created an event yet! ' +
+          'Click the ‘Create’ tab to create your first event.';
     } else {
       noElementsText.innerText = 'No events to see! Create one now.';
     }
@@ -291,12 +292,11 @@ async function getEvents(events, index, option) {
   }
 
   events.forEach(function(event) {
-
-// TODO: may need to adjust for string parsing depending on how servlet returns the data
-//   if (typeof event.tags === 'string') {
-//     var tagsString = event.tags.substring(1, event.tags.length - 1);
-//     event.tags = tagsString.split(', ');
-//   }
+    // TODO: adjust for string parsing based on how servlet returns the data
+    //   if (typeof event.tags === 'string') {
+    //     var tagsString = event.tags.substring(1, event.tags.length - 1);
+    //     event.tags = tagsString.split(', ');
+    //   }
 
     const eventItemElement = document.createElement('a');
     eventItemElement.className = 'event-item';
