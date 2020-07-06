@@ -517,6 +517,11 @@ function openLink(url) {
  * the class 'rainbow'
  */
 const colors = ['#FF0900', '#FF7F00', '#ffe600','#00F11D', '#0079FF', '#A800FF'];
+var tagsAll = ['environment', 'blm', 'volunteer', 'education', 'LGBTQ+'];
+var tagsSearch = [];
+var tagsBox = [...tagsAll];
+var tagsOnEvent = [];
+
 function generateRainbowTags() {
   const elements = document.getElementsByClassName('rainbow');
   for (var e = 0; e < elements.length; e++) {
@@ -634,7 +639,8 @@ function updateEventTagBox() {
 async function getRecommendedEvents() {
   if(loggedIn) {
     fetch("/user?get=saved").then(response => response.json()).then(function(js) {
-      getEvents(js, 1, 0);
+      // TODO: change this fetch call to get recommendations instead
+      getEvents(dummyEvents, 1, 0);
     });
   } else {
     alert('Please log in first!');
@@ -665,11 +671,6 @@ async function getMyEvents() {
 /***********************************************************************
  * Methods for search.html
  ***********************************************************************/ 
-
-var tagsAll = ['environment', 'blm', 'volunteer', 'education', 'LGBTQ+'];
-var tagsSearch = [];
-var tagsBox = [...tagsAll];
-var tagsOnEvent = [];
 
 function addTagBoxToSearch(tag) {
   var boxIndex = tagsBox.indexOf(tag);
