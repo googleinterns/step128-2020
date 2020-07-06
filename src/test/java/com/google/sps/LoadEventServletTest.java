@@ -36,7 +36,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/** Tests for LoadEventServlet */
+/** Tests for LoadEventServlet. */
 @RunWith(JUnit4.class)
 public final class LoadEventServletTest {
   private final LocalServiceTestHelper helper =
@@ -45,6 +45,7 @@ public final class LoadEventServletTest {
   private Entity goalEntity;
   private String goalKeyString;
 
+  /** Set up Entity and Entity key to test for. */
   @Before
   public void setUp() {
     helper.setUp();
