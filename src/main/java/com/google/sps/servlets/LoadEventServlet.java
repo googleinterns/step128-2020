@@ -36,11 +36,10 @@ public class LoadEventServlet extends HttpServlet {
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response)
       throws ServletException, IOException {
+    Key keyRequested;
     try {
-      Key keyRequested = getEventKey(request);
-      if (keyRequested == null) {
-        throw new IOException("Could not retrieve event key.");
-      } else {
+      keyRequested = getEventKey(request);
+      if (keyRequested != null) {
         Query query = new Query("Event", keyRequested);
 
         DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
@@ -82,20 +81,13 @@ public class LoadEventServlet extends HttpServlet {
   private Key getEventKey(HttpServletRequest request) throws IllegalArgumentException, IOException {
     Key eventKey = null;
     // Get the string from the request.
-    try {
-      if (request.getParameter("Event") != null) {
-        String eventKeyString = request.getParameter("Event");
-        if (eventKeyString instanceof String) {
-          // Convert String to type Key.
-          eventKey = KeyFactory.stringToKey(eventKeyString);
-        } else {
-          throw new IllegalArgumentException("Not a valid key");
-        }
-      } else {
-        throw new IOException("Request is missing parameter");
-      }
-    } catch (Exception e) {
-      LOGGER.info("Could not retrieve event key: " + e);
+    if (request.getParameter("Event") != null) {
+      String eventKeyString = request.getParameter("Event");
+
+      // Convert String to type Key.
+      eventKey = KeyFactory.stringToKey(eventKeyString);
+    } else {
+      throw new IOException("Request is missing parameter");
     }
     return eventKey;
   }
