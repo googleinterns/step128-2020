@@ -618,10 +618,11 @@ function changeSearchDistance() {
 
 /**
  * Opens an event via its key name.
+ * @param {string} key web safe key string.
  */
 function openLink(key) {
-  const path = '/load-event?Event='
-  var url = path.concat(key);
+  const path = '/load-event?Event=';
+  let url = path.concat(key);
   window.location.href = url;
 }
 
