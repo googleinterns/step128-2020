@@ -50,8 +50,6 @@ public final class LoadEventServletTest {
     helper.setUp();
     testServlet = new LoadEventServlet();
 
-    DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
-
     goalEntity = new Entity("Event");
     goalEntity.setProperty("eventName", "Lake Clean Up");
     goalEntity.setProperty("eventDescription", "We're cleaning up the lake");
@@ -63,7 +61,10 @@ public final class LoadEventServletTest {
     goalEntity.setProperty("endTime", "15:00");
     goalEntity.setProperty("coverPhoto", "/img-2030121");
     goalEntity.setProperty("tags", "['environment']");
+
+    DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
     ds.put(goalEntity);
+
     Key goalKey = goalEntity.getKey();
     goalKeyString = KeyFactory.keyToString(goalKey);
   }
