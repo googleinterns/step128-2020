@@ -159,16 +159,7 @@ public final class UserServletTest {
     // post the events to datastore
     postEventsSetup();
 
-    HttpServletRequest request = mock(HttpServletRequest.class);
-    HttpServletResponse response = mock(HttpServletResponse.class);
-    StringWriter out = new StringWriter();
-    PrintWriter writer = new PrintWriter(out);
-    when(response.getWriter()).thenReturn(writer);
-
-    testUserServlet.doGet(request, response);
-    out.flush();
-    List<Entity> resultingEntities =
-        gson.fromJson(out.toString(), new TypeToken<ArrayList<Entity>>() {}.getType());
+    List<Entity> resultingEntities = callGet("");
 
     // create the expected resulting search results
     Entity goalEntity = createLakeCleanupEvent();
@@ -189,19 +180,7 @@ public final class UserServletTest {
 
     postEventsSetup();
     toggleLogin("test@example.com");
-
-    HttpServletRequest request = mock(HttpServletRequest.class);
-    HttpServletResponse response = mock(HttpServletResponse.class);
-    when(request.getParameter("get")).thenReturn("created");
-
-    StringWriter out = new StringWriter();
-    PrintWriter writer = new PrintWriter(out);
-    when(response.getWriter()).thenReturn(writer);
-
-    testUserServlet.doGet(request, response);
-    out.flush();
-    List<Entity> resultingEntities =
-        gson.fromJson(out.toString(), new TypeToken<ArrayList<Entity>>() {}.getType());
+    List<Entity> resultingEntities = callGet("created");
 
     Entity goalEntity = createLakeCleanupEvent();
     Entity goalEntity2 = createBlmProtestEvent();
@@ -215,36 +194,16 @@ public final class UserServletTest {
   @Test
   public void saveAnEvent() throws IOException {
     postEventsSetup();
+    List<Entity> allEntities = callGet("");
 
-    // get list of existing entities with their auto-assigned keys
-    HttpServletRequest request = mock(HttpServletRequest.class);
-    HttpServletResponse response = mock(HttpServletResponse.class);
-    StringWriter out = new StringWriter();
-    PrintWriter writer = new PrintWriter(out);
-    when(response.getWriter()).thenReturn(writer);
-    testUserServlet.doGet(request, response);
-    out.flush();
-    List<Entity> resultingEntities =
-        gson.fromJson(out.toString(), new TypeToken<ArrayList<Entity>>() {}.getType());
-
-    Entity entityToSave = resultingEntities.get(0);
+    Entity entityToSave = allEntities.get(0);
     long id = entityToSave.getKey().getId();
     List<Long> goalList = new ArrayList<>();
     goalList.add(id);
 
     // login and add BLM event to user's saved events
     toggleLogin("test@example.com");
-    request = mock(HttpServletRequest.class);
-    response = mock(HttpServletResponse.class);
-    when(request.getParameter("event")).thenReturn(id + "");
-    when(request.getParameter("action")).thenReturn("save");
-
-    out = new StringWriter();
-    writer = new PrintWriter(out);
-    when(response.getWriter()).thenReturn(writer);
-
-    testUserServlet.doPost(request, response);
-    out.flush();
+    callPost(id, "save");
 
     DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
     Key userKey = KeyFactory.createKey("User", "test@example.com");
@@ -257,7 +216,132 @@ public final class UserServletTest {
     }
   }
 
-  // TODO: no tests yet for saved events (no means of saving events yet)
+  @Test
+  public void saveTwoEvents() throws IOException {
+    // save two events, this time checking that doGet behaves correctly
+    postEventsSetup();
+
+    // for reference, get list of existing entities with their auto-assigned keys
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    StringWriter out = new StringWriter();
+    PrintWriter writer = new PrintWriter(out);
+    when(response.getWriter()).thenReturn(writer);
+    testUserServlet.doGet(request, response);
+    out.flush();
+    List<Entity> allEntities =
+        gson.fromJson(out.toString(), new TypeToken<ArrayList<Entity>>() {}.getType());
+
+    long id0 = allEntities.get(0).getKey().getId();
+    long id1 = allEntities.get(1).getKey().getId();
+    List<Entity> goalList = new ArrayList<>();
+    goalList.add(allEntities.get(0));
+    goalList.add(allEntities.get(1));
+
+    // login and save these two events
+    toggleLogin("test@example.com");
+    callPost(id0, "save");
+    callPost(id1, "save");
+
+    // now call doGet
+    request = mock(HttpServletRequest.class);
+    response = mock(HttpServletResponse.class);
+    when(request.getParameter("get")).thenReturn("saved");
+    out = new StringWriter();
+    writer = new PrintWriter(out);
+    when(response.getWriter()).thenReturn(writer);
+
+    testUserServlet.doGet(request, response);
+    out.flush();
+    List<Entity> resultingEntities =
+        gson.fromJson(out.toString(), new TypeToken<ArrayList<Entity>>() {}.getType());
+
+    assertListsEqual(goalList, resultingEntities);
+  }
+
+  @Test
+  public void saveAndUnsave() throws IOException {
+    postEventsSetup();
+
+    // for reference, get list of existing entities with their auto-assigned keys
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    StringWriter out = new StringWriter();
+    PrintWriter writer = new PrintWriter(out);
+    when(response.getWriter()).thenReturn(writer);
+    testUserServlet.doGet(request, response);
+    out.flush();
+    List<Entity> resultingEntities =
+        gson.fromJson(out.toString(), new TypeToken<ArrayList<Entity>>() {}.getType());
+
+    long id = resultingEntities.get(0).getKey().getId();
+
+    // save an event, then unsave it
+    toggleLogin("test@example.com");
+    callPost(id, "save");
+    callPost(id, "unsave");
+
+    // now call doGet
+    request = mock(HttpServletRequest.class);
+    response = mock(HttpServletResponse.class);
+    when(request.getParameter("get")).thenReturn("saved");
+    out = new StringWriter();
+    writer = new PrintWriter(out);
+    when(response.getWriter()).thenReturn(writer);
+
+    testUserServlet.doGet(request, response);
+    out.flush();
+    resultingEntities =
+        gson.fromJson(out.toString(), new TypeToken<ArrayList<Entity>>() {}.getType());
+
+    assertListsEqual(new ArrayList<Entity>(), resultingEntities);
+  }
+
+  @Test
+  public void saveDuplicateEvent() throws IOException {
+    postEventsSetup();
+
+    // for reference, get list of existing entities with their auto-assigned keys
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    StringWriter out = new StringWriter();
+    PrintWriter writer = new PrintWriter(out);
+    when(response.getWriter()).thenReturn(writer);
+    testUserServlet.doGet(request, response);
+    out.flush();
+    List<Entity> resultingEntities =
+        gson.fromJson(out.toString(), new TypeToken<ArrayList<Entity>>() {}.getType());
+
+    long id = resultingEntities.get(0).getKey().getId();
+    List<Entity> goal = new ArrayList<>();
+    goal.add(resultingEntities.get(0));
+
+    // save an event, then save it again
+    toggleLogin("test@example.com");
+    callPost(id, "save");
+    callPost(id, "save");
+
+    // now call doGet
+    request = mock(HttpServletRequest.class);
+    response = mock(HttpServletResponse.class);
+    when(request.getParameter("get")).thenReturn("saved");
+    out = new StringWriter();
+    writer = new PrintWriter(out);
+    when(response.getWriter()).thenReturn(writer);
+
+    testUserServlet.doGet(request, response);
+    out.flush();
+    resultingEntities =
+        gson.fromJson(out.toString(), new TypeToken<ArrayList<Entity>>() {}.getType());
+
+    assertListsEqual(goal, resultingEntities);
+  }
+
+  @Test
+  public void unsaveNonexistentEvent() throws IOException {}
+
+  @Test
+  public void saveWhileNotLoggedIn() throws IOException {}
 
   /** Logs in and out a few times, posting events to datastore */
   private void postEventsSetup() throws IOException {
@@ -302,6 +386,31 @@ public final class UserServletTest {
 
     // logout
     toggleLogin("another@example.com");
+  }
+
+  // performs the GET request to return a list of events
+  private List<Entity> callGet(String get) throws IOException {
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    when(request.getParameter("get")).thenReturn("created");
+
+    StringWriter out = new StringWriter();
+    PrintWriter writer = new PrintWriter(out);
+    when(response.getWriter()).thenReturn(writer);
+
+    testUserServlet.doGet(request, response);
+    out.flush();
+
+    return gson.fromJson(out.toString(), new TypeToken<ArrayList<Entity>>() {}.getType());
+  }
+
+  // performs the POST request to save or unsave an event with a given id
+  private void callPost(long id, String action) throws IOException {
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    when(request.getParameter("event")).thenReturn(id + "");
+    when(request.getParameter("action")).thenReturn(action);
+    testUserServlet.doPost(request, response);
   }
 
   // entities to compare against postSetup() method
