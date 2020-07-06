@@ -438,7 +438,7 @@ async function getEvents(events, index, option) {
 
     const eventItemElement = document.createElement('a');
     eventItemElement.className = 'event-item';
-    eventItemElement.setAttribute('onclick', 'openLink(\"' 
+    eventItemElement.setAttribute('onclick', 'openLink(\"'
         + event.key + '\")');
     eventListElement.appendChild(eventItemElement);
 
@@ -622,7 +622,7 @@ function changeSearchDistance() {
  */
 function openLink(key) {
   const path = '/load-event?Event=';
-  let url = path.concat(key);
+  const url = path.concat(key);
   window.location.href = url;
 }
 
