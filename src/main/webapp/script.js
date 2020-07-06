@@ -672,6 +672,13 @@ async function getMyEvents() {
  * Methods for search.html
  ***********************************************************************/ 
 
+function searchLoadActions() {
+  updateSearchBar(); 
+  updateTagBox(); 
+  getEvents(dummyEvents, 0, 3); // TODO: delete once search() is implemented
+  getSearchDistanceSettings();
+}
+
 function addTagBoxToSearch(tag) {
   var boxIndex = tagsBox.indexOf(tag);
   if (boxIndex > -1) {
