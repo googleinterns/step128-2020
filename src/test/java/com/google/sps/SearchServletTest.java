@@ -19,6 +19,7 @@ import static org.mockito.Mockito.*;
 
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
+import com.google.maps.model.LatLng;
 import com.google.sps.servlets.SearchServlet;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -150,5 +151,13 @@ public final class SearchServletTest {
             Arrays.asList("important", "movement", "climate", "change", "protest"));
     List<String> testList = SearchServlet.getKeywords(titleText, descText);
     assertEquals(correctList, testList);
+  }
+
+  @Test
+  public void getDistanceWorks() throws IOException {
+    int distance =
+        SearchServlet.getDistance(
+            new LatLng(-31.9522, 115.8589), new LatLng(-25.344677, 131.036692));
+    assertEquals(2059, distance);
   }
 }

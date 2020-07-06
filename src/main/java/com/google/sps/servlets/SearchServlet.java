@@ -23,6 +23,10 @@ import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.Filter;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
+import com.google.maps.DistanceMatrixApi;
+import com.google.maps.GeoApiContext;
+import com.google.maps.model.DistanceMatrix;
+import com.google.maps.model.LatLng;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,9 +40,6 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import com.google.maps.model.DistanceMatrix;
-import com.google.maps.model.DistanceMatrixElementStatus;
-import com.google.maps.model.LatLng;
 
 @WebServlet("/search")
 public class SearchServlet extends HttpServlet {
@@ -52,10 +53,9 @@ public class SearchServlet extends HttpServlet {
   // This list is incomplete
   private static final List<String> IRRELEVANT_WORDS =
       new ArrayList<String>(Arrays.asList("the", "is", "for", "in", "of", "so", "to"));
-  private static final String MAPS_API_KEY = 
-      "AIzaSyCKIb4ChiPZYbj5Gce75aEKahQ34OXu3v4";
-  private static final GeoApiContext context = 
-      new GeoApiContext().setApiKey(MAPS_API_KEY);
+  private static final String MAPS_API_KEY = "";
+  private static final GeoApiContext context =
+      new GeoApiContext.Builder().apiKey(MAPS_API_KEY).build();
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -72,19 +72,8 @@ public class SearchServlet extends HttpServlet {
         new ArrayList<Entity>(results.asList(FetchOptions.Builder.withDefaults()));
 
     // get location
-    String location = Utility.getParameter(request, "location", "");
-
-    try {
-      DistanceMatrix result = DistanceMatrixApi.newRequest(context)
-        .origins(new LatLng(-31.9522, 115.8589))
-        .destinations(new LatLng(-25.344677, 131.036692))
-        .await();
-    } catch (Exception e) {
-        System.out.println(e.getMessage());
-    }
-
-    String json = result;
-    DistanceMatrix dm = gson.fromJson(json, DistanceMatrix.class);
+    String location = Utils.getParameter(request, "location", "");
+    getDistance(new LatLng(-31.9522, 115.8589), new LatLng(-25.344677, 131.036692));
     // filter by location and cutoff outside it
 
     // get tags
@@ -118,9 +107,7 @@ public class SearchServlet extends HttpServlet {
   }
 
   @Override
-  public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-
-  }
+  public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {}
 
   /**
    * Returns a count of the number of tags two lists have in common.
@@ -222,5 +209,21 @@ public class SearchServlet extends HttpServlet {
       }
     }
     return map;
+  }
+
+  public static int getDistance(LatLng from, LatLng to) {
+    DistanceMatrix result = null;
+    try {
+      result =
+          DistanceMatrixApi.newRequest(context)
+              .origins(new LatLng(-31.9522, 115.8589))
+              .destinations(new LatLng(-25.344677, 131.036692))
+              .await();
+    } catch (Exception e) {
+      System.out.println(e.getMessage());
+    }
+
+    int distance = (int) (result.rows[0].elements[0].distance.inMeters / 1000);
+    return distance;
   }
 }
