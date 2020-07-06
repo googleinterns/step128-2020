@@ -353,29 +353,29 @@ function updateEventTagBox() {
 
 /* Two test examples to use with getEvents() */
 var test = {title:'Beach clean up', 
-            description:'Lorem ipsum dolor sit amet, consectetur adipiscing elit. ' +
-                'Nam efficitur enim quis est mollis blandit. Integer vitae augue risus. ' +
-                'Nunc sit amet semper urna, ac mollis dui. Aenean vitae imperdiet nisi, ' +
-                'sit amet mattis libero. Sed tincidunt arcu in justo...',
-            date:'Saturday, June 20, 2020', 
-            time:'1:00 PM',
-            distance:'5 miles away', 
-            address:'Main St, Venice, CA',
-            attendeeCount: 12,
-            tags:['environment'],
-            key: 'aglub19hcHBfaWRyEgsSBUV2ZW50GICAgICAgIAKDA'};
+  description:'Lorem ipsum dolor sit amet, consectetur adipiscing elit. ' +
+      'Nam efficitur enim quis est mollis blandit. Integer vitae augue risus. ' +
+      'Nunc sit amet semper urna, ac mollis dui. Aenean vitae imperdiet nisi, ' +
+      'sit amet mattis libero. Sed tincidunt arcu in justo...',
+  date:'Saturday, June 20, 2020', 
+  time:'1:00 PM',
+  distance:'5 miles away', 
+  address:'Main St, Venice, CA',
+  attendeeCount: 12,
+  tags:['environment'],
+  key: 'aglub19hcHBfaWRyEgsSBUV2ZW50GICAgICAgIAKDA'};
 var test2 = {title:'Book Drive', 
-            description:'Lorem ipsum dolor sit amet, consectetur adipiscing elit. ' +
-                'Nam efficitur enim quis est mollis blandit. Integer vitae augue risus. ' +
-                'Nunc sit amet semper urna, ac mollis dui. Aenean vitae imperdiet nisi, ' +
-                'sit amet mattis libero. Sed tincidunt arcu in justo...',
-            date:'Sunday, June 21, 2020', 
-            time:'1:00 PM',
-            distance:'6 miles away', 
-            address:'Main St, Los Angeles, CA',
-            attendeeCount: 12,
-            tags:['education'],
-            key: 'aglub19hcHBfaWRyEgsSBUV2ZW50GICAgICAgIAKDA'};
+  description:'Lorem ipsum dolor sit amet, consectetur adipiscing elit. ' +
+      'Nam efficitur enim quis est mollis blandit. Integer vitae augue risus. ' +
+      'Nunc sit amet semper urna, ac mollis dui. Aenean vitae imperdiet nisi, ' +
+      'sit amet mattis libero. Sed tincidunt arcu in justo...',
+  date:'Sunday, June 21, 2020', 
+  time:'1:00 PM',
+  distance:'6 miles away', 
+  address:'Main St, Los Angeles, CA',
+  attendeeCount: 12,
+  tags:['education'],
+  key: 'aglub19hcHBfaWRyEgsSBUV2ZW50GICAgICAgIAKDA'};
 var events = [test, test2];
 
 const dummyText = "Suggested for you"; // TODO: come up with variety
