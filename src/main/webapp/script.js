@@ -543,7 +543,7 @@ async function getEvents(events, index, option) {
       }
 
       attendeeCountContainerElement.className = 'attendee-count-container';
-    
+
       const attendeeCountElement = document.createElement('span');
       attendeeCountElement.className = 'attendee-count ' + event.tags[0] +
           '-text';
@@ -569,7 +569,7 @@ async function getEvents(events, index, option) {
   });
 
   // generates this structure:
-  // 
+  //
   //   <div class="event-item">
   //
   // DESKTOP:
