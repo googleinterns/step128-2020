@@ -62,12 +62,12 @@ footer h4, footer p {
   padding: 0;
 }
 
-/* nav bar (MOSTLY UNCHANGED) */
+/* nav bar*/
 
 .header {
   display: flex;
   flex-flow: row nowrap;
-  height: 10%; /* note: 100px -> 10% */
+  height: 10%;
   justify-content: space-between;
   position: sticky;
 }
@@ -145,7 +145,7 @@ a:link, a:visited {
 /* Home Page */
 .hero-image {
   background-color: #ffd966;
-  height: 90vh;
+  height: 84vh;
   min-width: 100%;
 }
 
@@ -398,7 +398,7 @@ h1 {
 /* event lists */
 .event-section {
   font-weight: bold;
-  margin: 8vw 3vw 0 3vw;
+  margin: 8vw 3vw 8vw 3vw;
 }
 
 .event-section-header {

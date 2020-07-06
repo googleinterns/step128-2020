@@ -13,11 +13,18 @@
 // limitations under the License.
 
 
-var url = "";
-var loggedIn = false;
+/** *********************************************************************
+ * Utility methods/onload methods (all pages)
+ ***********************************************************************/
+let url = '';
+let loggedIn = false;
 
-/* determines which stylesheet to use and generates nav bar*/
-function loadActions() {
+/**
+ * determines which stylesheet to use and generates nav bar
+ *
+ * @param {function} doAfter used to specify actions during checkLogin()
+ */
+function loadActions(doAfter) {
   const styleSheetElement = document.getElementById('style');
   if (window.innerWidth >= window.innerHeight) {
     styleSheetElement.href = '/style.css';
@@ -25,19 +32,28 @@ function loadActions() {
     styleSheetElement.href = 'style-mobile.css';
   }
 
-  checkLogin();
+  checkLogin(doAfter);
 
   generateNavBar();
 }
 
-/* checks for login status and fetches login/logout url */
-async function checkLogin() {
- fetch('/auth').then(response => response.json()).then(function(responseJson) {
+/**
+ * checks for login status and fetches login/logout url
+ *
+ * @param {function} doAfter Will call this function after handling login
+ *      Helps with chaining async functions and cleaning up code
+ */
+async function checkLogin(doAfter) {
+  fetch('/auth').then(response => response.json()).then(function(responseJson) {
     loggedIn = responseJson.loggedIn;
     url = responseJson.url;
+    doAfter();
   });
 }
 
+/**
+ * Generates navigation bar for the page
+ */
 function generateNavBar() {
   const headerLeft = document.createElement('div');
   headerLeft.className = 'header-left';
@@ -96,21 +112,23 @@ function generateNavBar() {
   header.appendChild(headerLeft);
   header.appendChild(headerRight);
 
-    // creates this structure:
-    //   <div class="header-left">
-    //     <a href="/index.html">        
-    //       <img src="images/uniteLogo.svg" alt="Unite by STEP logo.">
-    //     </a>
-    //     <a class="nav-item" href="/index.html">Home</a>
-    //     <a class="nav-item" href="/create-event.html">Create</a>
-    //     <a class="nav-item" href="/search.html">Find</a>
-    //   </div>
-    //   <div class="header-right">
-    //     <a class="nav-item" href="/my-events.html">My Events</a>
-    //   </div>
+  // creates this structure:
+  //   <div class="header-left">
+  //     <a href="/index.html">
+  //       <img src="images/uniteLogo.svg" alt="Unite by STEP logo.">
+  //     </a>
+  //     <a class="nav-item" href="/index.html">Home</a>
+  //     <a class="nav-item" href="/create-event.html">Create</a>
+  //     <a class="nav-item" href="/search.html">Find</a>
+  //   </div>
+  //   <div class="header-right">
+  //     <a class="nav-item" href="/my-events.html">My Events</a>
+  //   </div>
 }
 
-/* expands and collapses details section on individual event display */
+/**
+ * expands and collapses details section on individual event display
+ */
 function toggleDetails() {
   const detailsBox = document.getElementsByClassName('event-right-details')[0];
   const arrowIcon = document.getElementById('expand-arrow');
@@ -125,9 +143,11 @@ function toggleDetails() {
   }
 }
 
-/* Toggles the navigation menu for the mobile layout. */
+/**
+ * Toggles the navigation menu for the mobile layout.
+ */
 function toggleNavMenu() {
-  var exists = document.getElementById('dropdown-bar');
+  const exists = document.getElementById('dropdown-bar');
 
   if (exists != null) {
     document.getElementById('dropdown-bar').remove();
@@ -136,7 +156,9 @@ function toggleNavMenu() {
   }
 }
 
-/* Generates the navigation menu layout on mobile. */
+/**
+ * Generates the navigation menu layout on mobile.
+ */
 function generateMobileNavLayout() {
   const dropdownContainer = document.getElementsByClassName('dropdown')[0];
 
@@ -149,7 +171,7 @@ function generateMobileNavLayout() {
   homeLink.className = 'dropdown-item';
   homeLink.href = '/index.html';
   homeLink.innerText = 'Home';
-  homeBullet.appendChild(homeLink)
+  homeBullet.appendChild(homeLink);
   dropdownBar.appendChild(homeBullet);
 
   const createBullet = document.createElement('li');
@@ -179,69 +201,331 @@ function generateMobileNavLayout() {
   dropdownContainer.appendChild(dropdownBar);
 }
 
-var tagsAll = ['environment', 'blm', 'volunteer', 'education', 'LGBTQ+'];
-var tagsSearch = [];
-var tagsBox = [...tagsAll];
-var tagsOnEvent = [];
+/** *********************************************************************
+ * Loading methods for event search/display -- distance settings,
+ * rainbow tags, event lists
+ ***********************************************************************/
 
-function addTagBoxToSearch(tag) {
-  var boxIndex = tagsBox.indexOf(tag);
-  if (boxIndex > -1) {
-    tagsBox.splice(boxIndex, 1);
+// option constants to use with getEvents
+const recommendedForYou = 0;
+const savedEvents = 1;
+const createdEvents = 2;
+
+// Two test examples to use with getEvents()
+const test = {eventName: 'Beach clean up',
+  eventDescription: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. ' +
+      'Nam efficitur enim quis est mollis blandit. Integer vitae augue risus. ' +
+      'Nunc sit amet semper urna, ac mollis dui. Aenean vitae imperdiet nisi, ' +
+      'sit amet mattis libero. Sed tincidunt arcu in justo...',
+  date: 'Saturday, June 20, 2020',
+  startTime: '1:00 PM',
+  distance: '5 miles away',
+  streetAddress: 'Main St',
+  city: 'Venice',
+  state: 'CA',
+  attendeeCount: 12,
+  tags: ['environment'],
+  url: '/display-event.html'};
+const test2 = {eventName: 'Book Drive', 
+  eventDescription: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. ' +
+      'Nam efficitur enim quis est mollis blandit. Integer vitae augue risus. ' +
+      'Nunc sit amet semper urna, ac mollis dui. Aenean vitae imperdiet nisi, ' +
+      'sit amet mattis libero. Sed tincidunt arcu in justo...',
+  date: 'Sunday, June 21, 2020',
+  startTime: '1:00 PM',
+  distance: '6 miles away',
+  streetAddress: 'Main St',
+  city: 'Los Angeles',
+  state: 'CA',
+  attendeeCount: 12,
+  tags: ['education'],
+  url: '/display-event.html'};
+const dummyEvents = [test, test2];
+const dummyText = 'Suggested for you'; // TODO: come up with variety
+
+/**
+ * Fetches events from a specific url
+ *
+ * Currently uses the events variable defined above
+ *
+ * @param {array} events The list of events to display
+ * @param {number} index To identify which event list container
+ *                           on the page to generate.
+ * @param {number} option To identify which format to generate--
+ *                           attendee count, unsave/edit event,
+ *                           or a recommendation reason.
+ */
+async function getEvents(events, index, option) {
+  const eventListElements =
+      document.getElementsByClassName('event-list-container');
+  url = '/display-event.html'; // use this for now
+  if (index == null || index >= eventListElements.length) {
+    index = 0;
   }
-  
-  tagsSearch.push(tag);
-  updateTagBox();
-  updateSearchBar();
-}
 
-function addTagSearchToBox(tag) {
-  var searchIndex = tagsSearch.indexOf(tag);
-  if (searchIndex > -1) {
-    tagsSearch.splice(searchIndex, 1);
+  // check which stylesheet we are currently using
+  const styleLink = document.getElementById('style').href;
+  const styleName = styleLink.substring(styleLink.lastIndexOf('/') + 1);
+  const onMobile = (styleName.indexOf('mobile') >= 0);
+
+  const eventListElement = eventListElements[index];
+  eventListElement.innerHTML = '';
+
+  if (events.length == 0) {
+    const noElementsBox = document.createElement('div');
+    noElementsBox.className = 'no-events';
+    const noElementsText = document.createElement('div');
+    noElementsText.className = 'no-events-text';
+    if (option == savedEvents) {
+      noElementsText.innerText = 'You have not saved any events yet! ' +
+          'Click the ‘Find’ tab to to find an event you would like to save.';
+    } else if (option == createdEvents) {
+      noElementsText.innerText = 'You have not created an event yet! ' +
+          'Click the ‘Create’ tab to create your first event.';
+    } else {
+      noElementsText.innerText = 'No events to see! Create one now.';
+    }
+
+    noElementsBox.appendChild(noElementsText);
+    eventListElement.appendChild(noElementsBox);
+    return;
   }
-  
-  tagsBox.splice(tagsAll.indexOf(tag), 0, tag);
-  updateSearchBar();
-  updateTagBox();
-}
 
-function updateSearchBar() {
-  const elements = document.getElementsByClassName('search-bar');
-  const searchBarElement = elements[0];
-  searchBarElement.innerHTML = '';
-  tagsSearch.forEach(function(tag) {
-    const spanElement = document.createElement('span');
-    spanElement.setAttribute('onclick', 'addTagSearchToBox(\"' + tag + 
-        '\")');
-    // class name is now (for example) 'tag environment'
-    if (tag == 'LGBTQ+') spanElement.className = 'tag rainbow';
-    else spanElement.className = 'tag ' + tag;
-    spanElement.innerText = tag;
+  events.forEach(function(event) {
+    // TODO: adjust for string parsing based on how servlet returns the data
+    //   if (typeof event.tags === 'string') {
+    //     var tagsString = event.tags.substring(1, event.tags.length - 1);
+    //     event.tags = tagsString.split(', ');
+    //   }
 
-    searchBarElement.appendChild(spanElement);
+    const eventItemElement = document.createElement('a');
+    eventItemElement.className = 'event-item';
+    eventItemElement.setAttribute('onclick', 'openLink(\"' 
+        + event.url + '\")');
+    eventListElement.appendChild(eventItemElement);
+
+    const eventImageElement = document.createElement('div');
+    eventImageElement.className = 'event-image ' + event.tags[0];
+
+    const eventItemInfoElement = document.createElement('div');
+    eventItemInfoElement.className = 'event-item-info';
+
+    const eventItemHeaderElement = document.createElement('div');
+    eventItemHeaderElement.className = 'event-item-header';
+    eventItemInfoElement.appendChild(eventItemHeaderElement);
+
+    const eventItemTitleElement = document.createElement('div');
+    eventItemTitleElement.className = 'event-item-title';
+
+    // show event address if on the my-events page
+    if (option == createdEvents || option == savedEvents) {
+      const eventItemTitleName = document.createElement('div');
+      eventItemTitleName.innerText = event.eventName;
+      const eventItemTitleAddr = document.createElement('div');
+      eventItemTitleAddr.innerText = event.streetAddress  + ', ' + event.city + ', ' + event.state;
+      eventItemTitleAddr.className = 'event-item-address';
+      eventItemTitleElement.appendChild(eventItemTitleName);
+      eventItemTitleElement.appendChild(eventItemTitleAddr);
+    } else {
+      eventItemTitleElement.innerText = event.eventName;
+    }
+
+    const eventItemDetailsElement = document.createElement('div');
+    eventItemDetailsElement.className = 'event-item-details';
+    // determine order of elements depending on mobile or non-mobile layout
+    if (onMobile) {
+      // image is part of event-header, inside event-item-info
+      // event-item-title is part of event-header, outside of event-item-details      
+      eventItemElement.appendChild(eventItemInfoElement);
+      eventItemHeaderElement.appendChild(eventItemDetailsElement);
+      eventItemHeaderElement.appendChild(eventImageElement);
+      eventItemDetailsElement.appendChild(eventItemTitleElement);
+    } else {
+      // image is outisde of event-item-info
+      // event-item-title is part of event-item-details
+      eventItemElement.appendChild(eventImageElement);
+      eventItemElement.appendChild(eventItemInfoElement);
+      eventItemHeaderElement.appendChild(eventItemTitleElement);
+      eventItemHeaderElement.appendChild(eventItemDetailsElement);
+    }
+
+    const eventItemDateElement = document.createElement('div');
+    eventItemDateElement.className = 'event-item-date';
+    eventItemDateElement.innerText = event.date;
+    eventItemDetailsElement.appendChild(eventItemDateElement);
+    const eventItemDistanceElement = document.createElement('div');
+    eventItemDistanceElement.className = 'event-item-distance';
+    if (option == savedEvents || option == createdEvents) {
+      eventItemDistanceElement.innerText = event.startTime;
+    } else {
+      // TODO: calculate distance
+      if (event.distance != null){
+        eventItemDistanceElement.innerText = event.distance;
+      } else {
+        eventItemDistanceElement.innerText = event.streetAddress  + ', ' + event.city + ', ' + event.state;
+      }
+    }
+    eventItemDetailsElement.appendChild(eventItemDistanceElement);
+
+    const eventItemDescElement = document.createElement('div');
+    eventItemDescElement.className = 'event-item-description';
+    eventItemDescElement.innerText = event.eventDescription;
+    eventItemInfoElement.appendChild(eventItemDescElement);
+
+    const eventItemFooterElement = document.createElement('div');
+    eventItemFooterElement.className = 'event-item-footer';
+    eventItemInfoElement.appendChild(eventItemFooterElement);
+
+    // decide which footer item to use
+    const attendeeCountContainerElement = document.createElement('div');
+    if (option == recommendedForYou) {
+      // "recommended for you"
+      attendeeCountContainerElement.innerText = dummyText;
+
+    } else if (option == savedEvents) {
+      // unsave an event
+      attendeeCountContainerElement.className = 'edit-unsave-event';
+      attendeeCountContainerElement.innerText = "Unsave this event";
+      attendeeCountContainerElement.onclick = function() {
+          // TODO: unsave from datastore and/or make popup that confirms choice first
+      }
+    } else if (option == createdEvents) {
+      // edit an event
+      attendeeCountContainerElement.className = 'edit-unsave-event';
+      const editEventLink = document.createElement("a");
+      editEventLink.innerText = "Edit this event";
+
+      editEventLink.href = "/edit-event-form.html";
+      attendeeCountContainerElement.appendChild(editEventLink);
+    } else {
+      // default: show attendee count
+      if (event.attendeeCount == null) {
+        event.attendeeCount = 0;
+      }
+
+      attendeeCountContainerElement.className = 'attendee-count-container';
+    
+      const attendeeCountElement = document.createElement('span');
+      attendeeCountElement.className = 'attendee-count ' + event.tags[0] + '-text';
+      attendeeCountElement.innerText = event.attendeeCount;
+      attendeeCountContainerElement.appendChild(attendeeCountElement);
+      attendeeCountContainerElement.appendChild(
+      document.createTextNode(' already attending'));
+    }
+    
+    eventItemFooterElement.appendChild(attendeeCountContainerElement);
+
+    const tagsContainerElement = document.createElement('div');
+    tagsContainerElement.className = 'tags-container';
+    eventItemFooterElement.appendChild(tagsContainerElement);
+    event.tags.forEach(function(tag) {
+      const tagElement = document.createElement('span');
+      // class name is now (for example) 'tag environment'
+      if (tag == 'LGBTQ+') spanElement.className = 'tag rainbow';
+      else tagElement.className = 'tag ' + tag;
+      tagElement.innerText = tag;
+      tagsContainerElement.appendChild(tagElement);
+    });
   });
 
-  generateRainbowTags();
+  // generates this structure:
+  //   
+  //   <div class="event-item">
+  //
+  // DESKTOP:
+  //     <div class="event-image green-background"></div>
+  //     <div class="event-item-info">
+  //       <div class="event-item-header">
+  //         <div class="event-item-title">Beach clean up</div>
+  //         <div class="event-item-details">
+  //             <div>Saturday, June 20, 2020</div>
+  //             <div>5 miles away</div>
+  //         </div>
+  //       </div>
+  // MOBILE:
+  //     
+  //     <div class="event-item-info">
+  //       <div class="event-item-header">
+  //         <div class="event-item-details">
+  //         <div class="event-item-title">Beach clean up</div>
+  //             <div>Saturday, June 20, 2020</div>
+  //             <div>5 miles away</div>
+  //         </div>
+  //         <div class="event-image green-background"></div>
+  //       </div>
+  //
+  //       <div class="event-item-description">
+  //         Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
+  //         Nam efficitur enim quis est mollis blandit. Integer vitae augue risus. 
+  //         Nunc sit amet semper urna, ac mollis dui. Aenean vitae imperdiet nisi, 
+  //         sit amet mattis libero. Sed tincidunt arcu in justo...</div>
+  //       <div class="event-item-footer">
+  //         <div class="attendee-count-container">     *this item depends on value of 'option'
+  //             <span class="attendee-count green">12</span> already attending
+  //         </div>
+  //         <div class="tags-container">
+  //             <span class="tag green-background">environment</span>
+  //         </div>
+  //       </div>
+  //     </div>
+  //   </div>
 }
 
-function updateTagBox() {
-  const elements = document.getElementsByClassName('tag-box');
-  const tagBoxElement = elements[0];
-  tagBoxElement.innerHTML = '';
-  tagsBox.forEach(function(tag) {
-    const spanElement = document.createElement('span');
-    spanElement.setAttribute('onclick', 'addTagBoxToSearch(\"' + tag + 
-        '\")');
-    // class name is now (for example) 'tag environment'
-    if (tag == 'LGBTQ+') spanElement.className = 'tag rainbow';
-    else spanElement.className = 'tag ' + tag;
-    spanElement.innerText = tag;
+var searchDistance = 5;
 
-    tagBoxElement.appendChild(spanElement);
+function changeSearchDistance() {
+  searchDistance = document.getElementById('searchDistance').value;
+  search();
+}
+
+/**
+ * Creates the search distance settings on the page
+ */
+async function getSearchDistanceSettings() {
+  const locationSettingsElements = document.getElementsByClassName('location-settings');
+  var locationSettingsElement = locationSettingsElements[0];
+
+  //TODO get from server where the user's location is to set by default
+  locationSettingsElement.innerHTML = '';
+  const currentLocationElement = document.createElement('div');
+  currentLocationElement.className = 'current-location';
+  currentLocationElement.innerText = 'Current Location: ' 
+      + 'Los Angeles, CA';
+  locationSettingsElement.appendChild(currentLocationElement);
+  locationSettingsElement.appendChild(
+        document.createTextNode(' '));
+
+  const changeLinkElement = document.createElement('a');
+  changeLinkElement.setAttribute('href', '');
+  changeLinkElement.innerText = 'Change Location';
+  locationSettingsElement.appendChild(changeLinkElement);
+
+  const distanceElement = document.createElement('div');
+  distanceElement.className = 'distance';
+  distanceElement.appendChild(
+        document.createTextNode('Searching within '));
+  locationSettingsElement.appendChild(distanceElement);
+
+  const selectElement = document.createElement('select');
+  selectElement.id = 'searchDistance';
+  selectElement.setAttribute('onchange', 'changeSearchDistance()');
+  distanceElement.appendChild(selectElement);
+
+  var distanceList = [5, 10, 25, 50];
+  distanceList.forEach(function(distance) {
+    const optionElement = document.createElement('option');
+    optionElement.value = distance;
+    optionElement.innerText = distance;
+    if (distance == searchDistance) optionElement.setAttribute('selected', 'true');
+    selectElement.appendChild(optionElement);
   });
 
-  generateRainbowTags();
+  distanceElement.appendChild(
+        document.createTextNode(' mi'));
+}
+
+function openLink(url) {
+  window.location.pathname = url;
 }
 
 /**
@@ -251,6 +535,11 @@ function updateTagBox() {
  * the class 'rainbow'
  */
 const colors = ['#FF0900', '#FF7F00', '#ffe600','#00F11D', '#0079FF', '#A800FF'];
+var tagsAll = ['environment', 'blm', 'volunteer', 'education', 'LGBTQ+'];
+var tagsSearch = [];
+var tagsBox = [...tagsAll];
+var tagsOnEvent = [];
+
 function generateRainbowTags() {
   const elements = document.getElementsByClassName('rainbow');
   for (var e = 0; e < elements.length; e++) {
@@ -268,31 +557,9 @@ function generateRainbowTags() {
   }
 }
 
-var searchDistance = 5;
-
-function changeSearchDistance() {
-  searchDistance = document.getElementById('searchDistance').value;
-  search();
-}
-
-/**
- * Placeholder function for search functionality
- */
-function search() {
-  var url = '/search.html?tags=';
-  tagsSearch.forEach(function(tag) {
-    url += tag + ',';
-  });
-  // trim the last comma off
-  if (url.charAt(url.length - 1) == ',') {
-    url = url.substring(0, url.length - 1);
-  }
-
-  url += '&searchDistance=' + searchDistance;
-
-  window.location.href = url;
-  //TODO fetch call to server with search parameters
-}
+/***********************************************************************
+ * Methods for create-event-form and edit-event form
+ ***********************************************************************/ 
 
 /* This is an array to keep track of the current form's selected tags. */
 var tagsSelected = [];
@@ -381,273 +648,137 @@ function updateEventTagBox() {
   generateRainbowTags();
 }
 
-/* Two test examples to use with getEvents() */
-var test = {title:'Beach clean up', 
-            description:'Lorem ipsum dolor sit amet, consectetur adipiscing elit. ' +
-                'Nam efficitur enim quis est mollis blandit. Integer vitae augue risus. ' +
-                'Nunc sit amet semper urna, ac mollis dui. Aenean vitae imperdiet nisi, ' +
-                'sit amet mattis libero. Sed tincidunt arcu in justo...',
-            date:'Saturday, June 20, 2020', 
-            time:'1:00 PM',
-            distance:'5 miles away', 
-            address:'Main St, Venice, CA',
-            attendeeCount: 12,
-            tags:['environment'],
-            url:'/display-event.html'};
-var test2 = {title:'Book Drive', 
-            description:'Lorem ipsum dolor sit amet, consectetur adipiscing elit. ' +
-                'Nam efficitur enim quis est mollis blandit. Integer vitae augue risus. ' +
-                'Nunc sit amet semper urna, ac mollis dui. Aenean vitae imperdiet nisi, ' +
-                'sit amet mattis libero. Sed tincidunt arcu in justo...',
-            date:'Sunday, June 21, 2020', 
-            time:'1:00 PM',
-            distance:'6 miles away', 
-            address:'Main St, Los Angeles, CA',
-            attendeeCount: 12,
-            tags:['education'],
-            url:'/display-event.html'};
-var events = [test, test2];
+/***********************************************************************
+ * Methods for index.html
+ ***********************************************************************/ 
 
-const dummyText = "Suggested for you"; // TODO: come up with variety
+ /** onload actions for index.html
+  * fetches events from server, calls getEvents with correct options and loads search distance options*/
+async function getRecommendedEvents() {
+  if (loggedIn) {
+    fetch("/user?get=saved").then(response => response.json()).then(function(js) {
+      // TODO: change this fetch call to get recommendations instead
+      getEvents(dummyEvents, 1, 0);
+    });
+  } else {
+    alert('Please log in first!');
+  }
+  getSearchDistanceSettings();
+}
+
+
+
+/***********************************************************************
+ * Methods for my-events.html
+ ***********************************************************************/ 
+
+/* on loading my-events.html, fetches events from server and calls getEvents with correct options */
+async function getMyEvents() {
+  if (loggedIn) {
+    fetch("/user?get=saved").then(response => response.json()).then(function(js) {
+      getEvents(js, 0, 1);
+    });
+    fetch("/user?get=created").then(response => response.json()).then(function(js) {
+      getEvents(js, 1, 2);
+    });
+  } else {
+    alert('Please log in first!');
+  }
+}
+
+/***********************************************************************
+ * Methods for search.html
+ ***********************************************************************/ 
+
+function searchLoadActions() {
+  updateSearchBar(); 
+  updateTagBox(); 
+  getEvents(dummyEvents, 0, 3); // TODO: delete once search() is implemented
+  getSearchDistanceSettings();
+}
+
+function addTagBoxToSearch(tag) {
+  var boxIndex = tagsBox.indexOf(tag);
+  if (boxIndex > -1) {
+    tagsBox.splice(boxIndex, 1);
+  }
+  
+  tagsSearch.push(tag);
+  updateTagBox();
+  updateSearchBar();
+}
+
+function addTagSearchToBox(tag) {
+  var searchIndex = tagsSearch.indexOf(tag);
+  if (searchIndex > -1) {
+    tagsSearch.splice(searchIndex, 1);
+  }
+  
+  tagsBox.splice(tagsAll.indexOf(tag), 0, tag);
+  updateSearchBar();
+  updateTagBox();
+}
+
+function updateSearchBar() {
+  const elements = document.getElementsByClassName('search-bar');
+  const searchBarElement = elements[0];
+  searchBarElement.innerHTML = '';
+  tagsSearch.forEach(function(tag) {
+    const spanElement = document.createElement('span');
+    spanElement.setAttribute('onclick', 'addTagSearchToBox(\"' + tag + 
+        '\")');
+    // class name is now (for example) 'tag environment'
+    if (tag == 'LGBTQ+') spanElement.className = 'tag rainbow';
+    else spanElement.className = 'tag ' + tag;
+    spanElement.innerText = tag;
+
+    searchBarElement.appendChild(spanElement);
+  });
+
+  generateRainbowTags();
+}
+
+function updateTagBox() {
+  const elements = document.getElementsByClassName('tag-box');
+  const tagBoxElement = elements[0];
+  tagBoxElement.innerHTML = '';
+  tagsBox.forEach(function(tag) {
+    const spanElement = document.createElement('span');
+    spanElement.setAttribute('onclick', 'addTagBoxToSearch(\"' + tag + 
+        '\")');
+    // class name is now (for example) 'tag environment'
+    if (tag == 'LGBTQ+') spanElement.className = 'tag rainbow';
+    else spanElement.className = 'tag ' + tag;
+    spanElement.innerText = tag;
+
+    tagBoxElement.appendChild(spanElement);
+  });
+
+  generateRainbowTags();
+}
+
 /**
- * Fetches events from a specific url
- * 
- * Currently uses the events variable defined above
- *
- * @param {string} url TODO - what is this for?
- * @param {number} index To identify which event list container on the page to generate.
- * @param {number} option To identify which format to generate -- attendee count, 
- *		unsave/edit event, or a recommendation reason.
+ * Placeholder function for search functionality
  */
-async function getEvents(url, index, option) {
-  const eventListElements = document.getElementsByClassName('event-list-container');
-  url = '/display-event.html'; // use this for now
-  if (index === null || index >= eventListElements.length) {
-    index = 0;
+function search() {
+  var url = '/search.html?tags=';
+  tagsSearch.forEach(function(tag) {
+    url += tag + ',';
+  });
+  // trim the last comma off
+  if (url.charAt(url.length - 1) == ',') {
+    url = url.substring(0, url.length - 1);
   }
 
-  // check which stylesheet we are currently using
-  const styleLink = document.getElementById('style').href;
-  const styleName = styleLink.substring(styleLink.lastIndexOf('/') + 1);
-  var onMobile = (styleName.indexOf('mobile') >= 0);
+  url += '&searchDistance=' + searchDistance;
 
-  var eventListElement = eventListElements[index];
-  eventListElement.innerHTML = '';
-  events.forEach(function(event) {
-    const eventItemElement = document.createElement('a');
-    eventItemElement.className = 'event-item';
-    eventItemElement.setAttribute('onclick', 'openLink(\"' 
-        + event.url + '\")');
-    eventListElement.appendChild(eventItemElement);
-
-    const eventImageElement = document.createElement('div');
-    eventImageElement.className = 'event-image ' + event.tags[0];
-
-    const eventItemInfoElement = document.createElement('div');
-    eventItemInfoElement.className = 'event-item-info';
-
-    const eventItemHeaderElement = document.createElement('div');
-    eventItemHeaderElement.className = 'event-item-header';
-    eventItemInfoElement.appendChild(eventItemHeaderElement);
-
-    const eventItemTitleElement = document.createElement('div');
-    eventItemTitleElement.className = 'event-item-title';
-
-    // show event address if on the my-events page
-    if (option == 1 || option == 2) {
-      const eventItemTitleName = document.createElement('div');
-      eventItemTitleName.innerText = event.title;
-      const eventItemTitleAddr = document.createElement('div');
-      eventItemTitleAddr.innerText = event.address;
-      eventItemTitleAddr.className = 'event-item-address';
-      eventItemTitleElement.appendChild(eventItemTitleName);
-      eventItemTitleElement.appendChild(eventItemTitleAddr);
-    } else {
-      eventItemTitleElement.innerText = event.title;
-    }
-
-    const eventItemDetailsElement = document.createElement('div');
-    eventItemDetailsElement.className = 'event-item-details';
-    // determine order of elements depending on mobile or non-mobile layout
-    if (onMobile) {
-      // image is part of event-header, inside event-item-info
-      // event-item-title is part of event-header, outside of event-item-details      
-      eventItemElement.appendChild(eventItemInfoElement);
-      eventItemHeaderElement.appendChild(eventItemDetailsElement);
-      eventItemHeaderElement.appendChild(eventImageElement);
-      eventItemDetailsElement.appendChild(eventItemTitleElement);
-    } else {
-      // image is outisde of event-item-info
-      // event-item-title is part of event-item-details
-      eventItemElement.appendChild(eventImageElement);
-      eventItemElement.appendChild(eventItemInfoElement);
-      eventItemHeaderElement.appendChild(eventItemTitleElement);
-      eventItemHeaderElement.appendChild(eventItemDetailsElement);
-    }
-
-    const eventItemDateElement = document.createElement('div');
-    eventItemDateElement.className = 'event-item-date';
-    eventItemDateElement.innerText = event.date;
-    eventItemDetailsElement.appendChild(eventItemDateElement);
-    const eventItemDistanceElement = document.createElement('div');
-    eventItemDistanceElement.className = 'event-item-distance';
-    if (option == 1 || option == 2) {
-      eventItemDistanceElement.innerText = event.time;
-    } else {
-      eventItemDistanceElement.innerText = event.distance;
-    }
-    eventItemDetailsElement.appendChild(eventItemDistanceElement);
-
-    const eventItemDescElement = document.createElement('div');
-    eventItemDescElement.className = 'event-item-description';
-    eventItemDescElement.innerText = event.description;
-    eventItemInfoElement.appendChild(eventItemDescElement);
-
-    const eventItemFooterElement = document.createElement('div');
-    eventItemFooterElement.className = 'event-item-footer';
-    eventItemInfoElement.appendChild(eventItemFooterElement);
-
-    // decide which footer item to use
-    const attendeeCountContainerElement = document.createElement('div');
-    if (option == 0) {
-      // "recommended for you"
-      attendeeCountContainerElement.innerText = dummyText;
-
-    } else if (option == 1) {
-      // unsave an event
-      attendeeCountContainerElement.className = 'edit-unsave-event';
-      attendeeCountContainerElement.innerText = "Unsave this event";
-      attendeeCountContainerElement.onclick = function() {
-          // TODO: unsave from datastore or make popup that confirms choice first
-      }
-    } else if (option == 2) {
-      // edit an event
-      attendeeCountContainerElement.className = 'edit-unsave-event';
-      const editEventLink = document.createElement("a");
-      editEventLink.innerText = "Edit this event";
-
-      editEventLink.href = "/edit-event-form.html";
-      attendeeCountContainerElement.appendChild(editEventLink);
-    } else {
-      // default: show attendee count
-      attendeeCountContainerElement.className = 'attendee-count-container';
-    
-      const attendeeCountElement = document.createElement('span');
-      attendeeCountElement.className = 'attendee-count ' + event.tags[0] + '-text';
-      attendeeCountElement.innerText = event.attendeeCount;
-      attendeeCountContainerElement.appendChild(attendeeCountElement);
-      attendeeCountContainerElement.appendChild(
-      document.createTextNode(' already attending'));
-    }
-    
-    eventItemFooterElement.appendChild(attendeeCountContainerElement);
-
-    const tagsContainerElement = document.createElement('div');
-    tagsContainerElement.className = 'tags-container';
-    eventItemFooterElement.appendChild(tagsContainerElement);
-    event.tags.forEach(function(tag) {
-      const tagElement = document.createElement('span');
-      // class name is now (for example) 'tag environment'
-      if (tag == 'LGBTQ+') spanElement.className = 'tag rainbow';
-      else tagElement.className = 'tag ' + tag;
-      tagElement.innerText = tag;
-
-      tagsContainerElement.appendChild(tagElement);
-    });
-  });
-
-  // generates this structure:
-  //   
-  //   <div class="event-item">
-  //
-  // DESKTOP:
-  //     <div class="event-image green-background"></div>
-  //     <div class="event-item-info">
-  //       <div class="event-item-header">
-  //         <div class="event-item-title">Beach clean up</div>
-  //         <div class="event-item-details">
-  //             <div>Saturday, June 20, 2020</div>
-  //             <div>5 miles away</div>
-  //         </div>
-  //       </div>
-  // MOBILE:
-  //     
-  //     <div class="event-item-info">
-  //       <div class="event-item-header">
-  //         <div class="event-item-details">
-  //         <div class="event-item-title">Beach clean up</div>
-  //             <div>Saturday, June 20, 2020</div>
-  //             <div>5 miles away</div>
-  //         </div>
-  //         <div class="event-image green-background"></div>
-  //       </div>
-  //
-  //       <div class="event-item-description">
-  //         Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
-  //         Nam efficitur enim quis est mollis blandit. Integer vitae augue risus. 
-  //         Nunc sit amet semper urna, ac mollis dui. Aenean vitae imperdiet nisi, 
-  //         sit amet mattis libero. Sed tincidunt arcu in justo...</div>
-  //       <div class="event-item-footer">
-  //         <div class="attendee-count-container">     *this item depends on value of 'option'
-  //             <span class="attendee-count green">12</span> already attending
-  //         </div>
-  //         <div class="tags-container">
-  //             <span class="tag green-background">environment</span>
-  //         </div>
-  //       </div>
-  //     </div>
-  //   </div>
+  window.location.href = url;
+  // TODO fetch call to server with search parameters
 }
 
-function openLink(url) {
-  window.location.pathname = url;
-}
-
-/**
- * Creates the search distance settings on the page
- */
-async function getSearchDistanceSettings() {
-  const locationSettingsElements = document.getElementsByClassName('location-settings');
-  var locationSettingsElement = locationSettingsElements[0];
-
-  //TODO get from server where the user's location is to set by default
-  locationSettingsElement.innerHTML = '';
-  const currentLocationElement = document.createElement('div');
-  currentLocationElement.className = 'current-location';
-  currentLocationElement.innerText = 'Current Location: ' 
-      + 'Los Angeles, CA';
-  locationSettingsElement.appendChild(currentLocationElement);
-  locationSettingsElement.appendChild(
-        document.createTextNode(' '));
-
-  const changeLinkElement = document.createElement('a');
-  changeLinkElement.setAttribute('href', '');
-  changeLinkElement.innerText = 'Change Location';
-  locationSettingsElement.appendChild(changeLinkElement);
-
-  const distanceElement = document.createElement('div');
-  distanceElement.className = 'distance';
-  distanceElement.appendChild(
-        document.createTextNode('Searching within '));
-  locationSettingsElement.appendChild(distanceElement);
-
-  const selectElement = document.createElement('select');
-  selectElement.id = 'searchDistance';
-  selectElement.setAttribute('onchange', 'changeSearchDistance()');
-  distanceElement.appendChild(selectElement);
-
-  var distanceList = [5, 10, 25, 50];
-  distanceList.forEach(function(distance) {
-    const optionElement = document.createElement('option');
-    optionElement.value = distance;
-    optionElement.innerText = distance;
-    if (distance == searchDistance) optionElement.setAttribute('selected', 'true');
-    selectElement.appendChild(optionElement);
-  });
-
-  distanceElement.appendChild(
-        document.createTextNode(' mi'));
-}
+/***********************************************************************
+ * Methods for survey.html
+ ***********************************************************************/ 
 
 /**
  * Toggles the display of the survey page to indicate which option is selected,
@@ -685,13 +816,4 @@ function submitSurvey() {
     // cannot submit while not logged in
     alert('Please log in first!');
   }
-}
-
-async function getMyEvents() {
-  fetch("/user?get=saved").then(response => response.text()).then(function(text) {
-      document.getElementById("test").innerText = text;
-  });
-  fetch("/user?get=created").then(response => response.text()).then(function(text) {
-      document.getElementById("test").innerText = text;
-  });
 }
