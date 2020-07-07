@@ -29,7 +29,6 @@ import com.google.gson.Gson;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.logging.Logger;
 import javax.servlet.annotation.WebServlet;
@@ -83,7 +82,7 @@ public class UserServlet extends HttpServlet {
       }
     }
     // TODO: apply any sort params
-    Collections.sort(events, ORDER_BY_NAME);
+    Collections.sort(events, Utils.ORDER_BY_NAME);
     response.getWriter().println(gson.toJson(events));
   }
 
@@ -195,18 +194,4 @@ public class UserServlet extends HttpServlet {
     }
     LOGGER.info("event " + eventId + " has not been saved yet");
   }
-
-  // comparators to apply sort to results
-  public static final Comparator<Entity> ORDER_BY_NAME =
-      new Comparator<Entity>() {
-        @Override
-        public int compare(Entity a, Entity b) {
-          if (!a.getKind().equals("Event") || !b.getKind().equals("Event")) {
-            throw new IllegalArgumentException("must be event items");
-          }
-          return a.getProperty("eventName")
-              .toString()
-              .compareTo(b.getProperty("eventName").toString());
-        }
-      };
 }

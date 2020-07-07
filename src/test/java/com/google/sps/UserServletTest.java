@@ -33,6 +33,7 @@ import com.google.gson.reflect.TypeToken;
 import com.google.sps.servlets.AuthServlet;
 import com.google.sps.servlets.EventServlet;
 import com.google.sps.servlets.UserServlet;
+import com.google.sps.servlets.Utils;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -94,8 +95,8 @@ public final class UserServletTest {
       fail();
     }
     assertEquals(goalEntityList.size(), resultingEntities.size());
-    Collections.sort(goalEntityList, UserServlet.ORDER_BY_NAME);
-    Collections.sort(resultingEntities, UserServlet.ORDER_BY_NAME);
+    Collections.sort(goalEntityList, Utils.ORDER_BY_NAME);
+    Collections.sort(resultingEntities, Utils.ORDER_BY_NAME);
 
     for (int i = 0; i < goalEntityList.size(); i++) {
       Entity goal = goalEntityList.get(i);

@@ -14,7 +14,9 @@
 
 package com.google.sps.servlets;
 
+import com.google.appengine.api.datastore.Entity;
 import com.google.gson.Gson;
+import java.util.Comparator;
 import javax.servlet.http.HttpServletRequest;
 
 public class Utils {
@@ -47,4 +49,18 @@ public class Utils {
     }
     return value;
   }
+
+  // comparators to apply sort to results
+  public static final Comparator<Entity> ORDER_BY_NAME =
+      new Comparator<Entity>() {
+        @Override
+        public int compare(Entity a, Entity b) {
+          if (!a.getKind().equals("Event") || !b.getKind().equals("Event")) {
+            throw new IllegalArgumentException("must be event items");
+          }
+          return a.getProperty("eventName")
+              .toString()
+              .compareTo(b.getProperty("eventName").toString());
+        }
+      };
 }
