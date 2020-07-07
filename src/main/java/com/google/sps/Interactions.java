@@ -20,8 +20,8 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.logging.Logger;
 
 public class Interactions {
@@ -43,7 +43,7 @@ public class Interactions {
   public static Map<String, Integer> getInterestMetrics(String userEmail) {
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     Key userKey = KeyFactory.createKey("User", userEmail);
-    Map<String, Integer> result = new TreeMap<>();
+    Map<String, Integer> result = new HashMap<>();
     Entity userEntity;
     try {
       userEntity = datastore.get(userKey);
@@ -59,6 +59,33 @@ public class Interactions {
     } catch (EntityNotFoundException e) {
       LOGGER.warning("ERROR: email not found " + userEmail);
       return null;
+    }
+    return result;
+  }
+
+  public static Map<String, Integer> buildVectorForEvent(Entity eventEntity) {
+    if (!eventEntity.getKind().equals("Event")) {
+      throw new IllegalArgumentException("must be event items");
+    }
+    String tags = eventEntity.getProperty("tags").toString();
+    if (tags == null) {
+      return new HashMap<>();
+    }
+    Map<String, Integer> eventMetrics = new HashMap<>();
+    for (String field : metrics) {
+      if (tags.contains(field)) {
+        eventMetrics.put(field, 1);
+      }
+    }
+    return eventMetrics;
+  }
+
+  public static int dotProduct(Map<String, Integer> v1, Map<String, Integer> v2) {
+    int result = 0;
+    for (String field : v1.keySet()) {
+      if (v2.containsKey(field)) {
+        result += v2.get(field) * v1.get(field);
+      }
     }
     return result;
   }

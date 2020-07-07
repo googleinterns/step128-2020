@@ -16,7 +16,9 @@ package com.google.sps.servlets;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.gson.Gson;
+import com.google.sps.Interactions;
 import java.util.Comparator;
+import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 public class Utils {
@@ -63,4 +65,21 @@ public class Utils {
               .compareTo(b.getProperty("eventName").toString());
         }
       };
+
+  public static Comparator<Entity> getComparatorByInterestMatch(Map<String, Integer> metrics) {
+    Comparator<Entity> result =
+        new Comparator<Entity>() {
+          @Override
+          public int compare(Entity a, Entity b) {
+            if (!a.getKind().equals("Event") || !b.getKind().equals("Event")) {
+              throw new IllegalArgumentException("must be event items");
+            }
+            Map<String, Integer> v1 = Interactions.buildVectorForEvent(a);
+            Map<String, Integer> v2 = Interactions.buildVectorForEvent(b);
+            return Integer.compare(
+                Interactions.dotProduct(v1, metrics), Interactions.dotProduct(v2, metrics));
+          }
+        };
+    return result;
+  }
 }
