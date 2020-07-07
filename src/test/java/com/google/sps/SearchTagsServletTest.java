@@ -214,7 +214,6 @@ public final class SearchTagsServletTest {
     // Order results like sorting algorithm will
     List<String> desiredOrder = new ArrayList<String>(Arrays.asList("2", "6", "7", "9", "10"));
     List<Entity> orderedEvents = orderEvents(desiredOrder, events);
-    System.out.println(orderedEvents);
 
     // Convert expected events to JSON for comparison
     String expected = Utils.convertToJson(orderedEvents);

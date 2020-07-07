@@ -89,12 +89,9 @@ public class SearchServlet extends HttpServlet {
       event.setProperty("distance", getDistance(userLocation, eventLocation));
     }
 
-    // filter by location and cutoff outside it
     // Get location cutoff
     int cutoff = Integer.parseInt(Utils.getParameter(request, "searchDistance", ""));
 
-    // get tags
-    // drop all without first tag?
     // Sort list by most tags in common with search
     Collections.sort(
         events,
@@ -107,9 +104,6 @@ public class SearchServlet extends HttpServlet {
                 Double.compare(
                     intersection(o2List, searchTags) * o2List.size(),
                     intersection(o1List, searchTags) * o1List.size());
-            System.out.println("" + o2List + compareTagsInCommon + o1List);
-            System.out.println(
-                "" + intersection(o2List, searchTags) + intersection(o1List, searchTags));
             if (compareTagsInCommon != 0) {
               return compareTagsInCommon;
             }
@@ -122,7 +116,6 @@ public class SearchServlet extends HttpServlet {
             }
             // Sort by which event has more tags
             int compareSize = Integer.compare(o2List.size(), o1List.size());
-            System.out.println("" + o2List + compareSize + o1List);
             if (compareSize != 0) {
               return compareSize;
             } else {
@@ -133,9 +126,7 @@ public class SearchServlet extends HttpServlet {
             }
           }
         });
-    // those closest to the user go to the top
-    System.out.println(events);
-
+    
     // Convert events list to json
     String json = Utils.convertToJson(events);
 
