@@ -845,7 +845,7 @@ function submitSurvey() {
  ***********************************************************************/
 
 /**
- * Generates tag-based features.
+ * Generates tags and tag-based features.
  */
 function displayIndividualEvent() {
   const tagString = document.getElementById('value').value;
