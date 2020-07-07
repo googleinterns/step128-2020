@@ -24,7 +24,7 @@
             ${description}
           </div>
           <div class="tags-container">Tags:
-            <input type="hidden" id="value" value='${tags}'>
+            <input type="hidden" id="tags-value" value='${tags}'>
           </div>
         </div>
         <div class="footer">
