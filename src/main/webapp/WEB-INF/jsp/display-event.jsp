@@ -25,7 +25,6 @@
           </div>
           <div class="tags-container">Tags:
             <input type="hidden" id="value" value='${tags}'>
-            <span class="tag environment">${tags}</span>
           </div>
         </div>
         <div class="footer">
