@@ -162,6 +162,13 @@ public final class SearchServletTest {
   }
 
   @Test
+  public void noDistance() throws IOException {
+    int distance =
+        SearchServlet.getDistance(new LatLng(-31.9522, 115.8589), new LatLng(-31.9522, 115.8589));
+    assertEquals(0, distance);
+  }
+
+  @Test
   public void getLatLngWorks() throws IOException {
     LatLng location = SearchServlet.getLatLng("3 Forrest Pl, Perth WA 6000, Australia");
     assertEquals(new LatLng(-31.95220010, 115.85884740), location);

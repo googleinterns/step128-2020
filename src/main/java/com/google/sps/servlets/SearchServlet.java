@@ -126,7 +126,7 @@ public class SearchServlet extends HttpServlet {
             }
           }
         });
-    
+
     // Convert events list to json
     String json = Utils.convertToJson(events);
 
