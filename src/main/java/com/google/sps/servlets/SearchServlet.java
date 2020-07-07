@@ -58,6 +58,8 @@ public class SearchServlet extends HttpServlet {
   private static final String MAPS_API_KEY = "";
   private static final GeoApiContext context =
       new GeoApiContext.Builder().apiKey(MAPS_API_KEY).build();
+  // Conversion rate from mi to km
+  private static final double MI_TO_KM = 1.609;
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -94,7 +96,7 @@ public class SearchServlet extends HttpServlet {
     int cutoff =
         Math.toIntExact(
             Math.round(
-                Integer.parseInt(Utils.getParameter(request, "searchDistance", "")) * 1.609));
+                Integer.parseInt(Utils.getParameter(request, "searchDistance", "")) * MI_TO_KM));
     // Remove from the list any events outside the cutoff or that aren't drivable
     events.removeIf(
         e -> ((int) e.getProperty("distance")) > cutoff || ((int) e.getProperty("distance")) < 0);
