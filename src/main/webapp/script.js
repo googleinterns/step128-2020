@@ -297,6 +297,9 @@ async function getEvents(events, index, option) {
     //     var tagsString = event.tags.substring(1, event.tags.length - 1);
     //     event.tags = tagsString.split(', ');
     //   }
+    console.log(event);
+    event = event.propertyMap;
+    console.log(event);
 
     const eventItemElement = document.createElement('a');
     eventItemElement.className = 'event-item';
@@ -305,7 +308,8 @@ async function getEvents(events, index, option) {
     eventListElement.appendChild(eventItemElement);
 
     const eventImageElement = document.createElement('div');
-    eventImageElement.className = 'event-image ' + event.tags[0];
+    eventImageElement.className = 'event-image ' + 'environment';
+    //eventImageElement.className = 'event-image ' + event.tags[0];
 
     const eventItemInfoElement = document.createElement('div');
     eventItemInfoElement.className = 'event-item-info';
@@ -799,6 +803,12 @@ async function search() {
   const response = await fetch('/search' + url);
   const events = await response.json();
   console.log(events);
+  events.forEach(function(event) {
+    let tagStr = event.propertyMap.tags.substring(1, event.propertyMap.tags.length - 1);
+    tagStr = tagStr.replace(/"/g, '');;
+    event.propertyMap.tags = tagStr.split(',');
+    
+  });
   getEvents(events, 0, 0);
 }
 

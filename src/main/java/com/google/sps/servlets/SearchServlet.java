@@ -55,14 +55,30 @@ public class SearchServlet extends HttpServlet {
     // List of all the tags we are searching for
     List<String> searchTags =
         new ArrayList<String>(Arrays.asList(request.getParameterValues("tags")));
-    // Filter to check if the event has any of tags we're searching for
-    Filter tagsFilter = new FilterPredicate("tags", FilterOperator.IN, searchTags);
-    Query query = new Query("Event").setFilter(tagsFilter);
+    System.out.println(searchTags); /*
+    for (int i = 0; i < searchTags.size(); i++) {
+      String a = searchTags.get(i);
+      searchTags.set(i, "\"" + a + "\"");
+    }
+    System.out.println(searchTags);
+*/
+    Query query = null;
+    // Check if there are no tags
+    if (!searchTags.get(0).equals("")) {
+      // Filter to check if the event has any of tags we're searching for
+      Filter tagsFilter = new FilterPredicate("tags", FilterOperator.IN, searchTags);
+      query = new Query("Event").setFilter(tagsFilter);
+    } else {
+      System.out.println("else");
+      query = new Query("Event");
+    }
 
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     PreparedQuery results = datastore.prepare(query);
     List<Entity> events =
         new ArrayList<Entity>(results.asList(FetchOptions.Builder.withDefaults()));
+    System.out.println(events);
+    System.out.println(events.get(0).getProperty("tags");
 
     // get location
     // filter by location and cutoff outside it
@@ -79,13 +95,7 @@ public class SearchServlet extends HttpServlet {
                     .compareTo(intersection((List<String>) o1.getProperty("tags"), searchTags));
             // For development purposes, if two events have the same number of tags
             // they are sorted by the event names (which in the test cases are integers)
-            if (condition == 0) {
-              return Integer.compare(
-                  Integer.parseInt(o1.getProperty("eventName").toString()),
-                  Integer.parseInt(o2.getProperty("eventName").toString()));
-            } else {
-              return condition;
-            }
+            return condition;
           }
         });
     // those closest to the user go to the top
