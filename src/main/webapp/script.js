@@ -882,7 +882,7 @@ function loadDefaultImage(color) {
 }
 
 /**
- * Displays the attending text based on the color of the first tag.
+ * Displays the 'amount attending' text based on the color of the first tag.
  * @param {String} color the color of the primary event.
  */
 function loadAttendingColor(color) {
