@@ -127,44 +127,45 @@ public class UserServlet extends HttpServlet {
     // adds or removes events from user's saved events list
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     UserService userService = UserServiceFactory.getUserService();
-
-    if (userService.isUserLoggedIn()) {
-      String userEmail = userService.getCurrentUser().getEmail();
-
-      if (request.getParameter("event") != null) {
-        Long eventId = Long.parseLong(request.getParameter("event"));
-        Key userKey = KeyFactory.createKey("User", userEmail);
-
-        try {
-          Entity userEntity = datastore.get(userKey);
-          List<Long> saved = (ArrayList<Long>) userEntity.getProperty("saved");
-          if (saved == null) {
-            saved = new ArrayList<>();
-          }
-          switch (request.getParameter("action")) {
-            case "save":
-              postHandleSave(saved, eventId);
-              break;
-            case "unsave":
-              postHandleUnsave(saved, eventId);
-              break;
-            default:
-              throw new IOException("missing or invalid parameters");
-          }
-          userEntity.setProperty("saved", saved);
-          datastore.put(userEntity);
-        } catch (EntityNotFoundException exception) {
-          // datastore entry has not been created yet for this user, create it now
-          Entity entity = new Entity(userKey);
-          entity.setProperty("id", userEmail);
-          datastore.put(entity);
-        }
-
-      } else {
-        throw new IOException("no event key specified");
-      }
-    } else {
+    if (!userService.isUserLoggedIn()) {
       throw new IOException("must be logged in");
+    }
+    if (request.getParameter("event") == null) {
+      throw new IOException("no event key specified");
+    }
+    Long eventId = 0L;
+    try {
+      eventId = Long.parseLong(request.getParameter("event"));
+    } catch (NumberFormatException e) {
+      throw new IOException("invalid format for event key");
+    }
+    // Handle the logic
+    String userEmail = userService.getCurrentUser().getEmail();
+    Key userKey = KeyFactory.createKey("User", userEmail);
+
+    try {
+      Entity userEntity = datastore.get(userKey);
+      List<Long> saved = (ArrayList<Long>) userEntity.getProperty("saved");
+      if (saved == null) {
+        saved = new ArrayList<>();
+      }
+      switch (request.getParameter("action")) {
+        case "save":
+          postHandleSave(saved, eventId);
+          break;
+        case "unsave":
+          postHandleUnsave(saved, eventId);
+          break;
+        default:
+          throw new IOException("missing or invalid parameters");
+      }
+      userEntity.setProperty("saved", saved);
+      datastore.put(userEntity);
+    } catch (EntityNotFoundException exception) {
+      // datastore entry has not been created yet for this user, create it now
+      Entity entity = new Entity(userKey);
+      entity.setProperty("id", userEmail);
+      datastore.put(entity);
     }
   }
 
@@ -174,12 +175,9 @@ public class UserServlet extends HttpServlet {
     Key eventKey = KeyFactory.createKey("Event", eventId);
     try {
       Entity eventEntity = datastore.get(eventKey);
-
-      for (int i = 0; i < saved.size(); i++) {
-        if (saved.get(i) == eventId) {
-          LOGGER.info("event " + eventId + " has already been saved");
-          return;
-        }
+      if (saved.contains(eventId)) {
+        LOGGER.info("event " + eventId + " has already been saved");
+        return;
       }
       saved.add(eventId);
     } catch (EntityNotFoundException e) {
