@@ -113,7 +113,6 @@ public class UserServlet extends HttpServlet {
     Query query =
         new Query("Event")
             .setFilter(new Query.FilterPredicate("creator", Query.FilterOperator.EQUAL, userEmail));
-    // .addSort("eventName", SortDirection.ASCENDING);
     PreparedQuery queried = datastore.prepare(query);
     for (Entity e : queried.asIterable()) {
       results.add(e);
