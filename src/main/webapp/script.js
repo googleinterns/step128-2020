@@ -848,7 +848,7 @@ function submitSurvey() {
  * Generates tags and tag-based features.
  */
 function displayIndividualEvent() {
-  const tagString = document.getElementById('value').value;
+  const tagString = document.getElementById('tags-value').value;
   const tagArray = JSON.parse(tagString);
   const mainColor = tagArray[0];
 
