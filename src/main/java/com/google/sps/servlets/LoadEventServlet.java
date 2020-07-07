@@ -70,7 +70,6 @@ public class LoadEventServlet extends HttpServlet {
     String state = event.getProperty("state").toString();
     String tags = event.getProperty("tags").toString();
 
-    System.out.println(tags);
     request.setAttribute("name", name);
     request.setAttribute("description", description);
     request.setAttribute("date", date);
