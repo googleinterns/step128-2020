@@ -60,12 +60,25 @@ public final class SearchTagsServletTest {
     List<String> possibleTags =
         new ArrayList<String>(
             Arrays.asList("environment", "blm", "education", "volunteer", "LGBTQ+"));
+    List<String> possibleLocations =
+        new ArrayList<String>(
+            Arrays.asList(
+                "1313 Disneyland Dr, Anaheim, CA",
+                "111 W Harbor Dr, San Diego, CA",
+                "Yosemite National Park, , CA",
+                " ,Seattle, WA",
+                "2 Chome-2-1 Dogenzaka, Shibuya City, Tokyo 150-0043, Japan"));
+    List<Integer> possibleDistances = new ArrayList<Integer>(Arrays.asList(42, 198, 593, 593, 593));
     testEntities = new ArrayList<Entity>();
     // Single tag events
     for (int i = 0; i < 5; i++) {
       Entity e = new Entity("Event");
       e.setProperty("eventName", i);
       e.setIndexedProperty("tags", new ArrayList<String>(Arrays.asList(possibleTags.get(i))));
+      e.setProperty("streetAddress", possibleLocations.get(i).split(",")[0]);
+      e.setProperty("city", possibleLocations.get(i).split(",")[1]);
+      e.setProperty("state", possibleLocations.get(i).split(",")[2]);
+      e.setProperty("distance", possibleDistances.get(i));
       testEntities.add(e);
     }
     // Double tag events
@@ -75,6 +88,10 @@ public final class SearchTagsServletTest {
       e.setIndexedProperty(
           "tags",
           new ArrayList<String>(Arrays.asList(possibleTags.get(i - 5), possibleTags.get(i - 4))));
+      e.setProperty("streetAddress", possibleLocations.get(i - 5).split(",")[0]);
+      e.setProperty("city", possibleLocations.get(i - 5).split(",")[1]);
+      e.setProperty("state", possibleLocations.get(i - 5).split(",")[2]);
+      e.setProperty("distance", possibleDistances.get(i - 5));
       testEntities.add(e);
     }
     // Triple tag events
@@ -86,6 +103,10 @@ public final class SearchTagsServletTest {
           new ArrayList<String>(
               Arrays.asList(
                   possibleTags.get(i - 9), possibleTags.get(i - 8), possibleTags.get(i - 7))));
+      e.setProperty("streetAddress", possibleLocations.get(i - 9).split(",")[0]);
+      e.setProperty("city", possibleLocations.get(i - 9).split(",")[1]);
+      e.setProperty("state", possibleLocations.get(i - 9).split(",")[2]);
+      e.setProperty("distance", possibleDistances.get(i - 9));
       testEntities.add(e);
     }
     // Add all the events to the mock Datastore
@@ -113,6 +134,8 @@ public final class SearchTagsServletTest {
     // Send the request to the servlet with param
     String[] paramArr = {"environment"};
     when(request.getParameterValues("tags")).thenReturn(paramArr);
+    when(request.getParameter("location")).thenReturn("Los Angeles, CA");
+    when(request.getParameter("searchDistance")).thenReturn("12742");
     testSearchServlet.doGet(request, response);
 
     // Get the JSON response from the server
@@ -141,6 +164,8 @@ public final class SearchTagsServletTest {
     // Send the request to the servlet with param
     String[] paramArr = {"environment", "blm", "education"};
     when(request.getParameterValues("tags")).thenReturn(paramArr);
+    when(request.getParameter("location")).thenReturn("Los Angeles, CA");
+    when(request.getParameter("searchDistance")).thenReturn("12742");
     testSearchServlet.doGet(request, response);
 
     // Get the JSON response from the server
@@ -174,6 +199,8 @@ public final class SearchTagsServletTest {
     // Send the request to the servlet with param
     String[] paramArr = {"education"};
     when(request.getParameterValues("tags")).thenReturn(paramArr);
+    when(request.getParameter("location")).thenReturn("Los Angeles, CA");
+    when(request.getParameter("searchDistance")).thenReturn("12742");
     testSearchServlet.doGet(request, response);
 
     // Get the JSON response from the server
@@ -187,6 +214,7 @@ public final class SearchTagsServletTest {
     // Order results like sorting algorithm will
     List<String> desiredOrder = new ArrayList<String>(Arrays.asList("2", "6", "7", "9", "10"));
     List<Entity> orderedEvents = orderEvents(desiredOrder, events);
+    System.out.println(orderedEvents);
 
     // Convert expected events to JSON for comparison
     String expected = Utils.convertToJson(orderedEvents);
@@ -195,26 +223,27 @@ public final class SearchTagsServletTest {
 
   @Test
   public void correctNumberTagsInCommon() throws IOException {
-    List<String> tagListA = new ArrayList<String>(Arrays.asList("blm"));
-    List<String> tagListB = new ArrayList<String>(Arrays.asList("environment", "blm", "volunteer"));
-    int result = testSearchServlet.intersection(tagListA, tagListB);
-    assertEquals(1, result);
+    List<String> tagListA = new ArrayList<String>(Arrays.asList("environment", "blm", "volunteer"));
+    List<String> tagListB = new ArrayList<String>(Arrays.asList("blm"));
+    double result = testSearchServlet.intersection(tagListA, tagListB);
+    double correct = 1.0 / 3;
+    assertEquals(correct, result, 0.0002);
   }
 
   @Test
   public void tagsInCommonHandlesNoTags() throws IOException {
     List<String> tagListA = new ArrayList<String>();
     List<String> tagListB = new ArrayList<String>();
-    int result = testSearchServlet.intersection(tagListA, tagListB);
-    assertEquals(0, result);
+    double result = testSearchServlet.intersection(tagListA, tagListB);
+    assertEquals(0.0, result, 0.0002);
   }
 
   @Test
   public void handlesNoTagsInCommon() throws IOException {
     List<String> tagListA = new ArrayList<String>(Arrays.asList("education"));
     List<String> tagListB = new ArrayList<String>(Arrays.asList("environment", "blm", "volunteer"));
-    int result = testSearchServlet.intersection(tagListA, tagListB);
-    assertEquals(0, result);
+    double result = testSearchServlet.intersection(tagListA, tagListB);
+    assertEquals(0.0, result, 0.0002);
   }
 
   /**

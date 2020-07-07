@@ -25,7 +25,9 @@ import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.maps.DistanceMatrixApi;
 import com.google.maps.GeoApiContext;
+import com.google.maps.GeocodingApi;
 import com.google.maps.model.DistanceMatrix;
+import com.google.maps.model.GeocodingResult;
 import com.google.maps.model.LatLng;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -71,10 +73,25 @@ public class SearchServlet extends HttpServlet {
     List<Entity> events =
         new ArrayList<Entity>(results.asList(FetchOptions.Builder.withDefaults()));
 
-    // get location
-    String location = Utils.getParameter(request, "location", "");
-    getDistance(new LatLng(-31.9522, 115.8589), new LatLng(-25.344677, 131.036692));
+    // Get location of user
+    String location = request.getParameter("location");
+    LatLng userLocation = getLatLng(location);
+
+    // Get distance between user and the location of all the events
+    for (Entity event : events) {
+      LatLng eventLocation =
+          getLatLng(
+              event.getProperty("streetAddress").toString()
+                  + " "
+                  + event.getProperty("city").toString()
+                  + " "
+                  + event.getProperty("state").toString());
+      event.setProperty("distance", getDistance(userLocation, eventLocation));
+    }
+
     // filter by location and cutoff outside it
+    // Get location cutoff
+    int cutoff = Integer.parseInt(Utils.getParameter(request, "searchDistance", ""));
 
     // get tags
     // drop all without first tag?
@@ -88,16 +105,22 @@ public class SearchServlet extends HttpServlet {
                     .compareTo(intersection((List<String>) o1.getProperty("tags"), searchTags));
             // For development purposes, if two events have the same number of tags
             // they are sorted by the event names (which in the test cases are integers)
+            System.out.println("" + o2.getProperty("tags") + condition + o1.getProperty("tags"));
+            System.out.println(
+                ""
+                    + intersection((List<String>) o2.getProperty("tags"), searchTags)
+                    + intersection((List<String>) o1.getProperty("tags"), searchTags));
             if (condition == 0) {
               return Integer.compare(
-                  Integer.parseInt(o1.getProperty("eventName").toString()),
-                  Integer.parseInt(o2.getProperty("eventName").toString()));
+                  Integer.parseInt(o1.getProperty("distance").toString()),
+                  Integer.parseInt(o2.getProperty("distance").toString()));
             } else {
               return condition;
             }
           }
         });
     // those closest to the user go to the top
+    System.out.println(events);
 
     // Convert events list to json
     String json = Utils.convertToJson(events);
@@ -110,16 +133,20 @@ public class SearchServlet extends HttpServlet {
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {}
 
   /**
-   * Returns a count of the number of tags two lists have in common.
+   * Returns a ratio of the number of tags a list has in common with another.
    *
    * @param tagListA List of tags to be compared
-   * @param tagListB List of tags to be compared
-   * @return Integer count of number of tags in common
+   * @param tagListB List of tags to be compared against
+   * @return Long ratio of number of tags in common to total number of tags
    */
-  public Integer intersection(List<String> tagListA, List<String> tagListB) {
+  public Double intersection(List<String> tagListA, List<String> tagListB) {
+    // Catches divide by zero
+    if (tagListA.size() == 0) {
+      return 0.0;
+    }
     List<String> tagListC = new ArrayList<String>(tagListA);
     tagListC.retainAll(tagListB);
-    return tagListC.size();
+    return ((double) tagListC.size()) / tagListA.size();
   }
 
   /**
@@ -212,20 +239,33 @@ public class SearchServlet extends HttpServlet {
   }
 
   /**
+   * Gets the latitude and longitude of a location using the Google Maps API.
+   *
+   * @param location String containing the address of the location
+   * @return the latitude and longitude of the location
+   */
+  public static LatLng getLatLng(String location) {
+    GeocodingResult[] results = null;
+    try {
+      results = GeocodingApi.newRequest(context).address(location).await();
+    } catch (Exception e) {
+      System.out.println(e.getMessage());
+    }
+
+    return new LatLng(results[0].geometry.location.lat, results[0].geometry.location.lng);
+  }
+
+  /**
    * Calculates the distance between two locations using the Google Maps API.
    *
    * @param from Latitude and longitude of the beginning location
-   * @param from Latitude and longitude of the ending location
+   * @param to Latitude and longitude of the ending location
    * @return the distance in km between the two locations
    */
   public static int getDistance(LatLng from, LatLng to) {
     DistanceMatrix result = null;
     try {
-      result =
-          DistanceMatrixApi.newRequest(context)
-              .origins(new LatLng(-31.9522, 115.8589))
-              .destinations(new LatLng(-25.344677, 131.036692))
-              .await();
+      result = DistanceMatrixApi.newRequest(context).origins(from).destinations(to).await();
     } catch (Exception e) {
       System.out.println(e.getMessage());
     }
