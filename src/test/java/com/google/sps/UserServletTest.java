@@ -55,7 +55,7 @@ public final class UserServletTest {
   private final LocalServiceTestHelper helper =
       new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
   private final Gson gson = new Gson();
-  private EventServlet testEventServlet;
+  private static EventServlet testEventServlet;
   private UserServlet testUserServlet;
 
   /** Checks for equivalent content between two entity lists */
@@ -93,6 +93,31 @@ public final class UserServletTest {
         fail();
       }
     }
+  }
+
+  // performs the GET request to return a list of events
+  private List<Entity> callGet(String get) throws IOException {
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    when(request.getParameter("get")).thenReturn(get);
+
+    StringWriter out = new StringWriter();
+    PrintWriter writer = new PrintWriter(out);
+    when(response.getWriter()).thenReturn(writer);
+
+    testUserServlet.doGet(request, response);
+    out.flush();
+
+    return gson.fromJson(out.toString(), new TypeToken<ArrayList<Entity>>() {}.getType());
+  }
+
+  // performs the POST request to save or unsave an event with a given id
+  private void callPost(long id, String action) throws IOException {
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    when(request.getParameter("event")).thenReturn(id + "");
+    when(request.getParameter("action")).thenReturn(action);
+    testUserServlet.doPost(request, response);
   }
 
   @Before
@@ -316,7 +341,7 @@ public final class UserServletTest {
   }
 
   /** Logs in and out a few times, posting events to datastore */
-  private void postEventsSetup() throws IOException {
+  public static void postEventsSetup() throws IOException {
     // posted by test@example.com
     TestingUtil.toggleLogin("test@example.com");
     HttpServletRequest request = mock(HttpServletRequest.class);
@@ -360,33 +385,8 @@ public final class UserServletTest {
     TestingUtil.toggleLogin("another@example.com");
   }
 
-  // performs the GET request to return a list of events
-  private List<Entity> callGet(String get) throws IOException {
-    HttpServletRequest request = mock(HttpServletRequest.class);
-    HttpServletResponse response = mock(HttpServletResponse.class);
-    when(request.getParameter("get")).thenReturn(get);
-
-    StringWriter out = new StringWriter();
-    PrintWriter writer = new PrintWriter(out);
-    when(response.getWriter()).thenReturn(writer);
-
-    testUserServlet.doGet(request, response);
-    out.flush();
-
-    return gson.fromJson(out.toString(), new TypeToken<ArrayList<Entity>>() {}.getType());
-  }
-
-  // performs the POST request to save or unsave an event with a given id
-  private void callPost(long id, String action) throws IOException {
-    HttpServletRequest request = mock(HttpServletRequest.class);
-    HttpServletResponse response = mock(HttpServletResponse.class);
-    when(request.getParameter("event")).thenReturn(id + "");
-    when(request.getParameter("action")).thenReturn(action);
-    testUserServlet.doPost(request, response);
-  }
-
   // entities to compare against postSetup() method
-  private static Entity createLakeCleanupEvent() {
+  public static Entity createLakeCleanupEvent() {
     Entity entity = new Entity("Event");
     entity.setProperty("eventName", "Lake Clean Up");
     entity.setProperty("eventDescription", "We're cleaning up the lake");
@@ -403,7 +403,7 @@ public final class UserServletTest {
     return entity;
   }
 
-  private static Entity createBlmProtestEvent() {
+  public static Entity createBlmProtestEvent() {
     Entity entity = new Entity("Event");
     entity.setProperty("eventName", "BLM Protest");
     entity.setProperty("eventDescription", "Fight for racial justice!");
@@ -420,7 +420,7 @@ public final class UserServletTest {
     return entity;
   }
 
-  private static Entity createBookDriveEvent() {
+  public static Entity createBookDriveEvent() {
     Entity entity = new Entity("Event");
     entity.setProperty("eventName", "Book Drive");
     entity.setProperty("eventDescription", "Let's donate books for kids");
