@@ -486,14 +486,14 @@ function openLink(key) {
   window.location.href = url;
 }
 
-function loadTags() {
-  const tagString = document.getElementById("value").value;
+function loadEventPageTags() {
+  const tagString = document.getElementById('value').value;
   const tagArray = JSON.parse(tagString);
-  const tagsContainer = document.getElementsByClassName('tags-container')[0];
 
+  const tagsContainer = document.getElementsByClassName('tags-container')[0];
   for (i = 0; i < tagArray.length; i++) {
     var tag = document.createElement('span');
-    tag.className = "tag " + tagArray[i];
+    tag.className = 'tag ' + tagArray[i];
     tag.innerHTML = tagArray[i];
     tagsContainer.appendChild(tag);
   }
