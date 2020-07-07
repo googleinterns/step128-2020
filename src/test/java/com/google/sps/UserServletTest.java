@@ -88,7 +88,6 @@ public final class UserServletTest {
     assertEquals(goalIds.size(), resultIds.size());
     Collections.sort(goalIds);
     Collections.sort(resultIds);
-    // add to sorted lists, then use assertListsEqual
     for (int i = 0; i < goalIds.size(); i++) {
       if (goalIds.get(i) != resultIds.get(i)) {
         fail();
