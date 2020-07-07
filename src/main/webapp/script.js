@@ -486,20 +486,6 @@ function openLink(key) {
   window.location.href = url;
 }
 
-function loadEventPageTags() {
-  const tagString = document.getElementById('value').value;
-  const tagArray = JSON.parse(tagString);
-
-  const tagsContainer = document.getElementsByClassName('tags-container')[0];
-  for (i = 0; i < tagArray.length; i++) {
-    var tag = document.createElement('span');
-    tag.className = 'tag ' + tagArray[i];
-    tag.innerHTML = tagArray[i];
-    tagsContainer.appendChild(tag);
-  }
-}
-
-
 var searchDistance = 5;
 
 function changeSearchDistance() {
@@ -852,4 +838,54 @@ function submitSurvey() {
     // cannot submit while not logged in
     alert('Please log in first!');
   }
+}
+
+/***********************************************************************
+ * Methods for display-event.jsp
+ ***********************************************************************/
+
+/**
+ * Generates tag-based features.
+ */
+function displayIndividualEvent() {
+  const tagString = document.getElementById('value').value;
+  const tagArray = JSON.parse(tagString);
+  const mainColor = tagArray[0];
+
+  loadEventTags(tagArray);
+  loadDefaultImage(mainColor);
+  loadAttendingColor(mainColor);
+}
+
+/**
+ * Displays the event tags.
+ * @param {array} events the array of event tags
+ */
+function loadEventTags(events) {
+  const tagsContainer = document.getElementsByClassName('tags-container')[0];
+
+  for (i = 0; i < events.length; i++) {
+    let tag = document.createElement('span');
+    tag.className = 'tag ' + events[i];
+    tag.innerHTML = events[i];
+    tagsContainer.appendChild(tag);
+  }
+}
+
+/**
+ * Displays the default image based on the color of the first tag.
+ * @param {String} color the color of the primary event.
+ */
+function loadDefaultImage(color) {
+  const eventImage = document.getElementsByClassName('event-display-image')[0];
+  eventImage.className = 'event-display-image ' + color;
+}
+
+/**
+ * Displays the attending text based on the color of the first tag.
+ * @param {String} color the color of the primary event.
+ */
+function loadAttendingColor(color) {
+  const countContainer = document.getElementsByClassName('attendee-count')[0];
+  countContainer.className = 'attendee-count ' + color + '-text';
 }
