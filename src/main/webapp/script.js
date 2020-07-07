@@ -714,7 +714,6 @@ async function getMyEvents() {
 function searchLoadActions() {
   updateSearchBar();
   updateTagBox();
-  getEvents(dummyEvents, 0, 3); // TODO: delete once search() is implemented
   getSearchDistanceSettings();
 }
 
@@ -781,8 +780,8 @@ function updateTagBox() {
 /**
  * Placeholder function for search functionality
  */
-function search() {
-  var url = '/search.html?tags=';
+async function search() {
+  var url = '?tags=';
   tagsSearch.forEach(function(tag) {
     url += tag + ',';
   });
@@ -791,10 +790,16 @@ function search() {
     url = url.substring(0, url.length - 1);
   }
 
-  url += '&searchDistance=' + searchDistance;
+  // TODO get user location
+  url += '&searchDistance=' + searchDistance + '&location=' + 'Los Angeles, CA';
 
-  window.location.href = url;
+  //window.location.href = '/search.html' + url;
   // TODO fetch call to server with search parameters
+  
+  const response = await fetch('/search' + url);
+  const events = await response.json();
+  console.log(events);
+  getEvents(events, 0, 0);
 }
 
 /***********************************************************************
