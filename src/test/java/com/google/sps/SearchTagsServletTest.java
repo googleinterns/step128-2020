@@ -67,8 +67,9 @@ public final class SearchTagsServletTest {
                 "111 W Harbor Dr, San Diego, CA",
                 "Yosemite National Park, , CA",
                 " ,Seattle, WA",
-                "2 Chome-2-1 Dogenzaka, Shibuya City, Tokyo 150-0043, Japan"));
-    List<Integer> possibleDistances = new ArrayList<Integer>(Arrays.asList(42, 198, 593, 593, 593));
+                "Broadway, New York, NY"));
+    List<Integer> possibleDistances =
+        new ArrayList<Integer>(Arrays.asList(42, 198, 593, 1826, 4497));
     testEntities = new ArrayList<Entity>();
     // Single tag events
     for (int i = 0; i < 5; i++) {
@@ -135,7 +136,7 @@ public final class SearchTagsServletTest {
     String[] paramArr = {"environment"};
     when(request.getParameterValues("tags")).thenReturn(paramArr);
     when(request.getParameter("location")).thenReturn("Los Angeles, CA");
-    when(request.getParameter("searchDistance")).thenReturn("12742");
+    when(request.getParameter("searchDistance")).thenReturn("5000");
     testSearchServlet.doGet(request, response);
 
     // Get the JSON response from the server
@@ -165,7 +166,7 @@ public final class SearchTagsServletTest {
     String[] paramArr = {"environment", "blm", "education"};
     when(request.getParameterValues("tags")).thenReturn(paramArr);
     when(request.getParameter("location")).thenReturn("Los Angeles, CA");
-    when(request.getParameter("searchDistance")).thenReturn("12742");
+    when(request.getParameter("searchDistance")).thenReturn("5000");
     testSearchServlet.doGet(request, response);
 
     // Get the JSON response from the server
@@ -187,6 +188,40 @@ public final class SearchTagsServletTest {
   }
 
   @Test
+  public void checkDistanceCutoff() throws IOException {
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpServletResponse response = mock(HttpServletResponse.class);
+
+    StringWriter sw = new StringWriter();
+    PrintWriter pw = new PrintWriter(sw);
+
+    when(response.getWriter()).thenReturn(pw);
+
+    // Send the request to the servlet with param
+    String[] paramArr = {"education"};
+    when(request.getParameterValues("tags")).thenReturn(paramArr);
+    when(request.getParameter("location")).thenReturn("Los Angeles, CA");
+    when(request.getParameter("searchDistance")).thenReturn("50");
+    testSearchServlet.doGet(request, response);
+
+    // Get the JSON response from the server
+    String result = sw.getBuffer().toString().trim();
+
+    // Get the events we were expecting the search to return
+    // from the datastore and assemble our expected
+    List<Integer> ids = new ArrayList<Integer>(Arrays.asList(9));
+    List<Entity> events = fetchIDsFromDataStore(ids);
+
+    // Order results like sorting algorithm will
+    List<String> desiredOrder = new ArrayList<String>(Arrays.asList("9"));
+    List<Entity> orderedEvents = orderEvents(desiredOrder, events);
+
+    // Convert expected events to JSON for comparison
+    String expected = Utils.convertToJson(orderedEvents);
+    assertEquals(expected, result);
+  }
+
+  @Test
   public void checkSingleTagSorted() throws IOException {
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
@@ -200,7 +235,7 @@ public final class SearchTagsServletTest {
     String[] paramArr = {"education"};
     when(request.getParameterValues("tags")).thenReturn(paramArr);
     when(request.getParameter("location")).thenReturn("Los Angeles, CA");
-    when(request.getParameter("searchDistance")).thenReturn("12742");
+    when(request.getParameter("searchDistance")).thenReturn("5000");
     testSearchServlet.doGet(request, response);
 
     // Get the JSON response from the server

@@ -169,6 +169,15 @@ public final class SearchServletTest {
   }
 
   @Test
+  public void nonDrivableDistance() throws IOException {
+    int distance =
+        SearchServlet.getDistance(
+            SearchServlet.getLatLng("2 Chome-2-1 Dogenzaka, Shibuya City, Tokyo 150-0043, Japan"),
+            SearchServlet.getLatLng("Seattle WA"));
+    assertEquals(-1, distance);
+  }
+
+  @Test
   public void getLatLngWorks() throws IOException {
     LatLng location = SearchServlet.getLatLng("3 Forrest Pl, Perth WA 6000, Australia");
     assertEquals(new LatLng(-31.95220010, 115.85884740), location);
