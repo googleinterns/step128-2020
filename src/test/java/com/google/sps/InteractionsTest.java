@@ -17,6 +17,7 @@ package com.google.sps;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
 
+import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
@@ -103,5 +104,32 @@ public final class InteractionsTest {
     testSurveyServlet.doPost(request, response);
 
     assertEquals(null, Interactions.getInterestMetrics("other@example.com"));
+  }
+
+  @Test
+  public void buildVector() throws IOException {
+    Entity entity = UserServletTest.createBlmProtestEvent();
+
+    Map<String, Integer> expectedVector = new HashMap<>();
+    expectedVector.put("environment", 0);
+    expectedVector.put("blm", 1);
+    expectedVector.put("volunteer", 0);
+    expectedVector.put("education", 0);
+    expectedVector.put("LGBTQ+", 0);
+
+    assertEquals(expectedVector, Interactions.buildVectorForEvent(entity));
+  }
+
+  @Test
+  public void checkDotProduct() throws IOException {
+    Map<String, Integer> v1 = new HashMap<>();
+    v1.put("1", 1);
+    v1.put("2", 2);
+    v1.put("3", 3);
+
+    Map<String, Integer> v2 = new HashMap<>();
+    v2.put("2", 2);
+
+    assertEquals(4, Interactions.dotProduct(v1, v2));
   }
 }

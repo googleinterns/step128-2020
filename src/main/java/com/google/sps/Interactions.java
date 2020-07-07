@@ -63,6 +63,8 @@ public class Interactions {
     return result;
   }
 
+  // simplistic methods that builds vectors and computes dot products
+  // (highly subject to change)
   public static Map<String, Integer> buildVectorForEvent(Entity eventEntity) {
     if (!eventEntity.getKind().equals("Event")) {
       throw new IllegalArgumentException("must be event items");
@@ -75,6 +77,8 @@ public class Interactions {
     for (String field : metrics) {
       if (tags.contains(field)) {
         eventMetrics.put(field, 1);
+      } else {
+        eventMetrics.put(field, 0);
       }
     }
     return eventMetrics;
