@@ -30,15 +30,12 @@ import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestC
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.google.sps.servlets.AuthServlet;
 import com.google.sps.servlets.EventServlet;
 import com.google.sps.servlets.UserServlet;
 import com.google.sps.servlets.Utils;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -49,45 +46,17 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({URL.class, UserServiceFactory.class})
+@PrepareForTest(UserServiceFactory.class)
 public final class UserServletTest {
   private final LocalServiceTestHelper helper =
       new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
   private final Gson gson = new Gson();
-  private AuthServlet testAuthServlet;
   private EventServlet testEventServlet;
   private UserServlet testUserServlet;
-  private MockedUserService mockService;
-
-  private String activeUrl;
-
-  /**
-   * Use the current url to login/logout
-   *
-   * @param email If logging in, will log into this user's account.
-   */
-  private void toggleLogin(String email) throws MalformedURLException, IOException {
-    URL mockurl = PowerMockito.mock(URL.class);
-    when(mockurl.openConnection())
-        .thenReturn(mockService.evaluateURL(AuthServletTest.makeLoginURL(activeUrl, email)));
-    mockurl.openConnection();
-
-    HttpServletRequest request = mock(HttpServletRequest.class);
-    HttpServletResponse response = mock(HttpServletResponse.class);
-    StringWriter out = new StringWriter();
-    PrintWriter writer = new PrintWriter(out);
-    when(response.getWriter()).thenReturn(writer);
-
-    testAuthServlet.doGet(request, response);
-    out.flush();
-    LoginObject result = gson.fromJson(out.toString(), LoginObject.class);
-    activeUrl = result.url;
-  }
 
   /** Checks for equivalent content between two entity lists */
   private void assertListsEqual(List<Entity> goalEntityList, List<Entity> resultingEntities) {
@@ -130,30 +99,15 @@ public final class UserServletTest {
   @Before
   public void setUp() throws IOException {
     helper.setUp();
-    PowerMockito.mockStatic(UserServiceFactory.class);
-    mockService = new MockedUserService();
-    when(UserServiceFactory.getUserService()).thenReturn(mockService);
     testEventServlet = new EventServlet();
-    testAuthServlet = new AuthServlet();
     testUserServlet = new UserServlet();
-
-    // get the initial login url
-    HttpServletRequest request = mock(HttpServletRequest.class);
-    HttpServletResponse response = mock(HttpServletResponse.class);
-    StringWriter out = new StringWriter();
-    PrintWriter writer = new PrintWriter(out);
-    when(response.getWriter()).thenReturn(writer);
-    testAuthServlet.doGet(request, response);
-    out.flush();
-
-    LoginObject result = gson.fromJson(out.toString(), LoginObject.class);
-    activeUrl = result.url;
+    TestingUtil.setUp();
   }
 
   @After
   public void tearDown() {
     helper.tearDown();
-    activeUrl = "";
+    TestingUtil.tearDown();
   }
 
   @Test
@@ -181,7 +135,7 @@ public final class UserServletTest {
     // login as test@example.com and make sure method returns correct events
 
     postEventsSetup();
-    toggleLogin("test@example.com");
+    TestingUtil.toggleLogin("test@example.com");
     List<Entity> resultingEntities = callGet("created");
 
     Entity goalEntity = createLakeCleanupEvent();
@@ -204,7 +158,7 @@ public final class UserServletTest {
     goalList.add(id);
 
     // login and add BLM event to user's saved events
-    toggleLogin("test@example.com");
+    TestingUtil.toggleLogin("test@example.com");
     callPost(id, "save");
 
     DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
@@ -231,7 +185,7 @@ public final class UserServletTest {
     goalList.add(allEntities.get(1));
 
     // login and save these two events
-    toggleLogin("test@example.com");
+    TestingUtil.toggleLogin("test@example.com");
     callPost(id0, "save");
     callPost(id1, "save");
 
@@ -247,7 +201,7 @@ public final class UserServletTest {
     long id = allEntities.get(0).getKey().getId();
 
     // save an event, then unsave it
-    toggleLogin("test@example.com");
+    TestingUtil.toggleLogin("test@example.com");
     callPost(id, "save");
     callPost(id, "unsave");
 
@@ -264,7 +218,7 @@ public final class UserServletTest {
     goal.add(allEntities.get(0));
 
     // save an event, then save it again
-    toggleLogin("test@example.com");
+    TestingUtil.toggleLogin("test@example.com");
     callPost(id, "save");
     callPost(id, "save");
 
@@ -284,7 +238,7 @@ public final class UserServletTest {
     List<Entity> goal = new ArrayList<>();
 
     // save an event, then save it again
-    toggleLogin("test@example.com");
+    TestingUtil.toggleLogin("test@example.com");
     callPost(id, "save");
 
     assertListsEqual(goal, callGet("saved"));
@@ -301,7 +255,7 @@ public final class UserServletTest {
     goalList.add(allEntities.get(0));
 
     // save an event, but unsave a different event
-    toggleLogin("test@example.com");
+    TestingUtil.toggleLogin("test@example.com");
     callPost(id0, "save");
     callPost(id1, "unsave");
 
@@ -323,9 +277,9 @@ public final class UserServletTest {
       DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
       for (Entity user : ds.prepare(new Query("User")).asIterable()) {
         String email = user.getKey().getName();
-        toggleLogin(email);
+        TestingUtil.toggleLogin(email);
         assertListsEqual(new ArrayList<Entity>(), callGet("saved"));
-        toggleLogin(email);
+        TestingUtil.toggleLogin(email);
       }
     }
   }
@@ -343,9 +297,9 @@ public final class UserServletTest {
     // save the same event for all users
     for (Entity user : ds.prepare(new Query("User")).asIterable()) {
       String email = user.getKey().getName();
-      toggleLogin(email);
+      TestingUtil.toggleLogin(email);
       callPost(id, "save");
-      toggleLogin(email);
+      TestingUtil.toggleLogin(email);
     }
 
     try {
@@ -355,9 +309,9 @@ public final class UserServletTest {
       // ensure that no users have saved anything
       for (Entity user : ds.prepare(new Query("User")).asIterable()) {
         String email = user.getKey().getName();
-        toggleLogin(email);
+        TestingUtil.toggleLogin(email);
         assertListsEqual(goalList, callGet("saved"));
-        toggleLogin(email);
+        TestingUtil.toggleLogin(email);
       }
     }
   }
@@ -365,7 +319,7 @@ public final class UserServletTest {
   /** Logs in and out a few times, posting events to datastore */
   private void postEventsSetup() throws IOException {
     // posted by test@example.com
-    toggleLogin("test@example.com");
+    TestingUtil.toggleLogin("test@example.com");
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
     when(request.getParameter("event-name")).thenReturn("Lake Clean Up");
@@ -389,10 +343,10 @@ public final class UserServletTest {
     when(request.getParameter("start-time")).thenReturn("13:00");
     when(request.getParameter("all-tags")).thenReturn("['blm']");
     testEventServlet.doPost(request, response);
-    toggleLogin("test@example.com");
+    TestingUtil.toggleLogin("test@example.com");
 
     // posted by another@example.com
-    toggleLogin("another@example.com");
+    TestingUtil.toggleLogin("another@example.com");
     when(request.getParameter("event-name")).thenReturn("Book Drive");
     when(request.getParameter("event-description")).thenReturn("Let's donate books for kids");
     when(request.getParameter("street-address")).thenReturn("School Drive");
@@ -404,7 +358,7 @@ public final class UserServletTest {
     testEventServlet.doPost(request, response);
 
     // logout
-    toggleLogin("another@example.com");
+    TestingUtil.toggleLogin("another@example.com");
   }
 
   // performs the GET request to return a list of events
@@ -482,11 +436,5 @@ public final class UserServletTest {
     entity.setProperty("creator", "another@example.com");
 
     return entity;
-  }
-
-  /* the LoginObject structure used by AuthServlet */
-  private static class LoginObject {
-    private boolean loggedIn;
-    private String url;
   }
 }
