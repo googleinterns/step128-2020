@@ -489,8 +489,16 @@ function openLink(key) {
 function loadTags() {
   const tagString = document.getElementById("value").value;
   const tagArray = JSON.parse(tagString);
-  console.log(tagArray);
+  const tagsContainer = document.getElementsByClassName('tags-container')[0];
+
+  for (i = 0; i < tagArray.length; i++) {
+    var tag = document.createElement('span');
+    tag.className = "tag " + tagArray[i];
+    tag.innerHTML = tagArray[i];
+    tagsContainer.appendChild(tag);
+  }
 }
+
 
 var searchDistance = 5;
 
