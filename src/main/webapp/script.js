@@ -214,7 +214,7 @@ const createdEvents = 2;
 // Two test examples to use with getEvents()
 const test = {eventName: 'Beach clean up',
   eventDescription: 'Lorem ipsum dolor sit amet, consectetur. ' +
-      'Nam efficitur enim quis est mollis blandit. Integer vitae augue risus. ' +
+      'Nam efficitur enim quis est mollis blandit. Integer vitae risus. ' +
       'Nunc sit amet semper urna, ac mollis dui. Aenean vitae imperdiet, ' +
       'sit amet mattis libero. Sed tincidunt arcu in justo...',
   date: 'Saturday, June 20, 2020',
@@ -384,7 +384,6 @@ async function getEvents(events, index, option) {
     if (option == recommendedForYou) {
       // "recommended for you"
       attendeeCountContainerElement.innerText = dummyText;
-
     } else if (option == savedEvents) {
       // unsave an event
       attendeeCountContainerElement.className = 'edit-unsave-event';
@@ -542,14 +541,14 @@ async function getSearchDistanceSettings() {
 }
 
 /**
- * Generates all the rainbow tags on a page, currently made to be used 
+ * Generates all the rainbow tags on a page, currently made to be used
  * with LGBTQ+
  *
  * To have a rainbow tag generated, set its innerText to the tag name and
  *  give it the class 'rainbow'
  */
 const colors = ['#FF0900', '#FF7F00', '#ffe600', '#00F11D', '#0079FF',
-    '#A800FF'];
+  '#A800FF'];
 var tagsAll = ['environment', 'blm', 'volunteer', 'education', 'LGBTQ+'];
 var tagsSearch = [];
 var tagsBox = [...tagsAll];
