@@ -102,33 +102,34 @@ public class SearchServlet extends HttpServlet {
           public int compare(Entity o1, Entity o2) {
             List<String> o1List = (List<String>) o1.getProperty("tags");
             List<String> o2List = (List<String>) o2.getProperty("tags");
+            // Sort by which event has more tags in common with the search tags
             int compareTagsInCommon =
                 Double.compare(
                     intersection(o2List, searchTags) * o2List.size(),
                     intersection(o1List, searchTags) * o1List.size());
-            // Algorithm details
             System.out.println("" + o2List + compareTagsInCommon + o1List);
             System.out.println(
                 "" + intersection(o2List, searchTags) + intersection(o1List, searchTags));
-            if (compareTagsInCommon == 0) {
-              int compareRatioOfTagsInCommon =
-                  Double.compare(
-                      intersection(o2List, searchTags), intersection(o1List, searchTags));
-              if (compareRatioOfTagsInCommon == 0) {
-                int compareSize = Integer.compare(o2List.size(), o1List.size());
-                System.out.println("" + o2List + compareSize + o1List);
-                if (compareSize != 0) {
-                  return compareSize;
-                } else {
-                  return Integer.compare(
-                      Integer.parseInt(o1.getProperty("distance").toString()),
-                      Integer.parseInt(o2.getProperty("distance").toString()));
-                }
-              } else {
-                return compareRatioOfTagsInCommon;
-              }
-            } else {
+            if (compareTagsInCommon != 0) {
               return compareTagsInCommon;
+            }
+            // Sort by which event has a higher ratio of: tags in common with
+            // the search tags to total number of tags
+            int compareRatioOfTagsInCommon =
+                Double.compare(intersection(o2List, searchTags), intersection(o1List, searchTags));
+            if (compareRatioOfTagsInCommon != 0) {
+              return compareRatioOfTagsInCommon;
+            }
+            // Sort by which event has more tags
+            int compareSize = Integer.compare(o2List.size(), o1List.size());
+            System.out.println("" + o2List + compareSize + o1List);
+            if (compareSize != 0) {
+              return compareSize;
+            } else {
+              // Sort by which event is closer to the user
+              return Integer.compare(
+                  Integer.parseInt(o1.getProperty("distance").toString()),
+                  Integer.parseInt(o2.getProperty("distance").toString()));
             }
           }
         });
