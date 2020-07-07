@@ -100,22 +100,35 @@ public class SearchServlet extends HttpServlet {
         events,
         new Comparator<Entity>() {
           public int compare(Entity o1, Entity o2) {
-            int condition =
-                intersection((List<String>) o2.getProperty("tags"), searchTags)
-                    .compareTo(intersection((List<String>) o1.getProperty("tags"), searchTags));
-            // For development purposes, if two events have the same number of tags
-            // they are sorted by the event names (which in the test cases are integers)
-            System.out.println("" + o2.getProperty("tags") + condition + o1.getProperty("tags"));
+            List<String> o1List = (List<String>) o1.getProperty("tags");
+            List<String> o2List = (List<String>) o2.getProperty("tags");
+            int compareTagsInCommon =
+                Double.compare(
+                    intersection(o2List, searchTags) * o2List.size(),
+                    intersection(o1List, searchTags) * o1List.size());
+            // Algorithm details
+            System.out.println("" + o2List + compareTagsInCommon + o1List);
             System.out.println(
-                ""
-                    + intersection((List<String>) o2.getProperty("tags"), searchTags)
-                    + intersection((List<String>) o1.getProperty("tags"), searchTags));
-            if (condition == 0) {
-              return Integer.compare(
-                  Integer.parseInt(o1.getProperty("distance").toString()),
-                  Integer.parseInt(o2.getProperty("distance").toString()));
+                "" + intersection(o2List, searchTags) + intersection(o1List, searchTags));
+            if (compareTagsInCommon == 0) {
+              int compareRatioOfTagsInCommon =
+                  Double.compare(
+                      intersection(o2List, searchTags), intersection(o1List, searchTags));
+              if (compareRatioOfTagsInCommon == 0) {
+                int compareSize = Integer.compare(o2List.size(), o1List.size());
+                System.out.println("" + o2List + compareSize + o1List);
+                if (compareSize != 0) {
+                  return compareSize;
+                } else {
+                  return Integer.compare(
+                      Integer.parseInt(o1.getProperty("distance").toString()),
+                      Integer.parseInt(o2.getProperty("distance").toString()));
+                }
+              } else {
+                return compareRatioOfTagsInCommon;
+              }
             } else {
-              return condition;
+              return compareTagsInCommon;
             }
           }
         });
