@@ -23,8 +23,8 @@ import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.sps.servlets.SurveyServlet;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.TreeMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.junit.After;
@@ -76,7 +76,7 @@ public final class InteractionsTest {
     String email = "test@example.com";
     takeSurvey(email);
 
-    Map<String, Integer> expectedSurvey = new TreeMap<>();
+    Map<String, Integer> expectedSurvey = new HashMap<>();
     expectedSurvey.put("environment", 3);
     expectedSurvey.put("blm", 4);
     expectedSurvey.put("volunteer", 3);
