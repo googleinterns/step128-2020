@@ -68,7 +68,9 @@ public class LoadEventServlet extends HttpServlet {
     String street = event.getProperty("streetAddress").toString();
     String city = event.getProperty("city").toString();
     String state = event.getProperty("state").toString();
+    String tags = event.getProperty("tags").toString();
 
+    System.out.println(tags);
     request.setAttribute("name", name);
     request.setAttribute("description", description);
     request.setAttribute("date", date);
@@ -77,6 +79,7 @@ public class LoadEventServlet extends HttpServlet {
     request.setAttribute("street", street);
     request.setAttribute("city", city);
     request.setAttribute("state", state);
+    request.setAttribute("tags", tags);
 
     return request;
   }
