@@ -14,6 +14,14 @@
 
 package com.google.sps;
 
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.EntityNotFoundException;
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.logging.Logger;
 
 public class Interactions {
@@ -25,6 +33,33 @@ public class Interactions {
   public static final int SAVE_SCORE = 3;
   public static final int CREATE_SCORE = 5;
 
-  //   public static getPreferences(String userId) {}
-  // TODO: move the getInterestMetrics from the survey servlet to here
+  // interest categories, matches question order on survey pages
+  public static final String[] metrics = {"environment", "blm", "volunteer", "education", "LGBTQ+"};
+
+  /**
+   * returns a map of a user's interest levels with respect to each tag. returns null if user not
+   * found.
+   */
+  public static Map<String, Integer> getInterestMetrics(String userEmail) {
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    Key userKey = KeyFactory.createKey("User", userEmail);
+    Map<String, Integer> result = new TreeMap<>();
+    Entity userEntity;
+    try {
+      userEntity = datastore.get(userKey);
+      for (String param : metrics) {
+        if (userEntity.hasProperty(param)) {
+          int score = Integer.parseInt(userEntity.getProperty(param).toString());
+          result.put(param, score);
+        } else {
+          // default val is 0
+          result.put(param, 0);
+        }
+      }
+    } catch (EntityNotFoundException e) {
+      LOGGER.warning("ERROR: email not found " + userEmail);
+      return null;
+    }
+    return result;
+  }
 }

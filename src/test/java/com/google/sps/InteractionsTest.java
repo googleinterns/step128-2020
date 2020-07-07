@@ -11,17 +11,11 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 package com.google.sps;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
 
-import com.google.appengine.api.datastore.DatastoreService;
-import com.google.appengine.api.datastore.DatastoreServiceFactory;
-import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
@@ -33,6 +27,8 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Map;
+import java.util.TreeMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.junit.After;
@@ -46,7 +42,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 /** */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({URL.class, UserServiceFactory.class})
-public final class SurveyServletTest {
+public final class InteractionsTest {
   private final LocalServiceTestHelper helper =
       new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
   private final Gson gson = new Gson();
@@ -79,6 +75,21 @@ public final class SurveyServletTest {
     activeUrl = result.url;
   }
 
+  private void takeSurvey(String email) throws MalformedURLException, IOException {
+    toggleLogin(email);
+
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    when(request.getParameter("environment")).thenReturn("3");
+    when(request.getParameter("blm")).thenReturn("4");
+    when(request.getParameter("volunteer")).thenReturn("3");
+    when(request.getParameter("education")).thenReturn("2");
+    when(request.getParameter("LGBTQ+")).thenReturn("4");
+
+    testSurveyServlet.doPost(request, response);
+    toggleLogin(email);
+  }
+
   @Before
   public void setUp() throws IOException {
     helper.setUp();
@@ -108,8 +119,24 @@ public final class SurveyServletTest {
   }
 
   @Test
-  public void submitSurvey() throws IOException {
-    // basic test to make sure all parameters have been posted to datastore
+  public void checkInterestMetrics() throws IOException {
+    // a basic test to make sure Interactions.getInterestMetrics() works as intended
+    String email = "test@example.com";
+    takeSurvey(email);
+
+    Map<String, Integer> expectedSurvey = new TreeMap<>();
+    expectedSurvey.put("environment", 3);
+    expectedSurvey.put("blm", 4);
+    expectedSurvey.put("volunteer", 3);
+    expectedSurvey.put("education", 2);
+    expectedSurvey.put("LGBTQ+", 4);
+
+    assertEquals(expectedSurvey, Interactions.getInterestMetrics(email));
+  }
+
+  @Test
+  public void noUserForCheckMetrics() throws IOException {
+    // call Interactions.getInterestMetrics() on nonexistent user
 
     String email = "test@example.com";
     toggleLogin(email);
@@ -121,82 +148,9 @@ public final class SurveyServletTest {
     when(request.getParameter("volunteer")).thenReturn("3");
     when(request.getParameter("education")).thenReturn("2");
     when(request.getParameter("LGBTQ+")).thenReturn("4");
-
     testSurveyServlet.doPost(request, response);
 
-    DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
-    Entity userEntity = ds.prepare(new Query("User")).asSingleEntity();
-    assertEquals("3", userEntity.getProperty("environment"));
-    assertEquals("4", userEntity.getProperty("blm"));
-    assertEquals("3", userEntity.getProperty("volunteer"));
-    assertEquals("2", userEntity.getProperty("education"));
-    assertEquals("4", userEntity.getProperty("LGBTQ+"));
-  }
-
-  @Test
-  public void submitIncomplete() throws IOException {
-    // try to submit a survey with incomplete fields
-    String email = "test@example.com";
-    toggleLogin(email);
-
-    HttpServletRequest request = mock(HttpServletRequest.class);
-    HttpServletResponse response = mock(HttpServletResponse.class);
-    when(request.getParameter("environment")).thenReturn("3");
-    when(request.getParameter("blm")).thenReturn("4");
-    when(request.getParameter("volunteer")).thenReturn("3");
-    when(request.getParameter("education")).thenReturn("2");
-
-    try {
-      testSurveyServlet.doPost(request, response);
-
-      fail();
-    } catch (IOException expected) {
-
-      // make sure nothing has been posted
-      DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
-      Entity userEntity = ds.prepare(new Query("User")).asSingleEntity();
-
-      assertEquals(false, userEntity.hasProperty("environment"));
-      assertEquals(false, userEntity.hasProperty("blm"));
-      assertEquals(false, userEntity.hasProperty("volunteer"));
-      assertEquals(false, userEntity.hasProperty("education"));
-      assertEquals(false, userEntity.hasProperty("LGBTQ+"));
-    }
-  }
-
-  @Test
-  public void submitWithoutLogin() throws IOException {
-    // try to submit a survey without being logged in
-
-    String email = "test@example.com";
-    // login then log back out
-    toggleLogin(email);
-    toggleLogin(email);
-
-    HttpServletRequest request = mock(HttpServletRequest.class);
-    HttpServletResponse response = mock(HttpServletResponse.class);
-    when(request.getParameter("environment")).thenReturn("3");
-    when(request.getParameter("blm")).thenReturn("4");
-    when(request.getParameter("volunteer")).thenReturn("3");
-    when(request.getParameter("education")).thenReturn("2");
-    when(request.getParameter("LGBTQ+")).thenReturn("4");
-
-    try {
-      testSurveyServlet.doPost(request, response);
-
-      fail();
-    } catch (IOException expected) {
-
-      // make sure nothing has been posted
-      DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
-      Entity userEntity = ds.prepare(new Query("User")).asSingleEntity();
-
-      assertEquals(false, userEntity.hasProperty("environment"));
-      assertEquals(false, userEntity.hasProperty("blm"));
-      assertEquals(false, userEntity.hasProperty("volunteer"));
-      assertEquals(false, userEntity.hasProperty("education"));
-      assertEquals(false, userEntity.hasProperty("LGBTQ+"));
-    }
+    assertEquals(null, Interactions.getInterestMetrics("other@example.com"));
   }
 
   /* the LoginObject structure used by AuthServlet */

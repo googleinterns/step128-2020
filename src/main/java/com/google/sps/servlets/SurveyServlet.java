@@ -23,9 +23,8 @@ import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.gson.Gson;
+import com.google.sps.Interactions;
 import java.io.IOException;
-import java.util.Map;
-import java.util.TreeMap;
 import java.util.logging.Logger;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -36,9 +35,6 @@ import javax.servlet.http.HttpServletResponse;
 public class SurveyServlet extends HttpServlet {
 
   private static final Logger LOGGER = Logger.getLogger(SurveyServlet.class.getName());
-
-  // interest categories, matches question order on survey pages
-  public static final String[] metrics = {"environment", "blm", "volunteer", "education", "LGBTQ+"};
 
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -64,7 +60,7 @@ public class SurveyServlet extends HttpServlet {
       }
 
       // save score of each survey metric as an entity property
-      for (String param : metrics) {
+      for (String param : Interactions.metrics) {
         String score = request.getParameter(param);
         if (score == null) {
           throw new IOException("incomplete survey");
@@ -77,32 +73,5 @@ public class SurveyServlet extends HttpServlet {
     } else {
       throw new IOException("Cannot take survey while not logged in");
     }
-  }
-
-  /**
-   * returns a map of a user's interest levels with respect to each tag returns null if unsuccessful
-   * (user not found or survey not yet taken/incomplete)
-   */
-  public static Map<String, Integer> getInterestMetrics(String userEmail) {
-    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    Key userKey = KeyFactory.createKey("User", userEmail);
-    Map<String, Integer> result = new TreeMap<>();
-    Entity userEntity;
-    try {
-      userEntity = datastore.get(userKey);
-      for (String param : metrics) {
-        if (userEntity.hasProperty(param)) {
-          int score = Integer.parseInt(userEntity.getProperty(param).toString());
-          result.put(param, score);
-        } else {
-          LOGGER.warning("ERROR: entity did not contain " + param);
-          return null;
-        }
-      }
-    } catch (EntityNotFoundException e) {
-      LOGGER.warning("ERROR: email not found " + userEmail);
-      return null;
-    }
-    return result;
   }
 }
