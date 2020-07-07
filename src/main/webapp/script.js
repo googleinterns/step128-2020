@@ -213,9 +213,9 @@ const createdEvents = 2;
 
 // Two test examples to use with getEvents()
 const test = {eventName: 'Beach clean up',
-  eventDescription: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. ' +
+  eventDescription: 'Lorem ipsum dolor sit amet, consectetur. ' +
       'Nam efficitur enim quis est mollis blandit. Integer vitae augue risus. ' +
-      'Nunc sit amet semper urna, ac mollis dui. Aenean vitae imperdiet nisi, ' +
+      'Nunc sit amet semper urna, ac mollis dui. Aenean vitae imperdiet, ' +
       'sit amet mattis libero. Sed tincidunt arcu in justo...',
   date: 'Saturday, June 20, 2020',
   startTime: '1:00 PM',
@@ -226,10 +226,10 @@ const test = {eventName: 'Beach clean up',
   attendeeCount: 12,
   tags: ['environment'],
   key: 'aglub19hcHBfaWRyEgsSBUV2ZW50GICAgICAgIAKDA'};
-const test2 = {eventName: 'Book Drive', 
-  eventDescription: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. ' +
-      'Nam efficitur enim quis est mollis blandit. Integer vitae augue risus. ' +
-      'Nunc sit amet semper urna, ac mollis dui. Aenean vitae imperdiet nisi, ' +
+const test2 = {eventName: 'Book Drive',
+  eventDescription: 'Lorem ipsum dolor sit amet, consectetur elit. ' +
+      'Nam efficitur enim quis est mollis blandit. Integer vitae augue. ' +
+      'Nunc sit amet semper urna, ac mollis dui. Aenean vitae nisi, ' +
       'sit amet mattis libero. Sed tincidunt arcu in justo...',
   date: 'Sunday, June 21, 2020',
   startTime: '1:00 PM',
@@ -255,7 +255,6 @@ const dummyText = 'Suggested for you'; // TODO: come up with variety
  *                           attendee count, unsave/edit event,
  *                           or a recommendation reason.
  */
-
 async function getEvents(events, index, option) {
   const eventListElements =
       document.getElementsByClassName('event-list-container');
@@ -323,7 +322,8 @@ async function getEvents(events, index, option) {
       const eventItemTitleName = document.createElement('div');
       eventItemTitleName.innerText = event.eventName;
       const eventItemTitleAddr = document.createElement('div');
-      eventItemTitleAddr.innerText = event.streetAddress  + ', ' + event.city + ', ' + event.state;
+      eventItemTitleAddr.innerText = event.streetAddress + ', ' + event.city +
+          ', ' + event.state;
       eventItemTitleAddr.className = 'event-item-address';
       eventItemTitleElement.appendChild(eventItemTitleName);
       eventItemTitleElement.appendChild(eventItemTitleAddr);
@@ -361,10 +361,11 @@ async function getEvents(events, index, option) {
       eventItemDistanceElement.innerText = event.startTime;
     } else {
       // TODO: calculate distance
-      if (event.distance != null){
+      if (event.distance != null) {
         eventItemDistanceElement.innerText = event.distance;
       } else {
-        eventItemDistanceElement.innerText = event.streetAddress  + ', ' + event.city + ', ' + event.state;
+        eventItemDistanceElement.innerText = event.streetAddress + ', ' +
+            event.city + ', ' + event.state;
       }
     }
     eventItemDetailsElement.appendChild(eventItemDistanceElement);
@@ -387,10 +388,11 @@ async function getEvents(events, index, option) {
     } else if (option == savedEvents) {
       // unsave an event
       attendeeCountContainerElement.className = 'edit-unsave-event';
-      attendeeCountContainerElement.innerText = "Unsave this event";
+      attendeeCountContainerElement.innerText = 'Unsave this event';
       attendeeCountContainerElement.onclick = function() {
-          // TODO: unsave from datastore and/or make popup that confirms choice first
-      }
+        // TODO: unsave from datastore and/or make popup that confirms
+        // choice first
+      };
     } else if (option == createdEvents) {
       // edit an event
       attendeeCountContainerElement.className = 'edit-unsave-event';
@@ -446,7 +448,7 @@ async function getEvents(events, index, option) {
   //         </div>
   //       </div>
   // MOBILE:
-  // 
+  //
   //     <div class="event-item-info">
   //       <div class="event-item-header">
   //         <div class="event-item-details">
@@ -540,12 +542,14 @@ async function getSearchDistanceSettings() {
 }
 
 /**
- * Generates all the rainbow tags on a page, currently made to be used with LGBTQ+
+ * Generates all the rainbow tags on a page, currently made to be used 
+ * with LGBTQ+
  *
- * To have a rainbow tag generated, set its innerText to the tag name and give it
- * the class 'rainbow'
+ * To have a rainbow tag generated, set its innerText to the tag name and
+ *  give it the class 'rainbow'
  */
-const colors = ['#FF0900', '#FF7F00', '#ffe600','#00F11D', '#0079FF', '#A800FF'];
+const colors = ['#FF0900', '#FF7F00', '#ffe600', '#00F11D', '#0079FF',
+    '#A800FF'];
 var tagsAll = ['environment', 'blm', 'volunteer', 'education', 'LGBTQ+'];
 var tagsSearch = [];
 var tagsBox = [...tagsAll];
@@ -561,7 +565,8 @@ function generateRainbowTags() {
       if (colorIndex >= colors.length) {
         colorIndex = 0;
       }
-      tagHTML = tagHTML + '<span style=\"color: ' + colors[colorIndex] + '\">' + tag.charAt(i) + '</span>';
+      tagHTML = tagHTML + '<span style=\"color: ' + colors[colorIndex] +
+          '\">' + tag.charAt(i) + '</span>';
       colorIndex++;
     }
     elements[e].innerHTML = tagHTML;
@@ -570,7 +575,7 @@ function generateRainbowTags() {
 
 /***********************************************************************
  * Methods for create-event-form and edit-event form
- ***********************************************************************/ 
+ ***********************************************************************/
 
 /* This is an array to keep track of the current form's selected tags. */
 var tagsSelected = [];
@@ -585,9 +590,9 @@ function toggleTagEvent(tag) {
     tagsOnEvent[boxIndex] = !tagsOnEvent[boxIndex];
 
     if (tagsSelected.includes(tag)) {
-      tagsSelected.splice(boxIndex)
+      tagsSelected.splice(boxIndex);
     } else {
-      tagsSelected.push(tag)
+      tagsSelected.push(tag);
     }
   }
 
@@ -605,14 +610,14 @@ function verifyTags() {
     var tags = createHiddenInput(jsonArray);
 
     // Add string of tags to form for submission
-    document.getElementById("eventform").appendChild(tags);
+    document.getElementById('eventform').appendChild(tags);
     document.eventform.submit();
     tagsSelected.splice(0, tagsSelected.length);
   } else {
     // Display error and prevent from sumbission
-    var tagBoxError = document.getElementById("tags-label");
-    tagBoxError.style.borderStyle = "solid"
-    tagBoxError.style.borderColor = "red";
+    var tagBoxError = document.getElementById('tags-label');
+    tagBoxError.style.borderStyle = 'solid'
+    tagBoxError.style.borderColor = 'red';
     event.preventDefault();
   }
 }
@@ -640,7 +645,7 @@ function updateEventTagBox() {
   for (var i = 0; i < tagsBox.length; i++) {
     var tag = tagsBox[i];
     const spanElement = document.createElement('span');
-    spanElement.setAttribute('onclick', 'toggleTagEvent(\"' + tag + 
+    spanElement.setAttribute('onclick', 'toggleTagEvent(\"' + tag +
         '\")');
     // class name is now (for example) 'tag environment'
     if (tag == 'LGBTQ+') spanElement.className = 'tag rainbow';
@@ -661,13 +666,16 @@ function updateEventTagBox() {
 
 /***********************************************************************
  * Methods for index.html
- ***********************************************************************/ 
+ ***********************************************************************/
 
- /** onload actions for index.html
-  * fetches events from server, calls getEvents with correct options and loads search distance options*/
+/** onload actions for index.html
+ * fetches events from server, calls getEvents with correct options and loads
+ * search distance options
+ */
 async function getRecommendedEvents() {
   if (loggedIn) {
-    fetch("/user?get=saved").then(response => response.json()).then(function(js) {
+    fetch('/user?get=saved').then(response => response.json())
+        .then(function(js) {
       // TODO: change this fetch call to get recommendations instead
       getEvents(dummyEvents, 1, 0);
     });
@@ -678,18 +686,21 @@ async function getRecommendedEvents() {
 }
 
 
-
 /***********************************************************************
  * Methods for my-events.html
- ***********************************************************************/ 
+ ***********************************************************************/
 
-/* on loading my-events.html, fetches events from server and calls getEvents with correct options */
+/* on loading my-events.html, fetches events from server and calls getEvents
+ * with correct options
+ */
 async function getMyEvents() {
   if (loggedIn) {
-    fetch("/user?get=saved").then(response => response.json()).then(function(js) {
+    fetch('/user?get=saved').then(response => response.json())
+        .then(function(js) {
       getEvents(js, 0, 1);
     });
-    fetch("/user?get=created").then(response => response.json()).then(function(js) {
+    fetch('/user?get=created').then(response => response.json())
+        .then(function(js) {
       getEvents(js, 1, 2);
     });
   } else {
@@ -699,7 +710,7 @@ async function getMyEvents() {
 
 /***********************************************************************
  * Methods for search.html
- ***********************************************************************/ 
+ ***********************************************************************/
 
 function searchLoadActions() {
   updateSearchBar(); 
@@ -713,7 +724,7 @@ function addTagBoxToSearch(tag) {
   if (boxIndex > -1) {
     tagsBox.splice(boxIndex, 1);
   }
-  
+
   tagsSearch.push(tag);
   updateTagBox();
   updateSearchBar();
@@ -724,7 +735,7 @@ function addTagSearchToBox(tag) {
   if (searchIndex > -1) {
     tagsSearch.splice(searchIndex, 1);
   }
-  
+
   tagsBox.splice(tagsAll.indexOf(tag), 0, tag);
   updateSearchBar();
   updateTagBox();
@@ -736,7 +747,7 @@ function updateSearchBar() {
   searchBarElement.innerHTML = '';
   tagsSearch.forEach(function(tag) {
     const spanElement = document.createElement('span');
-    spanElement.setAttribute('onclick', 'addTagSearchToBox(\"' + tag + 
+    spanElement.setAttribute('onclick', 'addTagSearchToBox(\"' + tag +
         '\")');
     // class name is now (for example) 'tag environment'
     if (tag == 'LGBTQ+') spanElement.className = 'tag rainbow';
@@ -789,7 +800,7 @@ function search() {
 
 /***********************************************************************
  * Methods for survey.html
- ***********************************************************************/ 
+ ***********************************************************************/
 
 /**
  * Toggles the display of the survey page to indicate which option is selected,
@@ -800,12 +811,14 @@ function search() {
  */
 var surveyResponses = [-1, -1, -1, -1, -1];
 function toggleSurveyDisplay(question, index) {
-  const circle = document.getElementsByClassName('survey-select')[question*5 + index];
+  const circle = document.getElementsByClassName('survey-select')
+      [question*5 + index];
   if (surveyResponses[question] >= 0) {
     var oldIndex = surveyResponses[question];
-    const oldCircle = document.getElementsByClassName('survey-select')[question*5 + oldIndex];
+    const oldCircle = document.getElementsByClassName('survey-select')
+        [question*5 + oldIndex];
     oldCircle.style.backgroundColor = 'transparent';
-	}
+  }
   circle.style.backgroundColor = 'white';
   surveyResponses[question] = index;
 }
@@ -816,13 +829,14 @@ function submitSurvey() {
     for (var i = 0; i < surveyResponses.length; i++) {
       const score = surveyResponses[i];
       if (score < 0) {
-        alert('Please finish the survey first!'); // TODO: streamline this probably
+        // TODO: streamline this probably
+        alert('Please finish the survey first!');
         return;
       } else {
         params.append(tagsAll[i], score);
       }
     }
-    fetch(new Request("/submit-survey", {method: "POST", body: params}));
+    fetch(new Request('/submit-survey', {method: 'POST', body: params}));
   } else {
     // cannot submit while not logged in
     alert('Please log in first!');
