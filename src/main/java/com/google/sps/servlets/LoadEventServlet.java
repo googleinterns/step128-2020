@@ -48,7 +48,7 @@ public class LoadEventServlet extends HttpServlet {
 
         request.getRequestDispatcher("/WEB-INF/jsp/display-event.jsp").forward(request, response);
       }
-    } catch (Exception e) {
+    } catch (IllegalArgumentException | IOException | NullPointerException | ServletException e) {
       LOGGER.info("Could not retrieve event " + e);
       request.getRequestDispatcher("/WEB-INF/jsp/event-not-found.jsp").forward(request, response);
     }
@@ -60,14 +60,14 @@ public class LoadEventServlet extends HttpServlet {
    * @return the request with attributes set.
    */
   private HttpServletRequest populateRequest(HttpServletRequest request, Entity event) {
-    String name = (String) event.getProperty("eventName");
-    String description = (String) event.getProperty("eventDescription");
-    String date = (String) event.getProperty("date");
-    String start = (String) event.getProperty("startTime");
-    String end = (String) event.getProperty("endTime");
-    String street = (String) event.getProperty("streetAddress");
-    String city = (String) event.getProperty("city");
-    String state = (String) event.getProperty("state");
+    String name = event.getProperty("eventName").toString();
+    String description = event.getProperty("eventDescription").toString();
+    String date = event.getProperty("date").toString();
+    String start = event.getProperty("startTime").toString();
+    String end = event.getProperty("endTime").toString();
+    String street = event.getProperty("streetAddress").toString();
+    String city = event.getProperty("city").toString();
+    String state = event.getProperty("state").toString();
 
     request.setAttribute("name", name);
     request.setAttribute("description", description);
