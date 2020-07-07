@@ -488,7 +488,8 @@ function openLink(key) {
 
 function loadTags() {
   const tagString = document.getElementById("value").value;
-  console.log(tagString);
+  const tagArray = JSON.parse(tagString);
+  console.log(tagArray);
 }
 
 var searchDistance = 5;
