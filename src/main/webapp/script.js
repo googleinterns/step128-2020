@@ -486,6 +486,11 @@ function openLink(key) {
   window.location.href = url;
 }
 
+function loadTags() {
+  const tagString = document.getElementById("value").value;
+  console.log(tagString);
+}
+
 var searchDistance = 5;
 
 function changeSearchDistance() {
