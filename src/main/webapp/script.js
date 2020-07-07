@@ -616,7 +616,7 @@ function verifyTags() {
   } else {
     // Display error and prevent from sumbission
     var tagBoxError = document.getElementById('tags-label');
-    tagBoxError.style.borderStyle = 'solid'
+    tagBoxError.style.borderStyle = 'solid';
     tagBoxError.style.borderColor = 'red';
     event.preventDefault();
   }
@@ -676,9 +676,9 @@ async function getRecommendedEvents() {
   if (loggedIn) {
     fetch('/user?get=saved').then(response => response.json())
         .then(function(js) {
-      // TODO: change this fetch call to get recommendations instead
-      getEvents(dummyEvents, 1, 0);
-    });
+        // TODO: change this fetch call to get recommendations instead
+          getEvents(dummyEvents, 1, 0);
+        });
   } else {
     alert('Please log in first!');
   }
@@ -697,12 +697,12 @@ async function getMyEvents() {
   if (loggedIn) {
     fetch('/user?get=saved').then(response => response.json())
         .then(function(js) {
-      getEvents(js, 0, 1);
-    });
+          getEvents(js, 0, 1);
+        });
     fetch('/user?get=created').then(response => response.json())
         .then(function(js) {
-      getEvents(js, 1, 2);
-    });
+          getEvents(js, 1, 2);
+        });
   } else {
     alert('Please log in first!');
   }
@@ -713,8 +713,8 @@ async function getMyEvents() {
  ***********************************************************************/
 
 function searchLoadActions() {
-  updateSearchBar(); 
-  updateTagBox(); 
+  updateSearchBar();
+  updateTagBox();
   getEvents(dummyEvents, 0, 3); // TODO: delete once search() is implemented
   getSearchDistanceSettings();
 }
@@ -766,7 +766,7 @@ function updateTagBox() {
   tagBoxElement.innerHTML = '';
   tagsBox.forEach(function(tag) {
     const spanElement = document.createElement('span');
-    spanElement.setAttribute('onclick', 'addTagBoxToSearch(\"' + tag + 
+    spanElement.setAttribute('onclick', 'addTagBoxToSearch(\"' + tag +
         '\")');
     // class name is now (for example) 'tag environment'
     if (tag == 'LGBTQ+') spanElement.className = 'tag rainbow';
@@ -811,12 +811,10 @@ function search() {
  */
 var surveyResponses = [-1, -1, -1, -1, -1];
 function toggleSurveyDisplay(question, index) {
-  const circle = document.getElementsByClassName('survey-select')
-      [question*5 + index];
+  const circle = document.getElementsByClassName('survey-select')[question*5 + index];
   if (surveyResponses[question] >= 0) {
     var oldIndex = surveyResponses[question];
-    const oldCircle = document.getElementsByClassName('survey-select')
-        [question*5 + oldIndex];
+    const oldCircle = document.getElementsByClassName('survey-select')[question*5 + oldIndex];
     oldCircle.style.backgroundColor = 'transparent';
   }
   circle.style.backgroundColor = 'white';
