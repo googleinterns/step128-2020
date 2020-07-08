@@ -8,7 +8,7 @@ steps:
   - name: node:10.15.1
     entrypoint: npm
     args: ["run", "build:production"]
-  - name: "gcr.io/$PROJECT_ID/builder"
+  - name: "gcr.io/unitebystep/builder"
     entrypoint: bash
     args: ['-c', 'bash <(curl -s https://codecov.io/bash)']
     env:
