@@ -4,4 +4,4 @@ WORKDIR /app
 COPY pom.xml .
 COPY src ./src
 
-RUN mvn package -DskipTests
+RUN mvn test
