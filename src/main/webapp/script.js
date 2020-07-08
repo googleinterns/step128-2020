@@ -893,7 +893,7 @@ function displayIndividualEvent() {
   loadEventTags(tagArray);
   loadDefaultImage(mainColor);
   loadAttendingColor(mainColor);
-  formatDate();
+  // formatDate();
 }
 
 /**
@@ -927,62 +927,4 @@ function loadDefaultImage(color) {
 function loadAttendingColor(color) {
   const countContainer = document.getElementsByClassName('attendee-count')[0];
   countContainer.className = 'attendee-count ' + color + '-text';
-}
-
-/**
- * Format date to fit Month Day, Year format.
- */
-function formatDate() {
-  const dateString = document.getElementById('date-value').value;
-  const month = dateString.substr(5, 2);
-  const day = dateString.substr(8, 2);
-  const year = dateString.substr(0,4);
-
-  fullMonth = getMonth(month);
-  date = fullMonth + ' '+ day + ', ' + year;
-}
-
-/**
- * Return the month corresponding to the number.
- */
-function getMonth(month) {
-  let monthString = '';
-  switch(month) {
-    case '01':
-      monthString = 'January';
-      break;
-    case '02':
-      monthString = 'February';
-      break;
-    case '03':
-      monthString = 'March';
-      break;
-    case '04':
-      monthString = 'April';
-      break;
-    case '05':
-      monthString = 'May';
-      break;
-    case '06':
-      monthString = 'June';
-      break;
-    case '07':
-      monthString = 'July';
-      break;
-    case '08':
-      monthString = 'August';
-      break;
-    case '09':
-      monthString = 'September';
-      break;
-    case '10':
-      monthString = 'October';
-      break;
-    case '11':
-      monthString = 'November';
-      break;
-    case '12':
-      monthString = 'December';
-  }
-  return monthString;
 }
