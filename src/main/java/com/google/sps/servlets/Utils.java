@@ -66,6 +66,7 @@ public class Utils {
         }
       };
 
+  /** creates a comparator based on entity dot product with a given vector */
   public static Comparator<Entity> getComparatorByInterestMatch(Map<String, Integer> metrics) {
     Comparator<Entity> result =
         new Comparator<Entity>() {

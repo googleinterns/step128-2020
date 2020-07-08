@@ -385,7 +385,7 @@ public final class UserServletTest {
     TestingUtil.toggleLogin("another@example.com");
   }
 
-  // entities to compare against postSetup() method
+  /** Creates the lake cleanup event from postEventsSetup() */
   public static Entity createLakeCleanupEvent() {
     Entity entity = new Entity("Event");
     entity.setProperty("eventName", "Lake Clean Up");
@@ -403,6 +403,7 @@ public final class UserServletTest {
     return entity;
   }
 
+  /** Creates the blm protest event from postEventsSetup() */
   public static Entity createBlmProtestEvent() {
     Entity entity = new Entity("Event");
     entity.setProperty("eventName", "BLM Protest");
@@ -420,6 +421,7 @@ public final class UserServletTest {
     return entity;
   }
 
+  /** Creates the book drive event from postEventsSetup() */
   public static Entity createBookDriveEvent() {
     Entity entity = new Entity("Event");
     entity.setProperty("eventName", "Book Drive");

@@ -35,7 +35,7 @@ import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-/** */
+/** Tests for the utility methods in Interactions.java */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(UserServiceFactory.class)
 public final class InteractionsTest {
@@ -47,18 +47,19 @@ public final class InteractionsTest {
     TestingUtil.toggleLogin(email);
 
     HttpServletRequest request = mock(HttpServletRequest.class);
-    HttpServletResponse response = mock(HttpServletResponse.class);
     when(request.getParameter("environment")).thenReturn("3");
     when(request.getParameter("blm")).thenReturn("4");
     when(request.getParameter("volunteer")).thenReturn("3");
     when(request.getParameter("education")).thenReturn("2");
     when(request.getParameter("LGBTQ+")).thenReturn("4");
 
+    HttpServletResponse response = mock(HttpServletResponse.class);
     testSurveyServlet.doPost(request, response);
     TestingUtil.toggleLogin(email);
   }
 
   @Before
+  /** Sets up the datastore helper and authentication utility for each test */
   public void setUp() throws IOException {
     helper.setUp();
     testSurveyServlet = new SurveyServlet();
@@ -95,12 +96,12 @@ public final class InteractionsTest {
     TestingUtil.toggleLogin(email);
 
     HttpServletRequest request = mock(HttpServletRequest.class);
-    HttpServletResponse response = mock(HttpServletResponse.class);
     when(request.getParameter("environment")).thenReturn("3");
     when(request.getParameter("blm")).thenReturn("4");
     when(request.getParameter("volunteer")).thenReturn("3");
     when(request.getParameter("education")).thenReturn("2");
     when(request.getParameter("LGBTQ+")).thenReturn("4");
+    HttpServletResponse response = mock(HttpServletResponse.class);
     testSurveyServlet.doPost(request, response);
 
     assertEquals(null, Interactions.getInterestMetrics("other@example.com"));
@@ -108,8 +109,6 @@ public final class InteractionsTest {
 
   @Test
   public void buildVector() throws IOException {
-    Entity entity = UserServletTest.createBlmProtestEvent();
-
     Map<String, Integer> expectedVector = new HashMap<>();
     expectedVector.put("environment", 0);
     expectedVector.put("blm", 1);
@@ -117,6 +116,7 @@ public final class InteractionsTest {
     expectedVector.put("education", 0);
     expectedVector.put("LGBTQ+", 0);
 
+ Entity entity = UserServletTest.createBlmProtestEvent();
     assertEquals(expectedVector, Interactions.buildVectorForEvent(entity));
   }
 

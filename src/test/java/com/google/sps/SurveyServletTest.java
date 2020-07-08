@@ -36,7 +36,7 @@ import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-/** */
+/** Tests for the SurveyServlet.java class */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(UserServiceFactory.class)
 public final class SurveyServletTest {
