@@ -2,13 +2,9 @@ steps:
   - name: node:10.15.1
     entrypoint: npm
     args: ["install"]
-  - name: node:10.15.1
-    entrypoint: npm
-    args: ["test", "--", "--coverage"]      
-  - name: node:10.15.1
-    entrypoint: npm
-    args: ["run", "build:production"]
-  - name: "gcr.io/unitebystep/builder"
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/unitebystep/step128-2020', '.']
+  - name: 'gcr.io/unitebystep/builder'
     entrypoint: bash
     args: ['-c', 'bash <(curl -s https://codecov.io/bash)']
     env:
