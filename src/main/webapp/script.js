@@ -360,7 +360,6 @@ async function getEvents(events, index, option) {
     if (option == savedEvents || option == createdEvents) {
       eventItemDistanceElement.innerText = event.startTime;
     } else {
-      // TODO: calculate distance
       if (event.distance != null) {
         eventItemDistanceElement.innerText = event.distance;
       } else {
