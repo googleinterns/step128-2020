@@ -6,7 +6,7 @@ name: Codecov
 jobs:
 
   build:
-    name: Build
+    name: Codecov Build
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
