@@ -352,7 +352,7 @@ public final class UserServletTest {
     when(request.getParameter("street-address")).thenReturn("678 Lakeview Way");
     when(request.getParameter("city")).thenReturn("Lakeside");
     when(request.getParameter("state")).thenReturn("Michigan");
-    when(request.getParameter("date")).thenReturn("2020-17-05");
+    when(request.getParameter("date")).thenReturn("2020-05-17");
     when(request.getParameter("start-time")).thenReturn("14:00");
     when(request.getParameter("all-tags")).thenReturn("['environment']");
     testEventServlet.doPost(request, response);
@@ -364,7 +364,7 @@ public final class UserServletTest {
     when(request.getParameter("street-address")).thenReturn("Main Street");
     when(request.getParameter("city")).thenReturn("Los Angeles");
     when(request.getParameter("state")).thenReturn("California");
-    when(request.getParameter("date")).thenReturn("2020-17-05");
+    when(request.getParameter("date")).thenReturn("2020-05-17");
     when(request.getParameter("start-time")).thenReturn("13:00");
     when(request.getParameter("all-tags")).thenReturn("['blm']");
     testEventServlet.doPost(request, response);
@@ -377,7 +377,7 @@ public final class UserServletTest {
     when(request.getParameter("street-address")).thenReturn("School Drive");
     when(request.getParameter("city")).thenReturn("Los Angeles");
     when(request.getParameter("state")).thenReturn("California");
-    when(request.getParameter("date")).thenReturn("2020-17-05");
+    when(request.getParameter("date")).thenReturn("2020-05-17");
     when(request.getParameter("start-time")).thenReturn("10:00");
     when(request.getParameter("all-tags")).thenReturn("['education']");
     testEventServlet.doPost(request, response);
@@ -394,7 +394,7 @@ public final class UserServletTest {
     entity.setProperty("streetAddress", "678 Lakeview Way");
     entity.setProperty("city", "Lakeside");
     entity.setProperty("state", "Michigan");
-    entity.setProperty("date", "2020-17-05");
+    entity.setProperty("date", "2020-05-17");
     entity.setProperty("startTime", "14:00");
     entity.setProperty("endTime", "");
     entity.setProperty("coverPhoto", "");
@@ -412,7 +412,7 @@ public final class UserServletTest {
     entity.setProperty("streetAddress", "Main Street");
     entity.setProperty("city", "Los Angeles");
     entity.setProperty("state", "California");
-    entity.setProperty("date", "2020-17-05");
+    entity.setProperty("date", "2020-05-17");
     entity.setProperty("startTime", "13:00");
     entity.setProperty("endTime", "");
     entity.setProperty("coverPhoto", "");
@@ -430,7 +430,7 @@ public final class UserServletTest {
     entity.setProperty("streetAddress", "School Drive");
     entity.setProperty("city", "Los Angeles");
     entity.setProperty("state", "California");
-    entity.setProperty("date", "2020-17-05");
+    entity.setProperty("date", "2020-05-17");
     entity.setProperty("startTime", "10:00");
     entity.setProperty("endTime", "");
     entity.setProperty("coverPhoto", "");
