@@ -193,9 +193,9 @@ public class EventServlet extends HttpServlet {
         break;
       case "12":
         monthString = "December";
+        break;
       default:
         monthString = "Invalid";
-        break;
     }
     return monthString;
   }
