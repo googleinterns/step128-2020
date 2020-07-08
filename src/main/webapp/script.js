@@ -301,8 +301,8 @@ async function getEvents(events, index, option) {
 
     const eventItemElement = document.createElement('a');
     eventItemElement.className = 'event-item';
-    eventItemElement.setAttribute('onclick', 'openLink(\"' +
-        event.key + '\")');
+    eventItemElement.setAttribute('onclick', 'openLink("' +
+        event.key + '")');
     eventListElement.appendChild(eventItemElement);
 
     const eventImageElement = document.createElement('div');
@@ -825,11 +825,11 @@ function search() {
  */
 const surveyResponses = [-1, -1, -1, -1, -1];
 function toggleSurveyDisplay(question, index) {
-  const circle = 
+  const circle =
     document.getElementsByClassName('survey-select')[question*5 + index];
   if (surveyResponses[question] >= 0) {
     const oldIndex = surveyResponses[question];
-    const oldCircle = 
+    const oldCircle =
       document.getElementsByClassName('survey-select')[question*5 + oldIndex];
     oldCircle.style.backgroundColor = 'transparent';
   }
