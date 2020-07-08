@@ -33,6 +33,10 @@
   background-color: #6e9eeb;
 }
 
+.LGBTQ {
+  background-image: linear-gradient(to right, red, orange , yellow, green, royalblue, blueviolet);
+}
+
 /* content */
 
 body {
