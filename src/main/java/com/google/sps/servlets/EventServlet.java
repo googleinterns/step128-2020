@@ -69,13 +69,15 @@ public class EventServlet extends HttpServlet {
     String coverPhoto = getParameter(request, "cover-photo", "");
     String tags = getParameter(request, "all-tags", "");
 
+    String formattedDate = formatDate(date);
+    String fullAddress = streetAddress + " " + city + " " + state;
     Entity eventEntity = new Entity("Event");
     eventEntity.setProperty("eventName", eventName);
     eventEntity.setProperty("eventDescription", eventDescription);
-    eventEntity.setProperty("streetAddress", streetAddress);
-    eventEntity.setProperty("city", city);
-    eventEntity.setProperty("state", state);
-    eventEntity.setProperty("date", date);
+    eventEntity.setProperty("streetAddress", fullAddress);
+    // eventEntity.setProperty("city", city);
+    // eventEntity.setProperty("state", state);
+    eventEntity.setProperty("date", formattedDate);
     eventEntity.setProperty("startTime", startTime);
     eventEntity.setProperty("endTime", endTime);
     eventEntity.setProperty("coverPhoto", coverPhoto);
@@ -94,5 +96,60 @@ public class EventServlet extends HttpServlet {
       return defaultValue;
     }
     return value;
+  }
+
+  /** Format date to fit Month Day, Year format. */
+  private String formatDate(String date) {
+    String month = date.substring(5, 7);
+    String day = date.substring(8, 10);
+    String year = date.substring(0, 4);
+
+    String fullMonth = getMonth(month);
+
+    date = fullMonth + " " + day + ", " + year;
+    return date;
+  }
+
+  /** Return the month corresponding to the number. */
+  private String getMonth(String month) {
+    String monthString = "";
+    switch (month) {
+      case "01":
+        monthString = "January";
+        break;
+      case "02":
+        monthString = "February";
+        break;
+      case "03":
+        monthString = "March";
+        break;
+      case "04":
+        monthString = "April";
+        break;
+      case "05":
+        monthString = "May";
+        break;
+      case "06":
+        monthString = "June";
+        break;
+      case "07":
+        monthString = "July";
+        break;
+      case "08":
+        monthString = "August";
+        break;
+      case "09":
+        monthString = "September";
+        break;
+      case "10":
+        monthString = "October";
+        break;
+      case "11":
+        monthString = "November";
+        break;
+      case "12":
+        monthString = "December";
+    }
+    return monthString;
   }
 }
