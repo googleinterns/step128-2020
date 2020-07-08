@@ -36,7 +36,7 @@ public final class TestingUtil {
 
   private static String activeUrl = null;
 
-  /** Initializes the MockedUserService and fetches the first login url*/
+  /** Initializes the MockedUserService and fetches the first login url */
   public static void setUp() throws IOException {
     PowerMockito.mockStatic(UserServiceFactory.class);
     mockService = new MockedUserService();
