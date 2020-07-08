@@ -552,7 +552,7 @@ async function getSearchDistanceSettings() {
  * To have a rainbow tag generated, set its innerText to the tag name and
  *  give it the class 'rainbow'
  */
-const colors = ['#FF0900', '#FF7F00', '#ffb742', '#00F11D', '#0079FF',
+const colors = ['#FF0900', '#FF7F00', '#FFB742', '#00F11D', '#0079FF',
   '#A800FF'];
 const tagsAll = ['environment', 'blm', 'volunteer', 'education', 'LGBTQ+'];
 const tagsSearch = [];
@@ -890,7 +890,7 @@ function displayIndividualEvent() {
   const tagArray = JSON.parse(tagString);
   let mainColor = tagArray[0];
 
-  if (mainColor == 'LGBTQ+'){
+  if (mainColor == 'LGBTQ+') {
     mainColor = 'LGBTQ';
   }
 
