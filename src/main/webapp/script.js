@@ -893,6 +893,7 @@ function displayIndividualEvent() {
   loadEventTags(tagArray);
   loadDefaultImage(mainColor);
   loadAttendingColor(mainColor);
+  formatDate();
 }
 
 /**
@@ -926,4 +927,17 @@ function loadDefaultImage(color) {
 function loadAttendingColor(color) {
   const countContainer = document.getElementsByClassName('attendee-count')[0];
   countContainer.className = 'attendee-count ' + color + '-text';
+}
+
+/**
+ * Format date to fit Month XX, XXXX format.
+ */
+function formatDate() {
+  const dateString = document.getElementById('date-value').value;
+  let month = dateString.substr(5, 2);
+  const day = dateString.substr(8, 2);
+  const year = dateString.substr(0,4);
+  console.log(month);
+  console.log(day);
+  console.log(year);
 }
