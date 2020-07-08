@@ -1,18 +1,23 @@
-name: Codecov
-
 on: ["push", "pull_request"]
 
+
+name: Test Coveralls
+
 jobs:
-  CodeCov:
+
+  build:
+    name: Build
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Run tests
-        entrypoint: bash
-        args: ['bash <(mvn clean test)']
-      - name: Upload coverage report
-        uses: codecov/codecov-action@v1
-        with:
-          fail_ci_if_error: true
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+    - uses: actions/checkout@v1
+
+    - name: Run tests
+      run: |
+        mvn clean test
+
+        - name: Upload coverage report
+
+    - name: Coveralls
+      uses: coverallsapp/github-action@master
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
