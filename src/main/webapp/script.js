@@ -680,7 +680,7 @@ function updateEventTagBox() {
  * Methods for index.html
  * **********************************************************************/
 
-/** 
+/**
  * Onload actions for index.html
  * Fetches events from server, calls getEvents with correct options and loads
  * Search distance options
@@ -823,12 +823,14 @@ function search() {
  * @param {number} question The question number to apply the toggle.
  * @param {number} index Which bubble on the question to apply the toggle to.
  */
-let surveyResponses = [-1, -1, -1, -1, -1];
+const surveyResponses = [-1, -1, -1, -1, -1];
 function toggleSurveyDisplay(question, index) {
-  const circle = document.getElementsByClassName('survey-select')[question*5 + index];
+  const circle = 
+    document.getElementsByClassName('survey-select')[question*5 + index];
   if (surveyResponses[question] >= 0) {
-    let oldIndex = surveyResponses[question];
-    const oldCircle = document.getElementsByClassName('survey-select')[question*5 + oldIndex];
+    const oldIndex = surveyResponses[question];
+    const oldCircle = 
+      document.getElementsByClassName('survey-select')[question*5 + oldIndex];
     oldCircle.style.backgroundColor = 'transparent';
   }
   circle.style.backgroundColor = 'white';
@@ -837,7 +839,7 @@ function toggleSurveyDisplay(question, index) {
 
 function submitSurvey() {
   if (loggedIn) {
-    let params = new URLSearchParams();
+    const params = new URLSearchParams();
     for (let i = 0; i < surveyResponses.length; i++) {
       const score = surveyResponses[i];
       if (score < 0) {
