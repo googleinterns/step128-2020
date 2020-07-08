@@ -552,7 +552,7 @@ async function getSearchDistanceSettings() {
  * To have a rainbow tag generated, set its innerText to the tag name and
  *  give it the class 'rainbow'
  */
-const colors = ['#FF0900', '#FF7F00', '#ffe600', '#00F11D', '#0079FF',
+const colors = ['#FF0900', '#FF7F00', '#ffb742', '#00F11D', '#0079FF',
   '#A800FF'];
 const tagsAll = ['environment', 'blm', 'volunteer', 'education', 'LGBTQ+'];
 const tagsSearch = [];
@@ -888,7 +888,11 @@ function submitSurvey() {
 function displayIndividualEvent() {
   const tagString = document.getElementById('tags-value').value;
   const tagArray = JSON.parse(tagString);
-  const mainColor = tagArray[0];
+  let mainColor = tagArray[0];
+
+  if (mainColor == 'LGBTQ+'){
+    mainColor = 'LGBTQ';
+  }
 
   loadEventTags(tagArray);
   loadDefaultImage(mainColor);
@@ -905,10 +909,17 @@ function loadEventTags(events) {
 
   for (let i = 0; i < events.length; i++) {
     const tag = document.createElement('span');
-    tag.className = 'tag ' + events[i];
-    tag.innerHTML = events[i];
+    let tagType = events[i];
+    tag.innerHTML = tagType;
+
+    if (tagType == 'LGBTQ+') {
+      tagType = 'rainbow';
+    }
+
+    tag.className = 'tag ' + tagType;
     tagsContainer.appendChild(tag);
   }
+  generateRainbowTags();
 }
 
 /**
@@ -917,9 +928,6 @@ function loadEventTags(events) {
  */
 function loadDefaultImage(color) {
   const eventImage = document.getElementsByClassName('event-display-image')[0];
-  if (color == 'LGBTQ+'){
-    color = 'LGBTQ';
-  }
   eventImage.className = 'event-display-image ' + color;
 }
 
