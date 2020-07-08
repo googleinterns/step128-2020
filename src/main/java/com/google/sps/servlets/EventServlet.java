@@ -69,9 +69,9 @@ public class EventServlet extends HttpServlet {
     String coverPhoto = getParameter(request, "cover-photo", "");
     String tags = getParameter(request, "all-tags", "");
 
+    String fullAddress = String.format("%1$s %2$s, %3$s", streetAddress, city, state);
     String formattedDate = formatDate(date);
     String formattedTime = formatTime(startTime);
-    String fullAddress = String.format("%1$s %2$s, %3$s", streetAddress, city, state);
 
     if (endTime != "") {
       endTime = formatTime(endTime);
@@ -193,6 +193,9 @@ public class EventServlet extends HttpServlet {
         break;
       case "12":
         monthString = "December";
+      default:
+        monthString = "Invalid";
+        break;
     }
     return monthString;
   }
