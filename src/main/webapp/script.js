@@ -424,7 +424,7 @@ async function getEvents(events, index, option) {
     event.tags.forEach(function(tag) {
       const tagElement = document.createElement('span');
       // class name is now (for example) 'tag environment'
-      if (tag == 'LGBTQ+') spanElement.className = 'tag rainbow';
+      if (tag == 'LGBTQ+') tagElement.className = 'tag rainbow';
       else tagElement.className = 'tag ' + tag;
       tagElement.innerText = tag;
       tagsContainerElement.appendChild(tagElement);
@@ -485,8 +485,11 @@ function openLink(key) {
   window.location.href = url;
 }
 
-var searchDistance = 5;
+let searchDistance = 5;
 
+/**
+ * Retrieves the search distance setting from the page.
+ */
 function changeSearchDistance() {
   searchDistance = document.getElementById('searchDistance').value;
   search();
@@ -496,8 +499,9 @@ function changeSearchDistance() {
  * Creates the search distance settings on the page
  */
 async function getSearchDistanceSettings() {
-  const locationSettingsElements = document.getElementsByClassName('location-settings');
-  var locationSettingsElement = locationSettingsElements[0];
+  const locationSettingsElements =
+   document.getElementsByClassName('location-settings');
+  const locationSettingsElement = locationSettingsElements[0];
 
   // TODO get from server where the user's location is to set by default.
   locationSettingsElement.innerHTML = '';
@@ -525,13 +529,14 @@ async function getSearchDistanceSettings() {
   selectElement.setAttribute('onchange', 'changeSearchDistance()');
   distanceElement.appendChild(selectElement);
 
-  var distanceList = [5, 10, 25, 50];
+  const distanceList = [5, 10, 25, 50];
   distanceList.forEach(function(distance) {
     const optionElement = document.createElement('option');
     optionElement.value = distance;
     optionElement.innerText = distance;
-    if (distance == searchDistance) optionElement.setAttribute('selected',
-        'true');
+    if (distance == searchDistance) {
+      optionElement.setAttribute('selected', 'true');
+    }
     selectElement.appendChild(optionElement);
   });
 
