@@ -14,7 +14,8 @@
 
 package com.google.sps;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.gson.Gson;
