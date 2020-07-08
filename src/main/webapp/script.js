@@ -44,7 +44,7 @@ function loadActions(doAfter) {
  *      Helps with chaining async functions and cleaning up code
  */
 async function checkLogin(doAfter) {
-  fetch('/auth').then(response => response.json()).then(function(responseJson) {
+  fetch('/auth').then((response) => response.json()).then(function(responseJson) {
     loggedIn = responseJson.loggedIn;
     url = responseJson.url;
     doAfter();
