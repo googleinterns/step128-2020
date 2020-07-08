@@ -41,7 +41,6 @@
       </div>
       <div class="event-right-details">
         <div class="event-time-location">
-          <!-- <input type="hidden" id="date-value" value='${date}'> -->
           <div class="date">
             <p>Date: ${date}</p>
           </div>
