@@ -1,4 +1,4 @@
-name: Java Style Check
+name: Codecov
 
 # Triggers the workflow on pull request events.
 on: pull_request
@@ -9,5 +9,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Run check style against Google Java style guide
-        uses: codecov/codecov-action@master
+      - name: Run tests
+        entrypoint: bash
+        args: ['bash <(mvn clean test)']
+      - name: Upload coverage report
+        uses: codecov/codecov-action@v1
+        with:
+          fail_ci_if_error: true
+          file:
