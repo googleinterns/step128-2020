@@ -27,7 +27,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 
-/** Utility class to handle login operations during testing */
+/** Utility class to handle login operations during testing. */
 @PrepareForTest(UserServiceFactory.class)
 public final class TestingUtil {
   private static final Gson gson = new Gson();
@@ -36,7 +36,7 @@ public final class TestingUtil {
 
   private static String activeUrl = null;
 
-  /** Initializes the MockedUserService and fetches the first login url */
+  /** Initializes the MockedUserService and fetches the first login url. */
   public static void setUp() throws IOException {
     PowerMockito.mockStatic(UserServiceFactory.class);
     mockService = new MockedUserService();
@@ -55,7 +55,7 @@ public final class TestingUtil {
     activeUrl = result.url;
   }
 
-  /** resets the state of the active url */
+  /** Resets the state of the active url. */
   public static void tearDown() {
     activeUrl = null;
   }

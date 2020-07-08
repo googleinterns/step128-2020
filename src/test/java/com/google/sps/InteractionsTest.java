@@ -58,8 +58,8 @@ public final class InteractionsTest {
     TestingUtil.toggleLogin(email);
   }
 
+  /** Sets up the datastore helper and authentication utility for each test. */
   @Before
-  /** Sets up the datastore helper and authentication utility for each test */
   public void setUp() throws IOException {
     helper.setUp();
     testSurveyServlet = new SurveyServlet();

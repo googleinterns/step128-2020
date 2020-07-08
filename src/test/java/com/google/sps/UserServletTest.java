@@ -120,6 +120,7 @@ public final class UserServletTest {
     testUserServlet.doPost(request, response);
   }
 
+  /** Sets up the datastore helper and authentication utility for each test. */
   @Before
   public void setUp() throws IOException {
     helper.setUp();
@@ -340,7 +341,7 @@ public final class UserServletTest {
     }
   }
 
-  /** Logs in and out a few times, posting events to datastore */
+  /** Logs in and out a few times, posting events to datastore. */
   public static void postEventsSetup() throws IOException {
     // posted by test@example.com
     TestingUtil.toggleLogin("test@example.com");
@@ -385,7 +386,7 @@ public final class UserServletTest {
     TestingUtil.toggleLogin("another@example.com");
   }
 
-  /** Creates the lake cleanup event from postEventsSetup() */
+  /** Creates the lake cleanup event from postEventsSetup(). */
   public static Entity createLakeCleanupEvent() {
     Entity entity = new Entity("Event");
     entity.setProperty("eventName", "Lake Clean Up");
@@ -403,7 +404,7 @@ public final class UserServletTest {
     return entity;
   }
 
-  /** Creates the blm protest event from postEventsSetup() */
+  /** Creates the blm protest event from postEventsSetup(). */
   public static Entity createBlmProtestEvent() {
     Entity entity = new Entity("Event");
     entity.setProperty("eventName", "BLM Protest");
@@ -421,7 +422,7 @@ public final class UserServletTest {
     return entity;
   }
 
-  /** Creates the book drive event from postEventsSetup() */
+  /** Creates the book drive event from postEventsSetup(). */
   public static Entity createBookDriveEvent() {
     Entity entity = new Entity("Event");
     entity.setProperty("eventName", "Book Drive");

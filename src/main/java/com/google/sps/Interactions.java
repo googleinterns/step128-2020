@@ -63,7 +63,7 @@ public class Interactions {
     return result;
   }
 
-  /** simplistic method that builds a vector from an entity (subject to change) */
+  /** simplistic method that builds a vector from an entity (subject to change). */
   public static Map<String, Integer> buildVectorForEvent(Entity eventEntity) {
     if (!eventEntity.getKind().equals("Event")) {
       throw new IllegalArgumentException("must be event items");
@@ -83,7 +83,7 @@ public class Interactions {
     return eventMetrics;
   }
 
-  /** utility method that computes the dot product between two vectors */
+  /** utility method that computes the dot product between two vectors. */
   public static int dotProduct(Map<String, Integer> v1, Map<String, Integer> v2) {
     int result = 0;
     for (String field : v1.keySet()) {
