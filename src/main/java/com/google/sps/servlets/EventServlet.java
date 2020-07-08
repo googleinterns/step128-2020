@@ -70,6 +70,7 @@ public class EventServlet extends HttpServlet {
     String tags = getParameter(request, "all-tags", "");
 
     String formattedDate = formatDate(date);
+    String formattedTime = formatTime(startTime);
     String fullAddress = String.format("%1$s %2$s, %3$s", streetAddress, city, state);
 
     Entity eventEntity = new Entity("Event");
@@ -77,7 +78,7 @@ public class EventServlet extends HttpServlet {
     eventEntity.setProperty("eventDescription", eventDescription);
     eventEntity.setProperty("address", fullAddress);
     eventEntity.setProperty("date", formattedDate);
-    eventEntity.setProperty("startTime", startTime);
+    eventEntity.setProperty("startTime", formattedTime);
     eventEntity.setProperty("endTime", endTime);
     eventEntity.setProperty("coverPhoto", coverPhoto);
     eventEntity.setProperty("tags", tags);
@@ -95,6 +96,41 @@ public class EventServlet extends HttpServlet {
       return defaultValue;
     }
     return value;
+  }
+
+  /** Format time to standard format. */
+  private String formatTime(String time) {
+    String hour = time.substring(0, 2);
+    String minutes = time.substring(3, 5);
+    Integer hourInt = Integer.parseInt(hour);
+
+    String standardHour = getHour(hourInt);
+    String period = getPeriod(hourInt);
+
+    String formattedTime = String.format("%1$s:%2$s %3$s", standardHour, minutes, period);
+
+    return formattedTime;
+  }
+
+  /** Get Hour in standard format. */
+  private String getHour(Integer hour) {
+    Integer standard = hour % 12;
+    String standardString = Integer.toString(standard);
+
+    return standardString;
+  }
+
+  /** Get Period (AM/PM). */
+  private String getPeriod(Integer hour) {
+    String period = "";
+
+    if (hour > 12) {
+      period = "PM";
+    } else {
+      period = "AM";
+    }
+
+    return period;
   }
 
   /** Format date to fit Month Day, Year format. */
