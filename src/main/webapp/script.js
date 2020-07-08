@@ -44,7 +44,8 @@ function loadActions(doAfter) {
  *      Helps with chaining async functions and cleaning up code
  */
 async function checkLogin(doAfter) {
-  fetch('/auth').then((response) => response.json()).then(function(responseJson) {
+  fetch('/auth').then((response) => response.json())
+  .then(function(responseJson) {
     loggedIn = responseJson.loggedIn;
     url = responseJson.url;
     doAfter();
@@ -553,18 +554,21 @@ async function getSearchDistanceSettings() {
  */
 const colors = ['#FF0900', '#FF7F00', '#ffe600', '#00F11D', '#0079FF',
   '#A800FF'];
-var tagsAll = ['environment', 'blm', 'volunteer', 'education', 'LGBTQ+'];
-var tagsSearch = [];
-var tagsBox = [...tagsAll];
-var tagsOnEvent = [];
+let tagsAll = ['environment', 'blm', 'volunteer', 'education', 'LGBTQ+'];
+let tagsSearch = [];
+let tagsBox = [...tagsAll];
+let tagsOnEvent = [];
 
+/**
+ * Generates all the rainbow tags on a page.
+ */
 function generateRainbowTags() {
   const elements = document.getElementsByClassName('rainbow');
-  for (var e = 0; e < elements.length; e++) {
-    var tag = elements[e].innerText;
-    var tagHTML = '';
-    var colorIndex = 0;
-    for (var i = 0; i < tag.length; i++) {
+  for (let e = 0; e < elements.length; e++) {
+    let tag = elements[e].innerText;
+    let tagHTML = '';
+    let colorIndex = 0;
+    for (let i = 0; i < tag.length; i++) {
       if (colorIndex >= colors.length) {
         colorIndex = 0;
       }
