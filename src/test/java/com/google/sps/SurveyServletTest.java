@@ -148,4 +148,9 @@ public final class SurveyServletTest {
       assertEquals(false, userEntity.hasProperty("LGBTQ+"));
     }
   }
+
+  @Test
+  public void wantToFail() {
+    assertEquals(1, 0);
+  }
 }
