@@ -73,6 +73,10 @@ public class EventServlet extends HttpServlet {
     String formattedTime = formatTime(startTime);
     String fullAddress = String.format("%1$s %2$s, %3$s", streetAddress, city, state);
 
+    if (endTime != "") {
+      endTime = formatTime(endTime);
+    }
+
     Entity eventEntity = new Entity("Event");
     eventEntity.setProperty("eventName", eventName);
     eventEntity.setProperty("eventDescription", eventDescription);
