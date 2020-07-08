@@ -33,10 +33,6 @@
   background-color: #6e9eeb;
 }
 
-.LGBTQ {
-  background-image: linear-gradient(to right, red, orange , yellow, green, royalblue, blueviolet);
-}
-
 /* content */
 
 body {
@@ -617,8 +613,12 @@ input[type=text], textarea {
 }
 
 .rainbow {
-  background-color: #fdfdfd;
+  background-color: whitesmoke;
   color: black;
+}
+
+.LGBTQ {
+  background-image: linear-gradient(to right, red, orange , gold, forestgreen, royalblue, blueviolet);
 }
 
 .blm-text {
@@ -635,6 +635,10 @@ input[type=text], textarea {
 
 .education-text {
   color: #6e9eeb;
+}
+
+.LGBTQ-text {
+  color: mediumpurple;
 }
 
 .blm.invert {
