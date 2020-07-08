@@ -70,13 +70,12 @@ public class EventServlet extends HttpServlet {
     String tags = getParameter(request, "all-tags", "");
 
     String formattedDate = formatDate(date);
-    String fullAddress = streetAddress + " " + city + " " + state;
+    String fullAddress = streetAddress + " " + city + ", " + state;
+
     Entity eventEntity = new Entity("Event");
     eventEntity.setProperty("eventName", eventName);
     eventEntity.setProperty("eventDescription", eventDescription);
-    eventEntity.setProperty("streetAddress", fullAddress);
-    // eventEntity.setProperty("city", city);
-    // eventEntity.setProperty("state", state);
+    eventEntity.setProperty("address", fullAddress);
     eventEntity.setProperty("date", formattedDate);
     eventEntity.setProperty("startTime", startTime);
     eventEntity.setProperty("endTime", endTime);
