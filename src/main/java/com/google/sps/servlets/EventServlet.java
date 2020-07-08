@@ -119,6 +119,10 @@ public class EventServlet extends HttpServlet {
   /** Get Hour in standard format. */
   private String getHour(Integer hour) {
     Integer standard = hour % 12;
+    if (standard == 0) {
+      standard = 12;
+    }
+
     String standardString = Integer.toString(standard);
 
     return standardString;
@@ -128,7 +132,7 @@ public class EventServlet extends HttpServlet {
   private String getPeriod(Integer hour) {
     String period = "";
 
-    if (hour > 12) {
+    if (hour > 11) {
       period = "PM";
     } else {
       period = "AM";
