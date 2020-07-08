@@ -45,11 +45,11 @@ function loadActions(doAfter) {
  */
 async function checkLogin(doAfter) {
   fetch('/auth').then((response) => response.json())
-  .then(function(responseJson) {
-    loggedIn = responseJson.loggedIn;
-    url = responseJson.url;
-    doAfter();
-  });
+      .then(function(responseJson) {
+        loggedIn = responseJson.loggedIn;
+        url = responseJson.url;
+        doAfter();
+      });
 }
 
 /**
@@ -554,10 +554,10 @@ async function getSearchDistanceSettings() {
  */
 const colors = ['#FF0900', '#FF7F00', '#ffe600', '#00F11D', '#0079FF',
   '#A800FF'];
-let tagsAll = ['environment', 'blm', 'volunteer', 'education', 'LGBTQ+'];
-let tagsSearch = [];
-let tagsBox = [...tagsAll];
-let tagsOnEvent = [];
+const tagsAll = ['environment', 'blm', 'volunteer', 'education', 'LGBTQ+'];
+const tagsSearch = [];
+const tagsBox = [...tagsAll];
+const tagsOnEvent = [];
 
 /**
  * Generates all the rainbow tags on a page.
@@ -565,7 +565,7 @@ let tagsOnEvent = [];
 function generateRainbowTags() {
   const elements = document.getElementsByClassName('rainbow');
   for (let e = 0; e < elements.length; e++) {
-    let tag = elements[e].innerText;
+    const tag = elements[e].innerText;
     let tagHTML = '';
     let colorIndex = 0;
     for (let i = 0; i < tag.length; i++) {
@@ -580,19 +580,20 @@ function generateRainbowTags() {
   }
 }
 
-/***********************************************************************
+/* **********************************************************************
  * Methods for create-event-form and edit-event form
- ***********************************************************************/
+ * **********************************************************************/
 
 /* This is an array to keep track of the current form's selected tags. */
-var tagsSelected = [];
+let tagsSelected = [];
 
 /**
  * Inverts the apperance of a selected tag and adds it to the list
  * of selected tags
+ * @param {String} tag the name of the tag to be toggled
  */
 function toggleTagEvent(tag) {
-  var boxIndex = tagsBox.indexOf(tag);
+  let boxIndex = tagsBox.indexOf(tag);
   if (boxIndex > -1) {
     tagsOnEvent[boxIndex] = !tagsOnEvent[boxIndex];
 
@@ -613,8 +614,8 @@ function toggleTagEvent(tag) {
 function verifyTags() {
   if (tagsSelected.length > 0) {
     // Convert tags selected array into string
-    var jsonArray = JSON.stringify(tagsSelected);
-    var tags = createHiddenInput(jsonArray);
+    const jsonArray = JSON.stringify(tagsSelected);
+    const tags = createHiddenInput(jsonArray);
 
     // Add string of tags to form for submission
     document.getElementById('eventform').appendChild(tags);
@@ -622,7 +623,7 @@ function verifyTags() {
     tagsSelected.splice(0, tagsSelected.length);
   } else {
     // Display error and prevent from sumbission
-    var tagBoxError = document.getElementById('tags-label');
+    const tagBoxError = document.getElementById('tags-label');
     tagBoxError.style.borderStyle = 'solid';
     tagBoxError.style.borderColor = 'red';
     event.preventDefault();
@@ -630,10 +631,13 @@ function verifyTags() {
 }
 
 /**
- * Creates a hidden input for the array of tags.
+ * Creates a hidden input for the array of tags. Used to keep track 
+ * of which tags have been selected.
+ * @param {String} jsonArray a JSON array of type string.
+ * @return {input} returns the hidden input element.
  */
 function createHiddenInput(jsonArray) {
-  var tagsArray = document.createElement('input');
+  const tagsArray = document.createElement('input');
   tagsArray.setAttribute('type', 'hidden');
   tagsArray.setAttribute('name', 'all-tags');
   tagsArray.setAttribute('id', 'all-tags');
@@ -649,8 +653,8 @@ function updateEventTagBox() {
   const elements = document.getElementsByClassName('tag-box');
   const tagBoxElement = elements[0];
   tagBoxElement.innerHTML = '';
-  for (var i = 0; i < tagsBox.length; i++) {
-    var tag = tagsBox[i];
+  for (let i = 0; i < tagsBox.length; i++) {
+    let tag = tagsBox[i];
     const spanElement = document.createElement('span');
     spanElement.setAttribute('onclick', 'toggleTagEvent(\"' + tag +
         '\")');
