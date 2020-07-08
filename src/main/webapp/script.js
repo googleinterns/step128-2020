@@ -864,8 +864,8 @@ function displayIndividualEvent() {
 function loadEventTags(events) {
   const tagsContainer = document.getElementsByClassName('tags-container')[0];
 
-  for (i = 0; i < events.length; i++) {
-    let tag = document.createElement('span');
+  for (let i = 0; i < events.length; i++) {
+    const tag = document.createElement('span');
     tag.className = 'tag ' + events[i];
     tag.innerHTML = events[i];
     tagsContainer.appendChild(tag);
