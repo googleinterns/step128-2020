@@ -1,0 +1,10 @@
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['build', '-t', 'gcr.io/unitebystep/step128-2020', '.']
+
+images:
+- 'gcr.io/unitebystep/step128-2020'
+
+options:
+  env:
+  - 'CODECOV_TOKEN=074ac000-bb84-4cd5-9dea-6cc6ebe78843'
