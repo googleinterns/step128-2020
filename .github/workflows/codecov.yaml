@@ -4,7 +4,7 @@ name: Codecov
 on: pull_request
 
 jobs:
-  JavaCheckStyle:
+  CodeCov:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
