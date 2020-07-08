@@ -70,7 +70,7 @@ public class EventServlet extends HttpServlet {
     String tags = getParameter(request, "all-tags", "");
 
     String formattedDate = formatDate(date);
-    String fullAddress = streetAddress + " " + city + ", " + state;
+    String fullAddress = String.format("%1$s %2$s, %3$s", streetAddress, city, state);
 
     Entity eventEntity = new Entity("Event");
     eventEntity.setProperty("eventName", eventName);
@@ -105,8 +105,9 @@ public class EventServlet extends HttpServlet {
 
     String fullMonth = getMonth(month);
 
-    date = fullMonth + " " + day + ", " + year;
-    return date;
+    String formattedDate = String.format("%1$s %2$s, %3$s", fullMonth, day, year);
+
+    return formattedDate;
   }
 
   /** Return the month corresponding to the number. */
