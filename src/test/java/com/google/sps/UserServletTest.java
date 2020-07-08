@@ -391,10 +391,8 @@ public final class UserServletTest {
     Entity entity = new Entity("Event");
     entity.setProperty("eventName", "Lake Clean Up");
     entity.setProperty("eventDescription", "We're cleaning up the lake");
-    entity.setProperty("streetAddress", "678 Lakeview Way");
-    entity.setProperty("city", "Lakeside");
-    entity.setProperty("state", "Michigan");
-    entity.setProperty("date", "2020-05-17");
+    entity.setProperty("address", "678 Lakeview Way Lakeside, Michigan");
+    entity.setProperty("date", "May 17, 2020");
     entity.setProperty("startTime", "14:00");
     entity.setProperty("endTime", "");
     entity.setProperty("coverPhoto", "");
@@ -409,10 +407,8 @@ public final class UserServletTest {
     Entity entity = new Entity("Event");
     entity.setProperty("eventName", "BLM Protest");
     entity.setProperty("eventDescription", "Fight for racial justice!");
-    entity.setProperty("streetAddress", "Main Street");
-    entity.setProperty("city", "Los Angeles");
-    entity.setProperty("state", "California");
-    entity.setProperty("date", "2020-05-17");
+    entity.setProperty("address", "Main Street Los Angeles, California");
+    entity.setProperty("date", "May 17, 2020");
     entity.setProperty("startTime", "13:00");
     entity.setProperty("endTime", "");
     entity.setProperty("coverPhoto", "");
@@ -427,10 +423,8 @@ public final class UserServletTest {
     Entity entity = new Entity("Event");
     entity.setProperty("eventName", "Book Drive");
     entity.setProperty("eventDescription", "Let's donate books for kids");
-    entity.setProperty("streetAddress", "School Drive");
-    entity.setProperty("city", "Los Angeles");
-    entity.setProperty("state", "California");
-    entity.setProperty("date", "2020-05-17");
+    entity.setProperty("address", "School Drive Los Angeles, California");
+    entity.setProperty("date", "May 17, 2020");
     entity.setProperty("startTime", "10:00");
     entity.setProperty("endTime", "");
     entity.setProperty("coverPhoto", "");

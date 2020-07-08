@@ -139,10 +139,8 @@ public final class EventServletTest {
     Entity goalEntity = new Entity("Event");
     goalEntity.setProperty("eventName", "Lake Clean Up");
     goalEntity.setProperty("eventDescription", "We're cleaning up the lake");
-    goalEntity.setProperty("streetAddress", "678 Lakeview Way");
-    goalEntity.setProperty("city", "Lakeside");
-    goalEntity.setProperty("state", "Michigan");
-    goalEntity.setProperty("date", "2020-05-17");
+    goalEntity.setProperty("address", "678 Lakeview Way Lakeside, Michigan");
+    goalEntity.setProperty("date", "May 17, 2020");
     goalEntity.setProperty("startTime", "14:00");
     goalEntity.setProperty("endTime", "15:00");
     goalEntity.setProperty("coverPhoto", "/img-2030121");
