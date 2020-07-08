@@ -917,6 +917,9 @@ function loadEventTags(events) {
  */
 function loadDefaultImage(color) {
   const eventImage = document.getElementsByClassName('event-display-image')[0];
+  if (color == 'LGBTQ+'){
+    color = 'LGBTQ';
+  }
   eventImage.className = 'event-display-image ' + color;
 }
 
