@@ -618,6 +618,7 @@ input[type=text], textarea {
 }
 
 .LGBTQ {
+  background-color: thistle;
   background-image: linear-gradient(to right, red, orange , gold, forestgreen, royalblue, blueviolet);
 }
 
