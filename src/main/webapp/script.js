@@ -585,7 +585,7 @@ function generateRainbowTags() {
  * **********************************************************************/
 
 /* This is an array to keep track of the current form's selected tags. */
-let tagsSelected = [];
+const tagsSelected = [];
 
 /**
  * Inverts the apperance of a selected tag and adds it to the list
@@ -593,7 +593,7 @@ let tagsSelected = [];
  * @param {String} tag the name of the tag to be toggled
  */
 function toggleTagEvent(tag) {
-  let boxIndex = tagsBox.indexOf(tag);
+  const boxIndex = tagsBox.indexOf(tag);
   if (boxIndex > -1) {
     tagsOnEvent[boxIndex] = !tagsOnEvent[boxIndex];
 
@@ -631,7 +631,7 @@ function verifyTags() {
 }
 
 /**
- * Creates a hidden input for the array of tags. Used to keep track 
+ * Creates a hidden input for the array of tags. Used to keep track
  * of which tags have been selected.
  * @param {String} jsonArray a JSON array of type string.
  * @return {input} returns the hidden input element.
@@ -654,7 +654,7 @@ function updateEventTagBox() {
   const tagBoxElement = elements[0];
   tagBoxElement.innerHTML = '';
   for (let i = 0; i < tagsBox.length; i++) {
-    let tag = tagsBox[i];
+    const tag = tagsBox[i];
     const spanElement = document.createElement('span');
     spanElement.setAttribute('onclick', 'toggleTagEvent(\"' + tag +
         '\")');
@@ -666,8 +666,9 @@ function updateEventTagBox() {
     if (tagsOnEvent[i]) {
       spanElement.className = spanElement.className + ' invert';
       spanElement.innerText = '✓' + tag;
+    } else {
+      spanElement.innerText = tag;
     }
-    else spanElement.innerText = tag;
 
     tagBoxElement.appendChild(spanElement);
   }
@@ -675,17 +676,18 @@ function updateEventTagBox() {
   generateRainbowTags();
 }
 
-/***********************************************************************
+/* **********************************************************************
  * Methods for index.html
- ***********************************************************************/
+ * **********************************************************************/
 
-/** onload actions for index.html
- * fetches events from server, calls getEvents with correct options and loads
- * search distance options
+/** 
+ * Onload actions for index.html
+ * Fetches events from server, calls getEvents with correct options and loads
+ * Search distance options
  */
 async function getRecommendedEvents() {
   if (loggedIn) {
-    fetch('/user?get=saved').then(response => response.json())
+    fetch('/user?get=saved').then((response) => response.json())
         .then(function(js) {
         // TODO: change this fetch call to get recommendations instead
           getEvents(dummyEvents, 1, 0);
@@ -697,20 +699,21 @@ async function getRecommendedEvents() {
 }
 
 
-/***********************************************************************
- * Methods for my-events.html
- ***********************************************************************/
+/* **********************************************************************
+ *  Methods for my-events.html
+ * **********************************************************************/
 
-/* on loading my-events.html, fetches events from server and calls getEvents
- * with correct options
+/**
+ * On loading my-events.html, fetches events from server and calls getEvents
+ * with correct options.
  */
 async function getMyEvents() {
   if (loggedIn) {
-    fetch('/user?get=saved').then(response => response.json())
+    fetch('/user?get=saved').then((response) => response.json())
         .then(function(js) {
           getEvents(js, 0, 1);
         });
-    fetch('/user?get=created').then(response => response.json())
+    fetch('/user?get=created').then((response) => response.json())
         .then(function(js) {
           getEvents(js, 1, 2);
         });
@@ -719,9 +722,9 @@ async function getMyEvents() {
   }
 }
 
-/***********************************************************************
+/* **********************************************************************
  * Methods for search.html
- ***********************************************************************/
+ * **********************************************************************/
 
 function searchLoadActions() {
   updateSearchBar();
@@ -731,7 +734,7 @@ function searchLoadActions() {
 }
 
 function addTagBoxToSearch(tag) {
-  var boxIndex = tagsBox.indexOf(tag);
+  const boxIndex = tagsBox.indexOf(tag);
   if (boxIndex > -1) {
     tagsBox.splice(boxIndex, 1);
   }
@@ -742,7 +745,7 @@ function addTagBoxToSearch(tag) {
 }
 
 function addTagSearchToBox(tag) {
-  var searchIndex = tagsSearch.indexOf(tag);
+  const searchIndex = tagsSearch.indexOf(tag);
   if (searchIndex > -1) {
     tagsSearch.splice(searchIndex, 1);
   }
@@ -794,7 +797,7 @@ function updateTagBox() {
  * Placeholder function for search functionality
  */
 function search() {
-  var url = '/search.html?tags=';
+  let url = '/search.html?tags=';
   tagsSearch.forEach(function(tag) {
     url += tag + ',';
   });
@@ -809,9 +812,9 @@ function search() {
   // TODO fetch call to server with search parameters
 }
 
-/***********************************************************************
+/* **********************************************************************
  * Methods for survey.html
- ***********************************************************************/
+ * **********************************************************************/
 
 /**
  * Toggles the display of the survey page to indicate which option is selected,
@@ -820,11 +823,11 @@ function search() {
  * @param {number} question The question number to apply the toggle.
  * @param {number} index Which bubble on the question to apply the toggle to.
  */
-var surveyResponses = [-1, -1, -1, -1, -1];
+let surveyResponses = [-1, -1, -1, -1, -1];
 function toggleSurveyDisplay(question, index) {
   const circle = document.getElementsByClassName('survey-select')[question*5 + index];
   if (surveyResponses[question] >= 0) {
-    var oldIndex = surveyResponses[question];
+    let oldIndex = surveyResponses[question];
     const oldCircle = document.getElementsByClassName('survey-select')[question*5 + oldIndex];
     oldCircle.style.backgroundColor = 'transparent';
   }
@@ -834,8 +837,8 @@ function toggleSurveyDisplay(question, index) {
 
 function submitSurvey() {
   if (loggedIn) {
-    var params = new URLSearchParams();
-    for (var i = 0; i < surveyResponses.length; i++) {
+    let params = new URLSearchParams();
+    for (let i = 0; i < surveyResponses.length; i++) {
       const score = surveyResponses[i];
       if (score < 0) {
         // TODO: streamline this probably
@@ -852,9 +855,9 @@ function submitSurvey() {
   }
 }
 
-/***********************************************************************
+/* **********************************************************************
  * Methods for display-event.jsp
- ***********************************************************************/
+ * **********************************************************************/
 
 /**
  * Generates tags and tag-based features.
