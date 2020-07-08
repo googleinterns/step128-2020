@@ -141,8 +141,8 @@ public final class EventServletTest {
     goalEntity.setProperty("eventDescription", "We're cleaning up the lake");
     goalEntity.setProperty("address", "678 Lakeview Way Lakeside, Michigan");
     goalEntity.setProperty("date", "May 17, 2020");
-    goalEntity.setProperty("startTime", "14:00");
-    goalEntity.setProperty("endTime", "15:00");
+    goalEntity.setProperty("startTime", "2:00 PM");
+    goalEntity.setProperty("endTime", "3:00 PM");
     goalEntity.setProperty("coverPhoto", "/img-2030121");
     goalEntity.setProperty("tags", "['environment']");
     goalEntity.setProperty("creator", creatorEmail);
