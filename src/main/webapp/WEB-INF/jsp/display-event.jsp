@@ -7,7 +7,7 @@
     <link rel="icon" href="images/step-favicon.svg" type="image/svg" sizes="16x16">
     <script src="script.js"></script>
   </head>
-  <body id="body" onload="loadActions();">
+  <body id="body" onload="loadActions(); displayIndividualEvent();">
     <div class="header"></div>
     <div class="event-display-container">
       <div class="event-left-details">
@@ -16,7 +16,7 @@
           <div class="event-display-header">
             <div class = "event-display-title">${name}</div>
             <div class="attendee-count-container">
-              <span class="attendee-count environment-text">12</span> 
+              <span class="attendee-count">12</span> 
               already attending
             </div>
           </div>
@@ -24,7 +24,7 @@
             ${description}
           </div>
           <div class="tags-container">Tags:
-            <span class="tag environment">environment</span>
+            <input type="hidden" id="tags-value" value='${tags}'>
           </div>
         </div>
         <div class="footer">
@@ -41,9 +41,11 @@
       </div>
       <div class="event-right-details">
         <div class="event-time-location">
-          <p>Date: ${date}</p>
+          <div class="date">
+            <p>Date: ${date}</p>
+          </div>
           <p>Time: ${start}</p>
-          <p>Location: ${street}, ${city}, ${state}</p>
+          <p>Location: ${address}</p>
         </div>
         <div class = "event-display-options">
           <a href="my-events.html" class="save-event">Save Event</a>

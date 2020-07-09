@@ -613,8 +613,13 @@ input[type=text], textarea {
 }
 
 .rainbow {
-  background-color: #fdfdfd;
+  background-color: whitesmoke;
   color: black;
+}
+
+.LGBTQ {
+  background-color: thistle;
+  background-image: linear-gradient(to right, red, orange , gold, forestgreen, royalblue, blueviolet);
 }
 
 .blm-text {
@@ -631,6 +636,10 @@ input[type=text], textarea {
 
 .education-text {
   color: #6e9eeb;
+}
+
+.LGBTQ-text {
+  color: indigo;
 }
 
 .blm.invert {

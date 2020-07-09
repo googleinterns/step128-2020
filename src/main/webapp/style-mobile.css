@@ -792,6 +792,11 @@ h1 {
   color: black;
 }
 
+.LGBTQ {
+  background-color: thistle;
+  background-image: linear-gradient(to right, red, orange , gold, forestgreen, royalblue, blueviolet);
+}
+
 .blm-text {
   color: black;
 }
@@ -806,6 +811,10 @@ h1 {
 
 .education-text {
   color: #6e9eeb;
+}
+
+.LGBTQ-text {
+  color: indigo;
 }
 
 .blm.invert {

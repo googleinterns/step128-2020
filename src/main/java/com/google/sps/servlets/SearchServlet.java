@@ -23,6 +23,7 @@ import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.Filter;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
+import com.google.maps.model.LatLng;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -49,6 +50,8 @@ public class SearchServlet extends HttpServlet {
   // This list is incomplete
   private static final List<String> IRRELEVANT_WORDS =
       new ArrayList<String>(Arrays.asList("the", "is", "for", "in", "of", "so", "to"));
+  // Conversion rate from mi to km
+  private static final double MI_TO_KM = 1.609;
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -80,25 +83,67 @@ public class SearchServlet extends HttpServlet {
     System.out.println(events);
     System.out.println(events.get(0).getProperty("tags");
 
-    // get location
-    // filter by location and cutoff outside it
+    // Get location of user
+    String location = request.getParameter("location");
+    LatLng userLocation = Utils.getLatLng(location);
 
-    // get tags
-    // drop all without first tag?
+    // Get distance between user and the location of all the events
+    for (Entity event : events) {
+      String[] locationProperties =
+          new String[] {
+            event.getProperty("streetAddress").toString(),
+            event.getProperty("city").toString(),
+            event.getProperty("state").toString()
+          };
+      LatLng eventLocation = Utils.getLatLng(String.join(" ", locationProperties));
+
+      int distance = Utils.getDistance(userLocation, eventLocation);
+      event.setProperty("distance", distance);
+    }
+
+    // Get location cutoff converted from mi to km
+    int cutoff =
+        Math.toIntExact(
+            Math.round(
+                Integer.parseInt(Utils.getParameter(request, "searchDistance", "")) * MI_TO_KM));
+    // Remove from the list any events outside the cutoff or that aren't drivable
+    events.removeIf(
+        e -> ((int) e.getProperty("distance")) > cutoff || ((int) e.getProperty("distance")) < 0);
+
     // Sort list by most tags in common with search
     Collections.sort(
         events,
         new Comparator<Entity>() {
           public int compare(Entity o1, Entity o2) {
-            int condition =
-                intersection((List<String>) o2.getProperty("tags"), searchTags)
-                    .compareTo(intersection((List<String>) o1.getProperty("tags"), searchTags));
-            // For development purposes, if two events have the same number of tags
-            // they are sorted by the event names (which in the test cases are integers)
-            return condition;
+            List<String> o1List = (List<String>) o1.getProperty("tags");
+            List<String> o2List = (List<String>) o2.getProperty("tags");
+            // Sort by which event has more tags in common with the search tags
+            int compareTagsInCommon =
+                Double.compare(
+                    intersection(o2List, searchTags) * o2List.size(),
+                    intersection(o1List, searchTags) * o1List.size());
+            if (compareTagsInCommon != 0) {
+              return compareTagsInCommon;
+            }
+            // Sort by which event has a higher ratio of: tags in common with
+            // the search tags to total number of tags
+            int compareRatioOfTagsInCommon =
+                Double.compare(intersection(o2List, searchTags), intersection(o1List, searchTags));
+            if (compareRatioOfTagsInCommon != 0) {
+              return compareRatioOfTagsInCommon;
+            }
+            // Sort by which event has more tags
+            int compareSize = Integer.compare(o2List.size(), o1List.size());
+            if (compareSize != 0) {
+              return compareSize;
+            } else {
+              // Sort by which event is closer to the user
+              return Integer.compare(
+                  Integer.parseInt(o1.getProperty("distance").toString()),
+                  Integer.parseInt(o2.getProperty("distance").toString()));
+            }
           }
         });
-    // those closest to the user go to the top
 
     // Convert events list to json
     String json = Utils.convertToJson(events);
@@ -111,16 +156,20 @@ public class SearchServlet extends HttpServlet {
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {}
 
   /**
-   * Returns a count of the number of tags two lists have in common.
+   * Returns a ratio of the number of tags a list has in common with another.
    *
    * @param tagListA List of tags to be compared
-   * @param tagListB List of tags to be compared
-   * @return Integer count of number of tags in common
+   * @param tagListB List of tags to be compared against
+   * @return Double ratio of number of tags in common to total number of tags
    */
-  public Integer intersection(List<String> tagListA, List<String> tagListB) {
+  public Double intersection(List<String> tagListA, List<String> tagListB) {
+    // Catches divide by zero
+    if (tagListA.size() == 0) {
+      return 0.0;
+    }
     List<String> tagListC = new ArrayList<String>(tagListA);
     tagListC.retainAll(tagListB);
-    return tagListC.size();
+    return ((double) tagListC.size()) / tagListA.size();
   }
 
   /**
