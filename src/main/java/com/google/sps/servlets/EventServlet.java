@@ -73,7 +73,7 @@ public class EventServlet extends HttpServlet {
     String coverPhoto = getParameter(request, "cover-photo", "");
     String tags = getParameter(request, "all-tags", "");
 
-    final String fullAddress = String.format("%1$s %2$s, %3$s", streetAddress, city, state);
+    final String fullAddress = String.format("%1$s, %2$s, %3$s", streetAddress, city, state);
     final String formattedDate = formatDate(date);
     final String formattedTime = formatTime(startTime);
 
