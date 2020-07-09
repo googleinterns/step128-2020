@@ -221,14 +221,8 @@ public final class SearchServletTest {
 
     GeocodingResult[] gr = createGeocodingResult(loc);
 
-    GeocodingApiRequest geoRequest = PowerMockito.mock(GeocodingApiRequest.class);
-    PowerMockito.when(geoRequest.address(locStr)).thenReturn(geoRequest);
-    PowerMockito.when(geoRequest.await()).thenReturn(gr);
+    mockGeocodingApiSetup(locStr, gr);
 
-    PowerMockito.mockStatic(GeocodingApi.class);
-    GeoApiContext context = PowerMockito.mock(GeoApiContext.class);
-
-    PowerMockito.when(GeocodingApi.newRequest(any(GeoApiContext.class))).thenReturn(geoRequest);
     LatLng location = SearchServlet.getLatLng(locStr);
     assertEquals(new LatLng(-31.95220010, 115.85884740), location);
   }
@@ -272,10 +266,11 @@ public final class SearchServletTest {
   }
 
   /**
-   * Returns a GeocodingResult[] with the desired location inside.
+   * Sets up the mocking for a DistanceMatrixApi request.
    *
-   * @param desiredLocation LatLng location to be returned in the GeocodingResult[]
-   * @return GeocodingResult[] with the desired location inside
+   * @param origin LatLng location to be finding the distance from
+   * @param dest LatLng location to be finding the distance to
+   * @param output DistanceMatrix containing the distance the mock should return
    */
   private static void mockDistanceMatrixApiSetup(LatLng origin, LatLng dest, DistanceMatrix output)
       throws Exception {
@@ -289,5 +284,23 @@ public final class SearchServletTest {
 
     PowerMockito.when(DistanceMatrixApi.newRequest(any(GeoApiContext.class)))
         .thenReturn(dmaRequest);
+  }
+
+  /**
+   * Sets up the mocking for a GeocodingApi request.
+   *
+   * @param locStr String of the address of the location to be Geocoded
+   * @param output GeocodingResult[] containing the LatLng the mock should return
+   */
+  private static void mockGeocodingApiSetup(String locStr, GeocodingResult[] output)
+      throws Exception {
+    GeocodingApiRequest geoRequest = PowerMockito.mock(GeocodingApiRequest.class);
+    PowerMockito.when(geoRequest.address(locStr)).thenReturn(geoRequest);
+    PowerMockito.when(geoRequest.await()).thenReturn(output);
+
+    PowerMockito.mockStatic(GeocodingApi.class);
+    GeoApiContext context = PowerMockito.mock(GeoApiContext.class);
+
+    PowerMockito.when(GeocodingApi.newRequest(any(GeoApiContext.class))).thenReturn(geoRequest);
   }
 }
