@@ -211,7 +211,7 @@ a:link, a:visited {
 input[type=text], textarea {
   border: 1px solid #ccc;
   border-radius: 4px;
-  font-size: 2em;
+  font-size: 2.5em;
   padding: 10px;
   resize: vertical;
   width: 100%;
@@ -221,6 +221,7 @@ textarea,
 input[type=date],
 input[type=time] {
   font: 400 13.3333px Arial;
+  font-size: 2.5em;
 }
 
 input[type=file] {
