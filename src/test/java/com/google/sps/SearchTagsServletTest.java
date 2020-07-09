@@ -141,7 +141,7 @@ public final class SearchTagsServletTest {
   }
 
   @Test
-  public void anyQueryAndOutput() throws IOException {
+  public void anyQueryAndOutput() throws Exception {
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
 
@@ -156,22 +156,7 @@ public final class SearchTagsServletTest {
     when(request.getParameter("location")).thenReturn("Los Angeles, CA");
     when(request.getParameter("searchDistance")).thenReturn("5000");
 
-    PowerMockito.mockStatic(Utils.class);
-    PowerMockito.when(Utils.getLatLng("Los Angeles, CA"))
-        .thenReturn(new LatLng(34.0522342, -118.2436849));
-    for (int i = 0; i < possibleLocations.size(); i++) {
-      PowerMockito.when(Utils.getLatLng(possibleLocations.get(i)))
-          .thenReturn(possibleLatLngs.get(i));
-    }
-
-    for (int i = 0; i < possibleLocations.size(); i++) {
-      PowerMockito.when(
-              Utils.getDistance(new LatLng(34.0522342, -118.2436849), possibleLatLngs.get(i)))
-          .thenReturn(possibleDistances.get(i));
-    }
-    
-    PowerMockito.when(Utils.getParameter(request, "searchDistance", "")).thenCallRealMethod();
-    PowerMockito.when(Utils.convertToJson(any())).thenCallRealMethod();
+    mockUtils();
 
     testSearchServlet.doGet(request, response);
 
@@ -189,7 +174,7 @@ public final class SearchTagsServletTest {
   }
 
   @Test
-  public void checkSortedByCommonTags() throws IOException {
+  public void checkSortedByCommonTags() throws Exception {
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
 
@@ -203,6 +188,9 @@ public final class SearchTagsServletTest {
     when(request.getParameterValues("tags")).thenReturn(paramArr);
     when(request.getParameter("location")).thenReturn("Los Angeles, CA");
     when(request.getParameter("searchDistance")).thenReturn("5000");
+
+    mockUtils();
+
     testSearchServlet.doGet(request, response);
 
     // Get the JSON response from the server
@@ -224,7 +212,7 @@ public final class SearchTagsServletTest {
   }
 
   @Test
-  public void checkDistanceCutoff() throws IOException {
+  public void checkDistanceCutoff() throws Exception {
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
 
@@ -238,6 +226,9 @@ public final class SearchTagsServletTest {
     when(request.getParameterValues("tags")).thenReturn(paramArr);
     when(request.getParameter("location")).thenReturn("Los Angeles, CA");
     when(request.getParameter("searchDistance")).thenReturn("50");
+
+    mockUtils();
+
     testSearchServlet.doGet(request, response);
 
     // Get the JSON response from the server
@@ -258,7 +249,7 @@ public final class SearchTagsServletTest {
   }
 
   @Test
-  public void checkSingleTagSorted() throws IOException {
+  public void checkSingleTagSorted() throws Exception {
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
 
@@ -272,6 +263,9 @@ public final class SearchTagsServletTest {
     when(request.getParameterValues("tags")).thenReturn(paramArr);
     when(request.getParameter("location")).thenReturn("Los Angeles, CA");
     when(request.getParameter("searchDistance")).thenReturn("5000");
+
+    mockUtils();
+
     testSearchServlet.doGet(request, response);
 
     // Get the JSON response from the server
@@ -349,5 +343,28 @@ public final class SearchTagsServletTest {
     List<Entity> events =
         new ArrayList<Entity>(results.asList(FetchOptions.Builder.withDefaults()));
     return events;
+  }
+
+  /** Sets up and executes mocking for the Utils class. */
+  private void mockUtils() throws Exception {
+    // Mock the functionality of the methods in Utils that require the Google Maps API
+    PowerMockito.mockStatic(Utils.class);
+    PowerMockito.when(Utils.getLatLng("Los Angeles, CA"))
+        .thenReturn(new LatLng(34.0522342, -118.2436849));
+    // Mock getLatLng
+    for (int i = 0; i < possibleLocations.size(); i++) {
+      PowerMockito.when(Utils.getLatLng(possibleLocations.get(i)))
+          .thenReturn(possibleLatLngs.get(i));
+    }
+    // Mock getDistance
+    for (int i = 0; i < possibleLocations.size(); i++) {
+      PowerMockito.when(
+              Utils.getDistance(new LatLng(34.0522342, -118.2436849), possibleLatLngs.get(i)))
+          .thenReturn(possibleDistances.get(i));
+    }
+    // Call the actual getParameter and convertToJson methods
+    PowerMockito.when(Utils.getParameter(anyObject(), anyString(), anyString()))
+        .thenCallRealMethod();
+    PowerMockito.when(Utils.convertToJson(any())).thenCallRealMethod();
   }
 }
