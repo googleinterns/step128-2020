@@ -897,6 +897,7 @@ function displayIndividualEvent() {
   loadEventTags(tagArray);
   loadDefaultImage(mainColor);
   loadAttendingColor(mainColor);
+  loadOptionalFields();
 }
 
 /**
@@ -937,4 +938,19 @@ function loadDefaultImage(color) {
 function loadAttendingColor(color) {
   const countContainer = document.getElementsByClassName('attendee-count')[0];
   countContainer.className = 'attendee-count ' + color + '-text';
+}
+
+/**
+ * Loads optional field end time.
+ */
+function loadOptionalFields() {
+  const endTime = document.getElementById('end-value').value;
+
+  if (endTime != '') {
+    const timeContainer = document.getElementsByClassName('time')[0];
+    const end = document.createElement('p');
+    end.innerHTML = 'End time: ' + endTime;
+
+    timeContainer.appendChild(end);
+  }
 }
