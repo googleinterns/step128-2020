@@ -292,7 +292,9 @@ public class SearchServlet extends HttpServlet {
       System.out.println(e.getMessage());
     }
 
-    if (result.rows[0].elements[0].status.toString().equals("ZERO_RESULTS")) return -1;
+    if (result.rows[0].elements[0].status.toString().equals("ZERO_RESULTS")) {
+      return -1;
+    } 
     int distance = (int) (result.rows[0].elements[0].distance.inMeters / 1000);
     return distance;
   }

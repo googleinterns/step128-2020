@@ -46,15 +46,13 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-/** */
 @PowerMockIgnore("okhttp3.*")
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
-  DistanceMatrixApi.class,
-  DistanceMatrixApiRequest.class,
-  GeocodingApi.class,
-  GeocodingApiRequest.class
-})
+    DistanceMatrixApi.class,
+    DistanceMatrixApiRequest.class,
+    GeocodingApi.class,
+    GeocodingApiRequest.class})
 public final class SearchServletTest {
   private final LocalServiceTestHelper helper =
       new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
