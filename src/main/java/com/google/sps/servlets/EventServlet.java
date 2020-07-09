@@ -46,7 +46,6 @@ public class EventServlet extends HttpServlet {
     if (userService.isUserLoggedIn()) {
       String email = userService.getCurrentUser().getEmail();
       Entity eventEntity = populateEvent(request);
-
       eventEntity.setProperty("creator", email);
 
       DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
