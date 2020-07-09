@@ -33,6 +33,7 @@ import com.google.maps.model.GeocodingResult;
 import com.google.maps.model.Geometry;
 import com.google.maps.model.LatLng;
 import com.google.sps.servlets.SearchServlet;
+import com.google.sps.servlets.Utils;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -183,7 +184,7 @@ public final class SearchServletTest {
 
     mockDistanceMatrixApiSetup(loc, loc2, dm);
 
-    int distance = SearchServlet.getDistance(loc, loc2);
+    int distance = Utils.getDistance(loc, loc2);
     assertEquals(2059, distance);
   }
 
@@ -196,7 +197,7 @@ public final class SearchServletTest {
 
     mockDistanceMatrixApiSetup(loc, loc2, dm);
 
-    int distance = SearchServlet.getDistance(loc, loc2);
+    int distance = Utils.getDistance(loc, loc2);
     assertEquals(0, distance);
   }
 
@@ -209,7 +210,7 @@ public final class SearchServletTest {
 
     mockDistanceMatrixApiSetup(loc, loc2, dm);
 
-    int distance = SearchServlet.getDistance(loc, loc2);
+    int distance = Utils.getDistance(loc, loc2);
     assertEquals(-1, distance);
   }
 
@@ -222,7 +223,7 @@ public final class SearchServletTest {
 
     mockGeocodingApiSetup(locStr, gr);
 
-    LatLng location = SearchServlet.getLatLng(locStr);
+    LatLng location = Utils.getLatLng(locStr);
     assertEquals(new LatLng(-31.95220010, 115.85884740), location);
   }
 

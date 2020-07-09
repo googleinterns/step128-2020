@@ -28,6 +28,7 @@ import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
+import com.google.maps.model.LatLng;
 import com.google.sps.servlets.SearchServlet;
 import com.google.sps.servlets.Utils;
 import java.io.IOException;
@@ -42,14 +43,22 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
-@RunWith(JUnit4.class)
+@PowerMockIgnore("okhttp3.*")
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({Utils.class})
 public final class SearchTagsServletTest {
   private final LocalServiceTestHelper helper =
       new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
   private SearchServlet testSearchServlet;
   private List<Entity> testEntities;
+  private List<String> possibleLocations;
+  private List<LatLng> possibleLatLngs;
+  private List<Integer> possibleDistances;
 
   /** Sets up the tests with sample events put into the test datastore. */
   @Before
@@ -59,25 +68,33 @@ public final class SearchTagsServletTest {
     List<String> possibleTags =
         new ArrayList<String>(
             Arrays.asList("environment", "blm", "education", "volunteer", "LGBTQ+"));
-    List<String> possibleLocations =
+    possibleLocations =
         new ArrayList<String>(
             Arrays.asList(
-                "1313 Disneyland Dr, Anaheim, CA",
-                "111 W Harbor Dr, San Diego, CA",
-                "Yosemite National Park, , CA",
-                " ,Seattle, WA",
-                "Broadway, New York, NY"));
-    List<Integer> possibleDistances =
-        new ArrayList<Integer>(Arrays.asList(42, 198, 593, 1826, 4497));
+                "1313DisneylandDr Anaheim CA",
+                "111WHarborDr SanDiego CA",
+                "YosemiteNationalPark  CA",
+                " Seattle WA",
+                "Broadway NewYork NY"));
+    possibleLatLngs =
+        new ArrayList<LatLng>(
+            Arrays.asList(
+                new LatLng(33.8153959, -117.9263991),
+                new LatLng(32.7068214, -117.1628713),
+                new LatLng(37.8027472, -119.8739089),
+                new LatLng(47.6062095, -122.3320708),
+                new LatLng(40.81241989999999, -73.96053429999999)));
+    possibleDistances = new ArrayList<Integer>(Arrays.asList(42, 198, 593, 1826, 4497));
     testEntities = new ArrayList<Entity>();
     // Single tag events
     for (int i = 0; i < 5; i++) {
       Entity e = new Entity("Event");
       e.setProperty("eventName", i);
       e.setIndexedProperty("tags", new ArrayList<String>(Arrays.asList(possibleTags.get(i))));
-      e.setProperty("streetAddress", possibleLocations.get(i).split(",")[0]);
-      e.setProperty("city", possibleLocations.get(i).split(",")[1]);
-      e.setProperty("state", possibleLocations.get(i).split(",")[2]);
+      String[] loc = possibleLocations.get(i).split(" ");
+      e.setProperty("streetAddress", loc[0]);
+      e.setProperty("city", loc[1]);
+      e.setProperty("state", loc[2]);
       e.setProperty("distance", possibleDistances.get(i));
       testEntities.add(e);
     }
@@ -88,9 +105,10 @@ public final class SearchTagsServletTest {
       e.setIndexedProperty(
           "tags",
           new ArrayList<String>(Arrays.asList(possibleTags.get(i - 5), possibleTags.get(i - 4))));
-      e.setProperty("streetAddress", possibleLocations.get(i - 5).split(",")[0]);
-      e.setProperty("city", possibleLocations.get(i - 5).split(",")[1]);
-      e.setProperty("state", possibleLocations.get(i - 5).split(",")[2]);
+      String[] loc = possibleLocations.get(i - 5).split(" ");
+      e.setProperty("streetAddress", loc[0]);
+      e.setProperty("city", loc[1]);
+      e.setProperty("state", loc[2]);
       e.setProperty("distance", possibleDistances.get(i - 5));
       testEntities.add(e);
     }
@@ -103,9 +121,10 @@ public final class SearchTagsServletTest {
           new ArrayList<String>(
               Arrays.asList(
                   possibleTags.get(i - 9), possibleTags.get(i - 8), possibleTags.get(i - 7))));
-      e.setProperty("streetAddress", possibleLocations.get(i - 9).split(",")[0]);
-      e.setProperty("city", possibleLocations.get(i - 9).split(",")[1]);
-      e.setProperty("state", possibleLocations.get(i - 9).split(",")[2]);
+      String[] loc = possibleLocations.get(i - 9).split(" ");
+      e.setProperty("streetAddress", loc[0]);
+      e.setProperty("city", loc[1]);
+      e.setProperty("state", loc[2]);
       e.setProperty("distance", possibleDistances.get(i - 9));
       testEntities.add(e);
     }
@@ -136,6 +155,24 @@ public final class SearchTagsServletTest {
     when(request.getParameterValues("tags")).thenReturn(paramArr);
     when(request.getParameter("location")).thenReturn("Los Angeles, CA");
     when(request.getParameter("searchDistance")).thenReturn("5000");
+
+    PowerMockito.mockStatic(Utils.class);
+    PowerMockito.when(Utils.getLatLng("Los Angeles, CA"))
+        .thenReturn(new LatLng(34.0522342, -118.2436849));
+    for (int i = 0; i < possibleLocations.size(); i++) {
+      PowerMockito.when(Utils.getLatLng(possibleLocations.get(i)))
+          .thenReturn(possibleLatLngs.get(i));
+    }
+
+    for (int i = 0; i < possibleLocations.size(); i++) {
+      PowerMockito.when(
+              Utils.getDistance(new LatLng(34.0522342, -118.2436849), possibleLatLngs.get(i)))
+          .thenReturn(possibleDistances.get(i));
+    }
+    
+    PowerMockito.when(Utils.getParameter(request, "searchDistance", "")).thenCallRealMethod();
+    PowerMockito.when(Utils.convertToJson(any())).thenCallRealMethod();
+
     testSearchServlet.doGet(request, response);
 
     // Get the JSON response from the server
