@@ -572,8 +572,8 @@ function generateRainbowTags() {
       if (colorIndex >= colors.length) {
         colorIndex = 0;
       }
-      tagHTML = tagHTML + '<span style=\"color: ' + colors[colorIndex] +
-          '\">' + tag.charAt(i) + '</span>';
+      tagHTML = tagHTML + '<span style="color: ' + colors[colorIndex] +
+          '">' + tag.charAt(i) + '</span>';
       colorIndex++;
     }
     elements[e].innerHTML = tagHTML;
@@ -656,8 +656,8 @@ function updateEventTagBox() {
   for (let i = 0; i < tagsBox.length; i++) {
     const tag = tagsBox[i];
     const spanElement = document.createElement('span');
-    spanElement.setAttribute('onclick', 'toggleTagEvent(\"' + tag +
-        '\")');
+    spanElement.setAttribute('onclick', 'toggleTagEvent("' + tag +
+        '")');
     // class name is now (for example) 'tag environment'
     if (tag == 'LGBTQ+') spanElement.className = 'tag rainbow';
     else spanElement.className = 'tag ' + tag;
@@ -761,8 +761,8 @@ function updateSearchBar() {
   searchBarElement.innerHTML = '';
   tagsSearch.forEach(function(tag) {
     const spanElement = document.createElement('span');
-    spanElement.setAttribute('onclick', 'addTagSearchToBox(\"' + tag +
-        '\")');
+    spanElement.setAttribute('onclick', 'addTagSearchToBox("' + tag +
+        '")');
     // class name is now (for example) 'tag environment'
     if (tag == 'LGBTQ+') spanElement.className = 'tag rainbow';
     else spanElement.className = 'tag ' + tag;
