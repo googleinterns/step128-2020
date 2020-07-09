@@ -24,8 +24,10 @@ import com.google.appengine.api.datastore.Query.Filter;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.maps.DistanceMatrixApi;
+import com.google.maps.DistanceMatrixApiRequest;
 import com.google.maps.GeoApiContext;
 import com.google.maps.GeocodingApi;
+import com.google.maps.GeocodingApiRequest;
 import com.google.maps.model.DistanceMatrix;
 import com.google.maps.model.GeocodingResult;
 import com.google.maps.model.LatLng;
@@ -151,7 +153,7 @@ public class SearchServlet extends HttpServlet {
    *
    * @param tagListA List of tags to be compared
    * @param tagListB List of tags to be compared against
-   * @return Long ratio of number of tags in common to total number of tags
+   * @return Double ratio of number of tags in common to total number of tags
    */
   public Double intersection(List<String> tagListA, List<String> tagListB) {
     // Catches divide by zero
@@ -261,7 +263,9 @@ public class SearchServlet extends HttpServlet {
   public static LatLng getLatLng(String location) {
     GeocodingResult[] results = null;
     try {
-      results = GeocodingApi.newRequest(context).address(location).await();
+      GeocodingApiRequest request = GeocodingApi.newRequest(context);
+      request.address(location);
+      results = request.await();
     } catch (Exception e) {
       System.out.println(e.getMessage());
     }
@@ -280,7 +284,10 @@ public class SearchServlet extends HttpServlet {
   public static int getDistance(LatLng from, LatLng to) {
     DistanceMatrix result = null;
     try {
-      result = DistanceMatrixApi.newRequest(context).origins(from).destinations(to).await();
+      DistanceMatrixApiRequest request = DistanceMatrixApi.newRequest(context);
+      request.origins(from);
+      request.destinations(to);
+      result = request.await();
     } catch (Exception e) {
       System.out.println(e.getMessage());
     }

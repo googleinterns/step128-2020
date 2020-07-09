@@ -19,6 +19,18 @@ import static org.mockito.Mockito.*;
 
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
+import com.google.maps.DistanceMatrixApi;
+import com.google.maps.DistanceMatrixApiRequest;
+import com.google.maps.GeoApiContext;
+import com.google.maps.GeocodingApi;
+import com.google.maps.GeocodingApiRequest;
+import com.google.maps.model.Distance;
+import com.google.maps.model.DistanceMatrix;
+import com.google.maps.model.DistanceMatrixElement;
+import com.google.maps.model.DistanceMatrixElementStatus;
+import com.google.maps.model.DistanceMatrixRow;
+import com.google.maps.model.GeocodingResult;
+import com.google.maps.model.Geometry;
 import com.google.maps.model.LatLng;
 import com.google.sps.servlets.SearchServlet;
 import java.io.IOException;
@@ -29,10 +41,20 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 /** */
-@RunWith(JUnit4.class)
+@PowerMockIgnore("okhttp3.*")
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({
+  DistanceMatrixApi.class,
+  DistanceMatrixApiRequest.class,
+  GeocodingApi.class,
+  GeocodingApiRequest.class
+})
 public final class SearchServletTest {
   private final LocalServiceTestHelper helper =
       new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
@@ -154,32 +176,103 @@ public final class SearchServletTest {
   }
 
   @Test
-  public void getDistanceWorks() throws IOException {
-    int distance =
-        SearchServlet.getDistance(
-            new LatLng(-31.9522, 115.8589), new LatLng(-25.344677, 131.036692));
+  public void getDistanceWorks() throws Exception {
+    LatLng loc = new LatLng(-31.9522, 115.8589);
+    LatLng loc2 = new LatLng(-25.344677, 131.036692);
+
+    DistanceMatrixRow[] rows = new DistanceMatrixRow[1];
+    rows[0] = new DistanceMatrixRow();
+    rows[0].elements = new DistanceMatrixElement[1];
+    rows[0].elements[0] = new DistanceMatrixElement();
+    rows[0].elements[0].distance = new Distance();
+    rows[0].elements[0].distance.inMeters = 2059000;
+    rows[0].elements[0].status = DistanceMatrixElementStatus.OK;
+    DistanceMatrix dm = new DistanceMatrix(new String[] {"A"}, new String[] {"B"}, rows);
+
+    DistanceMatrixApiRequest dmaRequest = PowerMockito.mock(DistanceMatrixApiRequest.class);
+    PowerMockito.when(dmaRequest.origins(loc)).thenReturn(dmaRequest);
+    PowerMockito.when(dmaRequest.destinations(loc2)).thenReturn(dmaRequest);
+    PowerMockito.when(dmaRequest.await()).thenReturn(dm);
+
+    PowerMockito.mockStatic(DistanceMatrixApi.class);
+    GeoApiContext context = PowerMockito.mock(GeoApiContext.class);
+
+    PowerMockito.when(DistanceMatrixApi.newRequest(any(GeoApiContext.class)))
+        .thenReturn(dmaRequest);
+    int distance = SearchServlet.getDistance(loc, loc2);
     assertEquals(2059, distance);
   }
 
   @Test
-  public void noDistance() throws IOException {
-    int distance =
-        SearchServlet.getDistance(new LatLng(-31.9522, 115.8589), new LatLng(-31.9522, 115.8589));
+  public void noDistance() throws Exception {
+    LatLng loc = new LatLng(-31.9522, 115.8589);
+    LatLng loc2 = loc;
+
+    DistanceMatrixRow[] rows = new DistanceMatrixRow[] {new DistanceMatrixRow()};
+    rows[0].elements = new DistanceMatrixElement[] {new DistanceMatrixElement()};
+    rows[0].elements[0].distance = new Distance();
+    rows[0].elements[0].distance.inMeters = 1;
+    rows[0].elements[0].status = DistanceMatrixElementStatus.OK;
+    DistanceMatrix dm = new DistanceMatrix(new String[] {"A"}, new String[] {"B"}, rows);
+
+    DistanceMatrixApiRequest dmaRequest = PowerMockito.mock(DistanceMatrixApiRequest.class);
+    PowerMockito.when(dmaRequest.origins(loc)).thenReturn(dmaRequest);
+    PowerMockito.when(dmaRequest.destinations(loc2)).thenReturn(dmaRequest);
+    PowerMockito.when(dmaRequest.await()).thenReturn(dm);
+
+    PowerMockito.mockStatic(DistanceMatrixApi.class);
+    GeoApiContext context = PowerMockito.mock(GeoApiContext.class);
+
+    PowerMockito.when(DistanceMatrixApi.newRequest(any(GeoApiContext.class)))
+        .thenReturn(dmaRequest);
+    int distance = SearchServlet.getDistance(loc, loc2);
     assertEquals(0, distance);
   }
 
   @Test
-  public void nonDrivableDistance() throws IOException {
-    int distance =
-        SearchServlet.getDistance(
-            SearchServlet.getLatLng("2 Chome-2-1 Dogenzaka, Shibuya City, Tokyo 150-0043, Japan"),
-            SearchServlet.getLatLng("Seattle WA"));
+  public void nonDrivableDistance() throws Exception {
+    LatLng loc = new LatLng(35.6585, 139.7013);
+    LatLng loc2 = new LatLng(47.6062, 122.3321);
+
+    DistanceMatrixRow[] rows = new DistanceMatrixRow[1];
+    rows[0] = new DistanceMatrixRow();
+    rows[0].elements = new DistanceMatrixElement[1];
+    rows[0].elements[0] = new DistanceMatrixElement();
+    rows[0].elements[0].status = DistanceMatrixElementStatus.ZERO_RESULTS;
+    DistanceMatrix dm = new DistanceMatrix(new String[] {"A"}, new String[] {"B"}, rows);
+
+    DistanceMatrixApiRequest dmaRequest = PowerMockito.mock(DistanceMatrixApiRequest.class);
+    PowerMockito.when(dmaRequest.origins(loc)).thenReturn(dmaRequest);
+    PowerMockito.when(dmaRequest.destinations(loc2)).thenReturn(dmaRequest);
+    PowerMockito.when(dmaRequest.await()).thenReturn(dm);
+
+    PowerMockito.mockStatic(DistanceMatrixApi.class);
+    GeoApiContext context = PowerMockito.mock(GeoApiContext.class);
+
+    PowerMockito.when(DistanceMatrixApi.newRequest(any(GeoApiContext.class)))
+        .thenReturn(dmaRequest);
+    int distance = SearchServlet.getDistance(loc, loc2);
     assertEquals(-1, distance);
   }
 
   @Test
-  public void getLatLngWorks() throws IOException {
-    LatLng location = SearchServlet.getLatLng("3 Forrest Pl, Perth WA 6000, Australia");
+  public void getLatLngWorks() throws Exception {
+    LatLng loc = new LatLng(-31.95220010, 115.85884740);
+    String locStr = "3 Forrest Pl, Perth WA 6000, Australia";
+
+    GeocodingResult[] gr = new GeocodingResult[] {new GeocodingResult()};
+    gr[0].geometry = new Geometry();
+    gr[0].geometry.location = loc;
+
+    GeocodingApiRequest geoRequest = PowerMockito.mock(GeocodingApiRequest.class);
+    PowerMockito.when(geoRequest.address(locStr)).thenReturn(geoRequest);
+    PowerMockito.when(geoRequest.await()).thenReturn(gr);
+
+    PowerMockito.mockStatic(GeocodingApi.class);
+    GeoApiContext context = PowerMockito.mock(GeoApiContext.class);
+
+    PowerMockito.when(GeocodingApi.newRequest(any(GeoApiContext.class))).thenReturn(geoRequest);
+    LatLng location = SearchServlet.getLatLng(locStr);
     assertEquals(new LatLng(-31.95220010, 115.85884740), location);
   }
 }
