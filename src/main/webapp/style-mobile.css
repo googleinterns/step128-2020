@@ -217,6 +217,12 @@ input[type=text], textarea {
   width: 100%;
 }
 
+textarea,
+input[type=date],
+input[type=time] {
+  font: 400 13.3333px Arial;
+}
+
 input[type=file] {
   font-size: 2em;
 }
