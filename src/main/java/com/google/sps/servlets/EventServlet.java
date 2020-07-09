@@ -20,6 +20,10 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.logging.Logger;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -69,14 +73,20 @@ public class EventServlet extends HttpServlet {
     String coverPhoto = getParameter(request, "cover-photo", "");
     String tags = getParameter(request, "all-tags", "");
 
+    final String fullAddress = String.format("%1$s, %2$s, %3$s", streetAddress, city, state);
+    final String formattedDate = formatDate(date);
+    final String formattedTime = formatTime(startTime);
+
+    if (endTime != "") {
+      endTime = formatTime(endTime);
+    }
+
     Entity eventEntity = new Entity("Event");
     eventEntity.setProperty("eventName", eventName);
     eventEntity.setProperty("eventDescription", eventDescription);
-    eventEntity.setProperty("streetAddress", streetAddress);
-    eventEntity.setProperty("city", city);
-    eventEntity.setProperty("state", state);
-    eventEntity.setProperty("date", date);
-    eventEntity.setProperty("startTime", startTime);
+    eventEntity.setProperty("address", fullAddress);
+    eventEntity.setProperty("date", formattedDate);
+    eventEntity.setProperty("startTime", formattedTime);
     eventEntity.setProperty("endTime", endTime);
     eventEntity.setProperty("coverPhoto", coverPhoto);
     eventEntity.setProperty("tags", tags);
@@ -94,5 +104,47 @@ public class EventServlet extends HttpServlet {
       return defaultValue;
     }
     return value;
+  }
+
+  /** Format time to standard format. */
+  private String formatTime(String time) {
+    DateFormat inFormat = new SimpleDateFormat("HH:mm");
+    DateFormat outFormat = new SimpleDateFormat("h:mm a");
+
+    Date unformattedTime = null;
+    String formattedTime = "";
+    try {
+      unformattedTime = inFormat.parse(time);
+    } catch (ParseException e) {
+      LOGGER.info("Could parse time " + e);
+    }
+
+    if (unformattedTime != null) {
+      formattedTime = outFormat.format(unformattedTime);
+    }
+
+    return formattedTime;
+  }
+
+  /** Format date to fit Month Day, Year format. */
+  private String formatDate(String date) {
+    DateFormat inFormat = new SimpleDateFormat("yyyy-MM-dd");
+    DateFormat outFormat = new SimpleDateFormat("EEEE, MMMMM dd, yyyy");
+
+    Date unformattedDate = null;
+    String formattedDate = "";
+    try {
+      unformattedDate = inFormat.parse(date);
+      System.out.println(unformattedDate);
+    } catch (ParseException e) {
+      LOGGER.info("Could parse date " + e);
+    }
+
+    if (unformattedDate != null) {
+      formattedDate = outFormat.format(unformattedDate);
+      System.out.println(formattedDate);
+    }
+
+    return formattedDate;
   }
 }

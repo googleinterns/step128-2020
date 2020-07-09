@@ -70,7 +70,7 @@ public final class EventServletTest {
     when(request.getParameter("street-address")).thenReturn("678 Lakeview Way");
     when(request.getParameter("city")).thenReturn("Lakeside");
     when(request.getParameter("state")).thenReturn("Michigan");
-    when(request.getParameter("date")).thenReturn("2020-17-05");
+    when(request.getParameter("date")).thenReturn("2020-05-17");
     when(request.getParameter("start-time")).thenReturn("14:00");
     when(request.getParameter("end-time")).thenReturn("15:00");
     when(request.getParameter("cover-photo")).thenReturn("/img-2030121");
@@ -96,7 +96,7 @@ public final class EventServletTest {
     when(request.getParameter("street-address")).thenReturn("678 Lakeview Way");
     when(request.getParameter("city")).thenReturn("Lakeside");
     when(request.getParameter("state")).thenReturn("Michigan");
-    when(request.getParameter("date")).thenReturn("2020-17-05");
+    when(request.getParameter("date")).thenReturn("2020-05-17");
     when(request.getParameter("start-time")).thenReturn("14:00");
     when(request.getParameter("end-time")).thenReturn("15:00");
     when(request.getParameter("cover-photo")).thenReturn("/img-2030121");
@@ -125,7 +125,7 @@ public final class EventServletTest {
     when(request.getParameter("street-address")).thenReturn("678 Lakeview Way");
     when(request.getParameter("city")).thenReturn("Lakeside");
     when(request.getParameter("state")).thenReturn("Michigan");
-    when(request.getParameter("date")).thenReturn("2020-17-05");
+    when(request.getParameter("date")).thenReturn("2020-05-17");
     when(request.getParameter("start-time")).thenReturn("14:00");
     when(request.getParameter("end-time")).thenReturn("15:00");
     when(request.getParameter("cover-photo")).thenReturn("/img-2030121");
@@ -139,12 +139,10 @@ public final class EventServletTest {
     Entity goalEntity = new Entity("Event");
     goalEntity.setProperty("eventName", "Lake Clean Up");
     goalEntity.setProperty("eventDescription", "We're cleaning up the lake");
-    goalEntity.setProperty("streetAddress", "678 Lakeview Way");
-    goalEntity.setProperty("city", "Lakeside");
-    goalEntity.setProperty("state", "Michigan");
-    goalEntity.setProperty("date", "2020-17-05");
-    goalEntity.setProperty("startTime", "14:00");
-    goalEntity.setProperty("endTime", "15:00");
+    goalEntity.setProperty("address", "678 Lakeview Way, Lakeside, Michigan");
+    goalEntity.setProperty("date", "Sunday, May 17, 2020");
+    goalEntity.setProperty("startTime", "2:00 PM");
+    goalEntity.setProperty("endTime", "3:00 PM");
     goalEntity.setProperty("coverPhoto", "/img-2030121");
     goalEntity.setProperty("tags", "['environment']");
     goalEntity.setProperty("creator", creatorEmail);
@@ -170,7 +168,7 @@ public final class EventServletTest {
     when(request.getParameter("street-address")).thenReturn("678 Lakeview Way");
     when(request.getParameter("city")).thenReturn("Lakeside");
     when(request.getParameter("state")).thenReturn("Michigan");
-    when(request.getParameter("date")).thenReturn("2020-17-05");
+    when(request.getParameter("date")).thenReturn("2020-05-17");
     when(request.getParameter("start-time")).thenReturn("14:00");
     when(request.getParameter("all-tags")).thenReturn("['environment']");
 
@@ -197,7 +195,7 @@ public final class EventServletTest {
     when(request.getParameter("street-address")).thenReturn("678 Lakeview Way");
     when(request.getParameter("city")).thenReturn("Lakeside");
     when(request.getParameter("state")).thenReturn("Michigan");
-    when(request.getParameter("date")).thenReturn("2020-17-05");
+    when(request.getParameter("date")).thenReturn("2020-05-17");
     when(request.getParameter("start-time")).thenReturn("14:00");
     when(request.getParameter("all-tags")).thenReturn("['environment']");
 

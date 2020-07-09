@@ -46,9 +46,11 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+@PowerMockIgnore("okhttp3.*")
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(UserServiceFactory.class)
 public final class UserServletTest {
@@ -352,7 +354,7 @@ public final class UserServletTest {
     when(request.getParameter("street-address")).thenReturn("678 Lakeview Way");
     when(request.getParameter("city")).thenReturn("Lakeside");
     when(request.getParameter("state")).thenReturn("Michigan");
-    when(request.getParameter("date")).thenReturn("2020-17-05");
+    when(request.getParameter("date")).thenReturn("2020-05-17");
     when(request.getParameter("start-time")).thenReturn("14:00");
     when(request.getParameter("all-tags")).thenReturn("['environment']");
     testEventServlet.doPost(request, response);
@@ -364,7 +366,7 @@ public final class UserServletTest {
     when(request.getParameter("street-address")).thenReturn("Main Street");
     when(request.getParameter("city")).thenReturn("Los Angeles");
     when(request.getParameter("state")).thenReturn("California");
-    when(request.getParameter("date")).thenReturn("2020-17-05");
+    when(request.getParameter("date")).thenReturn("2020-05-17");
     when(request.getParameter("start-time")).thenReturn("13:00");
     when(request.getParameter("all-tags")).thenReturn("['blm']");
     testEventServlet.doPost(request, response);
@@ -377,7 +379,7 @@ public final class UserServletTest {
     when(request.getParameter("street-address")).thenReturn("School Drive");
     when(request.getParameter("city")).thenReturn("Los Angeles");
     when(request.getParameter("state")).thenReturn("California");
-    when(request.getParameter("date")).thenReturn("2020-17-05");
+    when(request.getParameter("date")).thenReturn("2020-05-17");
     when(request.getParameter("start-time")).thenReturn("10:00");
     when(request.getParameter("all-tags")).thenReturn("['education']");
     testEventServlet.doPost(request, response);
@@ -391,11 +393,9 @@ public final class UserServletTest {
     Entity entity = new Entity("Event");
     entity.setProperty("eventName", "Lake Clean Up");
     entity.setProperty("eventDescription", "We're cleaning up the lake");
-    entity.setProperty("streetAddress", "678 Lakeview Way");
-    entity.setProperty("city", "Lakeside");
-    entity.setProperty("state", "Michigan");
-    entity.setProperty("date", "2020-17-05");
-    entity.setProperty("startTime", "14:00");
+    entity.setProperty("address", "678 Lakeview Way, Lakeside, Michigan");
+    entity.setProperty("date", "Sunday, May 17, 2020");
+    entity.setProperty("startTime", "2:00 PM");
     entity.setProperty("endTime", "");
     entity.setProperty("coverPhoto", "");
     entity.setProperty("tags", "['environment']");
@@ -409,11 +409,9 @@ public final class UserServletTest {
     Entity entity = new Entity("Event");
     entity.setProperty("eventName", "BLM Protest");
     entity.setProperty("eventDescription", "Fight for racial justice!");
-    entity.setProperty("streetAddress", "Main Street");
-    entity.setProperty("city", "Los Angeles");
-    entity.setProperty("state", "California");
-    entity.setProperty("date", "2020-17-05");
-    entity.setProperty("startTime", "13:00");
+    entity.setProperty("address", "Main Street, Los Angeles, California");
+    entity.setProperty("date", "Sunday, May 17, 2020");
+    entity.setProperty("startTime", "1:00 PM");
     entity.setProperty("endTime", "");
     entity.setProperty("coverPhoto", "");
     entity.setProperty("tags", "['blm']");
@@ -427,11 +425,9 @@ public final class UserServletTest {
     Entity entity = new Entity("Event");
     entity.setProperty("eventName", "Book Drive");
     entity.setProperty("eventDescription", "Let's donate books for kids");
-    entity.setProperty("streetAddress", "School Drive");
-    entity.setProperty("city", "Los Angeles");
-    entity.setProperty("state", "California");
-    entity.setProperty("date", "2020-17-05");
-    entity.setProperty("startTime", "10:00");
+    entity.setProperty("address", "School Drive, Los Angeles, California");
+    entity.setProperty("date", "Sunday, May 17, 2020");
+    entity.setProperty("startTime", "10:00 AM");
     entity.setProperty("endTime", "");
     entity.setProperty("coverPhoto", "");
     entity.setProperty("tags", "['education']");

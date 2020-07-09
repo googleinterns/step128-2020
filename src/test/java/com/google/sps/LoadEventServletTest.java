@@ -57,7 +57,7 @@ public final class LoadEventServletTest {
     goalEntity.setProperty("streetAddress", "678 Lakeview Way");
     goalEntity.setProperty("city", "Lakeside");
     goalEntity.setProperty("state", "Michigan");
-    goalEntity.setProperty("date", "2020-17-05");
+    goalEntity.setProperty("date", "May 17, 2020");
     goalEntity.setProperty("startTime", "14:00");
     goalEntity.setProperty("endTime", "15:00");
     goalEntity.setProperty("coverPhoto", "/img-2030121");
