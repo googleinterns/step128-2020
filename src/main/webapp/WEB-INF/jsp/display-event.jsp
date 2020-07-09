@@ -41,10 +41,13 @@
       </div>
       <div class="event-right-details">
         <div class="event-time-location">
+          <input type="hidden" id="end-value" value='${end}'>
           <div class="date">
             <p>Date: ${date}</p>
           </div>
-          <p>Time: ${start}</p>
+          <div class="time">
+            <p>Start Time: ${start}</p>
+          </div>
           <p>Location: ${address}</p>
         </div>
         <div class = "event-display-options">
