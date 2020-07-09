@@ -27,7 +27,7 @@ public class SecretHandler {
   public static String getApiKey() throws IOException {
     try (SecretManagerServiceClient client = SecretManagerServiceClient.create()) {
       SecretVersionName secretVersionName =
-          SecretVersionName.of(PROJECT_ID, "your-secret-id-1", VERSION_ID);
+          SecretVersionName.of(PROJECT_ID, API_KEY_ID, VERSION_ID);
 
       AccessSecretVersionResponse response = client.accessSecretVersion(secretVersionName);
       String result = response.getPayload().getData().toStringUtf8();
