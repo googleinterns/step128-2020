@@ -180,14 +180,7 @@ public final class SearchServletTest {
     LatLng loc = new LatLng(-31.9522, 115.8589);
     LatLng loc2 = new LatLng(-25.344677, 131.036692);
 
-    DistanceMatrixRow[] rows = new DistanceMatrixRow[1];
-    rows[0] = new DistanceMatrixRow();
-    rows[0].elements = new DistanceMatrixElement[1];
-    rows[0].elements[0] = new DistanceMatrixElement();
-    rows[0].elements[0].distance = new Distance();
-    rows[0].elements[0].distance.inMeters = 2059000;
-    rows[0].elements[0].status = DistanceMatrixElementStatus.OK;
-    DistanceMatrix dm = new DistanceMatrix(new String[] {"A"}, new String[] {"B"}, rows);
+    DistanceMatrix dm = createDistanceMatrix(2059000, DistanceMatrixElementStatus.OK);
 
     DistanceMatrixApiRequest dmaRequest = PowerMockito.mock(DistanceMatrixApiRequest.class);
     PowerMockito.when(dmaRequest.origins(loc)).thenReturn(dmaRequest);
@@ -208,12 +201,7 @@ public final class SearchServletTest {
     LatLng loc = new LatLng(-31.9522, 115.8589);
     LatLng loc2 = loc;
 
-    DistanceMatrixRow[] rows = new DistanceMatrixRow[] {new DistanceMatrixRow()};
-    rows[0].elements = new DistanceMatrixElement[] {new DistanceMatrixElement()};
-    rows[0].elements[0].distance = new Distance();
-    rows[0].elements[0].distance.inMeters = 1;
-    rows[0].elements[0].status = DistanceMatrixElementStatus.OK;
-    DistanceMatrix dm = new DistanceMatrix(new String[] {"A"}, new String[] {"B"}, rows);
+    DistanceMatrix dm = createDistanceMatrix(1, DistanceMatrixElementStatus.OK);
 
     DistanceMatrixApiRequest dmaRequest = PowerMockito.mock(DistanceMatrixApiRequest.class);
     PowerMockito.when(dmaRequest.origins(loc)).thenReturn(dmaRequest);
@@ -234,12 +222,7 @@ public final class SearchServletTest {
     LatLng loc = new LatLng(35.6585, 139.7013);
     LatLng loc2 = new LatLng(47.6062, 122.3321);
 
-    DistanceMatrixRow[] rows = new DistanceMatrixRow[1];
-    rows[0] = new DistanceMatrixRow();
-    rows[0].elements = new DistanceMatrixElement[1];
-    rows[0].elements[0] = new DistanceMatrixElement();
-    rows[0].elements[0].status = DistanceMatrixElementStatus.ZERO_RESULTS;
-    DistanceMatrix dm = new DistanceMatrix(new String[] {"A"}, new String[] {"B"}, rows);
+    DistanceMatrix dm = createDistanceMatrix(0, DistanceMatrixElementStatus.ZERO_RESULTS);
 
     DistanceMatrixApiRequest dmaRequest = PowerMockito.mock(DistanceMatrixApiRequest.class);
     PowerMockito.when(dmaRequest.origins(loc)).thenReturn(dmaRequest);
@@ -260,9 +243,7 @@ public final class SearchServletTest {
     LatLng loc = new LatLng(-31.95220010, 115.85884740);
     String locStr = "3 Forrest Pl, Perth WA 6000, Australia";
 
-    GeocodingResult[] gr = new GeocodingResult[] {new GeocodingResult()};
-    gr[0].geometry = new Geometry();
-    gr[0].geometry.location = loc;
+    GeocodingResult[] gr = createGeocodingResult(loc);
 
     GeocodingApiRequest geoRequest = PowerMockito.mock(GeocodingApiRequest.class);
     PowerMockito.when(geoRequest.address(locStr)).thenReturn(geoRequest);
@@ -274,5 +255,43 @@ public final class SearchServletTest {
     PowerMockito.when(GeocodingApi.newRequest(any(GeoApiContext.class))).thenReturn(geoRequest);
     LatLng location = SearchServlet.getLatLng(locStr);
     assertEquals(new LatLng(-31.95220010, 115.85884740), location);
+  }
+
+  /**
+   * Returns a DistanceMatrix with the desired parameters.
+   *
+   * @param desiredDistance Distance in meters to be returned in the DistanceMatrix, irrelevant if
+   *     status is ZERO_RESULTS
+   * @param status DistanceMatrixElementStatus to be returned in the DistanceMatrix
+   * @return DistanceMatrix made according to parameters
+   */
+  private static DistanceMatrix createDistanceMatrix(
+      long desiredDistance, DistanceMatrixElementStatus status) {
+    DistanceMatrixRow[] rows = new DistanceMatrixRow[] {new DistanceMatrixRow()};
+    rows[0].elements = new DistanceMatrixElement[] {new DistanceMatrixElement()};
+
+    if (status == DistanceMatrixElementStatus.ZERO_RESULTS) {
+      rows[0].elements[0].status = DistanceMatrixElementStatus.ZERO_RESULTS;
+    } else {
+      rows[0].elements[0].distance = new Distance();
+      rows[0].elements[0].distance.inMeters = desiredDistance;
+      rows[0].elements[0].status = DistanceMatrixElementStatus.OK;
+    }
+
+    DistanceMatrix dm = new DistanceMatrix(new String[] {"A"}, new String[] {"B"}, rows);
+    return dm;
+  }
+
+  /**
+   * Returns a GeocodingResult[] with the desired location inside.
+   *
+   * @param desiredLocation LatLng location to be returned in the GeocodingResult[]
+   * @return GeocodingResult[] with the desired location inside
+   */
+  private static GeocodingResult[] createGeocodingResult(LatLng desiredLocation) {
+    GeocodingResult[] gr = new GeocodingResult[] {new GeocodingResult()};
+    gr[0].geometry = new Geometry();
+    gr[0].geometry.location = desiredLocation;
+    return gr;
   }
 }
