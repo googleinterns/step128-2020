@@ -46,9 +46,11 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+@PowerMockIgnore("okhttp3.*")
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(UserServiceFactory.class)
 public final class UserServletTest {

@@ -25,11 +25,11 @@ import com.google.maps.errors.ApiException;
 import com.google.maps.model.DistanceMatrix;
 import com.google.maps.model.GeocodingResult;
 import com.google.maps.model.LatLng;
-import java.io.IOException;
-import java.util.logging.Logger;
 import com.google.sps.Interactions;
+import java.io.IOException;
 import java.util.Comparator;
 import java.util.Map;
+import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 
 public class Utils {
