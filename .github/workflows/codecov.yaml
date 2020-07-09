@@ -1,0 +1,21 @@
+on: ["pull_request"]
+
+
+name: Codecov
+
+jobs:
+
+  build:
+    name: Codecov Build
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+
+    - name: Run tests
+      run: |
+        mvn clean test
+
+    - name: Codecov Report
+      uses: codecov/codecov-action@v1
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}

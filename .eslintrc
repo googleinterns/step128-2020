@@ -4,12 +4,13 @@
     "google",
   ],
   "env": {
+    "browser": true,
     "es6": true
   },
   "parserOptions": {
     "ecmaVersion": 8
   },
-  "globals": {
-    "document": "readonly"
+  "rules": {
+    "no-unused-vars": ["error", { "vars": "local", "args": "none" }]
   }
 }
