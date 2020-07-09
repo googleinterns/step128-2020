@@ -20,6 +20,10 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.logging.Logger;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -42,6 +46,7 @@ public class EventServlet extends HttpServlet {
     if (userService.isUserLoggedIn()) {
       String email = userService.getCurrentUser().getEmail();
       Entity eventEntity = populateEvent(request);
+
       eventEntity.setProperty("creator", email);
 
       DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
@@ -104,99 +109,43 @@ public class EventServlet extends HttpServlet {
 
   /** Format time to standard format. */
   private String formatTime(String time) {
-    String hour = time.substring(0, 2);
-    String minutes = time.substring(3, 5);
-    Integer hourInt = Integer.parseInt(hour);
+    DateFormat inFormat = new SimpleDateFormat("HH:mm");
+    DateFormat outFormat = new SimpleDateFormat("h:mm a");
 
-    String standardHour = getHour(hourInt);
-    String period = getPeriod(hourInt);
+    Date unformattedTime = null;
+    String formattedTime = "";
+    try {
+      unformattedTime = inFormat.parse(time);
+    } catch (ParseException e) {
+      LOGGER.info("Could parse time " + e);
+    }
 
-    String formattedTime = String.format("%1$s:%2$s %3$s", standardHour, minutes, period);
+    if (unformattedTime != null) {
+      formattedTime = outFormat.format(unformattedTime);
+    }
 
     return formattedTime;
   }
 
-  /** Get Hour in standard format. */
-  private String getHour(Integer hour) {
-    Integer standard = hour % 12;
-    if (standard == 0) {
-      standard = 12;
-    }
-
-    String standardString = Integer.toString(standard);
-
-    return standardString;
-  }
-
-  /** Get Period (AM/PM). */
-  private String getPeriod(Integer hour) {
-    String period = "";
-
-    if (hour > 11) {
-      period = "PM";
-    } else {
-      period = "AM";
-    }
-
-    return period;
-  }
-
   /** Format date to fit Month Day, Year format. */
   private String formatDate(String date) {
-    String month = date.substring(5, 7);
-    String day = date.substring(8, 10);
-    String year = date.substring(0, 4);
+    DateFormat inFormat = new SimpleDateFormat("yyyy-MM-dd");
+    DateFormat outFormat = new SimpleDateFormat("EEEE, MMMMM dd, yyyy");
 
-    String fullMonth = getMonth(month);
+    Date unformattedDate = null;
+    String formattedDate = "";
+    try {
+      unformattedDate = inFormat.parse(date);
+      System.out.println(unformattedDate);
+    } catch (ParseException e) {
+      LOGGER.info("Could parse date " + e);
+    }
 
-    String formattedDate = String.format("%1$s %2$s, %3$s", fullMonth, day, year);
+    if (unformattedDate != null) {
+      formattedDate = outFormat.format(unformattedDate);
+      System.out.println(formattedDate);
+    }
 
     return formattedDate;
-  }
-
-  /** Return the month corresponding to the number. */
-  private String getMonth(String month) {
-    String monthString = "";
-    switch (month) {
-      case "01":
-        monthString = "January";
-        break;
-      case "02":
-        monthString = "February";
-        break;
-      case "03":
-        monthString = "March";
-        break;
-      case "04":
-        monthString = "April";
-        break;
-      case "05":
-        monthString = "May";
-        break;
-      case "06":
-        monthString = "June";
-        break;
-      case "07":
-        monthString = "July";
-        break;
-      case "08":
-        monthString = "August";
-        break;
-      case "09":
-        monthString = "September";
-        break;
-      case "10":
-        monthString = "October";
-        break;
-      case "11":
-        monthString = "November";
-        break;
-      case "12":
-        monthString = "December";
-        break;
-      default:
-        monthString = "Invalid";
-    }
-    return monthString;
   }
 }
