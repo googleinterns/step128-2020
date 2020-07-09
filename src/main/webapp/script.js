@@ -897,7 +897,6 @@ function displayIndividualEvent() {
   loadEventTags(tagArray);
   loadDefaultImage(mainColor);
   loadAttendingColor(mainColor);
-  // formatDate();
 }
 
 /**
