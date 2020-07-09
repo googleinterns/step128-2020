@@ -856,7 +856,7 @@ function toggleSurveyDisplay(question, index) {
 }
 
 /**
- * Verifies the survey is completed. If it is completed, it submits survey.
+ * Verifies the survey is completed. If it is completed, submits.
  */
 function submitSurvey() {
   if (loggedIn) {
