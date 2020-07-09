@@ -726,6 +726,9 @@ async function getMyEvents() {
  * Methods for search.html
  * **********************************************************************/
 
+/**
+ * Load all actions for the search page.
+ */
 function searchLoadActions() {
   updateSearchBar();
   updateTagBox();
@@ -733,6 +736,10 @@ function searchLoadActions() {
   getSearchDistanceSettings();
 }
 
+/**
+ * Add the selected tag to the search bar and remove it from the tag box.
+ * @param {String} tag the name of the tag to add.
+ */
 function addTagBoxToSearch(tag) {
   const boxIndex = tagsBox.indexOf(tag);
   if (boxIndex > -1) {
@@ -744,6 +751,10 @@ function addTagBoxToSearch(tag) {
   updateSearchBar();
 }
 
+/**
+ * Adds selected tag to the tag box.
+ * @param {String} tag the name of the tag to add.
+ */
 function addTagSearchToBox(tag) {
   const searchIndex = tagsSearch.indexOf(tag);
   if (searchIndex > -1) {
@@ -755,6 +766,9 @@ function addTagSearchToBox(tag) {
   updateTagBox();
 }
 
+/**
+ * Update the tags shown in the search bar.
+ */
 function updateSearchBar() {
   const elements = document.getElementsByClassName('search-bar');
   const searchBarElement = elements[0];
@@ -774,14 +788,17 @@ function updateSearchBar() {
   generateRainbowTags();
 }
 
+/**
+ * Update the tags shown in the tag box.
+ */
 function updateTagBox() {
   const elements = document.getElementsByClassName('tag-box');
   const tagBoxElement = elements[0];
   tagBoxElement.innerHTML = '';
   tagsBox.forEach(function(tag) {
     const spanElement = document.createElement('span');
-    spanElement.setAttribute('onclick', 'addTagBoxToSearch(\"' + tag +
-        '\")');
+    spanElement.setAttribute('onclick', 'addTagBoxToSearch("' + tag +
+        '")');
     // class name is now (for example) 'tag environment'
     if (tag == 'LGBTQ+') spanElement.className = 'tag rainbow';
     else spanElement.className = 'tag ' + tag;
@@ -837,6 +854,9 @@ function toggleSurveyDisplay(question, index) {
   surveyResponses[question] = index;
 }
 
+/**
+ * Verifies survey is completed. If so, submit it.
+ */
 function submitSurvey() {
   if (loggedIn) {
     const params = new URLSearchParams();
