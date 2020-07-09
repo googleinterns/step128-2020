@@ -392,7 +392,7 @@ public final class UserServletTest {
     entity.setProperty("eventName", "Lake Clean Up");
     entity.setProperty("eventDescription", "We're cleaning up the lake");
     entity.setProperty("address", "678 Lakeview Way Lakeside, Michigan");
-    entity.setProperty("date", "May 17, 2020");
+    entity.setProperty("date", "Sunday, May 17, 2020");
     entity.setProperty("startTime", "2:00 PM");
     entity.setProperty("endTime", "");
     entity.setProperty("coverPhoto", "");
@@ -408,7 +408,7 @@ public final class UserServletTest {
     entity.setProperty("eventName", "BLM Protest");
     entity.setProperty("eventDescription", "Fight for racial justice!");
     entity.setProperty("address", "Main Street Los Angeles, California");
-    entity.setProperty("date", "May 17, 2020");
+    entity.setProperty("date", "Sunday, May 17, 2020");
     entity.setProperty("startTime", "1:00 PM");
     entity.setProperty("endTime", "");
     entity.setProperty("coverPhoto", "");
@@ -424,7 +424,7 @@ public final class UserServletTest {
     entity.setProperty("eventName", "Book Drive");
     entity.setProperty("eventDescription", "Let's donate books for kids");
     entity.setProperty("address", "School Drive Los Angeles, California");
-    entity.setProperty("date", "May 17, 2020");
+    entity.setProperty("date", "Sunday, May 17, 2020");
     entity.setProperty("startTime", "10:00 AM");
     entity.setProperty("endTime", "");
     entity.setProperty("coverPhoto", "");
