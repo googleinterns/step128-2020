@@ -182,16 +182,8 @@ public final class SearchServletTest {
 
     DistanceMatrix dm = createDistanceMatrix(2059000, DistanceMatrixElementStatus.OK);
 
-    DistanceMatrixApiRequest dmaRequest = PowerMockito.mock(DistanceMatrixApiRequest.class);
-    PowerMockito.when(dmaRequest.origins(loc)).thenReturn(dmaRequest);
-    PowerMockito.when(dmaRequest.destinations(loc2)).thenReturn(dmaRequest);
-    PowerMockito.when(dmaRequest.await()).thenReturn(dm);
+    mockDistanceMatrixApiSetup(loc, loc2, dm);
 
-    PowerMockito.mockStatic(DistanceMatrixApi.class);
-    GeoApiContext context = PowerMockito.mock(GeoApiContext.class);
-
-    PowerMockito.when(DistanceMatrixApi.newRequest(any(GeoApiContext.class)))
-        .thenReturn(dmaRequest);
     int distance = SearchServlet.getDistance(loc, loc2);
     assertEquals(2059, distance);
   }
@@ -203,16 +195,8 @@ public final class SearchServletTest {
 
     DistanceMatrix dm = createDistanceMatrix(1, DistanceMatrixElementStatus.OK);
 
-    DistanceMatrixApiRequest dmaRequest = PowerMockito.mock(DistanceMatrixApiRequest.class);
-    PowerMockito.when(dmaRequest.origins(loc)).thenReturn(dmaRequest);
-    PowerMockito.when(dmaRequest.destinations(loc2)).thenReturn(dmaRequest);
-    PowerMockito.when(dmaRequest.await()).thenReturn(dm);
+    mockDistanceMatrixApiSetup(loc, loc2, dm);
 
-    PowerMockito.mockStatic(DistanceMatrixApi.class);
-    GeoApiContext context = PowerMockito.mock(GeoApiContext.class);
-
-    PowerMockito.when(DistanceMatrixApi.newRequest(any(GeoApiContext.class)))
-        .thenReturn(dmaRequest);
     int distance = SearchServlet.getDistance(loc, loc2);
     assertEquals(0, distance);
   }
@@ -224,16 +208,8 @@ public final class SearchServletTest {
 
     DistanceMatrix dm = createDistanceMatrix(0, DistanceMatrixElementStatus.ZERO_RESULTS);
 
-    DistanceMatrixApiRequest dmaRequest = PowerMockito.mock(DistanceMatrixApiRequest.class);
-    PowerMockito.when(dmaRequest.origins(loc)).thenReturn(dmaRequest);
-    PowerMockito.when(dmaRequest.destinations(loc2)).thenReturn(dmaRequest);
-    PowerMockito.when(dmaRequest.await()).thenReturn(dm);
+    mockDistanceMatrixApiSetup(loc, loc2, dm);
 
-    PowerMockito.mockStatic(DistanceMatrixApi.class);
-    GeoApiContext context = PowerMockito.mock(GeoApiContext.class);
-
-    PowerMockito.when(DistanceMatrixApi.newRequest(any(GeoApiContext.class)))
-        .thenReturn(dmaRequest);
     int distance = SearchServlet.getDistance(loc, loc2);
     assertEquals(-1, distance);
   }
@@ -293,5 +269,25 @@ public final class SearchServletTest {
     gr[0].geometry = new Geometry();
     gr[0].geometry.location = desiredLocation;
     return gr;
+  }
+
+  /**
+   * Returns a GeocodingResult[] with the desired location inside.
+   *
+   * @param desiredLocation LatLng location to be returned in the GeocodingResult[]
+   * @return GeocodingResult[] with the desired location inside
+   */
+  private static void mockDistanceMatrixApiSetup(LatLng origin, LatLng dest, DistanceMatrix output)
+      throws Exception {
+    DistanceMatrixApiRequest dmaRequest = PowerMockito.mock(DistanceMatrixApiRequest.class);
+    PowerMockito.when(dmaRequest.origins(origin)).thenReturn(dmaRequest);
+    PowerMockito.when(dmaRequest.destinations(dest)).thenReturn(dmaRequest);
+    PowerMockito.when(dmaRequest.await()).thenReturn(output);
+
+    PowerMockito.mockStatic(DistanceMatrixApi.class);
+    GeoApiContext context = PowerMockito.mock(GeoApiContext.class);
+
+    PowerMockito.when(DistanceMatrixApi.newRequest(any(GeoApiContext.class)))
+        .thenReturn(dmaRequest);
   }
 }
