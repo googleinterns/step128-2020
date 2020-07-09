@@ -833,6 +833,8 @@ function search() {
  * Methods for survey.html
  * **********************************************************************/
 
+const surveyResponses = [-1, -1, -1, -1, -1];
+
 /**
  * Toggles the display of the survey page to indicate which option is selected,
  * while saving the survey responses.
@@ -840,7 +842,6 @@ function search() {
  * @param {number} question The question number to apply the toggle.
  * @param {number} index Which bubble on the question to apply the toggle to.
  */
-const surveyResponses = [-1, -1, -1, -1, -1];
 function toggleSurveyDisplay(question, index) {
   const circle =
     document.getElementsByClassName('survey-select')[question*5 + index];
@@ -855,7 +856,7 @@ function toggleSurveyDisplay(question, index) {
 }
 
 /**
- * Verifies survey is completed. If so, submit it.
+ * Verifies the survey is completed. If it is completed, it submits survey.
  */
 function submitSurvey() {
   if (loggedIn) {
