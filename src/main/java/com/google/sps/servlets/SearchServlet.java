@@ -28,6 +28,7 @@ import com.google.maps.DistanceMatrixApiRequest;
 import com.google.maps.GeoApiContext;
 import com.google.maps.GeocodingApi;
 import com.google.maps.GeocodingApiRequest;
+import com.google.maps.errors.ApiException;
 import com.google.maps.model.DistanceMatrix;
 import com.google.maps.model.GeocodingResult;
 import com.google.maps.model.LatLng;
@@ -83,13 +84,13 @@ public class SearchServlet extends HttpServlet {
 
     // Get distance between user and the location of all the events
     for (Entity event : events) {
-      LatLng eventLocation =
-          getLatLng(
-              event.getProperty("streetAddress").toString()
-                  + " "
-                  + event.getProperty("city").toString()
-                  + " "
-                  + event.getProperty("state").toString());
+      String[] locationProperties = new String[]{
+        event.getProperty("streetAddress").toString(),
+        event.getProperty("city").toString(),
+        event.getProperty("state").toString()
+      }
+      LatLng eventLocation = getLatLng(String.join(" ", locationProperties));
+              
       int distance = getDistance(userLocation, eventLocation);
       event.setProperty("distance", distance);
     }
@@ -266,8 +267,12 @@ public class SearchServlet extends HttpServlet {
       GeocodingApiRequest request = GeocodingApi.newRequest(context);
       request.address(location);
       results = request.await();
-    } catch (Exception e) {
-      System.out.println(e.getMessage());
+    } catch (ApiException e) {
+      LOGGER.warning(e.getMessage());
+    } catch (InterruptedException e) {
+      LOGGER.warning(e.getMessage());
+    } catch (IOException e) {
+      LOGGER.warning(e.getMessage());
     }
 
     return new LatLng(results[0].geometry.location.lat, results[0].geometry.location.lng);
@@ -288,13 +293,17 @@ public class SearchServlet extends HttpServlet {
       request.origins(from);
       request.destinations(to);
       result = request.await();
-    } catch (Exception e) {
-      System.out.println(e.getMessage());
+    } catch (ApiException e) {
+      LOGGER.warning(e.getMessage());
+    } catch (InterruptedException e) {
+      LOGGER.warning(e.getMessage());
+    } catch (IOException e) {
+      LOGGER.warning(e.getMessage());
     }
 
     if (result.rows[0].elements[0].status.toString().equals("ZERO_RESULTS")) {
       return -1;
-    } 
+    }
     int distance = (int) (result.rows[0].elements[0].distance.inMeters / 1000);
     return distance;
   }
