@@ -84,13 +84,14 @@ public class SearchServlet extends HttpServlet {
 
     // Get distance between user and the location of all the events
     for (Entity event : events) {
-      String[] locationProperties = new String[]{
-        event.getProperty("streetAddress").toString(),
-        event.getProperty("city").toString(),
-        event.getProperty("state").toString()
-      }
+      String[] locationProperties =
+          new String[] {
+            event.getProperty("streetAddress").toString(),
+            event.getProperty("city").toString(),
+            event.getProperty("state").toString()
+          };
       LatLng eventLocation = getLatLng(String.join(" ", locationProperties));
-              
+
       int distance = getDistance(userLocation, eventLocation);
       event.setProperty("distance", distance);
     }
