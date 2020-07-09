@@ -263,6 +263,12 @@ input[type=text], textarea {
   width: 100%;
 }
 
+textarea,
+input[type=date],
+input[type=time] {
+  font: 400 13.3333px Arial;
+}
+
 .form-section {
   display: flex;
 }
