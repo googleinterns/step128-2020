@@ -122,7 +122,7 @@ public class EventServlet extends HttpServlet {
     try {
       unformattedTime = inFormat.parse(time);
     } catch (ParseException e) {
-      LOGGER.info("Could parse time " + e);
+      LOGGER.info("Could not parse time " + e);
     }
 
     if (unformattedTime != null) {
@@ -143,7 +143,7 @@ public class EventServlet extends HttpServlet {
       unformattedDate = inFormat.parse(date);
       System.out.println(unformattedDate);
     } catch (ParseException e) {
-      LOGGER.info("Could parse date " + e);
+      LOGGER.info("Could not parse date " + e);
     }
 
     if (unformattedDate != null) {
