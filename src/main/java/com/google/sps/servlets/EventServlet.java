@@ -90,6 +90,7 @@ public class EventServlet extends HttpServlet {
     eventEntity.setProperty("endTime", endTime);
     eventEntity.setProperty("coverPhoto", coverPhoto);
     eventEntity.setProperty("tags", tags);
+    eventEntity.setProperty("attendeeCount", 0);
 
     return eventEntity;
   }
