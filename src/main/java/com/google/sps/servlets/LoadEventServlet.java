@@ -66,7 +66,7 @@ public class LoadEventServlet extends HttpServlet {
     String start = event.getProperty("startTime").toString();
     String end = event.getProperty("endTime").toString();
     String address = event.getProperty("address").toString();
-    String tags = event.getProperty("tags").toString();
+    String tags = Utils.convertToJson(event.getProperty("tags"));
 
     request.setAttribute("name", name);
     request.setAttribute("description", description);
