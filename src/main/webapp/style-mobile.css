@@ -168,12 +168,20 @@ a:link, a:visited {
 
 .page-header {
   display: flex;
+  flex-wrap: wrap;
   margin: 40px 10px 50px 10px;
 }
 
 .page-header-left {
   flex: 50%;
+  font-size: 2.5em;
   padding: 10px;
+  text-align: center;
+  width: auto;
+}
+
+.page-header-left a {
+  font-size: 0.77em;
 }
 
 .page-header-right {
@@ -181,15 +189,12 @@ a:link, a:visited {
   padding: 10px;
 }
 
-@media screen and (max-width: 900px) {
-  .page-header {
-    flex-direction: column;
-  }
+.page-header-right select{
+  font-size: 1em;
+}
 
-  .page-header-left,
-  .page-header-right {
-    width: auto;
-  }
+select option{
+  font-size: 0.5em;
 }
 
 /* Create Page */
@@ -383,7 +388,7 @@ h1 {
 
 .location-settings {
   float: right;
-  font-size: 16px;
+  font-size: 2.5em;
   margin: 20px 20px 0 20px;
   text-align: right;
 }
