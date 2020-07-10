@@ -718,8 +718,38 @@ async function getMyEvents() {
           getEvents(js, 1, 2);
         });
   } else {
-    alert('Please log in first!');
+    const eventListElements = document.getElementsByClassName('event-list-container');
+
+    const savedListElement = eventListElements[0];
+    savedListElement.innerHTML = '';
+    const savedBox = document.createElement('div');
+    savedBox.className = 'no-events';
+    const savedText = document.createElement('div');
+    savedText.className = 'no-events-text';
+    savedText.innerText = 'Please login to view your saved events!'
+    savedBox.appendChild(savedText);
+    savedListElement.appendChild(savedBox);
+
+    const createdListElement = eventListElements[1];
+    createdListElement.innerHTML = '';
+    const createdBox = document.createElement('div');
+    createdBox.className = 'no-events';
+    const createdText = document.createElement('div');
+    createdText.className = 'no-events-text';
+    createdText.innerText = 'Please login to view your created events!'
+    createdBox.appendChild(createdText);
+    createdListElement.appendChild(createdBox);
+
+    noElementsText.innerText = 'Please login to view your created events!'
   }
+}
+
+/** Makes servlet call to unsave event */
+async function unsaveEvent(eventId) {
+  const params = new URLSearchParams();
+  params.append("event", eventId);
+  params.append("action", "unsave");
+  fetch(new Request('/user', {method: 'POST', body: params}));
 }
 
 /* **********************************************************************
@@ -958,4 +988,19 @@ function loadOptionalFields() {
 
     timeContainer.appendChild(end);
   }
+
+/** Adds onclick action to the event display's save-event button */
+function setupSave(id) {
+  const saveButton = document.getElementsByClassName('save-event')[0];
+  saveButton.onclick = function() {
+    saveEvent(id);
+  }
+}
+
+/** Makes the servlet call to save an event */
+async function saveEvent(eventId) {
+  const params = new URLSearchParams();
+  params.append("event", eventId);
+  params.append("action", "save");
+  fetch(new Request('/user', {method: 'POST', body: params}));
 }
