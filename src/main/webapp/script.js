@@ -211,6 +211,7 @@ function generateMobileNavLayout() {
 const recommendedForYou = 0;
 const savedEvents = 1;
 const createdEvents = 2;
+const searchResults = 3;
 
 const MI_TO_KM = 1.609;
 
@@ -285,6 +286,8 @@ async function getEvents(events, index, option) {
     } else if (option == createdEvents) {
       noElementsText.innerText = 'You have not created an event yet! ' +
           'Click the ‘Create’ tab to create your first event.';
+    } else if (option == searchResults) {
+      noElementsText.innerText = 'No events found matching your desired tags.';
     } else {
       noElementsText.innerText = 'No events to see! Create one now.';
     }
@@ -827,7 +830,7 @@ async function search() {
 
   const response = await fetch('/search' + url);
   const events = await response.json();
-  getEvents(events, 0, 0);
+  getEvents(events, 0, 3);
 }
 
 /* **********************************************************************
