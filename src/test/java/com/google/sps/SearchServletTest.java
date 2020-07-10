@@ -33,7 +33,6 @@ import com.google.maps.model.GeocodingResult;
 import com.google.maps.model.Geometry;
 import com.google.maps.model.LatLng;
 import com.google.sps.servlets.SearchServlet;
-import com.google.sps.servlets.Utils;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
