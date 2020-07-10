@@ -362,7 +362,8 @@ async function getEvents(events, index, option) {
       eventItemDistanceElement.innerText = event.startTime;
     } else {
       if (event.distance != null) {
-        eventItemDistanceElement.innerText = Math.round(event.distance / MI_TO_KM) + " mi away" ;
+        eventItemDistanceElement.innerText = 
+            Math.round(event.distance / MI_TO_KM) + ' mi away';
       } else {
         eventItemDistanceElement.innerText = event.address;
       }
@@ -815,7 +816,7 @@ async function search() {
   let url = '?tags=';
   tagsSearch.forEach(function(tag) {
     if (tag == 'LGBTQ+') {
-      url += 'LGBTQ%2B' + ','
+      url += 'LGBTQ%2B' + ',';
     } else {
       url += tag + ',';
     }
