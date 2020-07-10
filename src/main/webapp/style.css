@@ -247,6 +247,11 @@ h1 {
 /* Create Page */
 .start-bttn img {
   height: 60px;
+  transition-duration: 0.4s;
+}
+
+.start-bttn img:hover {
+  box-shadow: 13px 13px 33px -13px rgba(92,92,92,1);
 }
 
 .form-container {
@@ -311,7 +316,6 @@ input[type=time] {
   height: auto;
   margin: 25px;
 }
-
 
 .edit-form-buttons img {
   height: 50px;
