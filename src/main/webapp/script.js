@@ -43,12 +43,14 @@ function loadActions(doAfter) {
  * @param {function} doAfter Will call this function after handling login
  *      Helps with chaining async functions and cleaning up code
  */
-async function checkLogin(doAfter) {
+async function checkLogin(doAfter = null) {
   fetch('/auth').then((response) => response.json())
       .then(function(responseJson) {
         loggedIn = responseJson.loggedIn;
         url = responseJson.url;
-        doAfter();
+        if(doAfter != null) {
+          doAfter();
+        }
       });
 }
 
@@ -298,6 +300,7 @@ async function getEvents(events, index, option) {
   }
 
   events.forEach(function(event) {
+    const eventId = event.key.id;
     event = event.propertyMap;
 
     const eventItemElement = document.createElement('a');
@@ -389,8 +392,7 @@ async function getEvents(events, index, option) {
       attendeeCountContainerElement.className = 'edit-unsave-event';
       attendeeCountContainerElement.innerText = 'Unsave this event';
       attendeeCountContainerElement.onclick = function() {
-        // TODO: unsave from datastore and/or make popup that confirms
-        // choice first
+        unsaveEvent(eventId);
       };
     } else if (option == createdEvents) {
       // edit an event
