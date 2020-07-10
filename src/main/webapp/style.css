@@ -118,7 +118,7 @@ footer {
   left: 50%;
   position: absolute;
   text-align: center;
-  top: 450px;
+  top: 50%;
   transform: translate(-50%, -50%);
 }
 
@@ -178,7 +178,7 @@ h1 {
   position: absolute;
   max-width: 700px;
   text-align: center;
-  top: 425px;
+  top: 45%;
   transform: translate(-50%, -50%);
   width: 70%;
 }
