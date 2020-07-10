@@ -74,8 +74,6 @@ public class EventServlet extends HttpServlet {
     String endTime = getParameter(request, "end-time", "");
     String coverPhoto = getParameter(request, "cover-photo", "");
     String tagsStr = getParameter(request, "all-tags", "");
-    Gson gson = new Gson();
-    String[] tags = gson.fromJson(tagsStr, String[].class);
 
     final String fullAddress = String.format("%1$s, %2$s, %3$s", streetAddress, city, state);
     final String formattedDate = formatDate(date);
@@ -93,6 +91,9 @@ public class EventServlet extends HttpServlet {
     eventEntity.setProperty("startTime", formattedTime);
     eventEntity.setProperty("endTime", endTime);
     eventEntity.setProperty("coverPhoto", coverPhoto);
+
+    Gson gson = new Gson();
+    String[] tags = gson.fromJson(tagsStr, String[].class);
     eventEntity.setIndexedProperty("tags", Arrays.asList(tags));
 
     return eventEntity;
