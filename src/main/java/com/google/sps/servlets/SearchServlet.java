@@ -57,7 +57,7 @@ public class SearchServlet extends HttpServlet {
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     // List of all the tags we are searching for
     List<String> searchTags =
-        new ArrayList<String>(Arrays.asList(request.getParameterValues("tags")));
+        new ArrayList<String>(Arrays.asList(request.getParameter("tags").split(",")));
 
     Query query = null;
     // Check if there are no tags
@@ -80,6 +80,7 @@ public class SearchServlet extends HttpServlet {
 
     // Get distance between user and the location of all the events
     for (Entity event : events) {
+      System.out.println(event);
       LatLng eventLocation = Utils.getLatLng(event.getProperty("address").toString());
 
       int distance = Utils.getDistance(userLocation, eventLocation);
