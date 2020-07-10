@@ -809,7 +809,7 @@ function updateTagBox() {
  * Placeholder function for search functionality
  */
 async function search() {
-  var url = '?tags=';
+  let url = '?tags=';
   tagsSearch.forEach(function(tag) {
     if (tag == 'LGBTQ+') {
       url += 'LGBTQ%2B' + ','

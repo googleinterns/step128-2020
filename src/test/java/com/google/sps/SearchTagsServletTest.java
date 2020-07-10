@@ -91,10 +91,7 @@ public final class SearchTagsServletTest {
       Entity e = new Entity("Event");
       e.setProperty("eventName", i);
       e.setIndexedProperty("tags", new ArrayList<String>(Arrays.asList(possibleTags.get(i))));
-      String[] loc = possibleLocations.get(i).split(" ");
-      e.setProperty("streetAddress", loc[0]);
-      e.setProperty("city", loc[1]);
-      e.setProperty("state", loc[2]);
+      e.setProperty("address", possibleLocations.get(i));
       e.setProperty("distance", possibleDistances.get(i));
       testEntities.add(e);
     }
@@ -105,10 +102,7 @@ public final class SearchTagsServletTest {
       e.setIndexedProperty(
           "tags",
           new ArrayList<String>(Arrays.asList(possibleTags.get(i - 5), possibleTags.get(i - 4))));
-      String[] loc = possibleLocations.get(i - 5).split(" ");
-      e.setProperty("streetAddress", loc[0]);
-      e.setProperty("city", loc[1]);
-      e.setProperty("state", loc[2]);
+      e.setProperty("address", possibleLocations.get(i - 5));
       e.setProperty("distance", possibleDistances.get(i - 5));
       testEntities.add(e);
     }
@@ -121,10 +115,7 @@ public final class SearchTagsServletTest {
           new ArrayList<String>(
               Arrays.asList(
                   possibleTags.get(i - 9), possibleTags.get(i - 8), possibleTags.get(i - 7))));
-      String[] loc = possibleLocations.get(i - 9).split(" ");
-      e.setProperty("streetAddress", loc[0]);
-      e.setProperty("city", loc[1]);
-      e.setProperty("state", loc[2]);
+      e.setProperty("address", possibleLocations.get(i - 9));
       e.setProperty("distance", possibleDistances.get(i - 9));
       testEntities.add(e);
     }
