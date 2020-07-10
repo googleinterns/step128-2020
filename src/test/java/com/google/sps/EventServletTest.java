@@ -27,17 +27,20 @@ import com.google.appengine.api.users.UserServiceFactory;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.sps.servlets.EventServlet;
+import com.google.sps.servlets.Utils;
 import java.io.IOException;
+import java.util.Arrays;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-/** */
+@PowerMockIgnore("okhttp3.*")
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(UserServiceFactory.class)
 public final class EventServletTest {
@@ -74,7 +77,8 @@ public final class EventServletTest {
     when(request.getParameter("start-time")).thenReturn("14:00");
     when(request.getParameter("end-time")).thenReturn("15:00");
     when(request.getParameter("cover-photo")).thenReturn("/img-2030121");
-    when(request.getParameter("all-tags")).thenReturn("[environment]");
+    String[] tags = {"environment"};
+    when(request.getParameter("all-tags")).thenReturn(Utils.convertToJson(tags));
 
     // Post event to Datastore.
     testEventServlet.doPost(request, response);
@@ -100,7 +104,8 @@ public final class EventServletTest {
     when(request.getParameter("start-time")).thenReturn("14:00");
     when(request.getParameter("end-time")).thenReturn("15:00");
     when(request.getParameter("cover-photo")).thenReturn("/img-2030121");
-    when(request.getParameter("all-tags")).thenReturn("['environment']");
+    String[] tags = {"environment"};
+    when(request.getParameter("all-tags")).thenReturn(Utils.convertToJson(tags));
 
     // Post three events to Datastore.
     testEventServlet.doPost(request, response);
@@ -129,7 +134,8 @@ public final class EventServletTest {
     when(request.getParameter("start-time")).thenReturn("14:00");
     when(request.getParameter("end-time")).thenReturn("15:00");
     when(request.getParameter("cover-photo")).thenReturn("/img-2030121");
-    when(request.getParameter("all-tags")).thenReturn("['environment']");
+    String[] tags = {"environment"};
+    when(request.getParameter("all-tags")).thenReturn(Utils.convertToJson(tags));
 
     // Post event to Datastore.
     testEventServlet.doPost(request, response);
@@ -144,7 +150,7 @@ public final class EventServletTest {
     goalEntity.setProperty("startTime", "2:00 PM");
     goalEntity.setProperty("endTime", "3:00 PM");
     goalEntity.setProperty("coverPhoto", "/img-2030121");
-    goalEntity.setProperty("tags", "['environment']");
+    goalEntity.setIndexedProperty("tags", Arrays.asList(tags));
     goalEntity.setProperty("creator", creatorEmail);
 
     // Retrieve the Entity posted to Datastore.
@@ -170,7 +176,8 @@ public final class EventServletTest {
     when(request.getParameter("state")).thenReturn("Michigan");
     when(request.getParameter("date")).thenReturn("2020-05-17");
     when(request.getParameter("start-time")).thenReturn("14:00");
-    when(request.getParameter("all-tags")).thenReturn("['environment']");
+    String[] tags = {"environment"};
+    when(request.getParameter("all-tags")).thenReturn(Utils.convertToJson(tags));
 
     // Post event to Datastore.
     testEventServlet.doPost(request, response);
@@ -197,7 +204,8 @@ public final class EventServletTest {
     when(request.getParameter("state")).thenReturn("Michigan");
     when(request.getParameter("date")).thenReturn("2020-05-17");
     when(request.getParameter("start-time")).thenReturn("14:00");
-    when(request.getParameter("all-tags")).thenReturn("['environment']");
+    String[] tags = {"environment"};
+    when(request.getParameter("all-tags")).thenReturn(Utils.convertToJson(tags));
 
     try {
       testEventServlet.doPost(request, response);

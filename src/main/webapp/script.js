@@ -211,6 +211,9 @@ function generateMobileNavLayout() {
 const recommendedForYou = 0;
 const savedEvents = 1;
 const createdEvents = 2;
+const searchResults = 3;
+
+const MI_TO_KM = 1.609;
 
 // Two test examples to use with getEvents()
 const test = {eventName: 'Beach clean up',
@@ -283,6 +286,8 @@ async function getEvents(events, index, option) {
     } else if (option == createdEvents) {
       noElementsText.innerText = 'You have not created an event yet! ' +
           'Click the ‘Create’ tab to create your first event.';
+    } else if (option == searchResults) {
+      noElementsText.innerText = 'No events found matching your desired tags.';
     } else {
       noElementsText.innerText = 'No events to see! Create one now.';
     }
@@ -293,11 +298,7 @@ async function getEvents(events, index, option) {
   }
 
   events.forEach(function(event) {
-    // TODO: adjust for string parsing based on how servlet returns the data
-    //   if (typeof event.tags === 'string') {
-    //     var tagsString = event.tags.substring(1, event.tags.length - 1);
-    //     event.tags = tagsString.split(', ');
-    //   }
+    event = event.propertyMap;
 
     const eventItemElement = document.createElement('a');
     eventItemElement.className = 'event-item';
@@ -323,8 +324,7 @@ async function getEvents(events, index, option) {
       const eventItemTitleName = document.createElement('div');
       eventItemTitleName.innerText = event.eventName;
       const eventItemTitleAddr = document.createElement('div');
-      eventItemTitleAddr.innerText = event.streetAddress + ', ' + event.city +
-          ', ' + event.state;
+      eventItemTitleAddr.innerText = event.address;
       eventItemTitleAddr.className = 'event-item-address';
       eventItemTitleElement.appendChild(eventItemTitleName);
       eventItemTitleElement.appendChild(eventItemTitleAddr);
@@ -362,10 +362,10 @@ async function getEvents(events, index, option) {
       eventItemDistanceElement.innerText = event.startTime;
     } else {
       if (event.distance != null) {
-        eventItemDistanceElement.innerText = event.distance;
+        eventItemDistanceElement.innerText =
+            Math.round(event.distance / MI_TO_KM) + ' mi away';
       } else {
-        eventItemDistanceElement.innerText = event.streetAddress + ', ' +
-            event.city + ', ' + event.state;
+        eventItemDistanceElement.innerText = event.address;
       }
     }
     eventItemDetailsElement.appendChild(eventItemDistanceElement);
@@ -732,7 +732,6 @@ async function getMyEvents() {
 function searchLoadActions() {
   updateSearchBar();
   updateTagBox();
-  getEvents(dummyEvents, 0, 3); // TODO: delete once search() is implemented
   getSearchDistanceSettings();
 }
 
@@ -813,20 +812,26 @@ function updateTagBox() {
 /**
  * Placeholder function for search functionality
  */
-function search() {
-  let url = '/search.html?tags=';
+async function search() {
+  let url = '?tags=';
   tagsSearch.forEach(function(tag) {
-    url += tag + ',';
+    if (tag == 'LGBTQ+') {
+      url += 'LGBTQ%2B' + ',';
+    } else {
+      url += tag + ',';
+    }
   });
   // trim the last comma off
   if (url.charAt(url.length - 1) == ',') {
     url = url.substring(0, url.length - 1);
   }
 
-  url += '&searchDistance=' + searchDistance;
+  // TODO get user location
+  url += '&searchDistance=' + searchDistance + '&location=' + 'Los Angeles, CA';
 
-  window.location.href = url;
-  // TODO fetch call to server with search parameters
+  const response = await fetch('/search' + url);
+  const events = await response.json();
+  getEvents(events, 0, 3);
 }
 
 /* **********************************************************************
