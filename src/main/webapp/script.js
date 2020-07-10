@@ -922,7 +922,7 @@ function submitSurvey() {
 /**
  * Generates tags and tag-based features.
  */
-function displayIndividualEvent() {
+function displayIndividualEvent(id = 0) {
   const tagString = document.getElementById('tags-value').value;
   const tagArray = JSON.parse(tagString);
   let mainColor = tagArray[0];
@@ -934,6 +934,7 @@ function displayIndividualEvent() {
   loadEventTags(tagArray);
   loadDefaultImage(mainColor);
   loadAttendingColor(mainColor);
+  setupSave(id);
 }
 
 /**
