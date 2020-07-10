@@ -17,6 +17,18 @@
     <powermock.version>2.0.2</powermock.version>
   </properties>
 
+  <dependencyManagement>
+  <dependencies>
+    <dependency>
+      <groupId>com.google.cloud</groupId>
+      <artifactId>libraries-bom</artifactId>
+      <version>8.0.0</version>
+      <type>pom</type>
+      <scope>import</scope>
+    </dependency>
+  </dependencies>
+</dependencyManagement>
+
   <dependencies>
     <dependency>
       <groupId>javax.servlet</groupId>
@@ -78,6 +90,7 @@
       <version>${powermock.version}</version>
       <scope>test</scope>
     </dependency>
+
     <dependency>
       <groupId>org.powermock</groupId>
       <artifactId>powermock-api-mockito2</artifactId>
@@ -86,15 +99,22 @@
     </dependency>
 
     <dependency>
+      <groupId>com.google.cloud</groupId>
+      <artifactId>google-cloud-secretmanager</artifactId>
+    </dependency>
+
+    <dependency>
       <groupId>com.google.maps</groupId>
       <artifactId>google-maps-services</artifactId>
       <version>0.14.0</version>
     </dependency>
+
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
       <version>1.7.25</version>
     </dependency>
+
   </dependencies>
 
   <build>
