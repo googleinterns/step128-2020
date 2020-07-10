@@ -311,8 +311,7 @@ async function getEvents(events, index, option) {
     eventListElement.appendChild(eventItemElement);
 
     const eventImageElement = document.createElement('div');
-    eventImageElement.className = 'event-image ' + 'environment';
-    //eventImageElement.className = 'event-image ' + event.tags[0];
+    eventImageElement.className = 'event-image ' + event.tags[0];
 
     const eventItemInfoElement = document.createElement('div');
     eventItemInfoElement.className = 'event-item-info';
@@ -329,8 +328,7 @@ async function getEvents(events, index, option) {
       const eventItemTitleName = document.createElement('div');
       eventItemTitleName.innerText = event.eventName;
       const eventItemTitleAddr = document.createElement('div');
-      eventItemTitleAddr.innerText = event.streetAddress + ', ' + event.city +
-          ', ' + event.state;
+      eventItemTitleAddr.innerText = event.address;
       eventItemTitleAddr.className = 'event-item-address';
       eventItemTitleElement.appendChild(eventItemTitleName);
       eventItemTitleElement.appendChild(eventItemTitleAddr);
@@ -427,7 +425,7 @@ async function getEvents(events, index, option) {
     const tagsContainerElement = document.createElement('div');
     tagsContainerElement.className = 'tags-container';
     eventItemFooterElement.appendChild(tagsContainerElement);
-    event.tags.value.forEach(function(tag) {
+    event.tags.forEach(function(tag) {
       const tagElement = document.createElement('span');
       // class name is now (for example) 'tag environment'
       if (tag == 'LGBTQ+') tagElement.className = 'tag rainbow';
@@ -820,7 +818,11 @@ function updateTagBox() {
 async function search() {
   var url = '?tags=';
   tagsSearch.forEach(function(tag) {
-    url += tag + ',';
+    if (tag == 'LGBTQ+') {
+      url += 'LGBTQ%2B' + ','
+    } else {
+      url += tag + ',';
+    }
   });
   // trim the last comma off
   if (url.charAt(url.length - 1) == ',') {
