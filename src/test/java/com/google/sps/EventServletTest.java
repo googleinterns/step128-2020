@@ -27,7 +27,6 @@ import com.google.appengine.api.users.UserServiceFactory;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.sps.servlets.EventServlet;
-import com.google.sps.servlets.Utils;
 import java.io.IOException;
 import java.util.Arrays;
 import javax.servlet.http.HttpServletRequest;
