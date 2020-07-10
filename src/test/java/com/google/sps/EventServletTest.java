@@ -27,9 +27,9 @@ import com.google.appengine.api.users.UserServiceFactory;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.sps.servlets.EventServlet;
-import com.google.sps.servlets.Utils;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.junit.After;
@@ -47,6 +47,16 @@ public final class EventServletTest {
   private final LocalServiceTestHelper helper =
       new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
   private EventServlet testEventServlet;
+
+  private void assertEntitiesEqual(Entity goal, Entity resultEntity) {
+    Set<String> goalProperties = goal.getProperties().keySet();
+    Set<String> resultProperties = goal.getProperties().keySet();
+    // checks along each of entity properties
+    assertEquals(goalProperties.size(), resultProperties.size());
+    for (String s : goalProperties) {
+      assertEquals(goal.getProperty(s), resultEntity.getProperty(s));
+    }
+  }
 
   @Before
   public void setUp() throws IOException {
@@ -152,6 +162,7 @@ public final class EventServletTest {
     goalEntity.setProperty("coverPhoto", "/img-2030121");
     goalEntity.setIndexedProperty("tags", Arrays.asList(tags));
     goalEntity.setProperty("creator", creatorEmail);
+    goalEntity.setProperty("attendeeCount", 0L);
 
     // Retrieve the Entity posted to Datastore.
     DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
@@ -159,7 +170,7 @@ public final class EventServletTest {
 
     // Assert the Entity posted to Datastore has the same properties as the
     // the goalEntity.
-    assertEquals(goalEntity.getProperties(), postedEntity.getProperties());
+    assertEntitiesEqual(goalEntity, postedEntity);
   }
 
   @Test

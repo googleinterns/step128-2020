@@ -32,7 +32,6 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.google.sps.servlets.EventServlet;
 import com.google.sps.servlets.UserServlet;
-import com.google.sps.servlets.Utils;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -61,6 +60,18 @@ public final class UserServletTest {
   private static EventServlet testEventServlet;
   private UserServlet testUserServlet;
 
+  private void assertEntitiesEqual(Entity goal, Entity resultEntity) {
+    Set<String> goalProperties = goal.getProperties().keySet();
+    Set<String> resultProperties = goal.getProperties().keySet();
+    assertEquals(goalProperties.size(), resultProperties.size());
+    for (String s : goalProperties) {
+      // ignore attendeeCount, which is checked elsewhere
+      if (!s.equals("attendeeCount")) {
+        assertEquals(goal.getProperty(s), resultEntity.getProperty(s));
+      }
+    }
+  }
+
   /** Checks for equivalent content between two entity lists */
   private void assertListsEqual(List<Entity> goalEntityList, List<Entity> resultingEntities) {
     if (goalEntityList == null || resultingEntities == null) {
@@ -73,13 +84,7 @@ public final class UserServletTest {
     for (int i = 0; i < goalEntityList.size(); i++) {
       Entity goal = goalEntityList.get(i);
       Entity resultEntity = resultingEntities.get(i);
-      Set<String> goalProperties = goal.getProperties().keySet();
-      Set<String> resultProperties = goal.getProperties().keySet();
-      // checks along each of entity properties
-      assertEquals(goalProperties.size(), resultProperties.size());
-      for (String s : goalProperties) {
-        assertEquals(goal.getProperty(s), resultEntity.getProperty(s));
-      }
+      assertEntitiesEqual(goal, resultEntity);
     }
   }
 
@@ -191,9 +196,13 @@ public final class UserServletTest {
 
     DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
     Key userKey = KeyFactory.createKey("User", "test@example.com");
+    Key eventKey = KeyFactory.createKey("Event", id);
     try {
       Entity userEntity = ds.get(userKey);
       assertIdListsEqual(goalList, (ArrayList<Long>) userEntity.getProperty("saved"));
+
+      Entity eventEntity = ds.get(eventKey);
+      assertEquals(1L, eventEntity.getProperty("attendeeCount"));
     } catch (EntityNotFoundException exception) {
       // user should have been created during previous get/post calls
       fail();
@@ -234,6 +243,16 @@ public final class UserServletTest {
     callPost(id, "unsave");
 
     assertListsEqual(new ArrayList<Entity>(), callGet("saved"));
+
+    // make sure attendee count is updated correctly
+    DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
+    Key eventKey = KeyFactory.createKey("Event", id);
+    try {
+      Entity eventEntity = ds.get(eventKey);
+      assertEquals(0L, eventEntity.getProperty("attendeeCount"));
+    } catch (EntityNotFoundException exception) {
+      fail();
+    }
   }
 
   @Test
@@ -251,6 +270,14 @@ public final class UserServletTest {
     callPost(id, "save");
 
     assertListsEqual(goal, callGet("saved"));
+    DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
+    Key eventKey = KeyFactory.createKey("Event", id);
+    try {
+      Entity eventEntity = ds.get(eventKey);
+      assertEquals(1L, eventEntity.getProperty("attendeeCount"));
+    } catch (EntityNotFoundException exception) {
+      fail();
+    }
   }
 
   @Test
@@ -265,11 +292,16 @@ public final class UserServletTest {
     }
     List<Entity> goal = new ArrayList<>();
 
-    // save an event, then save it again
     TestingUtil.toggleLogin("test@example.com");
     callPost(id, "save");
 
     assertListsEqual(goal, callGet("saved"));
+
+    // ensure no changes to attendee counts
+    DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
+    for (Entity eventEntity : ds.prepare(new Query("Event")).asIterable()) {
+      assertEquals(0L, Integer.parseInt(eventEntity.getProperty("attendeeCount").toString()));
+    }
   }
 
   @Test
@@ -288,6 +320,17 @@ public final class UserServletTest {
     callPost(id1, "unsave");
 
     assertListsEqual(goalList, callGet("saved"));
+    Key eventKey0 = KeyFactory.createKey("Event", id0);
+    Key eventKey1 = KeyFactory.createKey("Event", id1);
+    DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
+    try {
+      Entity eventEntity0 = ds.get(eventKey0);
+      assertEquals(1L, eventEntity0.getProperty("attendeeCount"));
+      Entity eventEntity1 = ds.get(eventKey1);
+      assertEquals(0L, eventEntity1.getProperty("attendeeCount"));
+    } catch (EntityNotFoundException exception) {
+      fail();
+    }
   }
 
   @Test
@@ -308,6 +351,9 @@ public final class UserServletTest {
         TestingUtil.toggleLogin(email);
         assertListsEqual(new ArrayList<Entity>(), callGet("saved"));
         TestingUtil.toggleLogin(email);
+      }
+      for (Entity eventEntity : ds.prepare(new Query("Event")).asIterable()) {
+        assertEquals(0L, Integer.parseInt(eventEntity.getProperty("attendeeCount").toString()));
       }
     }
   }

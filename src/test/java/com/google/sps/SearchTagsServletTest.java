@@ -30,7 +30,6 @@ import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestC
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.maps.model.LatLng;
 import com.google.sps.servlets.SearchServlet;
-import com.google.sps.servlets.Utils;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
