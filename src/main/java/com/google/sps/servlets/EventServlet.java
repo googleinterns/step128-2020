@@ -91,6 +91,7 @@ public class EventServlet extends HttpServlet {
     eventEntity.setProperty("startTime", formattedTime);
     eventEntity.setProperty("endTime", endTime);
     eventEntity.setProperty("coverPhoto", coverPhoto);
+    eventEntity.setProperty("attendeeCount", 0);
 
     Gson gson = new Gson();
     String[] tags = gson.fromJson(tagsStr, String[].class);

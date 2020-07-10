@@ -178,6 +178,18 @@ public class UserServlet extends HttpServlet {
         LOGGER.info("event " + eventId + " has already been saved");
         return;
       }
+      Object attendees = eventEntity.getProperty("attendeeCount");
+      int attendeeCount = 1;
+      if (attendees != null) {
+        try {
+          attendeeCount += Integer.parseInt(attendees.toString());
+        } catch (NumberFormatException num) {
+          LOGGER.info("error parsing attendee count  for event id " + eventId);
+          attendeeCount = 0;
+        }
+      }
+      eventEntity.setProperty("attendeeCount", attendeeCount);
+      datastore.put(eventEntity);
       saved.add(eventId);
     } catch (EntityNotFoundException e) {
       LOGGER.info("event " + eventId + " does not exist");
@@ -189,6 +201,30 @@ public class UserServlet extends HttpServlet {
     for (int i = 0; i < saved.size(); i++) {
       if (saved.get(i) == eventId) {
         saved.remove(i);
+
+        DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+        Key eventKey = KeyFactory.createKey("Event", eventId);
+        try {
+          Entity eventEntity = datastore.get(eventKey);
+          Object attendees = eventEntity.getProperty("attendeeCount");
+          int attendeeCount = -1;
+          if (attendees != null) {
+            try {
+              attendeeCount += Integer.parseInt(attendees.toString());
+            } catch (NumberFormatException num) {
+              LOGGER.info("error parsing attendee count  for event id " + eventId);
+              attendeeCount = 0;
+            }
+          }
+          if (attendeeCount < 0) {
+            attendeeCount = 0;
+          }
+          eventEntity.setProperty("attendeeCount", attendeeCount);
+          datastore.put(eventEntity);
+        } catch (EntityNotFoundException e) {
+          LOGGER.info("event " + eventId + " does not exist");
+        }
+
         return;
       }
     }
