@@ -24,15 +24,27 @@ public class SecretHandler {
   private static final String API_KEY_ID = "api-key";
   private static final String VERSION_ID = "1";
 
+  /**
+   * Returns a String containing the API key. Throws an exception if the Secret manager client is
+   * unable to be created.
+   */
   public static String getApiKey() throws IOException {
-    try (SecretManagerServiceClient client = SecretManagerServiceClient.create()) {
+    SecretManagerServiceClient client = null;
+    String result = "";
+    try {
+      client = SecretManagerServiceClient.create();
       SecretVersionName secretVersionName =
           SecretVersionName.of(PROJECT_ID, API_KEY_ID, VERSION_ID);
 
       AccessSecretVersionResponse response = client.accessSecretVersion(secretVersionName);
-      String result = response.getPayload().getData().toStringUtf8();
-      client.close();
+      result = response.getPayload().getData().toStringUtf8();
 
+    } catch (IOException e) {
+      throw new IOException("failed to create secret manager service client");
+    } finally {
+      if (client != null) {
+        client.close();
+      }
       return result;
     }
   }
