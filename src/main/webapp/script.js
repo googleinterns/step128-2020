@@ -362,7 +362,7 @@ async function getEvents(events, index, option) {
       eventItemDistanceElement.innerText = event.startTime;
     } else {
       if (event.distance != null) {
-        eventItemDistanceElement.innerText = 
+        eventItemDistanceElement.innerText =
             Math.round(event.distance / MI_TO_KM) + ' mi away';
       } else {
         eventItemDistanceElement.innerText = event.address;
