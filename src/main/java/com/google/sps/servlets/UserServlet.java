@@ -185,7 +185,7 @@ public class UserServlet extends HttpServlet {
         try {
           attendeeCount += Integer.parseInt(attendees.toString());
         } catch (NumberFormatException num) {
-          LOGGER.info("error parsing attendee count  for event id " + eventId);
+          LOGGER.info("error parsing attendee count for event id " + eventId);
           attendeeCount = 0;
         }
       }
@@ -213,7 +213,7 @@ public class UserServlet extends HttpServlet {
             try {
               attendeeCount += Integer.parseInt(attendees.toString());
             } catch (NumberFormatException num) {
-              LOGGER.info("error parsing attendee count  for event id " + eventId);
+              LOGGER.info("error parsing attendee count for event id " + eventId);
               attendeeCount = 0;
             }
           }
