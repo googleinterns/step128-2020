@@ -181,7 +181,7 @@ a:link, a:visited {
 }
 
 .page-header-left a {
-  font-size: 0.77em;
+  font-size: 0.79em;
 }
 
 .page-header-right {
@@ -485,6 +485,10 @@ h1 {
   font-size: 3.3vw;
 }
 
+.event-item-date {
+  font-size: 3.3vw;
+}
+
 .event-item-details {
   /* top-left part of item header with date and location */
   display: flex;
@@ -497,7 +501,7 @@ h1 {
 
 .event-item-title {
   font-weight: bold;
-  font-size: 4vw;
+  font-size: 5vw;
   margin: 3vw 0;
 }
 
