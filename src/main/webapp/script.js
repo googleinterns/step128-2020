@@ -212,6 +212,8 @@ const recommendedForYou = 0;
 const savedEvents = 1;
 const createdEvents = 2;
 
+const MI_TO_KM = 1.609;
+
 // Two test examples to use with getEvents()
 const test = {eventName: 'Beach clean up',
   eventDescription: 'Lorem ipsum dolor sit amet, consectetur. ' +
@@ -366,10 +368,9 @@ async function getEvents(events, index, option) {
       eventItemDistanceElement.innerText = event.startTime;
     } else {
       if (event.distance != null) {
-        eventItemDistanceElement.innerText = event.distance;
+        eventItemDistanceElement.innerText = Math.round(event.distance / MI_TO_KM) + " mi away" ;
       } else {
-        eventItemDistanceElement.innerText = event.streetAddress + ', ' +
-            event.city + ', ' + event.state;
+        eventItemDistanceElement.innerText = event.address;
       }
     }
     eventItemDetailsElement.appendChild(eventItemDistanceElement);
@@ -426,7 +427,7 @@ async function getEvents(events, index, option) {
     const tagsContainerElement = document.createElement('div');
     tagsContainerElement.className = 'tags-container';
     eventItemFooterElement.appendChild(tagsContainerElement);
-    event.tags.forEach(function(tag) {
+    event.tags.value.forEach(function(tag) {
       const tagElement = document.createElement('span');
       // class name is now (for example) 'tag environment'
       if (tag == 'LGBTQ+') tagElement.className = 'tag rainbow';
@@ -831,16 +832,16 @@ async function search() {
 
   //window.location.href = '/search.html' + url;
   // TODO fetch call to server with search parameters
-  
+  console.log('/search' + url);
   const response = await fetch('/search' + url);
   const events = await response.json();
-  console.log(events);
+  console.log(events);/*
   events.forEach(function(event) {
     let tagStr = event.propertyMap.tags.substring(1, event.propertyMap.tags.length - 1);
     tagStr = tagStr.replace(/"/g, '');;
     event.propertyMap.tags = tagStr.split(',');
     
-  });
+  });*/
   getEvents(events, 0, 0);
 }
 
