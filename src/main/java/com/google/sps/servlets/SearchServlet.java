@@ -66,7 +66,6 @@ public class SearchServlet extends HttpServlet {
       Filter tagsFilter = new FilterPredicate("tags", FilterOperator.IN, searchTags);
       query = new Query("Event").setFilter(tagsFilter);
     } else {
-      System.out.println("else");
       query = new Query("Event");
     }
 
