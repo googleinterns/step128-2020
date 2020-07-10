@@ -37,6 +37,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -445,7 +446,8 @@ public final class UserServletTest {
     entity.setProperty("startTime", "2:00 PM");
     entity.setProperty("endTime", "");
     entity.setProperty("coverPhoto", "");
-    entity.setProperty("tags", "['environment']");
+    String[] tags = {"environment"};
+    entity.setIndexedProperty("tags", Arrays.asList(tags));
     entity.setProperty("creator", "test@example.com");
 
     return entity;
@@ -461,7 +463,8 @@ public final class UserServletTest {
     entity.setProperty("startTime", "1:00 PM");
     entity.setProperty("endTime", "");
     entity.setProperty("coverPhoto", "");
-    entity.setProperty("tags", "['blm']");
+    String[] tags = {"blm"};
+    entity.setIndexedProperty("tags", Arrays.asList(tags));
     entity.setProperty("creator", "test@example.com");
 
     return entity;
@@ -477,7 +480,8 @@ public final class UserServletTest {
     entity.setProperty("startTime", "10:00 AM");
     entity.setProperty("endTime", "");
     entity.setProperty("coverPhoto", "");
-    entity.setProperty("tags", "['education']");
+    String[] tags = {"education"};
+    entity.setIndexedProperty("tags", Arrays.asList(tags));
     entity.setProperty("creator", "another@example.com");
 
     return entity;

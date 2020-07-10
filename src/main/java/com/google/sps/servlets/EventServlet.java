@@ -19,10 +19,12 @@ import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
+import com.google.gson.Gson;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.logging.Logger;
 import javax.servlet.annotation.WebServlet;
@@ -71,7 +73,7 @@ public class EventServlet extends HttpServlet {
     String startTime = getParameter(request, "start-time", "");
     String endTime = getParameter(request, "end-time", "");
     String coverPhoto = getParameter(request, "cover-photo", "");
-    String tags = getParameter(request, "all-tags", "");
+    String tagsStr = getParameter(request, "all-tags", "");
 
     final String fullAddress = String.format("%1$s, %2$s, %3$s", streetAddress, city, state);
     final String formattedDate = formatDate(date);
@@ -89,8 +91,11 @@ public class EventServlet extends HttpServlet {
     eventEntity.setProperty("startTime", formattedTime);
     eventEntity.setProperty("endTime", endTime);
     eventEntity.setProperty("coverPhoto", coverPhoto);
-    eventEntity.setProperty("tags", tags);
     eventEntity.setProperty("attendeeCount", 0);
+
+    Gson gson = new Gson();
+    String[] tags = gson.fromJson(tagsStr, String[].class);
+    eventEntity.setIndexedProperty("tags", Arrays.asList(tags));
 
     return eventEntity;
   }

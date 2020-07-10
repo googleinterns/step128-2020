@@ -58,9 +58,16 @@ public class SearchServlet extends HttpServlet {
     // List of all the tags we are searching for
     List<String> searchTags =
         new ArrayList<String>(Arrays.asList(request.getParameterValues("tags")));
-    // Filter to check if the event has any of tags we're searching for
-    Filter tagsFilter = new FilterPredicate("tags", FilterOperator.IN, searchTags);
-    Query query = new Query("Event").setFilter(tagsFilter);
+
+    Query query = null;
+    // Check if there are no tags
+    if (!searchTags.get(0).equals("")) {
+      // Filter to check if the event has any of tags we're searching for
+      Filter tagsFilter = new FilterPredicate("tags", FilterOperator.IN, searchTags);
+      query = new Query("Event").setFilter(tagsFilter);
+    } else {
+      query = new Query("Event");
+    }
 
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     PreparedQuery results = datastore.prepare(query);
@@ -73,13 +80,7 @@ public class SearchServlet extends HttpServlet {
 
     // Get distance between user and the location of all the events
     for (Entity event : events) {
-      String[] locationProperties =
-          new String[] {
-            event.getProperty("streetAddress").toString(),
-            event.getProperty("city").toString(),
-            event.getProperty("state").toString()
-          };
-      LatLng eventLocation = Utils.getLatLng(String.join(" ", locationProperties));
+      LatLng eventLocation = Utils.getLatLng(event.getProperty("address").toString());
 
       int distance = Utils.getDistance(userLocation, eventLocation);
       event.setProperty("distance", distance);
