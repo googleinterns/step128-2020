@@ -58,13 +58,7 @@ public class SearchServlet extends HttpServlet {
     // List of all the tags we are searching for
     List<String> searchTags =
         new ArrayList<String>(Arrays.asList(request.getParameterValues("tags")));
-    System.out.println(searchTags); /*
-    for (int i = 0; i < searchTags.size(); i++) {
-      String a = searchTags.get(i);
-      searchTags.set(i, "\"" + a + "\"");
-    }
-    System.out.println(searchTags);
-*/
+
     Query query = null;
     // Check if there are no tags
     if (!searchTags.get(0).equals("")) {
@@ -80,8 +74,6 @@ public class SearchServlet extends HttpServlet {
     PreparedQuery results = datastore.prepare(query);
     List<Entity> events =
         new ArrayList<Entity>(results.asList(FetchOptions.Builder.withDefaults()));
-    System.out.println(events);
-    // System.out.println(events.get(0).getProperty("tags"));
 
     // Get location of user
     String location = request.getParameter("location");

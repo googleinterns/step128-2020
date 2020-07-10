@@ -44,7 +44,6 @@ public class EventServlet extends HttpServlet {
 
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    System.out.println(request.toString());
     UserService userService = UserServiceFactory.getUserService();
     if (userService.isUserLoggedIn()) {
       String email = userService.getCurrentUser().getEmail();
@@ -75,10 +74,8 @@ public class EventServlet extends HttpServlet {
     String endTime = getParameter(request, "end-time", "");
     String coverPhoto = getParameter(request, "cover-photo", "");
     String tagsStr = getParameter(request, "all-tags", "");
-    System.out.println(tagsStr);
     Gson gson = new Gson();
     String[] tags = gson.fromJson(tagsStr, String[].class);
-    System.out.println(tags);
 
     final String fullAddress = String.format("%1$s, %2$s, %3$s", streetAddress, city, state);
     final String formattedDate = formatDate(date);

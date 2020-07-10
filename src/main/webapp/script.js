@@ -295,14 +295,7 @@ async function getEvents(events, index, option) {
   }
 
   events.forEach(function(event) {
-    // TODO: adjust for string parsing based on how servlet returns the data
-    //   if (typeof event.tags === 'string') {
-    //     var tagsString = event.tags.substring(1, event.tags.length - 1);
-    //     event.tags = tagsString.split(', ');
-    //   }
-    console.log(event);
     event = event.propertyMap;
-    console.log(event);
 
     const eventItemElement = document.createElement('a');
     eventItemElement.className = 'event-item';
@@ -832,18 +825,8 @@ async function search() {
   // TODO get user location
   url += '&searchDistance=' + searchDistance + '&location=' + 'Los Angeles, CA';
 
-  //window.location.href = '/search.html' + url;
-  // TODO fetch call to server with search parameters
-  console.log('/search' + url);
   const response = await fetch('/search' + url);
   const events = await response.json();
-  console.log(events);/*
-  events.forEach(function(event) {
-    let tagStr = event.propertyMap.tags.substring(1, event.propertyMap.tags.length - 1);
-    tagStr = tagStr.replace(/"/g, '');;
-    event.propertyMap.tags = tagStr.split(',');
-    
-  });*/
   getEvents(events, 0, 0);
 }
 
