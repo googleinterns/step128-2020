@@ -165,6 +165,8 @@ public class UserServlet extends HttpServlet {
       entity.setProperty("id", userEmail);
       datastore.put(entity);
     }
+
+    response.sendRedirect("/my-events.html");
   }
 
   // adds event id to list if it is not already present
