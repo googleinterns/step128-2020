@@ -303,7 +303,7 @@ async function getEvents(events, index, option) {
     const eventItemElement = document.createElement('a');
     eventItemElement.className = 'event-item';
     eventItemElement.setAttribute('onclick', 'openLink("' +
-        event.key + '")');
+        event.eventKey + '")');
     eventListElement.appendChild(eventItemElement);
 
     const eventImageElement = document.createElement('div');
