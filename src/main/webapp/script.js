@@ -935,7 +935,6 @@ function displayIndividualEvent(id = 0, alreadySaved = -1) {
   loadDefaultImage(mainColor);
   loadAttendingColor(mainColor);
   loadOptionalFields();
-
   setupSave(id, alreadySaved);
 }
 
@@ -1009,7 +1008,7 @@ function setupSave(id, alreadySaved) {
   }
 }
 
-/** Makes the servlet call to save an event. */
+/** Makes the servlet call to save an event */
 async function saveEvent(eventId) {
   const params = new URLSearchParams();
   params.append("event", eventId);
