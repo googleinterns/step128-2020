@@ -19,6 +19,24 @@
 let url = '';
 let loggedIn = false;
 
+// Firebase configuration
+var firebaseConfig = {
+  apiKey: "AIzaSyBt4BitYGc3aUw4aGVpLGyrXnJZbAXX9RE",
+  authDomain: "unitebystep.firebaseapp.com",
+  databaseURL: "https://unitebystep.firebaseio.com",
+  projectId: "unitebystep",
+  storageBucket: "unitebystep.appspot.com",
+  messagingSenderId: "654189328956",
+  appId: "1:654189328956:web:22ec1bce47a9cc1972e139",
+  measurementId: "G-QCZ0TV4734"
+};
+
+// Initialize Firebase
+function initializeFirebase() {
+  firebase.initializeApp(firebaseConfig);
+  firebase.analytics();
+}
+
 /**
  * determines which stylesheet to use and generates nav bar
  *
@@ -32,9 +50,19 @@ function loadActions(doAfter) {
     styleSheetElement.href = 'style-mobile.css';
   }
 
-  checkLogin(doAfter);
-
-  generateNavBar();
+  initializeFirebase();
+  
+  firebase.auth().onAuthStateChanged(function(user) {
+    if (user) {
+      loggedIn = true;
+    } else {
+      loggedIn = false;        
+    }
+    doAfter();
+    generateNavBar();
+  }, function(error) {
+    console.log(error);
+  });
 }
 
 /**
@@ -51,6 +79,17 @@ async function checkLogin(doAfter) {
         doAfter();
       });
 }
+
+function firebaseLogout() {
+  firebase.auth().signOut().then(function() {
+    // Sign-out successful.
+    window.location.href = "/index.html";
+  }).catch(function(error) {
+    // An error happened.
+    console.log(error);
+  });
+}
+
 
 /**
  * Generates navigation bar for the page
@@ -90,9 +129,22 @@ function generateNavBar() {
 
   const myLink = document.createElement('a');
   myLink.className = 'nav-item';
-  myLink.href = '/my-events.html';
-  myLink.innerText = 'My Events';
+  if (loggedIn) {
+    myLink.href = '/my-events.html';
+    myLink.innerText = 'My Events';
+  } else {
+    myLink.href = '/login.html';
+    myLink.innerText = 'Login';
+  }
   headerRight.appendChild(myLink);
+
+  if (loggedIn) {
+    const logoutLink = document.createElement('a');
+    logoutLink.className = 'nav-item';
+    logoutLink.href = 'javascript:firebaseLogout()';
+    logoutLink.innerText = 'Logout';
+    headerRight.appendChild(logoutLink);
+  }
 
   const dropdown = document.createElement('div');
   dropdown.className = 'dropdown';
@@ -693,7 +745,7 @@ async function getRecommendedEvents() {
           getEvents(dummyEvents, 1, 0);
         });
   } else {
-    alert('Please log in first!');
+    //alert('Please log in first!');
   }
   getSearchDistanceSettings();
 }
@@ -942,4 +994,33 @@ function loadDefaultImage(color) {
 function loadAttendingColor(color) {
   const countContainer = document.getElementsByClassName('attendee-count')[0];
   countContainer.className = 'attendee-count ' + color + '-text';
+}
+
+/* **********************************************************************
+ * Methods for login.html
+ * **********************************************************************/
+
+// FirebaseUI config.
+let uiConfig = {
+  signInSuccessUrl: '/index.html',
+  signInOptions: [
+    // Leave the lines as is for the providers you want to offer your users.
+    firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+    firebase.auth.EmailAuthProvider.PROVIDER_ID,
+  ],
+  // tosUrl and privacyPolicyUrl accept either url string or a callback
+  // function.
+  // Terms of service url/callback.
+  tosUrl: '<your-tos-url>',
+  // Privacy policy url/callback.
+  privacyPolicyUrl: function() {
+    window.location.assign('<your-privacy-policy-url>');
+  }
+};
+
+function initializeFirebaseLogin() {
+  // Initialize the FirebaseUI Widget using Firebase.
+  let ui = new firebaseui.auth.AuthUI(firebase.auth());
+  // The start method will wait until the DOM is loaded.
+  ui.start('#firebaseui-auth-container', uiConfig);
 }
