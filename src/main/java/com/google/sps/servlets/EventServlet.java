@@ -17,6 +17,9 @@ package com.google.sps.servlets;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
+import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.gson.Gson;
@@ -53,12 +56,27 @@ public class EventServlet extends HttpServlet {
       DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
       datastore.put(eventEntity);
 
+      allocateEventKey(eventEntity);
+
     } else {
       throw new IOException("Cannot create an event while not logged in");
     }
 
     // Redirect back to the my-events HTML page.
     response.sendRedirect("/my-events.html");
+  }
+
+  private void allocateEventKey(Entity event) {
+    Key eventKey = event.getKey();
+    String keyString = KeyFactory.keyToString(eventKey);
+
+    Query query = new Query("Event", eventKey);
+
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    Entity eventCreated = datastore.prepare(query).asSingleEntity();
+
+    eventCreated.setProperty("eventKey", keyString);
+    datastore.put(eventCreated);
   }
 
   /** @return the Event entity */
