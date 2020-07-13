@@ -106,6 +106,7 @@ public class LoadEventServlet extends HttpServlet {
     request.setAttribute("attendees", attendeeCount);
     request.setAttribute("saved", alreadySaved);
 
+
     return request;
   }
 
