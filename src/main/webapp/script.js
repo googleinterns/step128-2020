@@ -321,7 +321,9 @@ async function getEvents(events, index, option) {
     eventListElement.appendChild(eventItemElement);
 
     const eventImageElement = document.createElement('div');
-    eventImageElement.className = 'event-image ' + event.tags[0];
+    let primaryTag = event.tags[0];
+    if (primaryTag == 'LGBTQ+') primaryTag = 'LGBTQ';
+    eventImageElement.className = 'event-image ' + primaryTag;
 
     const eventItemInfoElement = document.createElement('div');
     eventItemInfoElement.className = 'event-item-info';
@@ -422,7 +424,7 @@ async function getEvents(events, index, option) {
       attendeeCountContainerElement.className = 'attendee-count-container';
 
       const attendeeCountElement = document.createElement('span');
-      attendeeCountElement.className = 'attendee-count ' + event.tags[0] +
+      attendeeCountElement.className = 'attendee-count ' + primaryTag +
           '-text';
       attendeeCountElement.innerText = event.attendeeCount;
       attendeeCountContainerElement.appendChild(attendeeCountElement);
@@ -444,6 +446,7 @@ async function getEvents(events, index, option) {
       tagsContainerElement.appendChild(tagElement);
     });
   });
+  generateRainbowTags();
 
   // generates this structure:
   //
