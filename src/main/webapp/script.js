@@ -246,10 +246,26 @@ function generateMobileNavLayout() {
   const myBullet = document.createElement('li');
   const myLink = document.createElement('a');
   myLink.className = 'dropdown-item';
-  myLink.href = '/my-events.html';
-  myLink.innerText = 'My Events';
+  if (loggedIn) {
+    myLink.href = '/my-events.html';
+    myLink.innerText = 'My Events';
+  } else {
+    myLink.href = '/login.html';
+    myLink.innerText = 'Login';
+  }
   myBullet.appendChild(myLink);
   dropdownBar.appendChild(myBullet);
+
+  if (loggedIn) {
+    const logoutBullet = document.createElement('li');
+    const logoutLink = document.createElement('a');
+    logoutLink.className = 'dropdown-item';
+    logoutLink.href = 'javascript:firebaseLogout()';
+    logoutLink.innerText = 'Logout';
+    logoutBullet.appendChild(logoutLink);
+    dropdownBar.appendChild(logoutBullet);
+  }
+
 
   dropdownContainer.appendChild(dropdownBar);
 }
@@ -745,7 +761,7 @@ async function getRecommendedEvents() {
           getEvents(dummyEvents, 1, 0);
         });
   } else {
-    //alert('Please log in first!');
+    alert('Please log in first!');
   }
   getSearchDistanceSettings();
 }
