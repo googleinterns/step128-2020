@@ -33,8 +33,6 @@ function loadActions(doAfter) {
   }
 
   checkLogin(doAfter);
-
-  generateNavBar();
 }
 
 /**
@@ -48,6 +46,8 @@ async function checkLogin(doAfter = null) {
       .then(function(responseJson) {
         loggedIn = responseJson.loggedIn;
         url = responseJson.url;
+
+        generateNavBar();
         if(doAfter != null) {
           doAfter();
         }
@@ -92,8 +92,14 @@ function generateNavBar() {
 
   const myLink = document.createElement('a');
   myLink.className = 'nav-item';
-  myLink.href = '/my-events.html';
-  myLink.innerText = 'My Events';
+  if(loggedIn) {
+    myLink.href = '/my-events.html';
+    myLink.innerText = 'My Events';
+  } else {
+    myLink.href = url;
+    myLink.innerText = "Login";
+  }
+  
   headerRight.appendChild(myLink);
 
   const dropdown = document.createElement('div');
@@ -196,8 +202,13 @@ function generateMobileNavLayout() {
   const myBullet = document.createElement('li');
   const myLink = document.createElement('a');
   myLink.className = 'dropdown-item';
-  myLink.href = '/my-events.html';
-  myLink.innerText = 'My Events';
+  if(loggedIn) {
+    myLink.href = '/my-events.html';
+    myLink.innerText = 'My Events';
+  } else {
+    myLink.href = url;
+    myLink.innerText = "Login";
+  }
   myBullet.appendChild(myLink);
   dropdownBar.appendChild(myBullet);
 
