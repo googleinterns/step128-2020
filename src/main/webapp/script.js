@@ -992,6 +992,7 @@ function loadOptionalFields() {
 
     timeContainer.appendChild(end);
   }
+}
 
 /** Adds onclick action to the event display's save-event button */
 function setupSave(id) {
