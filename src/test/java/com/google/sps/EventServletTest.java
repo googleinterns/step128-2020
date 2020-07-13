@@ -163,6 +163,7 @@ public final class EventServletTest {
     goalEntity.setIndexedProperty("tags", Arrays.asList(tags));
     goalEntity.setProperty("creator", creatorEmail);
     goalEntity.setProperty("attendeeCount", 0L);
+    goalEntity.setProperty("eventKey", "agR0ZXN0cgsLEgVFdmVudBgBDA");
 
     // Retrieve the Entity posted to Datastore.
     DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
