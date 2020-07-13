@@ -141,8 +141,7 @@ public final class SearchTagsServletTest {
     when(response.getWriter()).thenReturn(pw);
 
     // Send the request to the servlet with param
-    String[] paramArr = {"environment"};
-    when(request.getParameterValues("tags")).thenReturn(paramArr);
+    when(request.getParameter("tags")).thenReturn("environment");
     when(request.getParameter("location")).thenReturn("Los Angeles, CA");
     when(request.getParameter("searchDistance")).thenReturn("5000");
 
@@ -174,8 +173,7 @@ public final class SearchTagsServletTest {
     when(response.getWriter()).thenReturn(pw);
 
     // Send the request to the servlet with param
-    String[] paramArr = {"environment", "blm", "education"};
-    when(request.getParameterValues("tags")).thenReturn(paramArr);
+    when(request.getParameter("tags")).thenReturn("environment,blm,education");
     when(request.getParameter("location")).thenReturn("Los Angeles, CA");
     when(request.getParameter("searchDistance")).thenReturn("5000");
 
@@ -212,8 +210,7 @@ public final class SearchTagsServletTest {
     when(response.getWriter()).thenReturn(pw);
 
     // Send the request to the servlet with param
-    String[] paramArr = {"education"};
-    when(request.getParameterValues("tags")).thenReturn(paramArr);
+    when(request.getParameter("tags")).thenReturn("education");
     when(request.getParameter("location")).thenReturn("Los Angeles, CA");
     when(request.getParameter("searchDistance")).thenReturn("50");
 
@@ -249,8 +246,7 @@ public final class SearchTagsServletTest {
     when(response.getWriter()).thenReturn(pw);
 
     // Send the request to the servlet with param
-    String[] paramArr = {"education"};
-    when(request.getParameterValues("tags")).thenReturn(paramArr);
+    when(request.getParameter("tags")).thenReturn("education");
     when(request.getParameter("location")).thenReturn("Los Angeles, CA");
     when(request.getParameter("searchDistance")).thenReturn("5000");
 
