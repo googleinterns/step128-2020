@@ -57,7 +57,7 @@
           <div class="share-wrapper">
             <h3>Share</h3>
             <div class="share-container">
-              <!-- hrefs will contain the correct link when the page is generated w/JS -->
+              <!-- TODO: fix urls once this is deployed -->
               <a href = "https://twitter.com/share?url=http://google.com/" target="_blank">
                   <img src="images/twitter.svg" alt="Twitter"/>
               </a>
