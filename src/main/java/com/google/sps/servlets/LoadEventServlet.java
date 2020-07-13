@@ -68,6 +68,7 @@ public class LoadEventServlet extends HttpServlet {
     String end = event.getProperty("endTime").toString();
     String address = event.getProperty("address").toString();
     String tags = Utils.convertToJson(event.getProperty("tags"));
+    String attendeeCount = event.getProperty("attendeeCount").toString();
     long eventId = event.getKey().getId();
 
     request.setAttribute("name", name);
@@ -78,6 +79,7 @@ public class LoadEventServlet extends HttpServlet {
     request.setAttribute("address", address);
     request.setAttribute("tags", tags);
     request.setAttribute("id", eventId);
+    request.setAttribute("attendees", attendeeCount);
 
     return request;
   }

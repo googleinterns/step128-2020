@@ -7,7 +7,7 @@
     <link rel="icon" href="images/step-favicon.svg" type="image/svg" sizes="16x16">
     <script src="script.js"></script>
   </head>
-  <body id="body" onload="loadActions(); displayIndividualEvent();">
+  <body id="body" onload="loadActions(); displayIndividualEvent(${id});">
     <div class="header"></div>
     <div class="event-display-container">
       <div class="event-left-details">
@@ -16,7 +16,7 @@
           <div class="event-display-header">
             <div class = "event-display-title">${name}</div>
             <div class="attendee-count-container">
-              <span class="attendee-count">12</span> 
+              <span class="attendee-count">${attendees}</span> 
               already attending
             </div>
           </div>
