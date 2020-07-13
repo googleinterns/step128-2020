@@ -922,7 +922,7 @@ function submitSurvey() {
 /**
  * Generates tags and tag-based features.
  */
-function displayIndividualEvent(id = 0) {
+function displayIndividualEvent(id = 0, alreadySaved = -1) {
   const tagString = document.getElementById('tags-value').value;
   const tagArray = JSON.parse(tagString);
   let mainColor = tagArray[0];
@@ -936,7 +936,7 @@ function displayIndividualEvent(id = 0) {
   loadAttendingColor(mainColor);
   loadOptionalFields();
 
-  setupSave(id);
+  setupSave(id, alreadySaved);
 }
 
 /**
@@ -994,15 +994,22 @@ function loadOptionalFields() {
   }
 }
 
-/** Adds onclick action to the event display's save-event button */
-function setupSave(id) {
+/** Adds onclick action to the event display's save-event button. */
+function setupSave(id, alreadySaved) {
   const saveButton = document.getElementsByClassName('save-event')[0];
-  saveButton.onclick = function() {
-    saveEvent(id);
+  if(alreadySaved >= 0) {
+    saveButton.innerText = 'Unsave Event';
+    saveButton.onclick = function() {
+      unsaveEvent(id);
+    }
+  } else {
+    saveButton.onclick = function() {
+      saveEvent(id);
+    }
   }
 }
 
-/** Makes the servlet call to save an event */
+/** Makes the servlet call to save an event. */
 async function saveEvent(eventId) {
   const params = new URLSearchParams();
   params.append("event", eventId);
