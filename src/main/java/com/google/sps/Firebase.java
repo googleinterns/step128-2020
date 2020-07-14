@@ -40,11 +40,15 @@ public class Firebase {
     }
   }
 
+  /**
+   * Returns the uID of a user based off the token provided by the client.
+   *
+   * @param userToken String token used to authenticate the user
+   * @return String uID returned after authentication
+   */
   public static String authenticateUser(String userToken) {
-    // Retrieve auth service by passing the defaultApp variable
     FirebaseAuth defaultAuth = FirebaseAuth.getInstance(defaultApp);
 
-    // idToken comes from the client app (shown above)
     FirebaseToken decodedToken = null;
     String uid = "";
     try {
@@ -57,6 +61,13 @@ public class Firebase {
     return uid;
   }
 
+  /**
+   * Returns the logged in state of the user based off the token returned
+   * by the client.
+   *
+   * @param userToken String token used to check if logged in
+   * @return Boolean condition
+   */
   public static boolean isUserLoggedIn(String userToken) {
     return !userToken.equals("");
   }
