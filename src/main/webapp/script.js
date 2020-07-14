@@ -66,6 +66,7 @@ function loadActions(doAfter) {
 }
 
 /**
+ * DEPRECATED: Use Firebase system instead
  * checks for login status and fetches login/logout url
  *
  * @param {function} doAfter Will call this function after handling login
@@ -94,18 +95,16 @@ function firebaseLogout() {
   });
 }
 
-async function getUserIDTokenForURL() {
+async function getUserIDToken() {
   return new Promise(resolve => {
-    let uID = '';
     if (loggedIn) {
       firebase.auth().currentUser.getIdToken(/* forceRefresh */ true).then(function(idToken) {
-        uID = 'userToken=' + idToken;
-        resolve(uID);
+        resolve(idToken);
       }).catch(function(error) {
         console.log(error);
       });
     } else {
-      resolve('userToken=' + uID);
+      resolve('');
     }
   });
 }
@@ -704,8 +703,8 @@ function verifyTags() {
     // Convert tags selected array into string
     const jsonArray = JSON.stringify(tagsSelected);
     const tags = createHiddenInput(jsonArray);
-    getUserIDTokenForURL().then((preToken) => {
-      let userToken = createHiddenInput(preToken.substring(10, preToken.length));
+    getUserIDToken().then((preToken) => {
+      let userToken = createHiddenInput(preToken);
       userToken.name = 'userToken';
 
       // Add string of tags to form for submission
@@ -781,8 +780,8 @@ function updateEventTagBox() {
  */
 async function getRecommendedEvents() {
   if (loggedIn) {
-    getUserIDTokenForURL().then((userToken) => {
-      fetch('/user?get=saved&' + userToken).then((response) => response.json())
+    getUserIDToken().then((userToken) => {
+      fetch('/user?get=saved&userToken=' + userToken).then((response) => response.json())
         .then(function(js) {
         // TODO: change this fetch call to get recommendations instead
           getEvents(dummyEvents, 1, 0);
@@ -805,13 +804,12 @@ async function getRecommendedEvents() {
  */
 async function getMyEvents() {
   if (loggedIn) {
-    getUserIDTokenForURL().then((userToken) => {
-      let url = '/user?get=saved&' + userToken;
-      fetch(url).then((response) => response.json())
+    getUserIDToken().then((userToken) => {
+      fetch('/user?get=saved&userToken=' + userToken).then((response) => response.json())
         .then(function(js) {
           getEvents(js, 0, 1);
         });
-      fetch('/user?get=created&' + userToken).then((response) => response.json())
+      fetch('/user?get=created&userToken=' + userToken).then((response) => response.json())
         .then(function(js) {
           getEvents(js, 1, 2);
         });
@@ -851,6 +849,7 @@ async function unsaveEvent(eventId) {
   const params = new URLSearchParams();
   params.append('event', eventId);
   params.append('action', 'unsave');
+  params.append('userToken', getUserIDToken());
   fetch(new Request('/user', {method: 'POST', body: params}));
 }
 
@@ -1008,6 +1007,7 @@ function submitSurvey() {
         params.append(tagsAll[i], score);
       }
     }
+    params.append('userToken', getUserIDToken());
     fetch(new Request('/submit-survey', {method: 'POST', body: params}));
   } else {
     // cannot submit while not logged in
@@ -1153,5 +1153,6 @@ async function saveEvent(eventId) {
   const params = new URLSearchParams();
   params.append('event', eventId);
   params.append('action', 'save');
+  params.append('userToken', getUserIDToken());
   fetch(new Request('/user', {method: 'POST', body: params}));
 }

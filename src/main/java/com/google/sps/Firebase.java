@@ -62,8 +62,7 @@ public class Firebase {
   }
 
   /**
-   * Returns the logged in state of the user based off the token returned
-   * by the client.
+   * Returns the logged in state of the user based off the token returned by the client.
    *
    * @param userToken String token used to check if logged in
    * @return Boolean condition
