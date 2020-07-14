@@ -17,11 +17,16 @@ package com.google.sps.servlets;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.users.UserService;
+import com.google.appengine.api.users.UserServiceFactory;
 import com.google.sps.Utils;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -45,7 +50,25 @@ public class LoadEventServlet extends HttpServlet {
 
         DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
         Entity eventRequested = datastore.prepare(query).asSingleEntity();
-        request = populateRequest(request, eventRequested);
+
+        UserService userService = UserServiceFactory.getUserService();
+        int alreadySaved = -1;
+
+        if (userService.isUserLoggedIn()) {
+          String userEmail = userService.getCurrentUser().getEmail();
+          Key userKey = KeyFactory.createKey("User", userEmail);
+          try {
+            Entity userEntity = datastore.get(userKey);
+            alreadySaved = alreadySaved(eventRequested.getKey().getId(), userEntity);
+
+          } catch (EntityNotFoundException exception) {
+            // datastore entry has not been created yet for this user, create it now
+            Entity entity = new Entity(userKey);
+            entity.setProperty("id", userEmail);
+            datastore.put(entity);
+          }
+        }
+        request = populateRequest(request, eventRequested, alreadySaved);
 
         request.getRequestDispatcher("/WEB-INF/jsp/display-event.jsp").forward(request, response);
       }
@@ -60,7 +83,8 @@ public class LoadEventServlet extends HttpServlet {
    *
    * @return the request with attributes set.
    */
-  private HttpServletRequest populateRequest(HttpServletRequest request, Entity event) {
+  private HttpServletRequest populateRequest(
+      HttpServletRequest request, Entity event, int alreadySaved) {
     String name = event.getProperty("eventName").toString();
     String description = event.getProperty("eventDescription").toString();
     String date = event.getProperty("date").toString();
@@ -68,6 +92,8 @@ public class LoadEventServlet extends HttpServlet {
     String end = event.getProperty("endTime").toString();
     String address = event.getProperty("address").toString();
     String tags = Utils.convertToJson(event.getProperty("tags"));
+    String attendeeCount = event.getProperty("attendeeCount").toString();
+    long eventId = event.getKey().getId();
 
     request.setAttribute("name", name);
     request.setAttribute("description", description);
@@ -76,6 +102,9 @@ public class LoadEventServlet extends HttpServlet {
     request.setAttribute("end", end);
     request.setAttribute("address", address);
     request.setAttribute("tags", tags);
+    request.setAttribute("id", eventId);
+    request.setAttribute("attendees", attendeeCount);
+    request.setAttribute("saved", alreadySaved);
 
     return request;
   }
@@ -97,5 +126,23 @@ public class LoadEventServlet extends HttpServlet {
       throw new IOException("Request is missing parameter");
     }
     return eventKey;
+  }
+
+  /**
+   * Checks if user has already saved an event.
+   *
+   * @return the index of the event in user's saved list, or -1 if not found
+   */
+  private int alreadySaved(long eventId, Entity userEntity) {
+    List<Long> saved = (ArrayList<Long>) userEntity.getProperty("saved");
+    if (saved == null) {
+      saved = new ArrayList<>();
+    }
+    for (int i = 0; i < saved.size(); i++) {
+      if (saved.get(i) == eventId) {
+        return i;
+      }
+    }
+    return -1;
   }
 }

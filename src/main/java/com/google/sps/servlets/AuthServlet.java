@@ -57,6 +57,7 @@ public class AuthServlet extends HttpServlet {
         datastore.put(entity);
       }
       LoginObject info = new LoginObject(true, logoutUrl);
+      LOGGER.info("currently logged in as " + userEmail + ". Created logout URL " + logoutUrl);
       response.getWriter().println(gson.toJson(info));
     } else {
       String loginUrl = userService.createLoginURL("/");

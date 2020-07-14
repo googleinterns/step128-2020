@@ -118,7 +118,7 @@ footer {
   left: 50%;
   position: absolute;
   text-align: center;
-  top: 450px;
+  top: 50%;
   transform: translate(-50%, -50%);
 }
 
@@ -178,7 +178,7 @@ h1 {
   position: absolute;
   max-width: 700px;
   text-align: center;
-  top: 425px;
+  top: 45%;
   transform: translate(-50%, -50%);
   width: 70%;
 }
@@ -247,6 +247,11 @@ h1 {
 /* Create Page */
 .start-bttn img {
   height: 60px;
+  transition-duration: 0.4s;
+}
+
+.start-bttn img:hover {
+  box-shadow: 13px 13px 33px -13px rgba(92,92,92,1);
 }
 
 .form-container {
@@ -261,6 +266,12 @@ input[type=text], textarea {
   padding: 10px;
   resize: vertical;
   width: 100%;
+}
+
+textarea,
+input[type=date],
+input[type=time] {
+  font: 400 13.3333px Arial;
 }
 
 .form-section {
@@ -305,7 +316,6 @@ input[type=text], textarea {
   height: auto;
   margin: 25px;
 }
-
 
 .edit-form-buttons img {
   height: 50px;
@@ -500,7 +510,7 @@ input[type=text], textarea {
 }
 
 .event-time-location {
-  margin: 15px 15px 50px 15px;
+  margin: 15px 15px 15px 15px;
 }
 
 .save-event, .go-back {
