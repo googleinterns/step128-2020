@@ -107,7 +107,7 @@ public class UserServlet extends HttpServlet {
     return results;
   }
 
-  // returns a list of all events created by a user (identified by firebase-id)
+  // returns a list of all events created by a user (identified by firebaseID)
   private List<Entity> getHandleCreated(String userID) {
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     List<Entity> results = new ArrayList<>();

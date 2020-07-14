@@ -31,7 +31,6 @@ var firebaseConfig = {
   measurementId: "G-QCZ0TV4734"
 };
 
-// Initialize Firebase
 function initializeFirebase() {
   firebase.initializeApp(firebaseConfig);
   firebase.analytics();
@@ -284,7 +283,6 @@ function generateMobileNavLayout() {
     logoutBullet.appendChild(logoutLink);
     dropdownBar.appendChild(logoutBullet);
   }
-
 
   dropdownContainer.appendChild(dropdownBar);
 }
@@ -707,7 +705,7 @@ function verifyTags() {
       let userToken = createHiddenInput(preToken);
       userToken.name = 'userToken';
 
-      // Add string of tags to form for submission
+      // Add string of tags and userToken to form for submission
       document.getElementById('eventform').appendChild(tags);
       document.getElementById('eventform').appendChild(userToken);
 
