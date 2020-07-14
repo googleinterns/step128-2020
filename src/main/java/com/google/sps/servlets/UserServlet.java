@@ -128,13 +128,13 @@ public class UserServlet extends HttpServlet {
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
     String userToken = request.getParameter("userToken");
-    String userID = Firebase.authenticateUser(userToken);
-    if (!Firebase.isUserLoggedIn(userID)) {
+    if (!Firebase.isUserLoggedIn(userToken)) {
       throw new IOException("must be logged in");
     }
     if (request.getParameter("event") == null) {
       throw new IOException("no event key specified");
     }
+    String userID = Firebase.authenticateUser(userToken);
     Long eventId = 0L;
     try {
       eventId = Long.parseLong(request.getParameter("event"));
