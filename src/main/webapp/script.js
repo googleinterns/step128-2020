@@ -48,7 +48,7 @@ async function checkLogin(doAfter = null) {
         url = responseJson.url;
 
         generateNavBar();
-        if(doAfter != null) {
+        if (doAfter != null) {
           doAfter();
         }
       });
@@ -92,14 +92,14 @@ function generateNavBar() {
 
   const myLink = document.createElement('a');
   myLink.className = 'nav-item';
-  if(loggedIn) {
+  if (loggedIn) {
     myLink.href = '/my-events.html';
     myLink.innerText = 'My Events';
   } else {
     myLink.href = url;
-    myLink.innerText = "Login";
+    myLink.innerText = 'Login';
   }
-  
+
   headerRight.appendChild(myLink);
 
   const dropdown = document.createElement('div');
@@ -202,7 +202,7 @@ function generateMobileNavLayout() {
   const myBullet = document.createElement('li');
   const myLink = document.createElement('a');
   myLink.className = 'dropdown-item';
-  if(loggedIn) {
+  if (loggedIn) {
     myLink.href = '/my-events.html';
     myLink.innerText = 'My Events';
   } else {
@@ -731,7 +731,8 @@ async function getMyEvents() {
           getEvents(js, 1, 2);
         });
   } else {
-    const eventListElements = document.getElementsByClassName('event-list-container');
+    const eventListElements = 
+        document.getElementsByClassName('event-list-container');
 
     const savedListElement = eventListElements[0];
     savedListElement.innerHTML = '';
@@ -739,7 +740,7 @@ async function getMyEvents() {
     savedBox.className = 'no-events';
     const savedText = document.createElement('div');
     savedText.className = 'no-events-text';
-    savedText.innerText = 'Please login to view your saved events!'
+    savedText.innerText = 'Please login to view your saved events!';
     savedBox.appendChild(savedText);
     savedListElement.appendChild(savedBox);
 
@@ -749,15 +750,17 @@ async function getMyEvents() {
     createdBox.className = 'no-events';
     const createdText = document.createElement('div');
     createdText.className = 'no-events-text';
-    createdText.innerText = 'Please login to view your created events!'
+    createdText.innerText = 'Please login to view your created events!';
     createdBox.appendChild(createdText);
     createdListElement.appendChild(createdBox);
-
-    noElementsText.innerText = 'Please login to view your created events!'
   }
 }
 
-/** Makes servlet call to unsave event */
+/** 
+ * Makes the servlet call to unsave an event 
+ *
+ * @param {number} eventId Id of the event to be unsaved
+ */
 async function unsaveEvent(eventId) {
   const params = new URLSearchParams();
   params.append('event', eventId);
@@ -932,6 +935,10 @@ function submitSurvey() {
 
 /**
  * Generates tags and tag-based features.
+ *
+ * @param {number} id Id of the event to be displayed.
+ * @param {number} alreadySaved Status code for if event has
+ *                  already been saved by the user.
  */
 function displayIndividualEvent(id = 0, alreadySaved = -1) {
   const tagString = document.getElementById('tags-value').value;
@@ -1004,22 +1011,31 @@ function loadOptionalFields() {
   }
 }
 
-/** Adds onclick action to the event display's save-event button. */
+/** 
+ * Adds onclick action to the event display's save-event button.
+ * @param {number} id Id of the event to be saved/unsaved.
+ * @param {number} alreadySaved Status code for if event has
+ *                  already been saved by the user.
+ */
 function setupSave(id, alreadySaved) {
   const saveButton = document.getElementsByClassName('save-event')[0];
-  if(alreadySaved >= 0) {
+  if (alreadySaved >= 0) {
     saveButton.innerText = 'Unsave Event';
     saveButton.onclick = function() {
       unsaveEvent(id);
-    }
+    };
   } else {
     saveButton.onclick = function() {
       saveEvent(id);
-    }
+    };
   }
 }
 
-/** Makes the servlet call to save an event */
+/** 
+ * Makes the servlet call to save an event 
+ *
+ * @param {number} eventId Id of the event to be saved
+ */
 async function saveEvent(eventId) {
   const params = new URLSearchParams();
   params.append('event', eventId);
