@@ -51,7 +51,6 @@ public class UserServlet extends HttpServlet {
     response.setContentType("application/json");
 
     String userToken = request.getParameter("userToken");
-    System.out.println(userToken);
     String userID = "";
     if (Firebase.isUserLoggedIn(userToken)) {
       userID = Firebase.authenticateUser(userToken);

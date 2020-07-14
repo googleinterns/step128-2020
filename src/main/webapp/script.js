@@ -100,7 +100,6 @@ async function getUserIDTokenForURL() {
     if (loggedIn) {
       firebase.auth().currentUser.getIdToken(/* forceRefresh */ true).then(function(idToken) {
         uID = 'userToken=' + idToken;
-        console.log(uID);
         resolve(uID);
       }).catch(function(error) {
         console.log(error);
@@ -712,7 +711,6 @@ function verifyTags() {
       // Add string of tags to form for submission
       document.getElementById('eventform').appendChild(tags);
       document.getElementById('eventform').appendChild(userToken);
-      //console.log(document.getElementById('eventform'));
 
       document.eventform.submit();
       tagsSelected.splice(0, tagsSelected.length);
@@ -808,9 +806,7 @@ async function getRecommendedEvents() {
 async function getMyEvents() {
   if (loggedIn) {
     getUserIDTokenForURL().then((userToken) => {
-      console.log(userToken);
       let url = '/user?get=saved&' + userToken;
-      console.log(url);
       fetch(url).then((response) => response.json())
         .then(function(js) {
           getEvents(js, 0, 1);

@@ -46,7 +46,7 @@ public class EventServlet extends HttpServlet {
 
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    System.out.println(userToken);
+    String userToken = request.getParameter("userToken");
     if (Firebase.isUserLoggedIn(userToken)) {
       String userID = Firebase.authenticateUser(userToken);
       Entity eventEntity = populateEvent(request);
