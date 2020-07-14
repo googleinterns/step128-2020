@@ -207,7 +207,7 @@ function generateMobileNavLayout() {
     myLink.innerText = 'My Events';
   } else {
     myLink.href = url;
-    myLink.innerText = "Login";
+    myLink.innerText = 'Login';
   }
   myBullet.appendChild(myLink);
   dropdownBar.appendChild(myBullet);
@@ -760,8 +760,8 @@ async function getMyEvents() {
 /** Makes servlet call to unsave event */
 async function unsaveEvent(eventId) {
   const params = new URLSearchParams();
-  params.append("event", eventId);
-  params.append("action", "unsave");
+  params.append('event', eventId);
+  params.append('action', 'unsave');
   fetch(new Request('/user', {method: 'POST', body: params}));
 }
 
@@ -1022,7 +1022,7 @@ function setupSave(id, alreadySaved) {
 /** Makes the servlet call to save an event */
 async function saveEvent(eventId) {
   const params = new URLSearchParams();
-  params.append("event", eventId);
-  params.append("action", "save");
+  params.append('event', eventId);
+  params.append('action', 'save');
   fetch(new Request('/user', {method: 'POST', body: params}));
 }
