@@ -756,10 +756,10 @@ async function getMyEvents() {
   }
 }
 
-/** 
- * Makes the servlet call to unsave an event 
+/**
+ * Makes the servlet call to unsave an event.
  *
- * @param {number} eventId Id of the event to be unsaved
+ * @param {number} eventId Id of the event to be unsaved.
  */
 async function unsaveEvent(eventId) {
   const params = new URLSearchParams();
@@ -1011,7 +1011,7 @@ function loadOptionalFields() {
   }
 }
 
-/** 
+/**
  * Adds onclick action to the event display's save-event button.
  * @param {number} id Id of the event to be saved/unsaved.
  * @param {number} alreadySaved Status code for if event has
@@ -1031,10 +1031,10 @@ function setupSave(id, alreadySaved) {
   }
 }
 
-/** 
- * Makes the servlet call to save an event 
+/**
+ * Makes the servlet call to save an event.
  *
- * @param {number} eventId Id of the event to be saved
+ * @param {number} eventId Id of the event to be saved.
  */
 async function saveEvent(eventId) {
   const params = new URLSearchParams();
