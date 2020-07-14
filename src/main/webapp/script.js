@@ -33,8 +33,6 @@ function loadActions(doAfter) {
   }
 
   checkLogin(doAfter);
-
-  generateNavBar();
 }
 
 /**
@@ -43,12 +41,16 @@ function loadActions(doAfter) {
  * @param {function} doAfter Will call this function after handling login
  *      Helps with chaining async functions and cleaning up code
  */
-async function checkLogin(doAfter) {
+async function checkLogin(doAfter = null) {
   fetch('/auth').then((response) => response.json())
       .then(function(responseJson) {
         loggedIn = responseJson.loggedIn;
         url = responseJson.url;
-        doAfter();
+
+        generateNavBar();
+        if (doAfter != null) {
+          doAfter();
+        }
       });
 }
 
@@ -90,8 +92,14 @@ function generateNavBar() {
 
   const myLink = document.createElement('a');
   myLink.className = 'nav-item';
-  myLink.href = '/my-events.html';
-  myLink.innerText = 'My Events';
+  if (loggedIn) {
+    myLink.href = '/my-events.html';
+    myLink.innerText = 'My Events';
+  } else {
+    myLink.href = url;
+    myLink.innerText = 'Login';
+  }
+
   headerRight.appendChild(myLink);
 
   const dropdown = document.createElement('div');
@@ -194,8 +202,13 @@ function generateMobileNavLayout() {
   const myBullet = document.createElement('li');
   const myLink = document.createElement('a');
   myLink.className = 'dropdown-item';
-  myLink.href = '/my-events.html';
-  myLink.innerText = 'My Events';
+  if (loggedIn) {
+    myLink.href = '/my-events.html';
+    myLink.innerText = 'My Events';
+  } else {
+    myLink.href = url;
+    myLink.innerText = 'Login';
+  }
   myBullet.appendChild(myLink);
   dropdownBar.appendChild(myBullet);
 
@@ -298,6 +311,7 @@ async function getEvents(events, index, option) {
   }
 
   events.forEach(function(event) {
+    const eventId = event.key.id;
     event = event.propertyMap;
 
     const eventItemElement = document.createElement('a');
@@ -389,8 +403,7 @@ async function getEvents(events, index, option) {
       attendeeCountContainerElement.className = 'edit-unsave-event';
       attendeeCountContainerElement.innerText = 'Unsave this event';
       attendeeCountContainerElement.onclick = function() {
-        // TODO: unsave from datastore and/or make popup that confirms
-        // choice first
+        unsaveEvent(eventId);
       };
     } else if (option == createdEvents) {
       // edit an event
@@ -718,8 +731,41 @@ async function getMyEvents() {
           getEvents(js, 1, 2);
         });
   } else {
-    alert('Please log in first!');
+    const eventListElements =
+        document.getElementsByClassName('event-list-container');
+
+    const savedListElement = eventListElements[0];
+    savedListElement.innerHTML = '';
+    const savedBox = document.createElement('div');
+    savedBox.className = 'no-events';
+    const savedText = document.createElement('div');
+    savedText.className = 'no-events-text';
+    savedText.innerText = 'Please login to view your saved events!';
+    savedBox.appendChild(savedText);
+    savedListElement.appendChild(savedBox);
+
+    const createdListElement = eventListElements[1];
+    createdListElement.innerHTML = '';
+    const createdBox = document.createElement('div');
+    createdBox.className = 'no-events';
+    const createdText = document.createElement('div');
+    createdText.className = 'no-events-text';
+    createdText.innerText = 'Please login to view your created events!';
+    createdBox.appendChild(createdText);
+    createdListElement.appendChild(createdBox);
   }
+}
+
+/**
+ * Makes the servlet call to unsave an event.
+ *
+ * @param {number} eventId Id of the event to be unsaved.
+ */
+async function unsaveEvent(eventId) {
+  const params = new URLSearchParams();
+  params.append('event', eventId);
+  params.append('action', 'unsave');
+  fetch(new Request('/user', {method: 'POST', body: params}));
 }
 
 /* **********************************************************************
@@ -889,8 +935,12 @@ function submitSurvey() {
 
 /**
  * Generates tags and tag-based features.
+ *
+ * @param {number} id Id of the event to be displayed.
+ * @param {number} alreadySaved Status code for if event has
+ *                  already been saved by the user.
  */
-function displayIndividualEvent() {
+function displayIndividualEvent(id = 0, alreadySaved = -1) {
   const tagString = document.getElementById('tags-value').value;
   const tagArray = JSON.parse(tagString);
   let mainColor = tagArray[0];
@@ -903,6 +953,7 @@ function displayIndividualEvent() {
   loadDefaultImage(mainColor);
   loadAttendingColor(mainColor);
   loadOptionalFields();
+  setupSave(id, alreadySaved);
 }
 
 /**
@@ -958,4 +1009,36 @@ function loadOptionalFields() {
 
     timeContainer.appendChild(end);
   }
+}
+
+/**
+ * Adds onclick action to the event display's save-event button.
+ * @param {number} id Id of the event to be saved/unsaved.
+ * @param {number} alreadySaved Status code for if event has
+ *                  already been saved by the user.
+ */
+function setupSave(id, alreadySaved) {
+  const saveButton = document.getElementsByClassName('save-event')[0];
+  if (alreadySaved >= 0) {
+    saveButton.innerText = 'Unsave Event';
+    saveButton.onclick = function() {
+      unsaveEvent(id);
+    };
+  } else {
+    saveButton.onclick = function() {
+      saveEvent(id);
+    };
+  }
+}
+
+/**
+ * Makes the servlet call to save an event.
+ *
+ * @param {number} eventId Id of the event to be saved.
+ */
+async function saveEvent(eventId) {
+  const params = new URLSearchParams();
+  params.append('event', eventId);
+  params.append('action', 'save');
+  fetch(new Request('/user', {method: 'POST', body: params}));
 }

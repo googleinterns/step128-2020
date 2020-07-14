@@ -166,6 +166,8 @@ public class UserServlet extends HttpServlet {
       entity.setProperty("id", userEmail);
       datastore.put(entity);
     }
+
+    response.sendRedirect("/my-events.html");
   }
 
   // adds event id to list if it is not already present
@@ -184,7 +186,7 @@ public class UserServlet extends HttpServlet {
         try {
           attendeeCount += Integer.parseInt(attendees.toString());
         } catch (NumberFormatException num) {
-          LOGGER.info("error parsing attendee count  for event id " + eventId);
+          LOGGER.info("error parsing attendee count for event id " + eventId);
           attendeeCount = 0;
         }
       }
@@ -212,7 +214,7 @@ public class UserServlet extends HttpServlet {
             try {
               attendeeCount += Integer.parseInt(attendees.toString());
             } catch (NumberFormatException num) {
-              LOGGER.info("error parsing attendee count  for event id " + eventId);
+              LOGGER.info("error parsing attendee count for event id " + eventId);
               attendeeCount = 0;
             }
           }

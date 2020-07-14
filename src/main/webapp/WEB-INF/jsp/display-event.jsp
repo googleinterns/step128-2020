@@ -7,7 +7,7 @@
     <link rel="icon" href="images/step-favicon.svg" type="image/svg" sizes="16x16">
     <script src="script.js"></script>
   </head>
-  <body id="body" onload="loadActions(); displayIndividualEvent();">
+  <body id="body" onload="loadActions(); displayIndividualEvent(${id}, ${saved});">
     <div class="header"></div>
     <div class="event-display-container">
       <div class="event-left-details">
@@ -16,7 +16,7 @@
           <div class="event-display-header">
             <div class = "event-display-title">${name}</div>
             <div class="attendee-count-container">
-              <span class="attendee-count">12</span> 
+              <span class="attendee-count">${attendees}</span> 
               already attending
             </div>
           </div>
@@ -57,16 +57,13 @@
           <div class="share-wrapper">
             <h3>Share</h3>
             <div class="share-container">
-              <!-- hrefs will contain the correct link when the page is generated w/JS -->
-              <a href = "https://twitter.com/share?url=http://google.com/" target="_blank">
+              <a id="twitter-link" target="_blank">
                   <img src="images/twitter.svg" alt="Twitter"/>
               </a>
-              <a href='http://www.facebook.com/sharer.php?u=http://google.com/' 
-                  target="_blank">
+              <a id="fb-link" target="_blank">
                   <img src="images/facebook.svg" alt="Facebook"/>
               </a>
-              <a href="mailto:?subject=Unite by STEP Event&body=Check out this event!
-                  %0D%0A%0D%0Ahttp://google.com/" target="_blank">
+              <a id="mail-link" target="_blank">
                   <img src="images/gmail.svg" alt="Email"/>
               </a>
             </div>
