@@ -90,6 +90,23 @@ function firebaseLogout() {
   });
 }
 
+async function getUserIDTokenForURL() {
+  return new Promise(resolve => {
+    let uID = '';
+    if (loggedIn) {
+      firebase.auth().currentUser.getIdToken(/* forceRefresh */ true).then(function(idToken) {
+        uID = 'userToken=' + idToken;
+        console.log(uID);
+        resolve(uID);
+      }).catch(function(error) {
+        console.log(error);
+      });
+    } else {
+      resolve('userToken=' + uID);
+    }
+  });
+}
+
 
 /**
  * Generates navigation bar for the page
@@ -684,11 +701,18 @@ function verifyTags() {
     // Convert tags selected array into string
     const jsonArray = JSON.stringify(tagsSelected);
     const tags = createHiddenInput(jsonArray);
+    getUserIDTokenForURL().then((preToken) => {
+      let userToken = createHiddenInput(preToken.substring(10, preToken.length));
+      userToken.name = 'userToken';
 
-    // Add string of tags to form for submission
-    document.getElementById('eventform').appendChild(tags);
-    document.eventform.submit();
-    tagsSelected.splice(0, tagsSelected.length);
+      // Add string of tags to form for submission
+      document.getElementById('eventform').appendChild(tags);
+      document.getElementById('eventform').appendChild(userToken);
+      //console.log(document.getElementById('eventform'));
+
+      document.eventform.submit();
+      tagsSelected.splice(0, tagsSelected.length);
+    });
   } else {
     // Display error and prevent from sumbission
     const tagBoxError = document.getElementById('tags-label');
@@ -755,11 +779,13 @@ function updateEventTagBox() {
  */
 async function getRecommendedEvents() {
   if (loggedIn) {
-    fetch('/user?get=saved').then((response) => response.json())
+    getUserIDTokenForURL().then((userToken) => {
+      fetch('/user?get=saved&' + userToken).then((response) => response.json())
         .then(function(js) {
         // TODO: change this fetch call to get recommendations instead
           getEvents(dummyEvents, 1, 0);
         });
+      });
   } else {
     alert('Please log in first!');
   }
@@ -777,14 +803,19 @@ async function getRecommendedEvents() {
  */
 async function getMyEvents() {
   if (loggedIn) {
-    fetch('/user?get=saved').then((response) => response.json())
+    getUserIDTokenForURL().then((userToken) => {
+      console.log(userToken);
+      let url = '/user?get=saved&' + userToken;
+      console.log(url);
+      fetch(url).then((response) => response.json())
         .then(function(js) {
           getEvents(js, 0, 1);
         });
-    fetch('/user?get=created').then((response) => response.json())
+      fetch('/user?get=created&' + userToken).then((response) => response.json())
         .then(function(js) {
           getEvents(js, 1, 2);
         });
+    });
   } else {
     alert('Please log in first!');
   }

@@ -20,9 +20,8 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
-import com.google.appengine.api.users.UserService;
-import com.google.appengine.api.users.UserServiceFactory;
 import com.google.gson.Gson;
+import com.google.sps.Firebase;
 import com.google.sps.Interactions;
 import java.io.IOException;
 import java.util.logging.Logger;
@@ -39,16 +38,14 @@ public class SurveyServlet extends HttpServlet {
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
     // store survey results
-    UserService userService = UserServiceFactory.getUserService();
     Gson gson = new Gson();
     response.setContentType("application/json");
 
-    if (userService.isUserLoggedIn()) {
-      String userEmail = userService.getCurrentUser().getEmail();
-      String logoutUrl = userService.createLogoutURL("/");
-
+    String userToken = request.getParameter("userToken");
+    if (Firebase.isUserLoggedIn(userToken)) {
+      String userID = Firebase.authenticateUser(userToken);
       DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-      Key userKey = KeyFactory.createKey("User", userEmail);
+      Key userKey = KeyFactory.createKey("User", userID);
 
       // make sure there is a datastore entry for the user
       Entity userEntity;
@@ -56,7 +53,7 @@ public class SurveyServlet extends HttpServlet {
         userEntity = datastore.get(userKey);
       } catch (EntityNotFoundException e) {
         userEntity = new Entity(userKey);
-        userEntity.setProperty("id", userEmail);
+        userEntity.setProperty("firebaseID", userID);
       }
 
       // save score of each survey metric as an entity property

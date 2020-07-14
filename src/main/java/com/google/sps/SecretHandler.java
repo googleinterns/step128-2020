@@ -57,7 +57,7 @@ public class SecretHandler {
    * Returns a GoogleCredentials object containing the Firebase Admin key. Throws an exception if
    * the Secret manager client is unable to be created.
    */
-  public static GoogleCredentials getFirebaseKey() throws IOException {
+  public static GoogleCredentials getFirebaseCred() throws IOException {
     SecretManagerServiceClient client = null;
     String result = "";
     GoogleCredentials cred = null;
