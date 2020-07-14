@@ -21,14 +21,14 @@ let loggedIn = false;
 
 // Firebase configuration
 var firebaseConfig = {
-  apiKey: "AIzaSyBt4BitYGc3aUw4aGVpLGyrXnJZbAXX9RE",
-  authDomain: "unitebystep.firebaseapp.com",
-  databaseURL: "https://unitebystep.firebaseio.com",
-  projectId: "unitebystep",
-  storageBucket: "unitebystep.appspot.com",
-  messagingSenderId: "654189328956",
-  appId: "1:654189328956:web:22ec1bce47a9cc1972e139",
-  measurementId: "G-QCZ0TV4734"
+  apiKey: 'AIzaSyBt4BitYGc3aUw4aGVpLGyrXnJZbAXX9RE',
+  authDomain: 'unitebystep.firebaseapp.com',
+  databaseURL: 'https://unitebystep.firebaseio.com',
+  projectId: 'unitebystep',
+  storageBucket: 'unitebystep.appspot.com',
+  messagingSenderId: '654189328956',
+  appId: '1:654189328956:web:22ec1bce47a9cc1972e139',
+  measurementId: 'G-QCZ0TV4734'
 };
 
 function initializeFirebase() {
@@ -87,7 +87,7 @@ async function checkLogin(doAfter = null) {
 function firebaseLogout() {
   firebase.auth().signOut().then(function() {
     // Sign-out successful.
-    window.location.href = "/index.html";
+    window.location.href = '/index.html';
   }).catch(function(error) {
     // An error happened.
     console.log(error);
