@@ -731,7 +731,7 @@ async function getMyEvents() {
           getEvents(js, 1, 2);
         });
   } else {
-    const eventListElements = 
+    const eventListElements =
         document.getElementsByClassName('event-list-container');
 
     const savedListElement = eventListElements[0];
