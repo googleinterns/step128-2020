@@ -1015,6 +1015,9 @@ function loadOptionalFields() {
   }
 }
 
+/**
+ * Generates share links for Facebook, Twitter, and mail.
+ */
 function loadLinks() {
   const eventKey = document.getElementById('event-key').value;
   const twitter = document.getElementById('twitter-link');
