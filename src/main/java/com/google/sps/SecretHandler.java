@@ -47,7 +47,7 @@ public class SecretHandler {
       result = response.getPayload().getData().toStringUtf8();
 
     } catch (IOException e) {
-      LOGGER.warning(e.getMessage()); // "failed to create secret manager service client"
+      LOGGER.warning(e.getMessage());
     } finally {
       if (client != null) {
         client.close();
