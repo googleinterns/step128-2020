@@ -596,6 +596,62 @@ function generateRainbowTags() {
   }
 }
 
+/**
+ * Sets value of the cookie cname to cvalue
+ */
+function setCookie(cname, cvalue) {
+  document.cookie = cname + "=" + cvalue + "; ";
+}
+
+/**
+ * Gets value of the cookie cname
+ */
+function getCookie(cname) {
+  var name = cname + "=";
+  var decodedCookie = decodeURIComponent(document.cookie);
+  var cArr = decodedCookie.split(';');
+  for(var i = 0; i < cArr.length; i++) {
+    var c = cArr[i];
+    while (c.charAt(0) == ' ') {
+      c = c.substring(1);
+    }
+    if (c.indexOf(name) == 0) {
+      return c.substring(name.length, c.length);
+    }
+  }
+  return "";
+}
+
+/**
+ * Updates navbar with house based off cookie
+ */
+function checkCookie() {
+  var house = toStringHouse(getCookie("house"));
+  var elements = document.getElementsByClassName("house-navbar");
+  elements[0].id = house.toLowerCase();
+  elements[0].innerText = house;
+}
+
+function getLocation() {
+  let locationCookie = getCookie('location');
+  if (locationCookie == '') {
+
+  }
+  let locationDatastore = null;
+  // if user is logged in {
+    
+  }
+
+}
+
+function changeLocation() {
+  var location = prompt('Please enter your zipcode:', '');
+  if (location == null || location == 'Please enter your zipcode:') {
+    return '';
+  }
+  setCookie('location', location);
+}
+
 /* **********************************************************************
  * Methods for create-event-form and edit-event form
  * **********************************************************************/
