@@ -956,6 +956,7 @@ function displayIndividualEvent(id = 0, alreadySaved = -1) {
   loadDefaultImage(mainColor);
   loadAttendingColor(mainColor);
   loadOptionalFields();
+  loadLinks();
   setupSave(id, alreadySaved);
 }
 
@@ -1012,6 +1013,20 @@ function loadOptionalFields() {
 
     timeContainer.appendChild(end);
   }
+}
+
+function loadLinks() {
+  const eventKey = document.getElementById('event-key').value;
+  const twitter = document.getElementById('twitter-link');
+  const facebook = document.getElementById('fb-link');
+  const mail = document.getElementById('mail-link');
+  const url = 'http://unitebystep.appspot.com/load-event?Event=' + eventKey;
+  const br = '%0D%0A%0D%0A';
+
+  twitter.href = 'https://twitter.com/share?url=' + url;
+  facebook.href = 'http://www.facebook.com/sharer.php?u=' + url;
+  mail.href =
+   'mailto:?subject=Unite by STEP Event&body=Check out this event!' + br + url;
 }
 
 /**
