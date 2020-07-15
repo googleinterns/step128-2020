@@ -156,8 +156,6 @@ public final class UserServletTest {
     // post the events to datastore
     postEventsSetup();
 
-    List<Entity> resultingEntities = callGet("", "");
-
     // create the expected resulting search results
     Entity goalEntity = createLakeCleanupEvent();
     Entity goalEntity2 = createBlmProtestEvent();
@@ -168,6 +166,9 @@ public final class UserServletTest {
     goalEntityList.add(goalEntity2);
     goalEntityList.add(goalEntity3);
     goalEntityList.add(goalEntity);
+
+    List<Entity> resultingEntities = callGet("", "");
+
     assertListsEqual(goalEntityList, resultingEntities);
   }
 
@@ -388,7 +389,6 @@ public final class UserServletTest {
   /** Logs in and out a few times, posting events to datastore. */
   public static void postEventsSetup() throws IOException {
     // posted by test@example.com
-    String dummyToken = "test@example.com";
     PowerMockito.mockStatic(Firebase.class);
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
@@ -400,9 +400,12 @@ public final class UserServletTest {
     when(request.getParameter("date")).thenReturn("2020-05-17");
     when(request.getParameter("start-time")).thenReturn("14:00");
     when(request.getParameter("all-tags")).thenReturn("['environment']");
+
+    String dummyToken = "test@example.com";
     when(request.getParameter("userToken")).thenReturn(dummyToken);
     PowerMockito.when(Firebase.isUserLoggedIn(anyString())).thenCallRealMethod();
     PowerMockito.when(Firebase.authenticateUser(anyString())).thenReturn(dummyToken);
+
     testEventServlet.doPost(request, response);
 
     request = mock(HttpServletRequest.class);
@@ -415,9 +418,11 @@ public final class UserServletTest {
     when(request.getParameter("date")).thenReturn("2020-05-17");
     when(request.getParameter("start-time")).thenReturn("13:00");
     when(request.getParameter("all-tags")).thenReturn("['blm']");
+
     when(request.getParameter("userToken")).thenReturn(dummyToken);
     PowerMockito.when(Firebase.isUserLoggedIn(anyString())).thenCallRealMethod();
     PowerMockito.when(Firebase.authenticateUser(anyString())).thenReturn(dummyToken);
+
     testEventServlet.doPost(request, response);
 
     // posted by another@example.com
@@ -430,9 +435,11 @@ public final class UserServletTest {
     when(request.getParameter("date")).thenReturn("2020-05-17");
     when(request.getParameter("start-time")).thenReturn("10:00");
     when(request.getParameter("all-tags")).thenReturn("['education']");
+
     when(request.getParameter("userToken")).thenReturn(dummyToken);
     PowerMockito.when(Firebase.isUserLoggedIn(anyString())).thenCallRealMethod();
     PowerMockito.when(Firebase.authenticateUser(anyString())).thenReturn(dummyToken);
+
     testEventServlet.doPost(request, response);
   }
 

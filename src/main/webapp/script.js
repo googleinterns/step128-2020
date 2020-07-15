@@ -20,7 +20,7 @@ let url = '';
 let loggedIn = false;
 
 // Firebase configuration
-var firebaseConfig = {
+const firebaseConfig = {
   apiKey: 'AIzaSyBt4BitYGc3aUw4aGVpLGyrXnJZbAXX9RE',
   authDomain: 'unitebystep.firebaseapp.com',
   databaseURL: 'https://unitebystep.firebaseio.com',
@@ -28,9 +28,12 @@ var firebaseConfig = {
   storageBucket: 'unitebystep.appspot.com',
   messagingSenderId: '654189328956',
   appId: '1:654189328956:web:22ec1bce47a9cc1972e139',
-  measurementId: 'G-QCZ0TV4734'
+  measurementId: 'G-QCZ0TV4734',
 };
 
+/**
+ * Initializes Firebase using the imported Firebase JS files
+ */
 function initializeFirebase() {
   firebase.initializeApp(firebaseConfig);
   firebase.analytics();
@@ -50,12 +53,12 @@ function loadActions(doAfter) {
   }
 
   initializeFirebase();
-  
+
   firebase.auth().onAuthStateChanged(function(user) {
     if (user) {
       loggedIn = true;
     } else {
-      loggedIn = false;        
+      loggedIn = false; 
     }
     doAfter();
     generateNavBar();
@@ -84,20 +87,26 @@ async function checkLogin(doAfter = null) {
       });
 }
 
+/**
+ * Logs the user out of Firebase
+ */
 function firebaseLogout() {
   firebase.auth().signOut().then(function() {
-    // Sign-out successful.
     window.location.href = '/index.html';
   }).catch(function(error) {
-    // An error happened.
     console.log(error);
   });
 }
 
+/**
+ * Retrieves a token to identify the user when communicating with the backend
+ */
 async function getUserIDToken() {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     if (loggedIn) {
-      firebase.auth().currentUser.getIdToken(/* forceRefresh */ true).then(function(idToken) {
+      firebase.auth().currentUser
+          .getIdToken(/* forceRefresh */ true)
+          .then(function(idToken) {
         resolve(idToken);
       }).catch(function(error) {
         console.log(error);
@@ -702,7 +711,7 @@ function verifyTags() {
     const jsonArray = JSON.stringify(tagsSelected);
     const tags = createHiddenInput(jsonArray);
     getUserIDToken().then((preToken) => {
-      let userToken = createHiddenInput(preToken);
+      const userToken = createHiddenInput(preToken);
       userToken.name = 'userToken';
 
       // Add string of tags and userToken to form for submission
@@ -779,12 +788,13 @@ function updateEventTagBox() {
 async function getRecommendedEvents() {
   if (loggedIn) {
     getUserIDToken().then((userToken) => {
-      fetch('/user?get=saved&userToken=' + userToken).then((response) => response.json())
-        .then(function(js) {
+      fetch('/user?get=saved&userToken=' + userToken)
+          .then((response) => response.json())
+          .then(function(js) {
         // TODO: change this fetch call to get recommendations instead
           getEvents(dummyEvents, 1, 0);
-        });
       });
+    });
   } else {
     alert('Please log in first!');
   }
@@ -803,14 +813,16 @@ async function getRecommendedEvents() {
 async function getMyEvents() {
   if (loggedIn) {
     getUserIDToken().then((userToken) => {
-      fetch('/user?get=saved&userToken=' + userToken).then((response) => response.json())
+      fetch('/user?get=saved&userToken=' + userToken)
+        .then((response) => response.json())
         .then(function(js) {
           getEvents(js, 0, 1);
-        });
-      fetch('/user?get=created&userToken=' + userToken).then((response) => response.json())
+      });
+      fetch('/user?get=created&userToken=' + userToken)
+        .then((response) => response.json())
         .then(function(js) {
           getEvents(js, 1, 2);
-        });
+      });
     });
   } else {
     const eventListElements =
@@ -1085,7 +1097,7 @@ function loadAttendingColor(color) {
  * **********************************************************************/
 
 // FirebaseUI config.
-let uiConfig = {
+const uiConfig = {
   // TODO: replace with URL user came from each time?
   signInSuccessUrl: '/index.html',
   signInOptions: [
@@ -1099,11 +1111,14 @@ let uiConfig = {
   // Privacy policy url/callback.
   privacyPolicyUrl: function() {
     window.location.assign('<your-privacy-policy-url>');
-  }
+  },
 };
 
+/**
+ * Displays the Firebase login ui on the login page
+ */
 function initializeFirebaseLogin() {
-  let ui = new firebaseui.auth.AuthUI(firebase.auth());
+  const ui = new firebaseui.auth.AuthUI(firebase.auth());
   ui.start('#firebaseui-auth-container', uiConfig);
 }
 
