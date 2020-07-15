@@ -525,13 +525,13 @@ async function getSearchDistanceSettings() {
   const currentLocationElement = document.createElement('div');
   currentLocationElement.className = 'current-location';
   currentLocationElement.innerText = 'Current Location: ' +
-     'Los Angeles, CA';
+     getLocation();
   locationSettingsElement.appendChild(currentLocationElement);
   locationSettingsElement.appendChild(
       document.createTextNode(' '));
 
   const changeLinkElement = document.createElement('a');
-  changeLinkElement.setAttribute('href', '');
+  changeLinkElement.setAttribute('href', 'javascript:changeLocation()');
   changeLinkElement.innerText = 'Change Location';
   locationSettingsElement.appendChild(changeLinkElement);
 
@@ -623,33 +623,38 @@ function getCookie(cname) {
 }
 
 /**
- * Updates navbar with house based off cookie
+ * Retrieves the users location, prioritizing the datastore
+ * but falling back on cookies
  */
-function checkCookie() {
-  var house = toStringHouse(getCookie("house"));
-  var elements = document.getElementsByClassName("house-navbar");
-  elements[0].id = house.toLowerCase();
-  elements[0].innerText = house;
-}
-
 function getLocation() {
   let locationCookie = getCookie('location');
+  let location = '';
   if (locationCookie == '') {
-
-  }
+    return location;
+  }/*
   let locationDatastore = null;
   // if user is logged in {
-    
-  }
-
+    locationDatastore = 'something else';
+    if (locationCookie != locationDatastore) {
+      setCookie('location', locationDatastore);
+    }
+  }*/
+  location = locationCookie;
+  return location;
 }
 
+/**
+ * Prompts the user to enter their zipcode to change their location
+ */
 function changeLocation() {
   var location = prompt('Please enter your zipcode:', '');
-  if (location == null || location == 'Please enter your zipcode:') {
-    return '';
+  if (location == null || location == '') {
+    console.log('incomplete');
+  } else {
+    setCookie('location', location);
+    //post
   }
-  setCookie('location', location);
+  getSearchDistanceSettings();
 }
 
 /* **********************************************************************
