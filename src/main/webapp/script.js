@@ -58,7 +58,7 @@ function loadActions(doAfter) {
     if (user) {
       loggedIn = true;
     } else {
-      loggedIn = false; 
+      loggedIn = false;
     }
     doAfter();
     generateNavBar();
@@ -107,10 +107,10 @@ async function getUserIDToken() {
       firebase.auth().currentUser
           .getIdToken(/* forceRefresh */ true)
           .then(function(idToken) {
-        resolve(idToken);
-      }).catch(function(error) {
-        console.log(error);
-      });
+            resolve(idToken);
+          }).catch(function(error) {
+            console.log(error);
+          });
     } else {
       resolve('');
     }
@@ -791,10 +791,10 @@ async function getRecommendedEvents() {
       fetch('/user?get=saved&userToken=' + userToken)
           .then((response) => response.json())
           .then(function(js) {
-        // TODO: change this fetch call to get recommendations instead
-          getEvents(dummyEvents, 1, 0);
+            // TODO: change this fetch call to get recommendations instead
+            getEvents(dummyEvents, 1, 0);
+          });
       });
-    });
   } else {
     alert('Please log in first!');
   }
@@ -817,12 +817,12 @@ async function getMyEvents() {
         .then((response) => response.json())
         .then(function(js) {
           getEvents(js, 0, 1);
-      });
+        });
       fetch('/user?get=created&userToken=' + userToken)
         .then((response) => response.json())
         .then(function(js) {
           getEvents(js, 1, 2);
-      });
+        });
     });
   } else {
     const eventListElements =
