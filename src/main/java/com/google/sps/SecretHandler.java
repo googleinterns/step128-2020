@@ -21,12 +21,15 @@ import com.google.cloud.secretmanager.v1.SecretVersionName;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.logging.Logger;
 
 public class SecretHandler {
   private static final String PROJECT_ID = "unitebystep";
   private static final String API_KEY_ID = "api-key";
   private static final String FIREBASE_KEY_ID = "firebase-key";
   private static final String VERSION_ID = "1";
+
+  private static final Logger LOGGER = Logger.getLogger(SecretHandler.class.getName());
 
   /**
    * Returns a String containing the API key. Throws an exception if the Secret manager client is
@@ -44,7 +47,7 @@ public class SecretHandler {
       result = response.getPayload().getData().toStringUtf8();
 
     } catch (IOException e) {
-      throw new IOException("failed to create secret manager service client");
+      LOGGER.warning(e.getMessage()); // "failed to create secret manager service client"
     } finally {
       if (client != null) {
         client.close();
@@ -69,7 +72,7 @@ public class SecretHandler {
       AccessSecretVersionResponse response = client.accessSecretVersion(secretVersionName);
       result = response.getPayload().getData().toStringUtf8();
     } catch (IOException e) {
-      throw new IOException("failed to create secret manager service client");
+      LOGGER.warning(e.getMessage());
     } finally {
       if (client != null) {
         client.close();

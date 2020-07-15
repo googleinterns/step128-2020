@@ -14,6 +14,7 @@
 
 package com.google.sps;
 
+import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -29,7 +30,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 
 /** Utility class to handle login operations during testing. */
-@PrepareForTest(UserServiceFactory.class)
+@PrepareForTest({UserServiceFactory.class, Firebase.class})
 public final class TestingUtil {
   private static final Gson gson = new Gson();
   private static AuthServlet testAuthServlet;
@@ -59,6 +60,19 @@ public final class TestingUtil {
   /** Resets the state of the active url. */
   public static void tearDown() {
     activeUrl = null;
+  }
+
+  /**
+   * Mock the functionality of Firebase.
+   *
+   * @param request HTTPServletRequest to mock parameter calls from
+   * @param dummyToken String to be used in place of a client sent token
+   */
+  public static void mockFirebase(HttpServletRequest request, String dummyToken) {
+    PowerMockito.mockStatic(Firebase.class);
+    when(request.getParameter("userToken")).thenReturn(dummyToken);
+    PowerMockito.when(Firebase.isUserLoggedIn(anyString())).thenCallRealMethod();
+    PowerMockito.when(Firebase.authenticateUser(anyString())).thenReturn(dummyToken);
   }
 
   /**

@@ -25,12 +25,12 @@ import java.util.logging.Logger;
 public class Firebase {
 
   private static final Logger LOGGER = Logger.getLogger(Firebase.class.getName());
-  private static FirebaseApp defaultApp;
+  private static FirebaseApp defaultApp = initializeFirebase();
 
-  static {
-    defaultApp = null;
+  private static FirebaseApp initializeFirebase() {
+    FirebaseApp app = null;
     try {
-      defaultApp =
+      app =
           FirebaseApp.initializeApp(
               new FirebaseOptions.Builder()
                   .setCredentials(SecretHandler.getFirebaseCred())
@@ -38,6 +38,7 @@ public class Firebase {
     } catch (IOException e) {
       LOGGER.warning(e.getMessage());
     }
+    return app;
   }
 
   /**

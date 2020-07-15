@@ -54,6 +54,7 @@ public class SurveyServlet extends HttpServlet {
       } catch (EntityNotFoundException e) {
         userEntity = new Entity(userKey);
         userEntity.setProperty("firebaseID", userID);
+        datastore.put(userEntity);
       }
 
       // save score of each survey metric as an entity property

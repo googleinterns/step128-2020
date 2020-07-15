@@ -34,19 +34,19 @@ import javax.servlet.http.HttpServletRequest;
 public class Utils {
 
   private static final Logger LOGGER = Logger.getLogger(Utils.class.getName());
-  private static String MAPS_API_KEY;
+  private static String MAPS_API_KEY = getApiKey();
+  private static final GeoApiContext context =
+      new GeoApiContext.Builder().apiKey(MAPS_API_KEY).build();
 
-  static {
-    MAPS_API_KEY = "";
+  private static String getApiKey() {
+    String key = null;
     try {
-      MAPS_API_KEY = SecretHandler.getApiKey();
+      key = SecretHandler.getApiKey();
     } catch (IOException e) {
       LOGGER.warning(e.getMessage());
     }
+    return key;
   }
-
-  private static final GeoApiContext context =
-      new GeoApiContext.Builder().apiKey(MAPS_API_KEY).build();
 
   /**
    * Converts an Object instance into a JSON string using the Gson library.

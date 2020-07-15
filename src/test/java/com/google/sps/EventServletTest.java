@@ -23,7 +23,6 @@ import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Query;
-import com.google.appengine.api.users.UserServiceFactory;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.sps.servlets.EventServlet;
@@ -38,11 +37,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 @PowerMockIgnore("okhttp3.*")
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(UserServiceFactory.class)
+@SuppressStaticInitializationFor({"com.google.sps.Firebase"})
+@PrepareForTest({Firebase.class})
 public final class EventServletTest {
   private final LocalServiceTestHelper helper =
       new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
@@ -62,20 +63,18 @@ public final class EventServletTest {
   public void setUp() throws IOException {
     helper.setUp();
     testEventServlet = new EventServlet();
-    TestingUtil.setUp();
   }
 
   @After
   public void tearDown() {
     helper.tearDown();
-    TestingUtil.tearDown();
   }
 
   @Test
   public void postOneEventToDatastore() throws IOException {
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
-    TestingUtil.toggleLogin("test@example.com");
+    TestingUtil.mockFirebase(request, "test@example.com");
 
     // Add a mock request to pass as a parameter to doPost.
     when(request.getParameter("event-name")).thenReturn("Lake Clean Up");
@@ -102,7 +101,7 @@ public final class EventServletTest {
   public void postMultipleEventsToDatastore() throws IOException {
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
-    TestingUtil.toggleLogin("test@example.com");
+    TestingUtil.mockFirebase(request, "test@example.com");
 
     // Add a mock request to pass as a parameter to doPost.
     when(request.getParameter("event-name")).thenReturn("Lake Clean Up");
@@ -132,7 +131,7 @@ public final class EventServletTest {
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
     String creatorEmail = "test@example.com";
-    TestingUtil.toggleLogin(creatorEmail);
+    TestingUtil.mockFirebase(request, creatorEmail);
 
     // Add a mock request to pass as a parameter to doPost.
     when(request.getParameter("event-name")).thenReturn("Lake Clean Up");
@@ -178,7 +177,7 @@ public final class EventServletTest {
   public void postEventWithEmptyOptionalFields() throws IOException {
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
-    TestingUtil.toggleLogin("test@example.com");
+    TestingUtil.mockFirebase(request, "test@example.com");
 
     // This mock request does not include optional fields end-time and cover-photo.
     when(request.getParameter("event-name")).thenReturn("Lake Clean Up");
@@ -208,6 +207,7 @@ public final class EventServletTest {
   public void postEventWithoutLoggingIn() throws IOException {
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
+    TestingUtil.mockFirebase(request, "");
 
     when(request.getParameter("event-name")).thenReturn("Lake Clean Up");
     when(request.getParameter("event-description")).thenReturn("We're cleaning up the lake");
