@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/*global firebase */
-/*global firebaseui */
+/* global firebase */
+/* global firebaseui */
 
 /** *********************************************************************
  * Utility methods/onload methods (all pages)
