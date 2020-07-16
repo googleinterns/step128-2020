@@ -604,6 +604,21 @@ input[type=time] {
   width: 200px;
 }
 
+/* login */
+.firebaseui-background {
+  background-color: #ffd966;
+  height: 100vh;
+  min-width: 100%;
+}
+
+#firebaseui-auth-container {
+  left: 50%;
+  position: absolute;
+  text-align: center;
+  top: 200px;
+  transform: translate(-50%, -50%);
+}
+
 /* tag colors */
 
 .blm {

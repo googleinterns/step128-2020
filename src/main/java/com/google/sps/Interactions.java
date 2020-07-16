@@ -40,9 +40,9 @@ public class Interactions {
    * returns a map of a user's interest levels with respect to each tag. returns null if user not
    * found.
    */
-  public static Map<String, Integer> getInterestMetrics(String userEmail) {
+  public static Map<String, Integer> getInterestMetrics(String userID) {
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    Key userKey = KeyFactory.createKey("User", userEmail);
+    Key userKey = KeyFactory.createKey("User", userID);
     Map<String, Integer> result = new HashMap<>();
     Entity userEntity;
     try {
@@ -57,7 +57,7 @@ public class Interactions {
         }
       }
     } catch (EntityNotFoundException e) {
-      LOGGER.warning("ERROR: email not found " + userEmail);
+      LOGGER.warning("ERROR: email not found " + userID);
       return null;
     }
     return result;

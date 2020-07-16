@@ -23,9 +23,8 @@ import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.SortDirection;
-import com.google.appengine.api.users.UserService;
-import com.google.appengine.api.users.UserServiceFactory;
 import com.google.gson.Gson;
+import com.google.sps.Firebase;
 import com.google.sps.Utils;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -46,34 +45,36 @@ public class UserServlet extends HttpServlet {
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     // returns a list of events
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    UserService userService = UserServiceFactory.getUserService();
+
     Gson gson = new Gson();
     List<Entity> events = new ArrayList<>();
     response.setContentType("application/json");
 
-    if (userService.isUserLoggedIn()) {
-      String userEmail = userService.getCurrentUser().getEmail();
-      Key userKey = KeyFactory.createKey("User", userEmail);
+    String userToken = request.getParameter("userToken");
+    String userID = "";
+    if (Firebase.isUserLoggedIn(userToken)) {
+      userID = Firebase.authenticateUser(userToken);
+      Key userKey = KeyFactory.createKey("User", userID);
+      Entity userEntity = null;
       try {
-        Entity userEntity = datastore.get(userKey);
-        switch (request.getParameter("get")) {
-          case "saved":
-            events = getHandleSaved(userEntity);
-            break;
-          case "created":
-            events = getHandleCreated(userEmail);
-            break;
-          default:
-            throw new IOException("missing or invalid parameters");
-        }
-        LOGGER.info("queried for events @ account " + userEmail);
-
+        userEntity = datastore.get(userKey);
       } catch (EntityNotFoundException exception) {
         // datastore entry has not been created yet for this user, create it now
-        Entity entity = new Entity(userKey);
-        entity.setProperty("id", userEmail);
-        datastore.put(entity);
+        userEntity = new Entity(userKey);
+        userEntity.setProperty("firebaseID", userID);
+        datastore.put(userEntity);
       }
+      switch (request.getParameter("get")) {
+        case "saved":
+          events = getHandleSaved(userEntity);
+          break;
+        case "created":
+          events = getHandleCreated(userID);
+          break;
+        default:
+          throw new IOException("missing or invalid parameters");
+      }
+      LOGGER.info("queried for events @ account " + userID);
     } else {
       // return a list with all created events
       PreparedQuery results =
@@ -106,14 +107,14 @@ public class UserServlet extends HttpServlet {
     return results;
   }
 
-  // returns a list of all events created by a user (identified by email id)
-  private List<Entity> getHandleCreated(String userEmail) {
+  // returns a list of all events created by a user (identified by firebaseID)
+  private List<Entity> getHandleCreated(String userID) {
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     List<Entity> results = new ArrayList<>();
 
     Query query =
         new Query("Event")
-            .setFilter(new Query.FilterPredicate("creator", Query.FilterOperator.EQUAL, userEmail));
+            .setFilter(new Query.FilterPredicate("creator", Query.FilterOperator.EQUAL, userID));
     PreparedQuery queried = datastore.prepare(query);
     for (Entity e : queried.asIterable()) {
       results.add(e);
@@ -125,13 +126,15 @@ public class UserServlet extends HttpServlet {
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
     // adds or removes events from user's saved events list
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    UserService userService = UserServiceFactory.getUserService();
-    if (!userService.isUserLoggedIn()) {
+
+    String userToken = request.getParameter("userToken");
+    if (!Firebase.isUserLoggedIn(userToken)) {
       throw new IOException("must be logged in");
     }
     if (request.getParameter("event") == null) {
       throw new IOException("no event key specified");
     }
+    String userID = Firebase.authenticateUser(userToken);
     Long eventId = 0L;
     try {
       eventId = Long.parseLong(request.getParameter("event"));
@@ -139,33 +142,33 @@ public class UserServlet extends HttpServlet {
       throw new IOException("invalid format for event key");
     }
     // Handle the logic
-    String userEmail = userService.getCurrentUser().getEmail();
-    Key userKey = KeyFactory.createKey("User", userEmail);
+    Key userKey = KeyFactory.createKey("User", userID);
 
+    Entity userEntity = null;
     try {
-      Entity userEntity = datastore.get(userKey);
-      List<Long> saved = (ArrayList<Long>) userEntity.getProperty("saved");
-      if (saved == null) {
-        saved = new ArrayList<>();
-      }
-      switch (request.getParameter("action")) {
-        case "save":
-          postHandleSave(saved, eventId);
-          break;
-        case "unsave":
-          postHandleUnsave(saved, eventId);
-          break;
-        default:
-          throw new IOException("missing or invalid parameters");
-      }
-      userEntity.setProperty("saved", saved);
-      datastore.put(userEntity);
+      userEntity = datastore.get(userKey);
     } catch (EntityNotFoundException exception) {
       // datastore entry has not been created yet for this user, create it now
-      Entity entity = new Entity(userKey);
-      entity.setProperty("id", userEmail);
-      datastore.put(entity);
+      userEntity = new Entity(userKey);
+      userEntity.setProperty("firebaseID", userID);
+      datastore.put(userEntity);
     }
+    List<Long> saved = (ArrayList<Long>) userEntity.getProperty("saved");
+    if (saved == null) {
+      saved = new ArrayList<>();
+    }
+    switch (request.getParameter("action")) {
+      case "save":
+        postHandleSave(saved, eventId);
+        break;
+      case "unsave":
+        postHandleUnsave(saved, eventId);
+        break;
+      default:
+        throw new IOException("missing or invalid parameters");
+    }
+    userEntity.setProperty("saved", saved);
+    datastore.put(userEntity);
 
     response.sendRedirect("/my-events.html");
   }

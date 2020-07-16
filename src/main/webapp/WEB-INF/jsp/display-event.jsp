@@ -5,6 +5,9 @@
     <title>STEP Capstone</title>
     <link id="style" rel="stylesheet" href="style.css">
     <link rel="icon" href="images/step-favicon.svg" type="image/svg" sizes="16x16">
+    <script src="https://www.gstatic.com/firebasejs/7.15.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.15.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.15.1/firebase-analytics.js"></script>
     <script src="script.js"></script>
   </head>
   <body id="body" onload="loadActions(); displayIndividualEvent(${id}, ${saved});">
@@ -51,7 +54,7 @@
           <p>Location: ${address}</p>
         </div>
         <div class = "event-display-options">
-          <a href="my-events.html" class="save-event">Save Event</a>
+          <a class="save-event">Save Event</a>
           <a href="index.html" class="go-back">Go Back</a>
             <br>
           <div class="share-wrapper">

@@ -768,6 +768,41 @@ h1 {
   width: 30vw;
 }
 
+/* login */
+.firebaseui-background {
+  background-color: #ffd966;
+  height: 84vh;
+  min-width: 100%;
+}
+
+#firebaseui-auth-container {
+  left: 50%;
+  position: absolute;
+  text-align: center;
+  top: 25vh;
+  transform: translate(-50%, -50%);
+}
+
+.firebaseui-tos {
+  font-size: 2em;
+  line-height: 1.3em;
+  text-align: center;
+}
+
+.firebaseui-idp-button, .firebaseui-tenant-button {
+  min-width: 80vw;
+  min-height: 15em;
+}
+
+.firebaseui-idp-text {
+  font-size: 5em;
+}
+
+.firebaseui-idp-icon {
+  height: 5em;
+  padding-right: 1em;
+  width: 5em;
+}
 
 /* tags and tag colors */
 

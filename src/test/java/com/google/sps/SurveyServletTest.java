@@ -22,7 +22,6 @@ import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Query;
-import com.google.appengine.api.users.UserServiceFactory;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.sps.servlets.SurveyServlet;
@@ -34,11 +33,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 /** Tests for the SurveyServlet.java class */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(UserServiceFactory.class)
+@SuppressStaticInitializationFor({"com.google.sps.Firebase"})
+@PrepareForTest({Firebase.class})
 public final class SurveyServletTest {
   private final LocalServiceTestHelper helper =
       new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
@@ -48,24 +49,23 @@ public final class SurveyServletTest {
   public void setUp() throws IOException {
     helper.setUp();
     testSurveyServlet = new SurveyServlet();
-    TestingUtil.setUp();
   }
 
   @After
   public void tearDown() {
     helper.tearDown();
-    TestingUtil.tearDown();
   }
 
   @Test
   public void submitSurvey() throws IOException {
     // basic test to make sure all parameters have been posted to datastore
 
-    String email = "test@example.com";
-    TestingUtil.toggleLogin(email);
-
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
+
+    String email = "test@example.com";
+    TestingUtil.mockFirebase(request, email);
+
     when(request.getParameter("environment")).thenReturn("3");
     when(request.getParameter("blm")).thenReturn("4");
     when(request.getParameter("volunteer")).thenReturn("3");
@@ -86,11 +86,13 @@ public final class SurveyServletTest {
   @Test
   public void submitIncomplete() throws IOException {
     // try to submit a survey with incomplete fields
-    String email = "test@example.com";
-    TestingUtil.toggleLogin(email);
 
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
+
+    String email = "test@example.com";
+    TestingUtil.mockFirebase(request, email);
+
     when(request.getParameter("environment")).thenReturn("3");
     when(request.getParameter("blm")).thenReturn("4");
     when(request.getParameter("volunteer")).thenReturn("3");
@@ -118,13 +120,12 @@ public final class SurveyServletTest {
   public void submitWithoutLogin() throws IOException {
     // try to submit a survey without being logged in
 
-    String email = "test@example.com";
-    // login then log back out
-    TestingUtil.toggleLogin(email);
-    TestingUtil.toggleLogin(email);
-
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
+
+    String email = "";
+    TestingUtil.mockFirebase(request, email);
+
     when(request.getParameter("environment")).thenReturn("3");
     when(request.getParameter("blm")).thenReturn("4");
     when(request.getParameter("volunteer")).thenReturn("3");
@@ -141,11 +142,7 @@ public final class SurveyServletTest {
       DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
       Entity userEntity = ds.prepare(new Query("User")).asSingleEntity();
 
-      assertEquals(false, userEntity.hasProperty("environment"));
-      assertEquals(false, userEntity.hasProperty("blm"));
-      assertEquals(false, userEntity.hasProperty("volunteer"));
-      assertEquals(false, userEntity.hasProperty("education"));
-      assertEquals(false, userEntity.hasProperty("LGBTQ+"));
+      assertEquals(null, userEntity);
     }
   }
 }

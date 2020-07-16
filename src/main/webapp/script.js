@@ -12,12 +12,34 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/* global firebase */
+/* global firebaseui */
 
 /** *********************************************************************
  * Utility methods/onload methods (all pages)
  ***********************************************************************/
 let url = '';
 let loggedIn = false;
+
+// Firebase configuration
+const firebaseConfig = {
+  apiKey: 'AIzaSyBt4BitYGc3aUw4aGVpLGyrXnJZbAXX9RE',
+  authDomain: 'unitebystep.firebaseapp.com',
+  databaseURL: 'https://unitebystep.firebaseio.com',
+  projectId: 'unitebystep',
+  storageBucket: 'unitebystep.appspot.com',
+  messagingSenderId: '654189328956',
+  appId: '1:654189328956:web:22ec1bce47a9cc1972e139',
+  measurementId: 'G-QCZ0TV4734',
+};
+
+/**
+ * Initializes Firebase using the imported Firebase JS files
+ */
+function initializeFirebase() {
+  firebase.initializeApp(firebaseConfig);
+  firebase.analytics();
+}
 
 /**
  * determines which stylesheet to use and generates nav bar
@@ -32,10 +54,25 @@ function loadActions(doAfter) {
     styleSheetElement.href = 'style-mobile.css';
   }
 
-  checkLogin(doAfter);
+  initializeFirebase();
+
+  firebase.auth().onAuthStateChanged(function(user) {
+    if (user) {
+      loggedIn = true;
+    } else {
+      loggedIn = false;
+    }
+    if (doAfter != null) {
+      doAfter();
+    }
+    generateNavBar();
+  }, function(error) {
+    console.log(error);
+  });
 }
 
 /**
+ * DEPRECATED: Use Firebase system instead
  * checks for login status and fetches login/logout url
  *
  * @param {function} doAfter Will call this function after handling login
@@ -53,6 +90,37 @@ async function checkLogin(doAfter = null) {
         }
       });
 }
+
+/**
+ * Logs the user out of Firebase
+ */
+function firebaseLogout() {
+  firebase.auth().signOut().then(function() {
+    window.location.href = '/index.html';
+  }).catch(function(error) {
+    console.log(error);
+  });
+}
+
+/**
+ * Retrieves a token to identify the user when communicating with the backend
+ */
+async function getUserIDToken() {
+  return new Promise((resolve) => {
+    if (loggedIn) {
+      firebase.auth().currentUser
+          .getIdToken(/* forceRefresh */ true)
+          .then(function(idToken) {
+            resolve(idToken);
+          }).catch(function(error) {
+            console.log(error);
+          });
+    } else {
+      resolve('');
+    }
+  });
+}
+
 
 /**
  * Generates navigation bar for the page
@@ -96,11 +164,18 @@ function generateNavBar() {
     myLink.href = '/my-events.html';
     myLink.innerText = 'My Events';
   } else {
-    myLink.href = url;
+    myLink.href = '/login.html';
     myLink.innerText = 'Login';
   }
-
   headerRight.appendChild(myLink);
+
+  if (loggedIn) {
+    const logoutLink = document.createElement('a');
+    logoutLink.className = 'nav-item';
+    logoutLink.href = 'javascript:firebaseLogout()';
+    logoutLink.innerText = 'Logout';
+    headerRight.appendChild(logoutLink);
+  }
 
   const dropdown = document.createElement('div');
   dropdown.className = 'dropdown';
@@ -206,11 +281,21 @@ function generateMobileNavLayout() {
     myLink.href = '/my-events.html';
     myLink.innerText = 'My Events';
   } else {
-    myLink.href = url;
+    myLink.href = '/login.html';
     myLink.innerText = 'Login';
   }
   myBullet.appendChild(myLink);
   dropdownBar.appendChild(myBullet);
+
+  if (loggedIn) {
+    const logoutBullet = document.createElement('li');
+    const logoutLink = document.createElement('a');
+    logoutLink.className = 'dropdown-item';
+    logoutLink.href = 'javascript:firebaseLogout()';
+    logoutLink.innerText = 'Logout';
+    logoutBullet.appendChild(logoutLink);
+    dropdownBar.appendChild(logoutBullet);
+  }
 
   dropdownContainer.appendChild(dropdownBar);
 }
@@ -497,9 +582,10 @@ async function getEvents(events, index, option) {
  * @param {string} key web safe key string.
  */
 function openLink(key) {
-  const path = '/load-event?Event=';
-  const url = path.concat(key);
-  window.location.href = url;
+  getUserIDToken().then((userToken) => {
+    const url = '/load-event?Event=' + key + '&userToken=' + userToken;
+    window.location.href = url;
+  });
 }
 
 let searchDistance = 5;
@@ -632,11 +718,17 @@ function verifyTags() {
     // Convert tags selected array into string
     const jsonArray = JSON.stringify(tagsSelected);
     const tags = createHiddenInput(jsonArray);
+    getUserIDToken().then((preToken) => {
+      const userToken = createHiddenInput(preToken);
+      userToken.name = 'userToken';
 
-    // Add string of tags to form for submission
-    document.getElementById('eventform').appendChild(tags);
-    document.eventform.submit();
-    tagsSelected.splice(0, tagsSelected.length);
+      // Add string of tags and userToken to form for submission
+      document.getElementById('eventform').appendChild(tags);
+      document.getElementById('eventform').appendChild(userToken);
+
+      document.eventform.submit();
+      tagsSelected.splice(0, tagsSelected.length);
+    });
   } else {
     // Display error and prevent from sumbission
     const tagBoxError = document.getElementById('tags-label');
@@ -703,11 +795,14 @@ function updateEventTagBox() {
  */
 async function getRecommendedEvents() {
   if (loggedIn) {
-    fetch('/user?get=saved').then((response) => response.json())
-        .then(function(js) {
-        // TODO: change this fetch call to get recommendations instead
-          getEvents(dummyEvents, 1, 0);
-        });
+    getUserIDToken().then((userToken) => {
+      fetch('/user?get=saved&userToken=' + userToken)
+          .then((response) => response.json())
+          .then(function(js) {
+            // TODO: change this fetch call to get recommendations instead
+            getEvents(dummyEvents, 1, 0);
+          });
+    });
   } else {
     alert('Please log in first!');
   }
@@ -725,14 +820,18 @@ async function getRecommendedEvents() {
  */
 async function getMyEvents() {
   if (loggedIn) {
-    fetch('/user?get=saved').then((response) => response.json())
-        .then(function(js) {
-          getEvents(js, 0, 1);
-        });
-    fetch('/user?get=created').then((response) => response.json())
-        .then(function(js) {
-          getEvents(js, 1, 2);
-        });
+    getUserIDToken().then((userToken) => {
+      fetch('/user?get=saved&userToken=' + userToken)
+          .then((response) => response.json())
+          .then(function(js) {
+            getEvents(js, 0, 1);
+          });
+      fetch('/user?get=created&userToken=' + userToken)
+          .then((response) => response.json())
+          .then(function(js) {
+            getEvents(js, 1, 2);
+          });
+    });
   } else {
     const eventListElements =
         document.getElementsByClassName('event-list-container');
@@ -765,10 +864,14 @@ async function getMyEvents() {
  * @param {number} eventId Id of the event to be unsaved.
  */
 async function unsaveEvent(eventId) {
-  const params = new URLSearchParams();
-  params.append('event', eventId);
-  params.append('action', 'unsave');
-  fetch(new Request('/user', {method: 'POST', body: params}));
+  getUserIDToken().then((userToken) => {
+    const params = new URLSearchParams();
+    params.append('event', eventId);
+    params.append('action', 'unsave');
+    params.append('userToken', userToken);
+    fetch(new Request('/user', {method: 'POST', body: params}));
+    window.location.href = '/my-events.html';
+  });
 }
 
 /* **********************************************************************
@@ -925,6 +1028,7 @@ function submitSurvey() {
         params.append(tagsAll[i], score);
       }
     }
+    params.append('userToken', getUserIDToken());
     fetch(new Request('/submit-survey', {method: 'POST', body: params}));
   } else {
     // cannot submit while not logged in
@@ -1000,6 +1104,37 @@ function loadAttendingColor(color) {
   countContainer.className = 'attendee-count ' + color + '-text';
 }
 
+/* **********************************************************************
+ * Methods for login.html
+ * **********************************************************************/
+
+// FirebaseUI config.
+const uiConfig = {
+  // TODO: replace with URL user came from each time?
+  signInSuccessUrl: '/index.html',
+  signInOptions: [
+    firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+    firebase.auth.EmailAuthProvider.PROVIDER_ID,
+    firebase.auth.FacebookAuthProvider.PROVIDER_ID,
+  ],
+  // tosUrl and privacyPolicyUrl accept either url string or a callback
+  // function.
+  // Terms of service url/callback.
+  tosUrl: '<your-tos-url>',
+  // Privacy policy url/callback.
+  privacyPolicyUrl: function() {
+    window.location.assign('<your-privacy-policy-url>');
+  },
+};
+
+/**
+ * Displays the Firebase login ui on the login page
+ */
+function initializeFirebaseLogin() {
+  const ui = new firebaseui.auth.AuthUI(firebase.auth());
+  ui.start('#firebaseui-auth-container', uiConfig);
+}
+
 /**
  * Loads optional field end time.
  */
@@ -1057,9 +1192,13 @@ function setupSave(id, alreadySaved) {
  *
  * @param {number} eventId Id of the event to be saved.
  */
-async function saveEvent(eventId) {
-  const params = new URLSearchParams();
-  params.append('event', eventId);
-  params.append('action', 'save');
-  fetch(new Request('/user', {method: 'POST', body: params}));
+function saveEvent(eventId) {
+  getUserIDToken().then((userToken) => {
+    const params = new URLSearchParams();
+    params.append('event', eventId);
+    params.append('action', 'save');
+    params.append('userToken', userToken);
+    fetch(new Request('/user', {method: 'POST', body: params}));
+    window.location.href = '/my-events.html';
+  });
 }

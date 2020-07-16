@@ -20,9 +20,8 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
-import com.google.appengine.api.users.UserService;
-import com.google.appengine.api.users.UserServiceFactory;
 import com.google.gson.Gson;
+import com.google.sps.Firebase;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -47,11 +46,11 @@ public class EventServlet extends HttpServlet {
 
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    UserService userService = UserServiceFactory.getUserService();
-    if (userService.isUserLoggedIn()) {
-      String email = userService.getCurrentUser().getEmail();
+    String userToken = request.getParameter("userToken");
+    if (Firebase.isUserLoggedIn(userToken)) {
+      String userID = Firebase.authenticateUser(userToken);
       Entity eventEntity = populateEvent(request);
-      eventEntity.setProperty("creator", email);
+      eventEntity.setProperty("creator", userID);
 
       DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
       datastore.put(eventEntity);
