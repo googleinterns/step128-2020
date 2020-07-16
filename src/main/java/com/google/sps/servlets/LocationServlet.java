@@ -47,8 +47,6 @@ public class LocationServlet extends HttpServlet {
     // returns a list of events
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     UserService userService = UserServiceFactory.getUserService();
-    Gson gson = new Gson();
-    List<Entity> events = new ArrayList<>();
     
     String location = "";
 
@@ -58,7 +56,6 @@ public class LocationServlet extends HttpServlet {
       Entity userEntity = null;
       try {
         userEntity = datastore.get(userKey);
-        LOGGER.info("queried for events @ account " + userEmail);
       } catch (EntityNotFoundException exception) {
         // datastore entry has not been created yet for this user, create it now
         userEntity = new Entity(userKey);
