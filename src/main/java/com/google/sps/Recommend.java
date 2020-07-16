@@ -22,8 +22,8 @@ public class Recommend {
     spark.sparkContext().setLogLevel("ERROR");
   }
 
-  /** 
-   * trains an ALSModel on the provided training dataset 
+  /**
+   * trains an ALSModel on the provided training dataset
    *
    * @param path If specified, will save the model parameters at this path
    */

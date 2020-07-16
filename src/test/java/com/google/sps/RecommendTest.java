@@ -36,9 +36,9 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public final class RecommendTest {
   // file paths
-  private static final String RATINGS = "data/userdatav2.csv";
-  private static final String EVENTS = "data/events.csv";
-  private static final String MODEL_PATH = "data/eventsmodel";
+  private static final String RATINGS = "src/test/data/userdatav2.csv";
+  private static final String EVENTS = "src/test/data/events.csv";
+  private static final String MODEL_PATH = "src/test/data/eventsmodel";
 
   // dataframes only take numeric info, so event items, user ids are mapped to their hashcodes for
   // printing info
