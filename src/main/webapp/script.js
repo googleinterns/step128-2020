@@ -60,7 +60,9 @@ function loadActions(doAfter) {
     } else {
       loggedIn = false;
     }
-    doAfter();
+    if (doAfter != null) {
+      doAfter();
+    }
     generateNavBar();
   }, function(error) {
     console.log(error);
@@ -578,9 +580,10 @@ async function getEvents(events, index, option) {
  * @param {string} key web safe key string.
  */
 function openLink(key) {
-  const path = '/load-event?Event=';
-  const url = path.concat(key);
-  window.location.href = url;
+  getUserIDToken().then((userToken) => {
+    const url = '/load-event?Event=' + key + '&userToken=' + userToken;
+    window.location.href = url;
+  });
 }
 
 let searchDistance = 5;
@@ -859,11 +862,14 @@ async function getMyEvents() {
  * @param {number} eventId Id of the event to be unsaved.
  */
 async function unsaveEvent(eventId) {
-  const params = new URLSearchParams();
-  params.append('event', eventId);
-  params.append('action', 'unsave');
-  params.append('userToken', getUserIDToken());
-  fetch(new Request('/user', {method: 'POST', body: params}));
+  getUserIDToken().then((userToken) => {
+    const params = new URLSearchParams();
+    params.append('event', eventId);
+    params.append('action', 'unsave');
+    params.append('userToken', userToken);
+    fetch(new Request('/user', {method: 'POST', body: params}));
+    window.location.href = '/my-events.html';
+  });
 }
 
 /* **********************************************************************
@@ -1184,10 +1190,13 @@ function setupSave(id, alreadySaved) {
  *
  * @param {number} eventId Id of the event to be saved.
  */
-async function saveEvent(eventId) {
-  const params = new URLSearchParams();
-  params.append('event', eventId);
-  params.append('action', 'save');
-  params.append('userToken', getUserIDToken());
-  fetch(new Request('/user', {method: 'POST', body: params}));
+function saveEvent(eventId) {
+  getUserIDToken().then((userToken) => {
+    const params = new URLSearchParams();
+    params.append('event', eventId);
+    params.append('action', 'save');
+    params.append('userToken', userToken);
+    fetch(new Request('/user', {method: 'POST', body: params}));
+    window.location.href = '/my-events.html';
+  });
 }
