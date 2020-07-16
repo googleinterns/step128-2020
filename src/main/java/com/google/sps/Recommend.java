@@ -12,7 +12,7 @@ public class Recommend {
 
   private static SparkSession spark;
 
-  /** initializes the SparkSession */
+  /** Initializes the SparkSession. */
   private static void init() {
     spark =
         SparkSession.builder()
@@ -23,7 +23,7 @@ public class Recommend {
   }
 
   /**
-   * trains an ALSModel on the provided training dataset
+   * Trains an ALSModel on the provided training dataset.
    *
    * @param path If specified, will save the model parameters at this path
    * @param training Will fit the model to this training dataset
@@ -36,17 +36,17 @@ public class Recommend {
     try {
       model.write().overwrite().save(path);
     } catch (IOException e) {
-
+      // do nothing
     }
     return model;
   }
 
-  /** Returns an existing ALSModel */
+  /** Returns an existing ALSModel. */
   public static ALSModel getModel(String path) {
     return ALSModel.load(path);
   }
 
-  /** Uses RMSE to evaluate a set of predicted data */
+  /** Uses RMSE to evaluate a set of predicted data. */
   public static double evaluatePredictions(Dataset<Row> predictions) {
     RegressionEvaluator evaluator =
         new RegressionEvaluator()

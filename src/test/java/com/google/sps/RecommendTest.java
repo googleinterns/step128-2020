@@ -26,13 +26,12 @@ import org.apache.spark.ml.recommendation.ALSModel;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
-import org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/** */
+/** A class to make sure that Spark works as intended */
 @RunWith(JUnit4.class)
 public final class RecommendTest {
   // file paths
@@ -53,6 +52,7 @@ public final class RecommendTest {
   private static Dataset<Row> test;
 
   @Before
+  /** Initializes the spark session and reads in data from CSV files. */
   public void setUp() throws IOException {
     // sets up sparksession and reads in CSV data
     spark =
@@ -62,14 +62,14 @@ public final class RecommendTest {
             .getOrCreate();
     spark.sparkContext().setLogLevel("ERROR");
 
-    JavaRDD<EventRating> ratingsRDD =
+    JavaRDD<EventRating> ratingsRdd =
         spark
             .read()
             .textFile(RATINGS)
             .javaRDD()
             .map(EventRating::parseRating)
             .filter(rating -> rating != null);
-    ratings = spark.createDataFrame(ratingsRDD, EventRating.class);
+    ratings = spark.createDataFrame(ratingsRdd, EventRating.class);
 
     getEvents(EVENTS);
   }
@@ -79,7 +79,7 @@ public final class RecommendTest {
     testMultiple(1);
   }
 
-  /** Builds and evaluates model multiple times, printing out the average RMSE */
+  /** Builds and evaluates model multiple times, printing out the average RMSE. */
   public final void testMultiple(int count) throws IOException {
     double rmse = 0;
     for (int i = 0; i < count; i++) {
@@ -89,7 +89,7 @@ public final class RecommendTest {
     System.out.println("Average RMSE: " + rmse / count);
   }
 
-  /** Builds and evaluates model once, printing all relevant results */
+  /** Builds and evaluates model once, printing all relevant results. */
   public double test() throws IOException {
     Dataset<Row>[] splits = ratings.randomSplit(new double[] {0.8, 0.2});
     training = splits[0];
@@ -109,7 +109,7 @@ public final class RecommendTest {
     return rmse;
   }
 
-  /** Prints and parses relevant information from predicitions dataframe */
+  /** Prints and parses relevant information from predicitions dataframe. */
   private void printPreds(List<Row> preds) {
     for (Row r : preds) {
       int eventHash = r.getInt(0);
@@ -127,7 +127,7 @@ public final class RecommendTest {
     }
   }
 
-  /** Prints and parses relevant information from recommendations dataframe */
+  /** Prints and parses relevant information from recommendations dataframe. */
   private void printRecs(List<Row> recs) {
     for (Row r : recs) {
       List<Row> o = r.getList(1);
@@ -140,7 +140,7 @@ public final class RecommendTest {
     }
   }
 
-  /** Builds event list from CSV file */
+  /** Builds event list from CSV file. */
   private void getEvents(String path) throws FileNotFoundException {
     Scanner scan = new Scanner(new File(path));
     while (scan.hasNext()) {
@@ -154,7 +154,7 @@ public final class RecommendTest {
     scan.close();
   }
 
-  /** Utility class for parsing CSV and converting it to dataframe-friendly format */
+  /** Utility class for parsing CSV and converting it to dataframe-friendly format. */
   public static class EventRating {
     private int userId;
     private int eventId;
@@ -162,6 +162,7 @@ public final class RecommendTest {
 
     public EventRating() {}
 
+    /** Creates an EventRating object and saves it to the hashcode - userId mapping. */
     public EventRating(String userId, long eventId, float rating) {
       this.userId = userId.hashCode(); // all fields must be numeric
       this.eventId = (Long.toString(eventId)).hashCode();
@@ -182,6 +183,7 @@ public final class RecommendTest {
       return rating;
     }
 
+    /** Creates and returns EventRating object from a CSV input line. */
     public static EventRating parseRating(String str) {
       String[] fields = str.split(",");
       if (fields.length < 3) {
@@ -198,13 +200,14 @@ public final class RecommendTest {
     }
   }
 
-  /** Utility class used for CSV parsing */
+  /** Utility class used for CSV parsing. */
   public static class Event {
     private long eventId;
     private String eventName;
     private String eventDesc;
     private String[] tags;
 
+    /** Creates an Event object. */
     public Event(long eventId, String eventName, String eventDesc, String[] tags) {
       this.eventId = eventId;
       this.eventName = eventName;
@@ -224,6 +227,7 @@ public final class RecommendTest {
       return eventName;
     }
 
+    /** Creates and returns Event object from a CSV input line. */
     public static Event parseEvent(String str) {
       String[] fields = str.split(",");
       if (fields.length != 4) {

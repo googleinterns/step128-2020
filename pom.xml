@@ -116,9 +116,9 @@
     </dependency>
 
     <dependency>
-        <groupId>com.sparkjava</groupId>
-        <artifactId>spark-core</artifactId>
-        <version>2.5</version>
+      <groupId>com.sparkjava</groupId>
+      <artifactId>spark-core</artifactId>
+      <version>2.5</version>
     </dependency>
 
     <!-- https://mvnrepository.com/artifact/org.apache.spark/spark-mllib -->
