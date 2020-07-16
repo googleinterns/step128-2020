@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/*global firebase */
+/*global firebaseui */
 
 /** *********************************************************************
  * Utility methods/onload methods (all pages)
@@ -800,7 +802,7 @@ async function getRecommendedEvents() {
             // TODO: change this fetch call to get recommendations instead
             getEvents(dummyEvents, 1, 0);
           });
-      });
+    });
   } else {
     alert('Please log in first!');
   }
@@ -820,15 +822,15 @@ async function getMyEvents() {
   if (loggedIn) {
     getUserIDToken().then((userToken) => {
       fetch('/user?get=saved&userToken=' + userToken)
-        .then((response) => response.json())
-        .then(function(js) {
-          getEvents(js, 0, 1);
-        });
+          .then((response) => response.json())
+          .then(function(js) {
+            getEvents(js, 0, 1);
+          });
       fetch('/user?get=created&userToken=' + userToken)
-        .then((response) => response.json())
-        .then(function(js) {
-          getEvents(js, 1, 2);
-        });
+          .then((response) => response.json())
+          .then(function(js) {
+            getEvents(js, 1, 2);
+          });
     });
   } else {
     const eventListElements =
