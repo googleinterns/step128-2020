@@ -21,8 +21,7 @@ import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
-import com.google.appengine.api.users.UserService;
-import com.google.appengine.api.users.UserServiceFactory;
+import com.google.sps.Firebase;
 import com.google.sps.Utils;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -50,22 +49,23 @@ public class LoadEventServlet extends HttpServlet {
 
         DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
         Entity eventRequested = datastore.prepare(query).asSingleEntity();
-
-        UserService userService = UserServiceFactory.getUserService();
         int alreadySaved = -1;
 
-        if (userService.isUserLoggedIn()) {
-          String userEmail = userService.getCurrentUser().getEmail();
-          Key userKey = KeyFactory.createKey("User", userEmail);
-          try {
-            Entity userEntity = datastore.get(userKey);
-            alreadySaved = alreadySaved(eventRequested.getKey().getId(), userEntity);
+        String userToken = request.getParameter("userToken");
+        if (userToken != null) {
+          if (Firebase.isUserLoggedIn(userToken)) {
+            String userID = Firebase.authenticateUser(userToken);
+            Key userKey = KeyFactory.createKey("User", userID);
+            try {
+              Entity userEntity = datastore.get(userKey);
+              alreadySaved = alreadySaved(eventRequested.getKey().getId(), userEntity);
 
-          } catch (EntityNotFoundException exception) {
-            // datastore entry has not been created yet for this user, create it now
-            Entity entity = new Entity(userKey);
-            entity.setProperty("id", userEmail);
-            datastore.put(entity);
+            } catch (EntityNotFoundException exception) {
+              // datastore entry has not been created yet for this user, create it now
+              Entity entity = new Entity(userKey);
+              entity.setProperty("firebaseID", userID);
+              datastore.put(entity);
+            }
           }
         }
         request = populateRequest(request, eventRequested, alreadySaved);
@@ -93,6 +93,7 @@ public class LoadEventServlet extends HttpServlet {
     String address = event.getProperty("address").toString();
     String tags = Utils.convertToJson(event.getProperty("tags"));
     String attendeeCount = event.getProperty("attendeeCount").toString();
+    String key = event.getProperty("eventKey").toString();
     long eventId = event.getKey().getId();
 
     request.setAttribute("name", name);
@@ -105,6 +106,7 @@ public class LoadEventServlet extends HttpServlet {
     request.setAttribute("id", eventId);
     request.setAttribute("attendees", attendeeCount);
     request.setAttribute("saved", alreadySaved);
+    request.setAttribute("key", key);
 
     return request;
   }
