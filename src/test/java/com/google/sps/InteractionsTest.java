@@ -19,7 +19,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.users.UserServiceFactory;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.sps.servlets.SurveyServlet;
@@ -33,21 +32,25 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 /** Tests for the utility methods in Interactions.java */
+@PowerMockIgnore("okhttp3.*")
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(UserServiceFactory.class)
+@SuppressStaticInitializationFor({"com.google.sps.Firebase"})
+@PrepareForTest({Firebase.class})
 public final class InteractionsTest {
   private final LocalServiceTestHelper helper =
       new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
   private SurveyServlet testSurveyServlet;
 
   private void takeSurvey(String email) throws MalformedURLException, IOException {
-    TestingUtil.toggleLogin(email);
-
     HttpServletRequest request = mock(HttpServletRequest.class);
+    TestingUtil.mockFirebase(request, email);
+
     when(request.getParameter("environment")).thenReturn("3");
     when(request.getParameter("blm")).thenReturn("4");
     when(request.getParameter("volunteer")).thenReturn("3");
@@ -56,7 +59,6 @@ public final class InteractionsTest {
 
     HttpServletResponse response = mock(HttpServletResponse.class);
     testSurveyServlet.doPost(request, response);
-    TestingUtil.toggleLogin(email);
   }
 
   /** Sets up the datastore helper and authentication utility for each test. */
@@ -64,13 +66,11 @@ public final class InteractionsTest {
   public void setUp() throws IOException {
     helper.setUp();
     testSurveyServlet = new SurveyServlet();
-    TestingUtil.setUp();
   }
 
   @After
   public void tearDown() {
     helper.tearDown();
-    TestingUtil.tearDown();
   }
 
   @Test
@@ -92,11 +92,10 @@ public final class InteractionsTest {
   @Test
   public void noUserForCheckMetrics() throws IOException {
     // call Interactions.getInterestMetrics() on nonexistent user
-
-    String email = "test@example.com";
-    TestingUtil.toggleLogin(email);
-
     HttpServletRequest request = mock(HttpServletRequest.class);
+    String email = "test@example.com";
+    TestingUtil.mockFirebase(request, email);
+
     when(request.getParameter("environment")).thenReturn("3");
     when(request.getParameter("blm")).thenReturn("4");
     when(request.getParameter("volunteer")).thenReturn("3");

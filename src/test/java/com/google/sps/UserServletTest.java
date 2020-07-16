@@ -16,7 +16,9 @@ package com.google.sps;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
@@ -25,7 +27,6 @@ import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
-import com.google.appengine.api.users.UserServiceFactory;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.gson.Gson;
@@ -46,13 +47,16 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 @PowerMockIgnore("okhttp3.*")
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(UserServiceFactory.class)
+@SuppressStaticInitializationFor({"com.google.sps.Firebase"})
+@PrepareForTest({Firebase.class})
 public final class UserServletTest {
   private final LocalServiceTestHelper helper =
       new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
@@ -104,10 +108,14 @@ public final class UserServletTest {
   }
 
   // performs the GET request to return a list of events
-  private List<Entity> callGet(String get) throws IOException {
+  private List<Entity> callGet(String get, String dummyToken) throws IOException {
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
+    PowerMockito.mockStatic(Firebase.class);
     when(request.getParameter("get")).thenReturn(get);
+    PowerMockito.when(request.getParameter("userToken")).thenReturn(dummyToken);
+    PowerMockito.when(Firebase.isUserLoggedIn(anyString())).thenCallRealMethod();
+    PowerMockito.when(Firebase.authenticateUser(anyString())).thenReturn(dummyToken);
 
     StringWriter out = new StringWriter();
     PrintWriter writer = new PrintWriter(out);
@@ -120,11 +128,15 @@ public final class UserServletTest {
   }
 
   // performs the POST request to save or unsave an event with a given id
-  private void callPost(long id, String action) throws IOException {
+  private void callPost(long id, String action, String dummyToken) throws IOException {
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
+    PowerMockito.mockStatic(Firebase.class);
     when(request.getParameter("event")).thenReturn(id + "");
     when(request.getParameter("action")).thenReturn(action);
+    when(request.getParameter("userToken")).thenReturn(dummyToken);
+    PowerMockito.when(Firebase.isUserLoggedIn(anyString())).thenCallRealMethod();
+    PowerMockito.when(Firebase.authenticateUser(anyString())).thenReturn(dummyToken);
     testUserServlet.doPost(request, response);
   }
 
@@ -134,21 +146,17 @@ public final class UserServletTest {
     helper.setUp();
     testEventServlet = new EventServlet();
     testUserServlet = new UserServlet();
-    TestingUtil.setUp();
   }
 
   @After
   public void tearDown() {
     helper.tearDown();
-    TestingUtil.tearDown();
   }
 
   @Test
   public void notLoggedIn() throws IOException {
     // post the events to datastore
     postEventsSetup();
-
-    List<Entity> resultingEntities = callGet("");
 
     // create the expected resulting search results
     Entity goalEntity = createLakeCleanupEvent();
@@ -160,6 +168,9 @@ public final class UserServletTest {
     goalEntityList.add(goalEntity2);
     goalEntityList.add(goalEntity3);
     goalEntityList.add(goalEntity);
+
+    List<Entity> resultingEntities = callGet("", "");
+
     assertListsEqual(goalEntityList, resultingEntities);
   }
 
@@ -168,8 +179,7 @@ public final class UserServletTest {
     // login as test@example.com and make sure method returns correct events
 
     postEventsSetup();
-    TestingUtil.toggleLogin("test@example.com");
-    List<Entity> resultingEntities = callGet("created");
+    List<Entity> resultingEntities = callGet("created", "test@example.com");
 
     Entity goalEntity = createLakeCleanupEvent();
     Entity goalEntity2 = createBlmProtestEvent();
@@ -183,7 +193,7 @@ public final class UserServletTest {
   @Test
   public void saveAnEvent() throws IOException {
     postEventsSetup();
-    List<Entity> allEntities = callGet("");
+    List<Entity> allEntities = callGet("", "");
 
     Entity entityToSave = allEntities.get(0);
     long id = entityToSave.getKey().getId();
@@ -191,8 +201,7 @@ public final class UserServletTest {
     goalList.add(id);
 
     // login and add BLM event to user's saved events
-    TestingUtil.toggleLogin("test@example.com");
-    callPost(id, "save");
+    callPost(id, "save", "test@example.com");
 
     DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
     Key userKey = KeyFactory.createKey("User", "test@example.com");
@@ -213,7 +222,7 @@ public final class UserServletTest {
   public void saveTwoEvents() throws IOException {
     // save two events, this time checking that doGet behaves correctly
     postEventsSetup();
-    List<Entity> allEntities = callGet("");
+    List<Entity> allEntities = callGet("", "");
 
     long id0 = allEntities.get(0).getKey().getId();
     long id1 = allEntities.get(1).getKey().getId();
@@ -222,11 +231,10 @@ public final class UserServletTest {
     goalList.add(allEntities.get(1));
 
     // login and save these two events
-    TestingUtil.toggleLogin("test@example.com");
-    callPost(id0, "save");
-    callPost(id1, "save");
+    callPost(id0, "save", "test@example.com");
+    callPost(id1, "save", "test@example.com");
 
-    assertListsEqual(goalList, callGet("saved"));
+    assertListsEqual(goalList, callGet("saved", "test@example.com"));
   }
 
   @Test
@@ -234,15 +242,14 @@ public final class UserServletTest {
     postEventsSetup();
 
     // for reference, get list of existing entities with their auto-assigned keys
-    List<Entity> allEntities = callGet("");
+    List<Entity> allEntities = callGet("", "");
     long id = allEntities.get(0).getKey().getId();
 
     // save an event, then unsave it
-    TestingUtil.toggleLogin("test@example.com");
-    callPost(id, "save");
-    callPost(id, "unsave");
+    callPost(id, "save", "test@example.com");
+    callPost(id, "unsave", "test@example.com");
 
-    assertListsEqual(new ArrayList<Entity>(), callGet("saved"));
+    assertListsEqual(new ArrayList<Entity>(), callGet("saved", "test@example.com"));
 
     // make sure attendee count is updated correctly
     DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
@@ -259,17 +266,16 @@ public final class UserServletTest {
   public void saveDuplicateEvent() throws IOException {
     postEventsSetup();
 
-    List<Entity> allEntities = callGet("");
+    List<Entity> allEntities = callGet("", "");
     long id = allEntities.get(0).getKey().getId();
     List<Entity> goal = new ArrayList<>();
     goal.add(allEntities.get(0));
 
     // save an event, then save it again
-    TestingUtil.toggleLogin("test@example.com");
-    callPost(id, "save");
-    callPost(id, "save");
+    callPost(id, "save", "test@example.com");
+    callPost(id, "save", "test@example.com");
 
-    assertListsEqual(goal, callGet("saved"));
+    assertListsEqual(goal, callGet("saved", "test@example.com"));
     DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
     Key eventKey = KeyFactory.createKey("Event", id);
     try {
@@ -284,7 +290,7 @@ public final class UserServletTest {
   public void saveNonexistent() throws IOException {
     postEventsSetup();
 
-    List<Entity> allEntities = callGet("");
+    List<Entity> allEntities = callGet("", "");
     // create an id that does not currently exist in datastore
     long id = 0;
     for (int i = 0; i < allEntities.size(); i++) {
@@ -292,10 +298,9 @@ public final class UserServletTest {
     }
     List<Entity> goal = new ArrayList<>();
 
-    TestingUtil.toggleLogin("test@example.com");
-    callPost(id, "save");
+    callPost(id, "save", "test@example.com");
 
-    assertListsEqual(goal, callGet("saved"));
+    assertListsEqual(goal, callGet("saved", "test@example.com"));
 
     // ensure no changes to attendee counts
     DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
@@ -308,18 +313,17 @@ public final class UserServletTest {
   public void unsaveNotSaved() throws IOException {
     postEventsSetup();
 
-    List<Entity> allEntities = callGet("");
+    List<Entity> allEntities = callGet("", "");
     long id0 = allEntities.get(0).getKey().getId();
     long id1 = allEntities.get(1).getKey().getId();
     List<Entity> goalList = new ArrayList<>();
     goalList.add(allEntities.get(0));
 
     // save an event, but unsave a different event
-    TestingUtil.toggleLogin("test@example.com");
-    callPost(id0, "save");
-    callPost(id1, "unsave");
+    callPost(id0, "save", "test@example.com");
+    callPost(id1, "unsave", "test@example.com");
 
-    assertListsEqual(goalList, callGet("saved"));
+    assertListsEqual(goalList, callGet("saved", "test@example.com"));
     Key eventKey0 = KeyFactory.createKey("Event", id0);
     Key eventKey1 = KeyFactory.createKey("Event", id1);
     DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
@@ -337,20 +341,18 @@ public final class UserServletTest {
   public void saveWhileNotLoggedIn() throws IOException {
     postEventsSetup();
 
-    List<Entity> allEntities = callGet("");
+    List<Entity> allEntities = callGet("", "");
     long id = allEntities.get(0).getKey().getId();
 
     try {
-      callPost(id, "save");
+      callPost(id, "save", "");
       fail();
     } catch (IOException e) {
       // ensure that no users have saved anything
       DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
       for (Entity user : ds.prepare(new Query("User")).asIterable()) {
         String email = user.getKey().getName();
-        TestingUtil.toggleLogin(email);
-        assertListsEqual(new ArrayList<Entity>(), callGet("saved"));
-        TestingUtil.toggleLogin(email);
+        assertListsEqual(new ArrayList<Entity>(), callGet("saved", email));
       }
       for (Entity eventEntity : ds.prepare(new Query("Event")).asIterable()) {
         assertEquals(0L, Integer.parseInt(eventEntity.getProperty("attendeeCount").toString()));
@@ -363,7 +365,7 @@ public final class UserServletTest {
     postEventsSetup();
     DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
 
-    List<Entity> allEntities = callGet("");
+    List<Entity> allEntities = callGet("", "");
     long id = allEntities.get(0).getKey().getId();
     List<Entity> goalList = new ArrayList<>();
     goalList.add(allEntities.get(0));
@@ -371,21 +373,17 @@ public final class UserServletTest {
     // save the same event for all users
     for (Entity user : ds.prepare(new Query("User")).asIterable()) {
       String email = user.getKey().getName();
-      TestingUtil.toggleLogin(email);
-      callPost(id, "save");
-      TestingUtil.toggleLogin(email);
+      callPost(id, "save", email);
     }
 
     try {
-      callPost(id, "unsave");
+      callPost(id, "unsave", "");
       fail();
     } catch (IOException e) {
       // ensure that no users have saved anything
       for (Entity user : ds.prepare(new Query("User")).asIterable()) {
         String email = user.getKey().getName();
-        TestingUtil.toggleLogin(email);
-        assertListsEqual(goalList, callGet("saved"));
-        TestingUtil.toggleLogin(email);
+        assertListsEqual(goalList, callGet("saved", email));
       }
     }
   }
@@ -393,7 +391,7 @@ public final class UserServletTest {
   /** Logs in and out a few times, posting events to datastore. */
   public static void postEventsSetup() throws IOException {
     // posted by test@example.com
-    TestingUtil.toggleLogin("test@example.com");
+    PowerMockito.mockStatic(Firebase.class);
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
     when(request.getParameter("event-name")).thenReturn("Lake Clean Up");
@@ -404,6 +402,12 @@ public final class UserServletTest {
     when(request.getParameter("date")).thenReturn("2020-05-17");
     when(request.getParameter("start-time")).thenReturn("14:00");
     when(request.getParameter("all-tags")).thenReturn("['environment']");
+
+    String dummyToken = "test@example.com";
+    when(request.getParameter("userToken")).thenReturn(dummyToken);
+    PowerMockito.when(Firebase.isUserLoggedIn(anyString())).thenCallRealMethod();
+    PowerMockito.when(Firebase.authenticateUser(anyString())).thenReturn(dummyToken);
+
     testEventServlet.doPost(request, response);
 
     request = mock(HttpServletRequest.class);
@@ -416,11 +420,15 @@ public final class UserServletTest {
     when(request.getParameter("date")).thenReturn("2020-05-17");
     when(request.getParameter("start-time")).thenReturn("13:00");
     when(request.getParameter("all-tags")).thenReturn("['blm']");
+
+    when(request.getParameter("userToken")).thenReturn(dummyToken);
+    PowerMockito.when(Firebase.isUserLoggedIn(anyString())).thenCallRealMethod();
+    PowerMockito.when(Firebase.authenticateUser(anyString())).thenReturn(dummyToken);
+
     testEventServlet.doPost(request, response);
-    TestingUtil.toggleLogin("test@example.com");
 
     // posted by another@example.com
-    TestingUtil.toggleLogin("another@example.com");
+    dummyToken = "another@example.com";
     when(request.getParameter("event-name")).thenReturn("Book Drive");
     when(request.getParameter("event-description")).thenReturn("Let's donate books for kids");
     when(request.getParameter("street-address")).thenReturn("School Drive");
@@ -429,10 +437,12 @@ public final class UserServletTest {
     when(request.getParameter("date")).thenReturn("2020-05-17");
     when(request.getParameter("start-time")).thenReturn("10:00");
     when(request.getParameter("all-tags")).thenReturn("['education']");
-    testEventServlet.doPost(request, response);
 
-    // logout
-    TestingUtil.toggleLogin("another@example.com");
+    when(request.getParameter("userToken")).thenReturn(dummyToken);
+    PowerMockito.when(Firebase.isUserLoggedIn(anyString())).thenCallRealMethod();
+    PowerMockito.when(Firebase.authenticateUser(anyString())).thenReturn(dummyToken);
+
+    testEventServlet.doPost(request, response);
   }
 
   /** Creates the lake cleanup event from postEventsSetup(). */
