@@ -1,0 +1,221 @@
+userId,rating,eventId,eventName
+test@example.com,6,1,park clean up
+test@example.com,4,2,environment conference
+test@example.com,4,3,environment march
+test@example.com,0,4,book drive
+test@example.com,0,5,school fundraiser event
+test@example.com,4,6,blm protest
+test@example.com,2,7,bake sale for [blm?]
+test@example.com,4,8,pride parade
+test@example.com,2,9,craft market for lgbtq org
+test@example.com,0,0,Canned food drive
+test@example.com,0,11,Retirement home volunteering
+test@example.com,0,12,volunteers for marathon
+test@example.com,2,13,community blood drive
+test@example.com,0,14,toy donation
+test@example.com,0,15,phone banking
+test@example.com,0,16,voter registration
+,,,
+another@example.com,2,1,park clean up
+another@example.com,0,2,environment conference
+another@example.com,0,3,environment march
+another@example.com,4,4,book drive
+another@example.com,6,5,school fundraiser event
+another@example.com,0,6,blm protest
+another@example.com,0,7,bake sale for [blm?]
+another@example.com,2,8,pride parade
+another@example.com,4,9,craft market for [cause]
+another@example.com,0,0,Canned food drive
+another@example.com,0,11,Retirement home volunteering
+another@example.com,0,12,volunteers for marathon
+another@example.com,0,13,community blood drive
+another@example.com,0,14,toy donation
+another@example.com,4,15,phone banking
+another@example.com,6,16,voter registration
+,,,
+person@example.com,2,1,park clean up
+person@example.com,2,2,environment conference
+person@example.com,0,3,environment march
+person@example.com,2,4,book drive
+person@example.com,2,5,school fundraiser event
+person@example.com,0,6,blm protest
+person@example.com,2,7,bake sale for [blm?]
+person@example.com,0,8,pride parade
+person@example.com,2,9,craft market for lgbtq org
+person@example.com,2,0,Canned food drive
+person@example.com,2,11,Retirement home volunteering
+person@example.com,0,12,volunteers for marathon
+person@example.com,2,13,community blood drive
+person@example.com,2,14,toy donation
+person@example.com,0,15,phone banking
+person@example.com,0,16,voter registration
+,,,
+guy@example.com,4,1,park clean up
+guy@example.com,4,2,environment conference
+guy@example.com,4,3,environment march
+guy@example.com,0,4,book drive
+guy@example.com,0,5,school fundraiser event
+guy@example.com,4,6,blm protest
+guy@example.com,4,7,bake sale for [blm?]
+guy@example.com,0,8,pride parade
+guy@example.com,0,9,craft market for lgbtq org
+guy@example.com,2,0,Canned food drive
+guy@example.com,2,11,Retirement home volunteering
+guy@example.com,2,12,volunteers for marathon
+guy@example.com,0,13,community blood drive
+guy@example.com,0,14,toy donation
+guy@example.com,4,15,phone banking
+guy@example.com,4,16,voter registration
+,,,
+dude@example.com,0,1,park clean up
+dude@example.com,0,2,environment conference
+dude@example.com,0,3,environment march
+dude@example.com,6,4,book drive
+dude@example.com,6,5,school fundraiser event
+dude@example.com,4,6,blm protest
+dude@example.com,2,7,bake sale for [blm?]
+dude@example.com,0,8,pride parade
+dude@example.com,0,9,craft market for lgbtq org
+dude@example.com,6,0,Canned food drive
+dude@example.com,4,11,Retirement home volunteering
+dude@example.com,4,12,volunteers for marathon
+dude@example.com,0,13,community blood drive
+dude@example.com,0,14,toy donation
+dude@example.com,2,15,phone banking
+dude@example.com,2,16,voter registration
+,,,
+buddy@example.com,2,1,park clean up
+buddy@example.com,0,2,environment conference
+buddy@example.com,0,3,environment march
+buddy@example.com,2,4,book drive
+buddy@example.com,2,5,school fundraiser event
+buddy@example.com,0,6,blm protest
+buddy@example.com,0,7,bake sale for [blm?]
+buddy@example.com,2,8,pride parade
+buddy@example.com,2,9,craft market for lgbtq org
+buddy@example.com,0,0,Canned food drive
+buddy@example.com,2,11,Retirement home volunteering
+buddy@example.com,0,12,volunteers for marathon
+buddy@example.com,6,13,community blood drive
+buddy@example.com,4,14,toy donation
+buddy@example.com,0,15,phone banking
+buddy@example.com,0,16,voter registration
+,,,
+onemore@example.com,4,1,park clean up
+onemore@example.com,4,2,environment conference
+onemore@example.com,4,3,environment march
+onemore@example.com,2,4,book drive
+onemore@example.com,2,5,school fundraiser event
+onemore@example.com,2,6,blm protest
+onemore@example.com,2,7,bake sale for [blm?]
+onemore@example.com,2,8,pride parade
+onemore@example.com,2,9,craft market for lgbtq org
+onemore@example.com,4,0,Canned food drive
+onemore@example.com,6,11,Retirement home volunteering
+onemore@example.com,2,12,volunteers for marathon
+onemore@example.com,4,13,community blood drive
+onemore@example.com,4,14,toy donation
+onemore@example.com,2,15,phone banking
+onemore@example.com,2,16,voter registration
+,,,
+anotherone@example.com,0,1,park clean up
+anotherone@example.com,0,2,environment conference
+anotherone@example.com,0,3,environment march
+anotherone@example.com,2,4,book drive
+anotherone@example.com,2,5,school fundraiser event
+anotherone@example.com,0,6,blm protest
+anotherone@example.com,0,7,bake sale for [blm?]
+anotherone@example.com,0,8,pride parade
+anotherone@example.com,0,9,craft market for lgbtq org
+anotherone@example.com,2,0,Canned food drive
+anotherone@example.com,4,11,Retirement home volunteering
+anotherone@example.com,2,12,volunteers for marathon
+anotherone@example.com,2,13,community blood drive
+anotherone@example.com,2,14,toy donation
+anotherone@example.com,4,15,phone banking
+anotherone@example.com,6,16,voter registration
+,,,
+hey@example.com,0,1,park clean up
+hey@example.com,0,2,environment conference
+hey@example.com,0,3,environment march
+hey@example.com,2,4,book drive
+hey@example.com,2,5,school fundraiser event
+hey@example.com,4,6,blm protest
+hey@example.com,6,7,bake sale for [blm?]
+hey@example.com,2,8,pride parade
+hey@example.com,2,9,craft market for lgbtq org
+hey@example.com,0,0,Canned food drive
+hey@example.com,0,11,Retirement home volunteering
+hey@example.com,0,12,volunteers for marathon
+hey@example.com,0,13,community blood drive
+hey@example.com,0,14,toy donation
+hey@example.com,0,15,phone banking
+hey@example.com,0,16,voter registration
+,,,
+heythere@example.com,0,1,park clean up
+heythere@example.com,0,2,environment conference
+heythere@example.com,0,3,environment march
+heythere@example.com,0,4,book drive
+heythere@example.com,0,5,school fundraiser event
+heythere@example.com,2,6,blm protest
+heythere@example.com,2,7,bake sale for [blm?]
+heythere@example.com,2,8,pride parade
+heythere@example.com,2,9,craft market for lgbtq org
+heythere@example.com,0,0,Canned food drive
+heythere@example.com,0,11,Retirement home volunteering
+heythere@example.com,0,12,volunteers for marathon
+heythere@example.com,0,13,community blood drive
+heythere@example.com,0,14,toy donation
+heythere@example.com,0,15,phone banking
+heythere@example.com,0,16,voter registration
+,,,
+hello@example.com,4,1,park clean up
+hello@example.com,2,2,environment conference
+hello@example.com,4,3,environment march
+hello@example.com,0,4,book drive
+hello@example.com,0,5,school fundraiser event
+hello@example.com,6,6,blm protest
+hello@example.com,2,7,bake sale for [blm?]
+hello@example.com,4,8,pride parade
+hello@example.com,2,9,craft market for lgbtq org
+hello@example.com,0,0,Canned food drive
+hello@example.com,0,11,Retirement home volunteering
+hello@example.com,0,12,volunteers for marathon
+hello@example.com,0,13,community blood drive
+hello@example.com,0,14,toy donation
+hello@example.com,0,15,phone banking
+hello@example.com,0,16,voter registration
+,,,
+hellothere@example.com,0,1,park clean up
+hellothere@example.com,0,2,environment conference
+hellothere@example.com,0,3,environment march
+hellothere@example.com,4,4,book drive
+hellothere@example.com,0,5,school fundraiser event
+hellothere@example.com,0,6,blm protest
+hellothere@example.com,4,7,bake sale for [blm?]
+hellothere@example.com,0,8,pride parade
+hellothere@example.com,2,9,craft market for lgbtq org
+hellothere@example.com,4,0,Canned food drive
+hellothere@example.com,0,11,Retirement home volunteering
+hellothere@example.com,2,12,volunteers for marathon
+hellothere@example.com,4,13,community blood drive
+hellothere@example.com,4,14,toy donation
+hellothere@example.com,2,15,phone banking
+hellothere@example.com,0,16,voter registration
+,,,
+asdf@example.com,0,1,park clean up
+asdf@example.com,0,2,environment conference
+asdf@example.com,0,3,environment march
+asdf@example.com,0,4,book drive
+asdf@example.com,0,5,school fundraiser event
+asdf@example.com,0,6,blm protest
+asdf@example.com,0,7,bake sale for [blm?]
+asdf@example.com,0,8,pride parade
+asdf@example.com,0,9,craft market for lgbtq org
+asdf@example.com,6,0,Canned food drive
+asdf@example.com,4,11,Retirement home volunteering
+asdf@example.com,0,12,volunteers for marathon
+asdf@example.com,6,13,community blood drive
+asdf@example.com,4,14,toy donation
+asdf@example.com,4,15,phone banking
+asdf@example.com,4,16,voter registration
