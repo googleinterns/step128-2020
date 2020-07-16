@@ -52,18 +52,20 @@ public class LoadEventServlet extends HttpServlet {
         int alreadySaved = -1;
 
         String userToken = request.getParameter("userToken");
-        if (Firebase.isUserLoggedIn(userToken)) {
-          String userID = Firebase.authenticateUser(userToken);
-          Key userKey = KeyFactory.createKey("User", userID);
-          try {
-            Entity userEntity = datastore.get(userKey);
-            alreadySaved = alreadySaved(eventRequested.getKey().getId(), userEntity);
+        if (userToken != null) {
+          if (Firebase.isUserLoggedIn(userToken)) {
+            String userID = Firebase.authenticateUser(userToken);
+            Key userKey = KeyFactory.createKey("User", userID);
+            try {
+              Entity userEntity = datastore.get(userKey);
+              alreadySaved = alreadySaved(eventRequested.getKey().getId(), userEntity);
 
-          } catch (EntityNotFoundException exception) {
-            // datastore entry has not been created yet for this user, create it now
-            Entity entity = new Entity(userKey);
-            entity.setProperty("firebaseID", userID);
-            datastore.put(entity);
+            } catch (EntityNotFoundException exception) {
+              // datastore entry has not been created yet for this user, create it now
+              Entity entity = new Entity(userKey);
+              entity.setProperty("firebaseID", userID);
+              datastore.put(entity);
+            }
           }
         }
         request = populateRequest(request, eventRequested, alreadySaved);
