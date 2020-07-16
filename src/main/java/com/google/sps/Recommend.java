@@ -26,6 +26,7 @@ public class Recommend {
    * trains an ALSModel on the provided training dataset
    *
    * @param path If specified, will save the model parameters at this path
+   * @param training Will fit the model to this training dataset
    */
   public static ALSModel trainModel(String path, Dataset<Row> training) throws IOException {
     ALS als =
