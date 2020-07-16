@@ -57,6 +57,7 @@
           <div class="share-wrapper">
             <h3>Share</h3>
             <div class="share-container">
+              <input type="hidden" id="event-key" value='${key}'>
               <a id="twitter-link" target="_blank">
                   <img src="images/twitter.svg" alt="Twitter"/>
               </a>

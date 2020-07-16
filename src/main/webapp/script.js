@@ -402,7 +402,9 @@ async function getEvents(events, index, option) {
     eventListElement.appendChild(eventItemElement);
 
     const eventImageElement = document.createElement('div');
-    eventImageElement.className = 'event-image ' + event.tags[0];
+    let primaryTag = event.tags[0];
+    if (primaryTag == 'LGBTQ+') primaryTag = 'LGBTQ';
+    eventImageElement.className = 'event-image ' + primaryTag;
 
     const eventItemInfoElement = document.createElement('div');
     eventItemInfoElement.className = 'event-item-info';
@@ -503,7 +505,7 @@ async function getEvents(events, index, option) {
       attendeeCountContainerElement.className = 'attendee-count-container';
 
       const attendeeCountElement = document.createElement('span');
-      attendeeCountElement.className = 'attendee-count ' + event.tags[0] +
+      attendeeCountElement.className = 'attendee-count ' + primaryTag +
           '-text';
       attendeeCountElement.innerText = event.attendeeCount;
       attendeeCountContainerElement.appendChild(attendeeCountElement);
@@ -525,6 +527,7 @@ async function getEvents(events, index, option) {
       tagsContainerElement.appendChild(tagElement);
     });
   });
+  generateRainbowTags();
 
   // generates this structure:
   //
@@ -1049,6 +1052,7 @@ function displayIndividualEvent(id = 0, alreadySaved = -1) {
   loadDefaultImage(mainColor);
   loadAttendingColor(mainColor);
   loadOptionalFields();
+  loadLinks();
   setupSave(id, alreadySaved);
 }
 
@@ -1136,6 +1140,23 @@ function loadOptionalFields() {
 
     timeContainer.appendChild(end);
   }
+}
+
+/**
+ * Generates share links for Facebook, Twitter, and mail.
+ */
+function loadLinks() {
+  const eventKey = document.getElementById('event-key').value;
+  const twitter = document.getElementById('twitter-link');
+  const facebook = document.getElementById('fb-link');
+  const mail = document.getElementById('mail-link');
+  const url = 'http://unitebystep.appspot.com/load-event?Event=' + eventKey;
+  const br = '%0D%0A%0D%0A';
+
+  twitter.href = 'https://twitter.com/share?url=' + url;
+  facebook.href = 'http://www.facebook.com/sharer.php?u=' + url;
+  mail.href =
+   'mailto:?subject=Unite by STEP Event&body=Check out this event!' + br + url;
 }
 
 /**
