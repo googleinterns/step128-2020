@@ -31,7 +31,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/** A class to make sure that Spark works as intended */
+/** A class to make sure that Spark works as intended. */
 @RunWith(JUnit4.class)
 public final class RecommendTest {
   // file paths
@@ -51,8 +51,8 @@ public final class RecommendTest {
   private static Dataset<Row> training;
   private static Dataset<Row> test;
 
-  @Before
   /** Initializes the spark session and reads in data from CSV files. */
+  @Before
   public void setUp() throws IOException {
     // sets up sparksession and reads in CSV data
     spark =
@@ -147,7 +147,6 @@ public final class RecommendTest {
       String line = scan.nextLine();
       Event event = Event.parseEvent(line);
       if (event != null) {
-
         EVENT_INFO.put((Long.toString(event.getId())).hashCode(), event);
       }
     }
