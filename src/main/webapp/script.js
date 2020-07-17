@@ -881,6 +881,17 @@ function updateEventTagBox() {
   generateRainbowTags();
 }
 
+/**
+ * Opens the event edit form via its key name.
+ * @param {string} key web safe key string.
+ */
+function openEditForm(key) {
+  getUserIDToken().then((userToken) => {
+    const url = '/edit-event?Event=' + key + '&userToken=' + userToken;
+    window.location.href = url;
+  });
+}
+
 /* **********************************************************************
  * Methods for index.html
  * **********************************************************************/
