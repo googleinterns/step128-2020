@@ -687,8 +687,8 @@ function generateRainbowTags() {
 /**
  * Sets value of a cookie.
  *
- * @param cname name of the cookie
- * @param cvalue name of the value
+ * @param cname {string} name of the cookie
+ * @param cvalue {string} name of the value
  */
 function setCookie(cname, cvalue) {
   document.cookie = cname + '=' + cvalue + '; ';
@@ -697,11 +697,11 @@ function setCookie(cname, cvalue) {
 /**
  * Gets value of a cookie.
  *
- * @param cname name of the cookie
- * @returns the value of the requested cookie
+ * @param cname {string} name of the cookie
+ * @return {string} the value of the requested cookie
  */
 function getCookie(cname) {
-  const name = cname + "=";
+  const name = cname + '=';
   const decodedCookie = decodeURIComponent(document.cookie);
   const cArr = decodedCookie.split(';');
   for (let i = 0; i < cArr.length; i++) {
@@ -720,7 +720,7 @@ function getCookie(cname) {
  * Retrieves the users location, prioritizing the datastore
  * but falling back on cookies
  *
- * @returns the location of the user
+ * @return {string} the location of the user
  */
 function getLocation() {
   return new Promise((resolve) => {
@@ -731,8 +731,8 @@ function getLocation() {
           .then((response) => response.json())
           .then(function(js) {
             const locationDatastore = js;
-            if (locationDatastore != ''
-                && locationCookie != locationDatastore) {
+            if (locationDatastore != '' &&
+                locationCookie != locationDatastore) {
               setCookie('location', locationDatastore);
               location = locationDatastore;
             } else {
@@ -759,8 +759,8 @@ function changeLocation() {
       params.append('userToken', userToken);
       fetch(new Request('/location', {method: 'POST', body: params}))
           .then(() => {
-        getSearchDistanceSettings();
-      });
+            getSearchDistanceSettings();
+          });
     });
   }
 }
