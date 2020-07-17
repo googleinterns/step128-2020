@@ -16,7 +16,6 @@ package com.google.sps;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -44,7 +43,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-/** Tests for the SurveyServlet.java class */
+/** Tests for the LocationServlet.java class */
 @PowerMockIgnore("okhttp3.*")
 @RunWith(PowerMockRunner.class)
 @SuppressStaticInitializationFor({"com.google.sps.Firebase"})
@@ -204,6 +203,12 @@ public final class LocationServletTest {
     assertEquals("", output);
   }
 
+  /**
+   * Adds a prior location for the requested user.
+   *
+   * @param email String containing the identifying email for the user
+   * @param zip String containing the zip code of the prior location
+   */
   public void setPriorLocation(String email, String zip) throws IOException {
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
