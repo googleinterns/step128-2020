@@ -139,6 +139,32 @@ public final class LocationServletTest {
   }
 
   @Test
+  public void changeLocationNoNewLocation() throws IOException {
+    HttpServletRequest request = mock(HttpServletRequest.class);
+
+    String email = "test@example.com";
+    TestingUtil.mockFirebase(request, email);
+    setPriorLocation("test@example.com", "0");
+
+    HttpServletResponse response = mock(HttpServletResponse.class);
+
+    try {
+      testLocationServlet.doPost(request, response);
+      fail();
+    } catch (IOException e) {
+      // ensure that location was not changed
+      DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
+      Key userKey = KeyFactory.createKey("User", "test@example.com");
+      try {
+        Entity userEntity = ds.get(userKey);
+        assertEquals("0", userEntity.getProperty("location"));
+      } catch (EntityNotFoundException exception) {
+        fail();
+      }
+    }
+  }
+
+  @Test
   public void getLocation() throws IOException {
     HttpServletRequest request = mock(HttpServletRequest.class);
 
