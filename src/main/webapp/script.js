@@ -685,21 +685,27 @@ function generateRainbowTags() {
 }
 
 /**
- * Sets value of the cookie cname to cvalue
+ * Sets value of a cookie.
+ *
+ * @param cname name of the cookie
+ * @param cvalue name of the value
  */
 function setCookie(cname, cvalue) {
-  document.cookie = cname + "=" + cvalue + "; ";
+  document.cookie = cname + '=' + cvalue + '; ';
 }
 
 /**
- * Gets value of the cookie cname
+ * Gets value of a cookie.
+ *
+ * @param cname name of the cookie
+ * @returns the value of the requested cookie
  */
 function getCookie(cname) {
-  var name = cname + "=";
-  var decodedCookie = decodeURIComponent(document.cookie);
-  var cArr = decodedCookie.split(';');
-  for(var i = 0; i < cArr.length; i++) {
-    var c = cArr[i];
+  const name = cname + "=";
+  const decodedCookie = decodeURIComponent(document.cookie);
+  const cArr = decodedCookie.split(';');
+  for (let i = 0; i < cArr.length; i++) {
+    let c = cArr[i];
     while (c.charAt(0) == ' ') {
       c = c.substring(1);
     }
@@ -707,12 +713,14 @@ function getCookie(cname) {
       return c.substring(name.length, c.length);
     }
   }
-  return "";
+  return '';
 }
 
 /**
  * Retrieves the users location, prioritizing the datastore
  * but falling back on cookies
+ *
+ * @returns the location of the user
  */
 function getLocation() {
   return new Promise((resolve) => {
@@ -722,8 +730,9 @@ function getLocation() {
       fetch('/location?userToken=' + userToken)
           .then((response) => response.json())
           .then(function(js) {
-            let locationDatastore = js;
-            if (locationDatastore != '' && locationCookie != locationDatastore) {
+            const locationDatastore = js;
+            if (locationDatastore != ''
+                && locationCookie != locationDatastore) {
               setCookie('location', locationDatastore);
               location = locationDatastore;
             } else {
@@ -731,7 +740,7 @@ function getLocation() {
             }
             resolve(location);
           });
-  });
+    });
   });
 }
 
@@ -739,7 +748,7 @@ function getLocation() {
  * Prompts the user to enter their zipcode to change their location
  */
 function changeLocation() {
-  var location = prompt('Please enter your zipcode:', '');
+  const location = prompt('Please enter your zipcode:', '');
   if (location == null || location == '') {
     console.log('incomplete');
   } else {
@@ -748,7 +757,8 @@ function changeLocation() {
       const params = new URLSearchParams();
       params.append('zip', location);
       params.append('userToken', userToken);
-      fetch(new Request('/location', {method: 'POST', body: params})).then(() => {
+      fetch(new Request('/location', {method: 'POST', body: params}))
+          .then(() => {
         getSearchDistanceSettings();
       });
     });
@@ -942,8 +952,9 @@ async function unsaveEvent(eventId) {
     params.append('event', eventId);
     params.append('action', 'unsave');
     params.append('userToken', userToken);
-    fetch(new Request('/user', {method: 'POST', body: params}));
-    window.location.href = '/my-events.html';
+    fetch(new Request('/user', {method: 'POST', body: params})).then(() => {
+      window.location.href = '/my-events.html';
+    });
   });
 }
 
@@ -1054,11 +1065,11 @@ function search() {
   getLocation().then((location) => {
     // TODO get user location
     url += '&searchDistance=' + searchDistance + '&location=' + location;
- 
+
     fetch('/search' + url).then((response) => response.json())
-      .then(function(responseJson) {
-        getEvents(responseJson, 0, 3);
-      });
+        .then(function(responseJson) {
+          getEvents(responseJson, 0, 3);
+        });
   });
 }
 
@@ -1274,7 +1285,7 @@ function saveEvent(eventId) {
     params.append('event', eventId);
     params.append('action', 'save');
     params.append('userToken', userToken);
-    fetch(new Request('/user', {method: 'POST', body: params})).then(() => {;
+    fetch(new Request('/user', {method: 'POST', body: params})).then(() => {
       window.location.href = '/my-events.html';
     });
   });
