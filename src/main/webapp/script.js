@@ -602,49 +602,51 @@ function changeSearchDistance() {
  * Creates the search distance settings on the page
  */
 async function getSearchDistanceSettings() {
-  const locationSettingsElements =
-   document.getElementsByClassName('location-settings');
-  const locationSettingsElement = locationSettingsElements[0];
+  getLocation().then((location) => {
+    const locationSettingsElements =
+    document.getElementsByClassName('location-settings');
+    const locationSettingsElement = locationSettingsElements[0];
 
-  // TODO get from server where the user's location is to set by default.
-  locationSettingsElement.innerHTML = '';
-  const currentLocationElement = document.createElement('div');
-  currentLocationElement.className = 'current-location';
-  currentLocationElement.innerText = 'Current Location: ' +
-     getLocation();
-  locationSettingsElement.appendChild(currentLocationElement);
-  locationSettingsElement.appendChild(
-      document.createTextNode(' '));
+    // TODO get from server where the user's location is to set by default.
+    locationSettingsElement.innerHTML = '';
+    const currentLocationElement = document.createElement('div');
+    currentLocationElement.className = 'current-location';
+    currentLocationElement.innerText = 'Current Location: ' +
+      location;
+    locationSettingsElement.appendChild(currentLocationElement);
+    locationSettingsElement.appendChild(
+        document.createTextNode(' '));
 
-  const changeLinkElement = document.createElement('a');
-  changeLinkElement.setAttribute('href', 'javascript:changeLocation()');
-  changeLinkElement.innerText = 'Change Location';
-  locationSettingsElement.appendChild(changeLinkElement);
+    const changeLinkElement = document.createElement('a');
+    changeLinkElement.setAttribute('href', 'javascript:changeLocation()');
+    changeLinkElement.innerText = 'Change Location';
+    locationSettingsElement.appendChild(changeLinkElement);
 
-  const distanceElement = document.createElement('div');
-  distanceElement.className = 'distance';
-  distanceElement.appendChild(
-      document.createTextNode('Searching within '));
-  locationSettingsElement.appendChild(distanceElement);
+    const distanceElement = document.createElement('div');
+    distanceElement.className = 'distance';
+    distanceElement.appendChild(
+        document.createTextNode('Searching within '));
+    locationSettingsElement.appendChild(distanceElement);
 
-  const selectElement = document.createElement('select');
-  selectElement.id = 'searchDistance';
-  selectElement.setAttribute('onchange', 'changeSearchDistance()');
-  distanceElement.appendChild(selectElement);
+    const selectElement = document.createElement('select');
+    selectElement.id = 'searchDistance';
+    selectElement.setAttribute('onchange', 'changeSearchDistance()');
+    distanceElement.appendChild(selectElement);
 
-  const distanceList = [5, 10, 25, 50];
-  distanceList.forEach(function(distance) {
-    const optionElement = document.createElement('option');
-    optionElement.value = distance;
-    optionElement.innerText = distance;
-    if (distance == searchDistance) {
-      optionElement.setAttribute('selected', 'true');
-    }
-    selectElement.appendChild(optionElement);
+    const distanceList = [5, 10, 25, 50];
+    distanceList.forEach(function(distance) {
+      const optionElement = document.createElement('option');
+      optionElement.value = distance;
+      optionElement.innerText = distance;
+      if (distance == searchDistance) {
+        optionElement.setAttribute('selected', 'true');
+      }
+      selectElement.appendChild(optionElement);
+    });
+
+    distanceElement.appendChild(
+        document.createTextNode(' mi'));
   });
-
-  distanceElement.appendChild(
-      document.createTextNode(' mi'));
 }
 
 /**
@@ -713,20 +715,24 @@ function getCookie(cname) {
  * but falling back on cookies
  */
 function getLocation() {
-  let locationCookie = getCookie('location');
-  let location = '';
-  if (locationCookie == '') {
-    return location;
-  }/*
-  let locationDatastore = null;
-  // if user is logged in {
-    locationDatastore = 'something else';
-    if (locationCookie != locationDatastore) {
-      setCookie('location', locationDatastore);
-    }
-  }*/
-  location = locationCookie;
-  return location;
+  return new Promise((resolve) => {
+    const locationCookie = getCookie('location');
+    let location = '';
+    getUserIDToken().then((userToken) => {
+      fetch('/location?userToken=' + userToken)
+          .then((response) => response.json())
+          .then(function(js) {
+            let locationDatastore = js;
+            if (locationDatastore != '' && locationCookie != locationDatastore) {
+              setCookie('location', locationDatastore);
+              location = locationDatastore;
+            } else {
+              location = locationCookie;
+            }
+            resolve(location);
+          });
+  });
+  });
 }
 
 /**
@@ -738,9 +744,15 @@ function changeLocation() {
     console.log('incomplete');
   } else {
     setCookie('location', location);
-    //post
+    getUserIDToken().then((userToken) => {
+      const params = new URLSearchParams();
+      params.append('zip', location);
+      params.append('userToken', userToken);
+      fetch(new Request('/location', {method: 'POST', body: params})).then(() => {
+        getSearchDistanceSettings();
+      });
+    });
   }
-  getSearchDistanceSettings();
 }
 
 /* **********************************************************************
@@ -1025,7 +1037,7 @@ function updateTagBox() {
 /**
  * Placeholder function for search functionality
  */
-async function search() {
+function search() {
   let url = '?tags=';
   tagsSearch.forEach(function(tag) {
     if (tag == 'LGBTQ+') {
@@ -1039,12 +1051,15 @@ async function search() {
     url = url.substring(0, url.length - 1);
   }
 
-  // TODO get user location
-  url += '&searchDistance=' + searchDistance + '&location=' + 'Los Angeles, CA';
-
-  const response = await fetch('/search' + url);
-  const events = await response.json();
-  getEvents(events, 0, 3);
+  getLocation().then((location) => {
+    // TODO get user location
+    url += '&searchDistance=' + searchDistance + '&location=' + location;
+ 
+    fetch('/search' + url).then((response) => response.json())
+      .then(function(responseJson) {
+        getEvents(responseJson, 0, 3);
+      });
+  });
 }
 
 /* **********************************************************************
@@ -1259,7 +1274,8 @@ function saveEvent(eventId) {
     params.append('event', eventId);
     params.append('action', 'save');
     params.append('userToken', userToken);
-    fetch(new Request('/user', {method: 'POST', body: params}));
-    window.location.href = '/my-events.html';
+    fetch(new Request('/user', {method: 'POST', body: params})).then(() => {;
+      window.location.href = '/my-events.html';
+    });
   });
 }

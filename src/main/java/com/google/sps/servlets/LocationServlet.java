@@ -61,10 +61,10 @@ public class LocationServlet extends HttpServlet {
 
     // Convert events list to json
     String json = Utils.convertToJson(location);
-    System.out.println(json);
 
     response.setContentType("application/json;");
     response.getWriter().println(json);
+    LOGGER.info(String.format("Got user %1$s's location", userID));
   }
 
   @Override
@@ -95,6 +95,8 @@ public class LocationServlet extends HttpServlet {
 
     String zip = request.getParameter("zip");
     userEntity.setProperty("location", zip);
+
     datastore.put(userEntity);
+    LOGGER.info(String.format("Posted user %1$s's location", userID));
   }
 }
