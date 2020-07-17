@@ -17,27 +17,35 @@ package com.google.sps;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.EntityNotFoundException;
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
-import com.google.sps.servlets.SurveyServlet;
+import com.google.gson.Gson;
+import com.google.sps.servlets.LocationServlet;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
 import org.powermock.modules.junit4.PowerMockRunner;
-import com.google.gson.Gson;
 
 /** Tests for the SurveyServlet.java class */
+@PowerMockIgnore("okhttp3.*")
 @RunWith(PowerMockRunner.class)
 @SuppressStaticInitializationFor({"com.google.sps.Firebase"})
 @PrepareForTest({Firebase.class})
@@ -59,12 +67,12 @@ public final class LocationServletTest {
   }
 
   @Test
-  public void changeLocation() throws IOException{
+  public void changeLocation() throws IOException {
     HttpServletRequest request = mock(HttpServletRequest.class);
-    
+
     String email = "test@example.com";
     TestingUtil.mockFirebase(request, email);
-    setPriorLocation();
+    setPriorLocation("test@example.com", "0");
 
     when(request.getParameter("zip")).thenReturn("90001");
 
@@ -82,32 +90,37 @@ public final class LocationServletTest {
   }
 
   @Test
-  public void changeLocationNotLoggedIn() throws IOException{
+  public void changeLocationNotLoggedIn() throws IOException {
     HttpServletRequest request = mock(HttpServletRequest.class);
-    
+
     String email = "";
     TestingUtil.mockFirebase(request, email);
-    setPriorLocation();
+    setPriorLocation("test@example.com", "0");
 
     when(request.getParameter("zip")).thenReturn("90001");
 
     HttpServletResponse response = mock(HttpServletResponse.class);
-    testLocationServlet.doPost(request, response);
 
-    DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
-    Key userKey = KeyFactory.createKey("User", "test@example.com");
     try {
-      Entity userEntity = ds.get(userKey);
-      assertEquals("0", userEntity.getProperty("location"));
-    } catch (EntityNotFoundException exception) {
+      testLocationServlet.doPost(request, response);
       fail();
+    } catch (IOException e) {
+      // ensure that location was not changed
+      DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
+      Key userKey = KeyFactory.createKey("User", "test@example.com");
+      try {
+        Entity userEntity = ds.get(userKey);
+        assertEquals("0", userEntity.getProperty("location"));
+      } catch (EntityNotFoundException exception) {
+        fail();
+      }
     }
   }
 
   @Test
-  public void changeLocationNewUser() throws IOException{
+  public void changeLocationNewUser() throws IOException {
     HttpServletRequest request = mock(HttpServletRequest.class);
-    
+
     String email = "test@example.com";
     TestingUtil.mockFirebase(request, email);
 
@@ -127,132 +140,75 @@ public final class LocationServletTest {
   }
 
   @Test
-  public void getLocation() throws IOException{
+  public void getLocation() throws IOException {
     HttpServletRequest request = mock(HttpServletRequest.class);
-    
+
     String email = "test@example.com";
     TestingUtil.mockFirebase(request, email);
-    setPriorLocation();
+    setPriorLocation("test@example.com", "90001");
 
     HttpServletResponse response = mock(HttpServletResponse.class);
     StringWriter out = new StringWriter();
     PrintWriter writer = new PrintWriter(out);
     when(response.getWriter()).thenReturn(writer);
 
-    testLocationServlet.doPost(request, response);
+    testLocationServlet.doGet(request, response);
     out.flush();
 
     String output = out.toString();
-    
-    assertEquals("0", output);
+    output = output.substring(1, output.length() - 2);
+
+    assertEquals("90001", output);
   }
 
   @Test
-  public void getLocationNotLoggedIn() throws IOException{
-    
-  }
-
-  @Test
-  public void getLocationNewUser() throws IOException{
-    
-  }
-
-  
-  public static void setPriorLocation() throws IOException {
+  public void getLocationNotLoggedIn() throws IOException {
     HttpServletRequest request = mock(HttpServletRequest.class);
-    HttpServletResponse response = mock(HttpServletResponse.class);
-    TestingUtil.mockFirebase(request, email);
-    when(request.getParameter("zip")).thenReturn("0");
-    testEventServlet.doPost(request, response);
-  }
-
-  @Test
-  public void submitSurvey() throws IOException {
-    // basic test to make sure all parameters have been posted to datastore
-
-    HttpServletRequest request = mock(HttpServletRequest.class);
-    HttpServletResponse response = mock(HttpServletResponse.class);
-
-    String email = "test@example.com";
-    TestingUtil.mockFirebase(request, email);
-
-    when(request.getParameter("environment")).thenReturn("3");
-    when(request.getParameter("blm")).thenReturn("4");
-    when(request.getParameter("volunteer")).thenReturn("3");
-    when(request.getParameter("education")).thenReturn("2");
-    when(request.getParameter("LGBTQ+")).thenReturn("4");
-
-    testSurveyServlet.doPost(request, response);
-
-    DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
-    Entity userEntity = ds.prepare(new Query("User")).asSingleEntity();
-    assertEquals("3", userEntity.getProperty("environment"));
-    assertEquals("4", userEntity.getProperty("blm"));
-    assertEquals("3", userEntity.getProperty("volunteer"));
-    assertEquals("2", userEntity.getProperty("education"));
-    assertEquals("4", userEntity.getProperty("LGBTQ+"));
-  }
-
-  @Test
-  public void submitIncomplete() throws IOException {
-    // try to submit a survey with incomplete fields
-
-    HttpServletRequest request = mock(HttpServletRequest.class);
-    HttpServletResponse response = mock(HttpServletResponse.class);
-
-    String email = "test@example.com";
-    TestingUtil.mockFirebase(request, email);
-
-    when(request.getParameter("environment")).thenReturn("3");
-    when(request.getParameter("blm")).thenReturn("4");
-    when(request.getParameter("volunteer")).thenReturn("3");
-    when(request.getParameter("education")).thenReturn("2");
-
-    try {
-      testSurveyServlet.doPost(request, response);
-
-      fail();
-    } catch (IOException expected) {
-
-      // make sure nothing has been posted
-      DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
-      Entity userEntity = ds.prepare(new Query("User")).asSingleEntity();
-
-      assertEquals(false, userEntity.hasProperty("environment"));
-      assertEquals(false, userEntity.hasProperty("blm"));
-      assertEquals(false, userEntity.hasProperty("volunteer"));
-      assertEquals(false, userEntity.hasProperty("education"));
-      assertEquals(false, userEntity.hasProperty("LGBTQ+"));
-    }
-  }
-
-  @Test
-  public void submitWithoutLogin() throws IOException {
-    // try to submit a survey without being logged in
-
-    HttpServletRequest request = mock(HttpServletRequest.class);
-    HttpServletResponse response = mock(HttpServletResponse.class);
 
     String email = "";
     TestingUtil.mockFirebase(request, email);
+    setPriorLocation("test@example.com", "90001");
 
-    when(request.getParameter("environment")).thenReturn("3");
-    when(request.getParameter("blm")).thenReturn("4");
-    when(request.getParameter("volunteer")).thenReturn("3");
-    when(request.getParameter("education")).thenReturn("2");
-    when(request.getParameter("LGBTQ+")).thenReturn("4");
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    StringWriter out = new StringWriter();
+    PrintWriter writer = new PrintWriter(out);
+    when(response.getWriter()).thenReturn(writer);
 
-    try {
-      testSurveyServlet.doPost(request, response);
+    testLocationServlet.doGet(request, response);
+    out.flush();
 
-      fail();
-    } catch (IOException expected) {
+    String output = out.toString();
+    output = output.substring(1, output.length() - 2);
 
-      // make sure nothing has been posted
-      DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
-      Entity userEntity = ds.prepare(new Query("User")).asSingleEntity();
+    assertEquals("", output);
+  }
 
-      assertEquals(null, userEntity);
-    }
+  @Test
+  public void getLocationNewUser() throws IOException {
+    HttpServletRequest request = mock(HttpServletRequest.class);
+
+    String email = "test@example.com";
+    TestingUtil.mockFirebase(request, email);
+
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    StringWriter out = new StringWriter();
+    PrintWriter writer = new PrintWriter(out);
+    when(response.getWriter()).thenReturn(writer);
+
+    testLocationServlet.doGet(request, response);
+    out.flush();
+
+    String output = out.toString();
+    output = output.substring(1, output.length() - 2);
+
+    assertEquals("", output);
+  }
+
+  public void setPriorLocation(String email, String zip) throws IOException {
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    TestingUtil.mockFirebase(request, email);
+    when(request.getParameter("zip")).thenReturn(zip);
+    testLocationServlet.doPost(request, response);
   }
 }

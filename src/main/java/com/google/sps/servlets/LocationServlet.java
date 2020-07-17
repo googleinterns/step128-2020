@@ -20,17 +20,9 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
-import com.google.appengine.api.datastore.PreparedQuery;
-import com.google.appengine.api.datastore.Query;
-import com.google.appengine.api.datastore.Query.SortDirection;
-import com.google.appengine.api.users.UserService;
-import com.google.appengine.api.users.UserServiceFactory;
-import com.google.gson.Gson;
+import com.google.sps.Firebase;
 import com.google.sps.Utils;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.logging.Logger;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -46,28 +38,30 @@ public class LocationServlet extends HttpServlet {
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     // returns a list of events
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    UserService userService = UserServiceFactory.getUserService();
-    
+
     String location = "";
 
-    if (userService.isUserLoggedIn()) {
-      String userEmail = userService.getCurrentUser().getEmail();
-      Key userKey = KeyFactory.createKey("User", userEmail);
+    String userToken = request.getParameter("userToken");
+    String userID = "";
+    if (Firebase.isUserLoggedIn(userToken)) {
+      userID = Firebase.authenticateUser(userToken);
+      Key userKey = KeyFactory.createKey("User", userID);
       Entity userEntity = null;
       try {
         userEntity = datastore.get(userKey);
       } catch (EntityNotFoundException exception) {
         // datastore entry has not been created yet for this user, create it now
         userEntity = new Entity(userKey);
-        userEntity.setProperty("id", userEmail);
+        userEntity.setProperty("firebaseID", userID);
         userEntity.setProperty("location", "");
         datastore.put(userEntity);
       }
-      location = userEntity.getProperty("location");
+      location = userEntity.getProperty("location").toString();
     }
-    
+
     // Convert events list to json
     String json = Utils.convertToJson(location);
+    System.out.println(json);
 
     response.setContentType("application/json;");
     response.getWriter().println(json);
@@ -77,16 +71,17 @@ public class LocationServlet extends HttpServlet {
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
     // adds or removes events from user's saved events list
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    UserService userService = UserServiceFactory.getUserService();
-    if (!userService.isUserLoggedIn()) {
+
+    String userToken = request.getParameter("userToken");
+    if (!Firebase.isUserLoggedIn(userToken)) {
       throw new IOException("must be logged in");
     }
     if (request.getParameter("zip") == null) {
       throw new IOException("no location specified");
     }
     // Handle the logic
-    String userEmail = userService.getCurrentUser().getEmail();
-    Key userKey = KeyFactory.createKey("User", userEmail);
+    String userID = Firebase.authenticateUser(userToken);
+    Key userKey = KeyFactory.createKey("User", userID);
     Entity userEntity = null;
 
     try {
@@ -94,7 +89,7 @@ public class LocationServlet extends HttpServlet {
     } catch (EntityNotFoundException exception) {
       // datastore entry has not been created yet for this user, create it now
       userEntity = new Entity(userKey);
-      userEntity.setProperty("id", userEmail);
+      userEntity.setProperty("firebaseID", userID);
       datastore.put(userEntity);
     }
 
