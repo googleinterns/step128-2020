@@ -36,7 +36,6 @@ public class LocationServlet extends HttpServlet {
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    // returns a list of events
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
     String location = "";
@@ -59,7 +58,6 @@ public class LocationServlet extends HttpServlet {
       location = userEntity.getProperty("location").toString();
     }
 
-    // Convert events list to json
     String json = Utils.convertToJson(location);
 
     response.setContentType("application/json;");
@@ -69,7 +67,6 @@ public class LocationServlet extends HttpServlet {
 
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    // adds or removes events from user's saved events list
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
     String userToken = request.getParameter("userToken");
