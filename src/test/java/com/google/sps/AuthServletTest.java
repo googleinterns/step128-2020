@@ -31,8 +31,6 @@ import com.google.sps.servlets.AuthServlet;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.net.MalformedURLException;
-import java.net.URL;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.junit.After;
@@ -45,7 +43,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 /** */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({URL.class, UserServiceFactory.class})
+@PrepareForTest(UserServiceFactory.class)
 public final class AuthServletTest {
   private final LocalServiceTestHelper helper =
       new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
@@ -60,12 +58,8 @@ public final class AuthServletTest {
    * @param email The email of the intended user to login as, or logout from
    * @return A LoginObject created from the JSON returned by the request
    */
-  private LoginObject openUrlAndDoGet(String authUrl, String email)
-      throws MalformedURLException, IOException {
-    URL mockurl = PowerMockito.mock(URL.class);
-    when(mockurl.openConnection())
-        .thenReturn(mockService.evaluateURL(makeLoginURL(authUrl, email)));
-    mockurl.openConnection();
+  private LoginObject openUrlAndDoGet(String authUrl, String email) throws IOException {
+    mockService.evaluateURL(makeLoginURL(authUrl, email));
 
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
@@ -144,8 +138,6 @@ public final class AuthServletTest {
       Entity postedEntity = ds.prepare(new Query("User")).asSingleEntity();
       assertEquals("test@example.com", postedEntity.getKey().getName());
       assertEquals("test@example.com", postedEntity.getProperty("id"));
-    } catch (MalformedURLException e) {
-      fail();
     } catch (IOException e) {
       fail();
     }
@@ -186,8 +178,6 @@ public final class AuthServletTest {
       // make only 1 user has been added to datastore
       DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
       assertEquals(1, ds.prepare(new Query("User")).countEntities());
-    } catch (MalformedURLException e) {
-      fail();
     } catch (IOException e) {
       fail();
     }
@@ -228,8 +218,6 @@ public final class AuthServletTest {
       // make sure 2 different users have been added to datastore
       DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
       assertEquals(2, ds.prepare(new Query("User")).countEntities());
-    } catch (MalformedURLException e) {
-      fail();
     } catch (IOException e) {
       fail();
     }

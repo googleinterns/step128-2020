@@ -3,7 +3,6 @@ package com.google.sps;
 import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import java.net.MalformedURLException;
-import java.net.URLConnection;
 
 /* A mock class that imitates the UserService API for testing */
 public class MockedUserService implements UserService {
@@ -64,7 +63,7 @@ public class MockedUserService implements UserService {
     return loggedIn;
   }
 
-  public URLConnection evaluateURL(String url) throws MalformedURLException {
+  public void evaluateURL(String url) throws MalformedURLException {
     if (url.contains("login")) {
       login(url.substring(url.indexOf(EMAIL_TAG) + EMAIL_TAG.length()));
     } else if (url.contains("logout")) {
@@ -72,7 +71,6 @@ public class MockedUserService implements UserService {
     } else {
       throw new MalformedURLException("invalid url");
     }
-    return null;
   }
 
   private void login(String email) {
