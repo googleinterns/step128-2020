@@ -510,8 +510,9 @@ async function getEvents(events, index, option) {
       attendeeCountContainerElement.className = 'edit-unsave-event';
       const editEventLink = document.createElement('a');
       editEventLink.innerText = 'Edit this event';
+      editEventLink.setAttribute('onclick', 'openEditForm("' +
+        event.eventKey + '")');
 
-      editEventLink.href = '/edit-event-form.html';
       attendeeCountContainerElement.appendChild(editEventLink);
     } else {
       // default: show attendee count
