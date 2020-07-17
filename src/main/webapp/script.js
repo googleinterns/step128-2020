@@ -687,8 +687,8 @@ function generateRainbowTags() {
 /**
  * Sets value of a cookie.
  *
- * @param cname {string} name of the cookie
- * @param cvalue {string} name of the value
+ * @param {string} cname name of the cookie
+ * @param {string} cvalue name of the value
  */
 function setCookie(cname, cvalue) {
   document.cookie = cname + '=' + cvalue + '; ';
@@ -697,7 +697,7 @@ function setCookie(cname, cvalue) {
 /**
  * Gets value of a cookie.
  *
- * @param cname {string} name of the cookie
+ * @param {string} cname name of the cookie
  * @return {string} the value of the requested cookie
  */
 function getCookie(cname) {
