@@ -30,13 +30,14 @@ import javax.servlet.http.HttpServletResponse;
 @WebServlet("/worker")
 public class TaskHandler extends HttpServlet {
 
-  private static final Logger log = Logger.getLogger(TaskHandler.class.getName());
+  private static final Logger LOGGER = Logger.getLogger(TaskHandler.class.getName());
 
   private static final int TWELVE_HOURS = 43_200_000;
   private Queue queue;
 
   @Override
   public void init() {
+    LOGGER.log("initialized queue");
     queue = QueueFactory.getQueue("recommend-queue");
   }
 
@@ -47,7 +48,10 @@ public class TaskHandler extends HttpServlet {
       init();
     }
     if (queue.fetchStatistics().getNumTasks() == 0) {
+      LOGGER.info("empty queue, adding worker POST call now");
       queue.add(TaskOptions.Builder.withUrl("/worker"));
+    } else {
+      LOGGER.info("queue already setup, no actions needed");
     }
   }
 
@@ -60,8 +64,10 @@ public class TaskHandler extends HttpServlet {
 
     // recalculates the recommendation model
     Recommend.calculateRecommend();
+    LOGGER.log("completed recalculation of model");
 
     // queues new task for next recalculation
     queue.add(TaskOptions.Builder.withUrl("/worker").countdownMillis(TWELVE_HOURS));
+    LOGGER.log("scheduled next task for 12 hours later");
   }
 }
