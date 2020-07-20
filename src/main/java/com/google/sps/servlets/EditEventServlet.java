@@ -97,10 +97,10 @@ public class EditEventServlet extends HttpServlet {
   private HttpServletRequest populateRequest(HttpServletRequest request, Entity event) {
     String name = event.getProperty("eventName").toString();
     String description = event.getProperty("eventDescription").toString();
-    String date = event.getProperty("date").toString();
-    String start = event.getProperty("startTime").toString();
-    String end = event.getProperty("endTime").toString();
     String address = event.getProperty("address").toString();
+    String start = event.getProperty("unformattedStart").toString();
+    String end = event.getProperty("unformattedEnd").toString();
+    String date = event.getProperty("unformattedDate").toString();
     String tags = Utils.convertToJson(event.getProperty("tags"));
     String key = event.getProperty("eventKey").toString();
     long eventId = event.getKey().getId();
@@ -111,6 +111,9 @@ public class EditEventServlet extends HttpServlet {
     request.setAttribute("start", start);
     request.setAttribute("end", end);
     request.setAttribute("address", address);
+    request.setAttribute("tags", tags);
+    request.setAttribute("key", key);
+    request.setAttribute("id", eventId);
     request.setAttribute("tags", tags);
     request.setAttribute("key", key);
     request.setAttribute("id", eventId);
