@@ -325,14 +325,13 @@ public final class KeywordSearchServletTest {
         new ArrayList<String>(
             Arrays.asList(
                 "BLM Protest",
-                "Climate Change Protest",
                 "BLM Protest in LA",
+                "Climate Change Protest",
                 "Environment Climate Change Protest"));
     List<Entity> orderedEvents = SearchTagsServletTest.orderEvents(desiredOrder, events);
-    System.out.println(orderedEvents);
 
     // Convert expected events to JSON for comparison
-    String expected = Utils.convertToJson(events);
+    String expected = Utils.convertToJson(orderedEvents);
     assertEquals(expected, result);
   }
 

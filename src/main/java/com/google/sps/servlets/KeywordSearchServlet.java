@@ -65,7 +65,6 @@ public class KeywordSearchServlet extends HttpServlet {
       searchKeywords.set(i, searchKeywords.get(i).toLowerCase());
     }
     searchKeywords.removeAll(IRRELEVANT_WORDS);
-    System.out.println(searchKeywords);
 
     Query query = null;
     // Check if there are no tags
@@ -81,7 +80,6 @@ public class KeywordSearchServlet extends HttpServlet {
     PreparedQuery results = datastore.prepare(query);
     List<Entity> events =
         new ArrayList<Entity>(results.asList(FetchOptions.Builder.withDefaults()));
-    System.out.println(events);
 
     // Get location of user
     String location = request.getParameter("location");
@@ -133,8 +131,6 @@ public class KeywordSearchServlet extends HttpServlet {
 
             // Sort by which event has less keywords
             int compareSize = Integer.compare(o1List.size(), o2List.size());
-            return compareSize;
-            /*
             if (compareSize != 0) {
               return compareSize;
             } else {
@@ -142,11 +138,9 @@ public class KeywordSearchServlet extends HttpServlet {
               return Integer.compare(
                   Integer.parseInt(o1.getProperty("distance").toString()),
                   Integer.parseInt(o2.getProperty("distance").toString()));
-            }*/
+            }
           }
         });
-
-    System.out.println(events);
 
     // Convert events list to json
     String json = Utils.convertToJson(events);
@@ -185,8 +179,6 @@ public class KeywordSearchServlet extends HttpServlet {
           }
         });
 
-    System.out.println(mergeList);
-
     // Add top results to the final list
     Map<String, Integer> finalMap = new HashMap<String, Integer>();
     List<String> finalList = new ArrayList<String>();
@@ -202,7 +194,6 @@ public class KeywordSearchServlet extends HttpServlet {
         finalMap.put(e.getKey().toString(), (int) e.getValue());
         finalList.add(e.getKey().toString());
         finalValues.add((int) e.getValue());
-        System.out.println(e.getKey().toString() + ": " + e.getValue());
       }
       count++;
     }
