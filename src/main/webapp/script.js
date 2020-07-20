@@ -905,6 +905,24 @@ function loadFields() {
   const tagsString = document.getElementById('tags-value').value;
   const keyString = document.getElementById('key-value').value;
 
+  const name = document.getElementById('event-name');
+  name.value = nameString;
+
+  const desc = document.getElementById('event-description');
+  desc.value = descString;
+
+  formatAddress(addressString);
+}
+
+function formatAddress(addressString) {
+  const addressArr = addressString.split(',');
+  const street = document.getElementById('street-address');
+  const city = document.getElementById('city');
+  const state = document.getElementById('state');
+
+  street.value = trim(addressArr[0]);
+  city.value = trim(addressArr[1]);
+  state.value = trim(addressArr[2]);
 }
 
 /* **********************************************************************
