@@ -115,8 +115,9 @@ public class EventServlet extends HttpServlet {
     final String formattedDate = formatDate(date);
     final String formattedTime = formatTime(startTime);
 
+    String formattedTimeEnd = "";
     if (endTime != "") {
-      endTime = formatTime(endTime);
+      formattedTimeEnd = formatTime(endTime);
     }
 
     Entity eventEntity = new Entity("Event");
@@ -125,7 +126,7 @@ public class EventServlet extends HttpServlet {
     eventEntity.setProperty("address", fullAddress);
     eventEntity.setProperty("date", formattedDate);
     eventEntity.setProperty("startTime", formattedTime);
-    eventEntity.setProperty("endTime", endTime);
+    eventEntity.setProperty("endTime", formattedTimeEnd);
     eventEntity.setProperty("coverPhoto", coverPhoto);
     eventEntity.setProperty("attendeeCount", 0);
     eventEntity.setProperty("unformattedStart", startTime);
@@ -180,14 +181,12 @@ public class EventServlet extends HttpServlet {
     String formattedDate = "";
     try {
       unformattedDate = inFormat.parse(date);
-      System.out.println(unformattedDate);
     } catch (ParseException e) {
       LOGGER.info("Could not parse date " + e);
     }
 
     if (unformattedDate != null) {
       formattedDate = outFormat.format(unformattedDate);
-      System.out.println(formattedDate);
     }
 
     return formattedDate;
