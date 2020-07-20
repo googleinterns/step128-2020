@@ -67,7 +67,7 @@ public final class UserServletTest {
 
   private void assertEntitiesEqual(Entity goal, Entity resultEntity) {
     Set<String> goalProperties = goal.getProperties().keySet();
-    Set<String> resultProperties = goal.getProperties().keySet();
+    Set<String> resultProperties = resultEntity.getProperties().keySet();
     assertEquals(goalProperties.size(), resultProperties.size());
     for (String s : goalProperties) {
       // ignore attendeeCount, which is checked elsewhere
@@ -475,6 +475,11 @@ public final class UserServletTest {
     String[] tags = {"environment"};
     entity.setIndexedProperty("tags", Arrays.asList(tags));
     entity.setProperty("creator", "test@example.com");
+    entity.setProperty("eventKey", "agR0ZXN0cgsLEgVFdmVudBgBDA");
+    entity.setProperty("attendeeCount", 1L);
+    entity.setProperty("unformattedStart", "14:00");
+    entity.setProperty("unformattedEnd", "");
+    entity.setProperty("unformattedDate", "2020-05-17");
 
     return entity;
   }
@@ -492,6 +497,11 @@ public final class UserServletTest {
     String[] tags = {"blm"};
     entity.setIndexedProperty("tags", Arrays.asList(tags));
     entity.setProperty("creator", "test@example.com");
+    entity.setProperty("eventKey", "agR0ZXN0cgsLEgVFdmVudBgCDA");
+    entity.setProperty("attendeeCount", 1L);
+    entity.setProperty("unformattedStart", "13:00");
+    entity.setProperty("unformattedEnd", "");
+    entity.setProperty("unformattedDate", "2020-05-17");
 
     return entity;
   }
@@ -509,6 +519,11 @@ public final class UserServletTest {
     String[] tags = {"education"};
     entity.setIndexedProperty("tags", Arrays.asList(tags));
     entity.setProperty("creator", "another@example.com");
+    entity.setProperty("eventKey", "agR0ZXN0cgsLEgVFdmVudBgDDA");
+    entity.setProperty("attendeeCount", 1L);
+    entity.setProperty("unformattedStart", "10:00");
+    entity.setProperty("unformattedEnd", "");
+    entity.setProperty("unformattedDate", "2020-05-17");
 
     return entity;
   }
