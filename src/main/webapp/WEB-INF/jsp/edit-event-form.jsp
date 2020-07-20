@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="UTF-8">
-    <title>Create</title>
+    <title>Edit Event</title>
     <link id="style" rel="stylesheet" href="style.css">
     <link rel="icon" href="images/step-favicon.svg" type="image/svg" sizes="16x16">
     <script src="https://www.gstatic.com/firebasejs/7.15.1/firebase-app.js"></script>
@@ -14,7 +14,7 @@
     <div class="header"></div>
     <div class="form-container">
       <h1>Edit event</h1>
-      <form action="/event" method="POST" id="eventform" name="eventform">
+      <form action="/edit-event" method="POST" id="eventform" name="eventform">
         <div class="form-section">
           <div class="form-label">
             <label for="event-name">*Event name:</label>
