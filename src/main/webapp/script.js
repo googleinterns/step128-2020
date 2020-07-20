@@ -497,6 +497,7 @@ async function getEvents(events, index, option) {
       attendeeCountContainerElement.innerText = dummyText;
     } else if (option == recommendNotLoggedIn) {
       // TODO: determine what goes here
+      attendeeCountContainerElement.innerText = dummyText;
     } else if (option == savedEvents) {
       // unsave an event
       attendeeCountContainerElement.className = 'edit-unsave-event';
