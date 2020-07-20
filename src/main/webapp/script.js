@@ -382,7 +382,7 @@ async function getEvents(events, index, option) {
     noElementsBox.className = 'no-events';
     const noElementsText = document.createElement('div');
     noElementsText.className = 'no-events-text';
-    if(option == recommendedForYou) {
+    if (option == recommendedForYou) {
       noElementsText.innerText = 'No events to recommend yet! Click the ' +
           '‘Find’ tab to find some events that interest you.';
     } else if (option == recommendNotLoggedIn) {
@@ -496,7 +496,7 @@ async function getEvents(events, index, option) {
       // "recommended for you"
       attendeeCountContainerElement.innerText = dummyText;
     } else if (option == recommendNotLoggedIn) {
-
+      // TODO: determine what goes here
     } else if (option == savedEvents) {
       // unsave an event
       attendeeCountContainerElement.className = 'edit-unsave-event';
@@ -900,11 +900,11 @@ async function getRecommendedEvents() {
     });
   } else {
     fetch('/user')
-          .then((response) => response.json())
-          .then(function(js) {
-            // TODO: change this fetch call to get recommendations instead
-            getEvents(js, 0, recommendNotLoggedIn);
-          });
+        .then((response) => response.json())
+        .then(function(js) {
+          // TODO: change this fetch call to get recommendations instead
+          getEvents(js, 0, recommendNotLoggedIn);
+        });
   }
   getSearchDistanceSettings();
 }
