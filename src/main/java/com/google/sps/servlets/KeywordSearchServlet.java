@@ -113,28 +113,26 @@ public class KeywordSearchServlet extends HttpServlet {
             List<String> o2List = (List<String>) o2.getProperty("keywords");
             List<Long> o1Values = (List<Long>) o1.getProperty("keywordsValues");
             List<Long> o2Values = (List<Long>) o2.getProperty("keywordsValues");
+            double intersectionRatioO1 = SearchServlet.intersection(o1List, searchKeywords);
+            double intersectionRatioO2 = SearchServlet.intersection(o2List, searchKeywords);
             // Sort by which event has more keywords in common with the search keywords
-            int compareTagsInCommon =
+            int compareKeywordsInCommon =
                 Double.compare(
-                    SearchServlet.intersection(o2List, searchKeywords) * o2List.size(),
-                    SearchServlet.intersection(o1List, searchKeywords) * o1List.size());
-            if (compareTagsInCommon != 0) {
-              return compareTagsInCommon;
+                    intersectionRatioO2 * o2List.size(), intersectionRatioO1 * o1List.size());
+            if (compareKeywordsInCommon != 0) {
+              return compareKeywordsInCommon;
             }
-            // Sort by which event has a higher ratio of: tags in common with
-            // the search tags to total number of tags
-            int compareRatioOfTagsInCommon =
+            // Sort by which has a higher occurrence score
+            int compareOccurrence =
                 Double.compare(
-                    SearchServlet.intersection(o2List, searchKeywords)
-                        * occurrenceScore(o2List, searchKeywords, o2Values),
-                    SearchServlet.intersection(o1List, searchKeywords)
-                        * occurrenceScore(o1List, searchKeywords, o1Values));
-            if (compareRatioOfTagsInCommon != 0) {
-              return compareRatioOfTagsInCommon;
+                    occurrenceScore(o2List, searchKeywords, o2Values),
+                    occurrenceScore(o1List, searchKeywords, o1Values));
+            if (compareOccurrence != 0) {
+              return compareOccurrence;
             }
 
-            // Sort by which event has more tags
-            int compareSize = Integer.compare(o2List.size(), o1List.size());
+            // Sort by which event has less keywords
+            int compareSize = Integer.compare(o1List.size(), o2List.size());
             return compareSize;
             /*
             if (compareSize != 0) {
