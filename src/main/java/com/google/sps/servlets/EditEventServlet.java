@@ -162,18 +162,20 @@ public class EditEventServlet extends HttpServlet {
    */
   private boolean isUsersEvent(String userID, Key entityKey) {
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    String eventKeyString = KeyFactory.keyToString(entityKey);
     boolean exists = false;
 
+    // Query events created by user logged in.
     Query query =
         new Query("Event")
             .setFilter(new Query.FilterPredicate("creator", Query.FilterOperator.EQUAL, userID));
     PreparedQuery queried = datastore.prepare(query);
-    String eventKey = KeyFactory.keyToString(entityKey);
 
+    // Checks if the event is in the list of events created by the user.
     for (Entity e : queried.asIterable()) {
       String userEventKey = e.getProperty("eventKey").toString();
 
-      if (userEventKey.equals(eventKey)) {
+      if (userEventKey.equals(eventKeyString)) {
         exists = true;
       }
     }
