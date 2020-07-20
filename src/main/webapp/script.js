@@ -18,7 +18,6 @@
 /** *********************************************************************
  * Utility methods/onload methods (all pages)
  ***********************************************************************/
-let url = '';
 let loggedIn = false;
 
 // Firebase configuration
@@ -69,8 +68,11 @@ function loadActions(doAfter) {
   }, function(error) {
     console.log(error);
   });
+
+  fetch('/worker');
 }
 
+let url = '';
 /**
  * DEPRECATED: Use Firebase system instead
  * checks for login status and fetches login/logout url
@@ -731,7 +733,7 @@ function getCookie(cname) {
  *
  * @return {string} the location of the user
  */
-function getLocation() {
+async function getLocation() {
   return new Promise((resolve) => {
     const locationCookie = getCookie('location');
     let location = '';
@@ -903,7 +905,7 @@ async function getRecommendedEvents() {
             getEvents(js, 0, recommendNotLoggedIn);
           });
   }
-  getSearchDistanceSettings();
+//   getSearchDistanceSettings();
 }
 
 
