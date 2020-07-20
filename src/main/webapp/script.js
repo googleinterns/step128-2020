@@ -897,28 +897,38 @@ function openEditForm(key) {
  */
 function loadFields() {
   const nameString = document.getElementById('name-value').value;
-  const descString = document.getElementById('desc-value').value;
-  const addressString = document.getElementById('address-value').value;
-  const dateString = document.getElementById('date-value').value;
-  const startString = document.getElementById('start-value').value;
-  const endString = document.getElementById('end-value').value;
-  const tagsString = document.getElementById('tags-value').value;
-  const keyString = document.getElementById('key-value').value;
-
   const name = document.getElementById('event-name');
   name.value = nameString;
 
+  const descString = document.getElementById('desc-value').value;
   const desc = document.getElementById('event-description');
   desc.value = descString;
 
+  const dateString = document.getElementById('date-value').value;
   const date = document.getElementById('date');
   date.value = dateString;
 
+  const startString = document.getElementById('start-value').value;
+  const start = document.getElementById('start-time');
+  start.value = startString;
+
+  const endString = document.getElementById('end-value').value;
+  const end = document.getElementById('end-time');
+  end.value = endString;
+
+  const addressString = document.getElementById('address-value').value;
   formatAddress(addressString);
+
+  const tagsString = document.getElementById('tags-value').value;
+  formatTags(tagsString);
 }
 
-function formatAddress(addressString) {
-  const addressArr = addressString.split(',');
+/**
+ * Format address for edit event form.
+ * @param {string} address full address string.
+ */
+function formatAddress(address) {
+  const addressArr = address.split(',');
   const street = document.getElementById('street-address');
   const city = document.getElementById('city');
   const state = document.getElementById('state');
@@ -926,6 +936,17 @@ function formatAddress(addressString) {
   street.value = addressArr[0].trim();
   city.value = addressArr[1].trim();
   state.value = addressArr[2].trim();
+}
+
+/**
+ * Toggle tags for edit event form.
+ * @param {string} tags json string of user tags.
+ */
+function formatTags(tags) {
+  const tagArray = JSON.parse(tags);
+  for (let i = 0; i < tagArray.length; i++) {
+    toggleTagEvent(tagArray[i]);
+  }
 }
 
 /* **********************************************************************
