@@ -138,24 +138,6 @@ public class EditEventServlet extends HttpServlet {
   }
 
   /**
-   * Checks if user has already saved an event.
-   *
-   * @return the index of the event in user's saved list, or -1 if not found
-   */
-  private int alreadySaved(long eventId, Entity userEntity) {
-    List<Long> saved = (ArrayList<Long>) userEntity.getProperty("saved");
-    if (saved == null) {
-      saved = new ArrayList<>();
-    }
-    for (int i = 0; i < saved.size(); i++) {
-      if (saved.get(i) == eventId) {
-        return i;
-      }
-    }
-    return -1;
-  }
-
-  /**
    * Checks if the event queried belongs to the user logged in.
    *
    * @return a boolean 'exists' which contains if the event belongs to the user
