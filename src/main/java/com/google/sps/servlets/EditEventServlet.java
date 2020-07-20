@@ -69,7 +69,7 @@ public class EditEventServlet extends HttpServlet {
                       .forward(request, response);
                 } else {
                   request
-                      .getRequestDispatcher("/WEB-INF/jsp/event-not-found.jsp")
+                      .getRequestDispatcher("/WEB-INF/jsp/access-denied.jsp")
                       .forward(request, response);
                 }
               }
@@ -79,7 +79,7 @@ public class EditEventServlet extends HttpServlet {
               entity.setProperty("firebaseID", userID);
               datastore.put(entity);
               request
-                  .getRequestDispatcher("/WEB-INF/jsp/event-not-found.jsp")
+                  .getRequestDispatcher("/WEB-INF/jsp/access-denied.jsp")
                   .forward(request, response);
             }
           }
