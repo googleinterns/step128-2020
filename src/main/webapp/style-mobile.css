@@ -53,8 +53,8 @@ footer {
   height: 6%;
   justify-content: center;
   margin: 0;
-  text-align: center;
   padding: 0;
+  text-align: center;
 }
 
 footer h4, footer p {
@@ -770,17 +770,38 @@ h1 {
 
 /* login */
 .firebaseui-background {
+  align-items: center;
+  justify-content: center;
   background-color: #ffd966;
-  height: 84vh;
+  display: flex;
+  height: 84%;
+  margin: 0;
   min-width: 100%;
+  padding: 0;
 }
 
 #firebaseui-auth-container {
-  left: 50%;
-  position: absolute;
+  padding-bottom: 15vh;
+}
+
+.firebaseui-container {
+  align-items: center;
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: center;
+  margin: 0;
+  max-width: none;
+}
+
+.firebaseui-card-content {
+  padding: 0;
+  height: 70%;
+  margin-bottom: 2vh;
+}
+
+.firebaseui-idp-list>.firebaseui-list-item {
+  margin-bottom: 1.5vh;
   text-align: center;
-  top: 25vh;
-  transform: translate(-50%, -50%);
 }
 
 .firebaseui-tos {
@@ -789,7 +810,12 @@ h1 {
   text-align: center;
 }
 
-.firebaseui-idp-button, .firebaseui-tenant-button {
+.firebaseui-idp-button {
+  min-height: 15em;
+  min-width: 60vw;
+}
+
+.firebaseui-tenant-button {
   min-width: 80vw;
   min-height: 15em;
 }
@@ -804,8 +830,16 @@ h1 {
   width: 5em;
 }
 
-/* tags and tag colors */
+.mdl-button {
+  font-size: .6em;
+}
 
+.firebaseui-card-footer {
+  padding: 0;
+  width: 60vw;
+}
+
+/* tags and tag colors */
 .tag {
   color: white;
   border-radius: 1vw;
