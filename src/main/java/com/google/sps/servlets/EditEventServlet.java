@@ -102,6 +102,7 @@ public class EditEventServlet extends HttpServlet {
     String end = event.getProperty("endTime").toString();
     String address = event.getProperty("address").toString();
     String tags = Utils.convertToJson(event.getProperty("tags"));
+    String key = event.getProperty("eventKey").toString();
     long eventId = event.getKey().getId();
 
     request.setAttribute("name", name);
@@ -111,6 +112,7 @@ public class EditEventServlet extends HttpServlet {
     request.setAttribute("end", end);
     request.setAttribute("address", address);
     request.setAttribute("tags", tags);
+    request.setAttribute("key", key);
     request.setAttribute("id", eventId);
 
     return request;
