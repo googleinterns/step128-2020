@@ -37,7 +37,7 @@ public class TaskHandler extends HttpServlet {
 
   @Override
   public void init() {
-    LOGGER.log("initialized queue");
+    LOGGER.info("initialized queue");
     queue = QueueFactory.getQueue("recommend-queue");
   }
 
@@ -64,10 +64,10 @@ public class TaskHandler extends HttpServlet {
 
     // recalculates the recommendation model
     Recommend.calculateRecommend();
-    LOGGER.log("completed recalculation of model");
+    LOGGER.info("completed recalculation of model");
 
     // queues new task for next recalculation
     queue.add(TaskOptions.Builder.withUrl("/worker").countdownMillis(TWELVE_HOURS));
-    LOGGER.log("scheduled next task for 12 hours later");
+    LOGGER.info("scheduled next task for 12 hours later");
   }
 }
