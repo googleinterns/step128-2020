@@ -892,6 +892,21 @@ function openEditForm(key) {
   });
 }
 
+/**
+ * Pre-load input fields from datastore.
+ */
+function loadFields() {
+  const nameString = document.getElementById('name-value').value;
+  const descString = document.getElementById('desc-value').value;
+  const addressString = document.getElementById('address-value').value;
+  const dateString = document.getElementById('date-value').value;
+  const startString = document.getElementById('start-value').value;
+  const endString = document.getElementById('end-value').value;
+  const tagsString = document.getElementById('tags-value').value;
+  const keyString = document.getElementById('key-value').value;
+
+}
+
 /* **********************************************************************
  * Methods for index.html
  * **********************************************************************/
