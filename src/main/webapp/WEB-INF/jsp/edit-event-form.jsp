@@ -15,14 +15,14 @@
     <div class="form-container">
       <h1>Edit event</h1>
       <form action="/edit-event" method="POST" id="eventform" name="eventform">
-        <input type="hidden" id="key-value" value='${key}'>
+        <input type="hidden" id="key-value" value="${key}">
         <div class="form-section">
           <div class="form-label">
             <label for="event-name">*Event name:</label>
           </div>
           <div class="form-input">
             <input type="text" id="event-name" name="event-name" required><br>
-            <input type="hidden" id="name-value" value='${name}'>
+            <input type="hidden" id="name-value" value="${name}">
           </div>
         </div>
         <div class="form-section">
@@ -32,7 +32,7 @@
           <div class="form-input">
             <textarea id="event-description" name="event-description"
               style="height:100px" required></textarea><br>
-            <input type="hidden" id="desc-value" value='${description}'>
+            <input type="hidden" id="desc-value" value="${description}">
           </div>
         </div>
         <div class="form-section">
@@ -41,7 +41,7 @@
           </div>
           <div class="form-input">
             <input type="text" id="street-address" name="street-address" required><br>
-            <input type="hidden" id="address-value" value='${address}'>
+            <input type="hidden" id="address-value" value="${address}">
           </div>
         </div>
         <div class="form-section">
@@ -66,7 +66,7 @@
           </div>
           <div class="form-input">
             <input type="date" id="date" name="date" required><br>
-            <input type="hidden" id="date-value" value='${date}'>
+            <input type="hidden" id="date-value" value="${date}">
           </div>
         </div>
         <div class="form-section">
@@ -75,7 +75,7 @@
           </div>
           <div class="form-input">
             <input type="time" id="start-time" name="start-time" required><br>
-            <input type="hidden" id="start-value" value='${start}'>
+            <input type="hidden" id="start-value" value="${start}">
           </div>
         </div>
         <div class="form-section">
@@ -84,7 +84,7 @@
           </div>
           <div class="form-input">
             <input type="time" id="end-time" name="end-time"><br>
-            <input type="hidden" id="end-value" value='${end}'>
+            <input type="hidden" id="end-value" value="${end}">
           </div>
         </div>
         <div class="form-section">
