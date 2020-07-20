@@ -41,7 +41,7 @@ public class TaskHandler extends HttpServlet {
   }
 
   /** Makes sure there is a recommend job queued. */
-  protected void doGet(HttpServletRequest request, HttpServletResponse response)
+  public void doGet(HttpServletRequest request, HttpServletResponse response)
       throws ServletException, IOException {
     if (queue == null) {
       init();
