@@ -138,7 +138,7 @@ public class SearchServlet extends HttpServlet {
    * @param tagListB List of tags to be compared against
    * @return Double ratio of number of tags in common to total number of tags
    */
-  public Double intersection(List<String> tagListA, List<String> tagListB) {
+  public static Double intersection(List<String> tagListA, List<String> tagListB) {
     // Catches divide by zero
     if (tagListA.size() == 0) {
       return 0.0;

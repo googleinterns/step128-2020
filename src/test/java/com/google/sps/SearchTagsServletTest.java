@@ -303,7 +303,7 @@ public final class SearchTagsServletTest {
    * @param events List of events to be ordered
    * @return List containing the events ordered
    */
-  private static List<Entity> orderEvents(List<String> desiredOrder, List<Entity> events) {
+  public static List<Entity> orderEvents(List<String> desiredOrder, List<Entity> events) {
     List<Entity> orderedEvents = new ArrayList<Entity>();
     for (int o = 0; o < desiredOrder.size(); o++) {
       for (int i = 0; i < events.size(); i++) {
@@ -321,7 +321,7 @@ public final class SearchTagsServletTest {
    * @param ids List containing the ids of the entities to fetch from the Datastore
    * @return List containing the requested entities
    */
-  private static List<Entity> fetchIDsFromDataStore(List<Integer> ids) {
+  public static List<Entity> fetchIDsFromDataStore(List<Integer> ids) {
     Filter idFilter = new FilterPredicate("eventName", FilterOperator.IN, ids);
     Query query = new Query("Event").setFilter(idFilter);
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
