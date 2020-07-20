@@ -108,16 +108,17 @@ public class SearchServlet extends HttpServlet {
             if (compareRatioOfTagsInCommon != 0) {
               return compareRatioOfTagsInCommon;
             }
+            /*
             // Sort by which event has more tags
             int compareSize = Integer.compare(o2List.size(), o1List.size());
             if (compareSize != 0) {
               return compareSize;
-            } else {
-              // Sort by which event is closer to the user
-              return Integer.compare(
-                  Integer.parseInt(o1.getProperty("distance").toString()),
-                  Integer.parseInt(o2.getProperty("distance").toString()));
-            }
+            } else {*/
+            // Sort by which event is closer to the user
+            return Integer.compare(
+                Integer.parseInt(o1.getProperty("distance").toString()),
+                Integer.parseInt(o2.getProperty("distance").toString()));
+            /*}*/
           }
         });
 
