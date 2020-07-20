@@ -25,8 +25,6 @@ import com.google.appengine.api.datastore.Query;
 import com.google.sps.Firebase;
 import com.google.sps.Utils;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
