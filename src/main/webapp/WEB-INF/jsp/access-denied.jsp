@@ -14,7 +14,7 @@
     <div class="header"></div>
     <div class="hero-image">
       <div class="hero-text">
-        <h1>You do not have access to edit this event.</h1>
+        <h1>You do not have permission to edit this event.</h1>
       </div>
     </div>
   </body>
