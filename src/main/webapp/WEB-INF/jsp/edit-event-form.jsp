@@ -13,7 +13,7 @@
   <body onload="loadActions(updateEventTagBox)">
     <div class="header"></div>
     <div class="form-container">
-      <h1>Let's create an event.</h1>
+      <h1>Edit event</h1>
       <form action="/event" method="POST" id="eventform" name="eventform">
         <div class="form-section">
           <div class="form-label">
@@ -105,6 +105,10 @@
           <div class="divider"></div>
           <a href="/index.html">
             <img src="images/cancel-button.svg" alt="Cancel button.">
+          </a>
+          <div class="edit-divider"></div>
+          <a href="/my-events.html">
+            <img src="images/delete-button.svg" alt="Delete button.">
           </a>
         </div>
       </form>
