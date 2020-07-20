@@ -84,7 +84,7 @@ public final class TestingUtil {
     if (activeUrl == null) {
       throw new IllegalStateException("must call setUp() first");
     }
-    mockService.evaluateURL(AuthServletTest.makeLoginURL(activeUrl, email));
+    mockService.evaluateUrl(AuthServletTest.makeLoginURL(activeUrl, email));
 
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);

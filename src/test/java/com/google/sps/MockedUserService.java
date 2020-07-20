@@ -63,7 +63,8 @@ public class MockedUserService implements UserService {
     return loggedIn;
   }
 
-  public void evaluateURL(String url) throws MalformedURLException {
+  /** Logs in or out depending on the url. */
+  public void evaluateUrl(String url) throws MalformedURLException {
     if (url.contains("login")) {
       login(url.substring(url.indexOf(EMAIL_TAG) + EMAIL_TAG.length()));
     } else if (url.contains("logout")) {

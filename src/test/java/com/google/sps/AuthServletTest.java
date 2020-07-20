@@ -59,7 +59,7 @@ public final class AuthServletTest {
    * @return A LoginObject created from the JSON returned by the request
    */
   private LoginObject openUrlAndDoGet(String authUrl, String email) throws IOException {
-    mockService.evaluateURL(makeLoginURL(authUrl, email));
+    mockService.evaluateUrl(makeLoginURL(authUrl, email));
 
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
