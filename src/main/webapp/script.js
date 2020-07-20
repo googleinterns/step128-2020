@@ -307,6 +307,7 @@ function generateMobileNavLayout() {
 
 // option constants to use with getEvents
 const recommendedForYou = 0;
+const recommendNotLoggedIn = 0.5;
 const savedEvents = 1;
 const createdEvents = 2;
 const searchResults = 3;
@@ -378,7 +379,13 @@ async function getEvents(events, index, option) {
     noElementsBox.className = 'no-events';
     const noElementsText = document.createElement('div');
     noElementsText.className = 'no-events-text';
-    if (option == savedEvents) {
+    if(option == recommendedForYou) {
+      noElementsText.innerText = 'No events to recommend yet! Click the ' +
+          '‘Find’ tab to find some events that interest you.';
+    } else if (option == recommendNotLoggedIn) {
+      noElementsText.innerText = 'Please login first to get event ' +
+          'recommendations!';
+    } else if (option == savedEvents) {
       noElementsText.innerText = 'You have not saved any events yet! ' +
           'Click the ‘Find’ tab to to find an event you would like to save.';
     } else if (option == createdEvents) {
@@ -485,6 +492,8 @@ async function getEvents(events, index, option) {
     if (option == recommendedForYou) {
       // "recommended for you"
       attendeeCountContainerElement.innerText = dummyText;
+    } else if (option == recommendNotLoggedIn) {
+
     } else if (option == savedEvents) {
       // unsave an event
       attendeeCountContainerElement.className = 'edit-unsave-event';
@@ -883,11 +892,16 @@ async function getRecommendedEvents() {
           .then((response) => response.json())
           .then(function(js) {
             // TODO: change this fetch call to get recommendations instead
-            getEvents(dummyEvents, 1, 0);
+            getEvents(dummyEvents, 0, recommendedForYou);
           });
     });
   } else {
-    alert('Please log in first!');
+    fetch('/user')
+          .then((response) => response.json())
+          .then(function(js) {
+            // TODO: change this fetch call to get recommendations instead
+            getEvents(js, 0, recommendNotLoggedIn);
+          });
   }
   getSearchDistanceSettings();
 }
@@ -1289,4 +1303,11 @@ function saveEvent(eventId) {
       window.location.href = '/my-events.html';
     });
   });
+}
+
+async function task() {
+    fetch('/taskqueues/enqueue?key=123').then((response) => response.text())
+      .then(function(responseText) {
+        alert(responseText);
+      });
 }
