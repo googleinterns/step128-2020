@@ -911,6 +911,9 @@ function loadFields() {
   const desc = document.getElementById('event-description');
   desc.value = descString;
 
+  const date = document.getElementById('date');
+  date.value = dateString;
+
   formatAddress(addressString);
 }
 
@@ -920,9 +923,9 @@ function formatAddress(addressString) {
   const city = document.getElementById('city');
   const state = document.getElementById('state');
 
-  street.value = trim(addressArr[0]);
-  city.value = trim(addressArr[1]);
-  state.value = trim(addressArr[2]);
+  street.value = addressArr[0].trim();
+  city.value = addressArr[1].trim();
+  state.value = addressArr[2].trim();
 }
 
 /* **********************************************************************
