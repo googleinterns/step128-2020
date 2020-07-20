@@ -111,7 +111,7 @@
             <img src="images/submit-button.svg" alt="Submit button.">
           </a>
           <div class="divider"></div>
-          <a href="/index.html">
+          <a href="/my-events.html">
             <img src="images/cancel-button.svg" alt="Cancel button.">
           </a>
           <div class="edit-divider"></div>
