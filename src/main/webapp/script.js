@@ -905,7 +905,7 @@ async function getRecommendedEvents() {
             getEvents(js, 0, recommendNotLoggedIn);
           });
   }
-  getSearchDistanceSettings();       // ** secrets access doesn't work when deployed
+  getSearchDistanceSettings();
 }
 
 
