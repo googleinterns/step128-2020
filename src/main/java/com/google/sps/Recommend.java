@@ -22,6 +22,9 @@ public class Recommend {
     spark.sparkContext().setLogLevel("ERROR");
   }
 
+  /** Rebuilds recommendation model and calculates recommendations for users */
+  public static void calculateRecommend() {}
+
   /**
    * Trains an ALSModel on the provided training dataset.
    *
