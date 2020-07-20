@@ -1306,10 +1306,3 @@ function saveEvent(eventId) {
     });
   });
 }
-
-async function task() {
-    fetch('/taskqueues/enqueue?key=123').then((response) => response.text())
-      .then(function(responseText) {
-        alert(responseText);
-      });
-}
