@@ -69,6 +69,7 @@ function loadActions(doAfter) {
     console.log(error);
   });
 
+  // makes sure tasks are initialized in queue properly
   fetch('/worker');
 }
 
