@@ -155,7 +155,11 @@ public class EditEventServlet extends HttpServlet {
     return -1;
   }
 
-  // returns a list of all events created by a user (identified by firebaseID)
+  /**
+   * Checks if the event queried belongs to the user logged in.
+   *
+   * @return a boolean 'exists' which contains if the event belongs to the user
+   */
   private boolean isUsersEvent(String userID, Key entityKey) {
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     boolean exists = false;
@@ -164,8 +168,12 @@ public class EditEventServlet extends HttpServlet {
         new Query("Event")
             .setFilter(new Query.FilterPredicate("creator", Query.FilterOperator.EQUAL, userID));
     PreparedQuery queried = datastore.prepare(query);
+    String eventKey = KeyFactory.keyToString(entityKey);
+
     for (Entity e : queried.asIterable()) {
-      if ((e.getKey()) == entityKey) {
+      String userEventKey = e.getProperty("eventKey").toString();
+
+      if (userEventKey.equals(eventKey)) {
         exists = true;
       }
     }
