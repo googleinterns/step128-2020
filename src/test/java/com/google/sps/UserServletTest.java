@@ -27,12 +27,7 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
-import com.google.appengine.api.datastore.PreparedQuery;
-import com.google.appengine.api.datastore.PreparedQuery.TooManyResultsException;
 import com.google.appengine.api.datastore.Query;
-import com.google.appengine.api.datastore.Query.CompositeFilterOperator;
-import com.google.appengine.api.datastore.Query.FilterOperator;
-import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.gson.Gson;
@@ -66,9 +61,9 @@ import org.powermock.modules.junit4.PowerMockRunner;
 public final class UserServletTest {
   private final LocalServiceTestHelper helper =
       new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
-  private final Gson gson = new Gson();
-  private static EventServlet testEventServlet;
-  private UserServlet testUserServlet;
+  private static final Gson gson = new Gson();
+  private static final EventServlet testEventServlet = new EventServlet();
+  private static final UserServlet testUserServlet = new UserServlet();
 
   private void assertEntitiesEqual(Entity goal, Entity resultEntity) {
     Set<String> goalProperties = goal.getProperties().keySet();
@@ -113,66 +108,31 @@ public final class UserServletTest {
     }
   }
 
-  /** Makes sure interactions have been recorded correctly in datastore. */
-  private void assertExpectedInteraction(String userId, long eventId, int value) {
-    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    Query q =
-        new Query("Interaction")
-            .setFilter(
-                CompositeFilterOperator.and(
-                    new FilterPredicate("user", FilterOperator.EQUAL, userId),
-                    new FilterPredicate("event", FilterOperator.EQUAL, eventId)));
-    PreparedQuery pq = datastore.prepare(q);
-    try {
-      Entity interactionEntity = pq.asSingleEntity();
-      int score = Integer.parseInt(interactionEntity.getProperty("rating").toString());
-      assertEquals(value, score);
-    } catch (TooManyResultsException e) {
-      fail();
-    } catch (NullPointerException e) {
-      fail();
-    }
-  }
-
-  // performs the GET request to return a list of events
-  private List<Entity> callGet(String get, String dummyToken) throws IOException {
-    HttpServletRequest request = mock(HttpServletRequest.class);
-    HttpServletResponse response = mock(HttpServletResponse.class);
-    PowerMockito.mockStatic(Firebase.class);
-    when(request.getParameter("get")).thenReturn(get);
-    PowerMockito.when(request.getParameter("userToken")).thenReturn(dummyToken);
-    PowerMockito.when(Firebase.isUserLoggedIn(anyString())).thenCallRealMethod();
-    PowerMockito.when(Firebase.authenticateUser(anyString())).thenReturn(dummyToken);
-
-    StringWriter out = new StringWriter();
-    PrintWriter writer = new PrintWriter(out);
-    when(response.getWriter()).thenReturn(writer);
-
-    testUserServlet.doGet(request, response);
-    out.flush();
-
-    return gson.fromJson(out.toString(), new TypeToken<ArrayList<Entity>>() {}.getType());
-  }
-
-  // performs the POST request to save or unsave an event with a given id
-  private void callPost(long id, String action, String dummyToken) throws IOException {
-    HttpServletRequest request = mock(HttpServletRequest.class);
-    HttpServletResponse response = mock(HttpServletResponse.class);
-    PowerMockito.mockStatic(Firebase.class);
-    when(request.getParameter("event")).thenReturn(id + "");
-    when(request.getParameter("action")).thenReturn(action);
-    when(request.getParameter("userToken")).thenReturn(dummyToken);
-    PowerMockito.when(Firebase.isUserLoggedIn(anyString())).thenCallRealMethod();
-    PowerMockito.when(Firebase.authenticateUser(anyString())).thenReturn(dummyToken);
-    testUserServlet.doPost(request, response);
-  }
+  //   /** Makes sure interactions have been recorded correctly in datastore. */
+  //   private void assertExpectedInteraction(String userId, long eventId, int value) {
+  //     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+  //     Query q =
+  //         new Query("Interaction")
+  //             .setFilter(
+  //                 CompositeFilterOperator.and(
+  //                     new FilterPredicate("user", FilterOperator.EQUAL, userId),
+  //                     new FilterPredicate("event", FilterOperator.EQUAL, eventId)));
+  //     PreparedQuery pq = datastore.prepare(q);
+  //     try {
+  //       Entity interactionEntity = pq.asSingleEntity();
+  //       int score = Integer.parseInt(interactionEntity.getProperty("rating").toString());
+  //       assertEquals(value, score);
+  //     } catch (TooManyResultsException e) {
+  //       fail();
+  //     } catch (NullPointerException e) {
+  //       fail();
+  //     }
+  //   }
 
   /** Sets up the datastore helper and authentication utility for each test. */
   @Before
   public void setUp() throws IOException {
     helper.setUp();
-    testEventServlet = new EventServlet();
-    testUserServlet = new UserServlet();
   }
 
   @After
@@ -266,11 +226,12 @@ public final class UserServletTest {
 
     // make sure interactions are recorded properly
     assertListsEqual(goalList, callGet("saved", "another@example.com"));
-    assertExpectedInteraction("another@example.com", id0, Interactions.SAVE_SCORE);
-    assertExpectedInteraction("another@example.com", id1, Interactions.CREATE_SCORE);
-    assertExpectedInteraction("another@example.com", id2, Interactions.SAVE_SCORE);
-    assertExpectedInteraction("test@example.com", id0, Interactions.CREATE_SCORE);
-    assertExpectedInteraction("test@example.com", id2, Interactions.CREATE_SCORE);
+    InteractionsTest.assertExpectedInteraction("another@example.com", id0, Interactions.SAVE_SCORE);
+    InteractionsTest.assertExpectedInteraction(
+        "another@example.com", id1, Interactions.CREATE_SCORE);
+    InteractionsTest.assertExpectedInteraction("another@example.com", id2, Interactions.SAVE_SCORE);
+    InteractionsTest.assertExpectedInteraction("test@example.com", id0, Interactions.CREATE_SCORE);
+    InteractionsTest.assertExpectedInteraction("test@example.com", id2, Interactions.CREATE_SCORE);
 
     DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
     assertEquals(5, ds.prepare(new Query("Interaction")).countEntities(withLimit(10)));
@@ -299,7 +260,7 @@ public final class UserServletTest {
     } catch (EntityNotFoundException exception) {
       fail();
     }
-    assertExpectedInteraction(
+    InteractionsTest.assertExpectedInteraction(
         "test@example.com", id, Interactions.SAVE_SCORE + Interactions.UNSAVE_DELTA);
   }
 
@@ -325,7 +286,7 @@ public final class UserServletTest {
     } catch (EntityNotFoundException exception) {
       fail();
     }
-    assertExpectedInteraction("test@example.com", id, Interactions.SAVE_SCORE);
+    InteractionsTest.assertExpectedInteraction("test@example.com", id, Interactions.SAVE_SCORE);
   }
 
   @Test
@@ -430,6 +391,39 @@ public final class UserServletTest {
         assertListsEqual(goalList, callGet("saved", email));
       }
     }
+  }
+
+  /** Performs the GET request to return a list of events. */
+  public static List<Entity> callGet(String get, String dummyToken) throws IOException {
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    PowerMockito.mockStatic(Firebase.class);
+    when(request.getParameter("get")).thenReturn(get);
+    PowerMockito.when(request.getParameter("userToken")).thenReturn(dummyToken);
+    PowerMockito.when(Firebase.isUserLoggedIn(anyString())).thenCallRealMethod();
+    PowerMockito.when(Firebase.authenticateUser(anyString())).thenReturn(dummyToken);
+
+    StringWriter out = new StringWriter();
+    PrintWriter writer = new PrintWriter(out);
+    when(response.getWriter()).thenReturn(writer);
+
+    testUserServlet.doGet(request, response);
+    out.flush();
+
+    return gson.fromJson(out.toString(), new TypeToken<ArrayList<Entity>>() {}.getType());
+  }
+
+  /** Performs the POST request to save or unsave an event with a given id. */
+  public static void callPost(long id, String action, String dummyToken) throws IOException {
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    PowerMockito.mockStatic(Firebase.class);
+    when(request.getParameter("event")).thenReturn(id + "");
+    when(request.getParameter("action")).thenReturn(action);
+    when(request.getParameter("userToken")).thenReturn(dummyToken);
+    PowerMockito.when(Firebase.isUserLoggedIn(anyString())).thenCallRealMethod();
+    PowerMockito.when(Firebase.authenticateUser(anyString())).thenReturn(dummyToken);
+    testUserServlet.doPost(request, response);
   }
 
   /** Logs in and out a few times, posting events to datastore. */
