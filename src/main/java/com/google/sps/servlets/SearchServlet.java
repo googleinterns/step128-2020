@@ -45,9 +45,7 @@ public class SearchServlet extends HttpServlet {
   private static final double MI_TO_KM = 1.609;
   // Tags retrieved from the frontend in the doGet method
   private List<String> searchTags;
-  /**
-   * Comparator used to compare the relevance of two events to the user and their search tags
-   */
+  /** Comparator used to compare the relevance of two events to the user and their search tags */
   private final Comparator<Entity> TAGS_SEARCH_RELEVANCE =
       new Comparator<Entity>() {
         @Override
