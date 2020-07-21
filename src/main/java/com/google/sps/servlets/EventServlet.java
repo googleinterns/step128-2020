@@ -25,6 +25,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.google.sps.Firebase;
 import com.google.sps.Interactions;
+import com.google.sps.Utils;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -71,9 +72,7 @@ public class EventServlet extends HttpServlet {
     try {
       userEntity = datastore.get(userKey);
     } catch (EntityNotFoundException exception) {
-      // datastore entry has not been created yet for this user, create it now
-      userEntity = new Entity(userKey);
-      userEntity.setProperty("firebaseID", userID);
+      userEntity = Utils.makeUserEntity(userID, false);
     }
     int delta = Interactions.recordInteraction(userID, keyId, Interactions.CREATE_SCORE, false);
     Interactions.updatePrefs(userEntity, tags, delta);

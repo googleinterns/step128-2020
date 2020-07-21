@@ -14,6 +14,8 @@
 
 package com.google.sps;
 
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.gson.Gson;
 import com.google.maps.DistanceMatrixApi;
@@ -27,7 +29,6 @@ import com.google.maps.model.GeocodingResult;
 import com.google.maps.model.LatLng;
 import java.io.IOException;
 import java.util.Comparator;
-import java.util.Map;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 
@@ -130,6 +131,34 @@ public class Utils {
     return distance;
   }
 
+  /**
+   * Creates and returns a new Entity for a given userId
+   *
+   * @param userId to identify this user in datastore
+   * @param location user's location
+   * @param addToDatastore if true, will add this entity to datastore as well
+   */
+  public static Entity makeUserEntity(String userId, String location, boolean addToDatastore) {
+    Entity userEntity = new Entity("User", userId);
+    userEntity.setProperty("firebaseID", userId);
+    userEntity.setProperty("location", location);
+    if (addToDatastore) {
+      DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+      datastore.put(userEntity);
+    }
+    return userEntity;
+  }
+
+  /**
+   * Creates and returns a new Entity for a given userId, no location given
+   *
+   * @param userId to identify this user in datastore
+   * @param addToDatastore if true, will add this entity to datastore as well
+   */
+  public static Entity makeUserEntity(String userId, boolean addToDatastore) {
+    return makeUserEntity(userId, "", addToDatastore);
+  }
+
   // comparators to apply sort to results
   public static final Comparator<Entity> ORDER_BY_NAME =
       new Comparator<Entity>() {
@@ -144,21 +173,21 @@ public class Utils {
         }
       };
 
-  /** creates a comparator based on entity dot product with a given vector. */
-  public static Comparator<Entity> getComparatorByInterestMatch(Map<String, Integer> metrics) {
-    Comparator<Entity> result =
-        new Comparator<Entity>() {
-          @Override
-          public int compare(Entity a, Entity b) {
-            if (!a.getKind().equals("Event") || !b.getKind().equals("Event")) {
-              throw new IllegalArgumentException("must be event items");
-            }
-            Map<String, Integer> v1 = Interactions.buildVectorForEvent(a);
-            Map<String, Integer> v2 = Interactions.buildVectorForEvent(b);
-            return Integer.compare(
-                Interactions.dotProduct(v1, metrics), Interactions.dotProduct(v2, metrics));
-          }
-        };
-    return result;
-  }
+  //   /** creates a comparator based on entity dot product with a given vector. (not used) */
+  //   public static Comparator<Entity> getComparatorByInterestMatch(Map<String, Integer> metrics) {
+  //     Comparator<Entity> result =
+  //         new Comparator<Entity>() {
+  //           @Override
+  //           public int compare(Entity a, Entity b) {
+  //             if (!a.getKind().equals("Event") || !b.getKind().equals("Event")) {
+  //               throw new IllegalArgumentException("must be event items");
+  //             }
+  //             Map<String, Integer> v1 = Interactions.buildVectorForEvent(a);
+  //             Map<String, Integer> v2 = Interactions.buildVectorForEvent(b);
+  //             return Integer.compare(
+  //                 Interactions.dotProduct(v1, metrics), Interactions.dotProduct(v2, metrics));
+  //           }
+  //         };
+  //     return result;
+  //   }
 }

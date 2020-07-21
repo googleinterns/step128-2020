@@ -60,10 +60,7 @@ public class UserServlet extends HttpServlet {
       try {
         userEntity = datastore.get(userKey);
       } catch (EntityNotFoundException exception) {
-        // datastore entry has not been created yet for this user, create it now
-        userEntity = new Entity(userKey);
-        userEntity.setProperty("firebaseID", userID);
-        datastore.put(userEntity);
+        userEntity = Utils.makeUserEntity(userID, true);
       }
       switch (request.getParameter("get")) {
         case "saved":
@@ -149,10 +146,7 @@ public class UserServlet extends HttpServlet {
     try {
       userEntity = datastore.get(userKey);
     } catch (EntityNotFoundException exception) {
-      // datastore entry has not been created yet for this user, create it now
-      userEntity = new Entity(userKey);
-      userEntity.setProperty("firebaseID", userID);
-      datastore.put(userEntity);
+      userEntity = Utils.makeUserEntity(userID, false);
     }
     switch (request.getParameter("action")) {
       case "save":

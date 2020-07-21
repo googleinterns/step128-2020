@@ -61,11 +61,8 @@ public class LoadEventServlet extends HttpServlet {
             try {
               userEntity = datastore.get(userKey);
               alreadySaved = UserServlet.alreadySaved(eventRequested.getKey().getId(), userEntity);
-
             } catch (EntityNotFoundException exception) {
-              // datastore entry has not been created yet for this user, create it now
-              userEntity = new Entity(userKey);
-              userEntity.setProperty("firebaseID", userID);
+              userEntity = Utils.makeUserEntity(userID, false);
             }
             int delta =
                 Interactions.recordInteraction(
