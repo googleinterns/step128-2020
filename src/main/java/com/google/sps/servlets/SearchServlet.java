@@ -43,12 +43,43 @@ public class SearchServlet extends HttpServlet {
   private static final Logger LOGGER = Logger.getLogger(SearchServlet.class.getName());
   // Conversion rate from mi to km
   private static final double MI_TO_KM = 1.609;
+  // Tags retrieved from the frontend in the doGet method
+  private List<String> searchTags;
+  /**
+   * Comparator used to compare the relevance of two events to the user and their search tags
+   */
+  private final Comparator<Entity> TAGS_SEARCH_RELEVANCE =
+      new Comparator<Entity>() {
+        @Override
+        public int compare(Entity o1, Entity o2) {
+          List<String> o1List = (List<String>) o1.getProperty("tags");
+          List<String> o2List = (List<String>) o2.getProperty("tags");
+          // Sort by which event has more tags in common with the search tags
+          int compareTagsInCommon =
+              Double.compare(
+                  intersection(o2List, searchTags) * o2List.size(),
+                  intersection(o1List, searchTags) * o1List.size());
+          if (compareTagsInCommon != 0) {
+            return compareTagsInCommon;
+          }
+          // Sort by which event has a higher ratio of: tags in common with
+          // the search tags to total number of tags
+          int compareRatioOfTagsInCommon =
+              Double.compare(intersection(o2List, searchTags), intersection(o1List, searchTags));
+          if (compareRatioOfTagsInCommon != 0) {
+            return compareRatioOfTagsInCommon;
+          }
+          // Sort by which event is closer to the user
+          return Integer.compare(
+              Integer.parseInt(o1.getProperty("distance").toString()),
+              Integer.parseInt(o2.getProperty("distance").toString()));
+        }
+      };
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     // List of all the tags we are searching for
-    List<String> searchTags =
-        new ArrayList<String>(Arrays.asList(request.getParameter("tags").split(",")));
+    searchTags = new ArrayList<String>(Arrays.asList(request.getParameter("tags").split(",")));
 
     Query query = null;
     // Check if there are no tags
@@ -87,40 +118,7 @@ public class SearchServlet extends HttpServlet {
         e -> ((int) e.getProperty("distance")) > cutoff || ((int) e.getProperty("distance")) < 0);
 
     // Sort list by most tags in common with search
-    Collections.sort(
-        events,
-        new Comparator<Entity>() {
-          public int compare(Entity o1, Entity o2) {
-            List<String> o1List = (List<String>) o1.getProperty("tags");
-            List<String> o2List = (List<String>) o2.getProperty("tags");
-            // Sort by which event has more tags in common with the search tags
-            int compareTagsInCommon =
-                Double.compare(
-                    intersection(o2List, searchTags) * o2List.size(),
-                    intersection(o1List, searchTags) * o1List.size());
-            if (compareTagsInCommon != 0) {
-              return compareTagsInCommon;
-            }
-            // Sort by which event has a higher ratio of: tags in common with
-            // the search tags to total number of tags
-            int compareRatioOfTagsInCommon =
-                Double.compare(intersection(o2List, searchTags), intersection(o1List, searchTags));
-            if (compareRatioOfTagsInCommon != 0) {
-              return compareRatioOfTagsInCommon;
-            }
-            /*
-            // Sort by which event has more tags
-            int compareSize = Integer.compare(o2List.size(), o1List.size());
-            if (compareSize != 0) {
-              return compareSize;
-            } else {*/
-            // Sort by which event is closer to the user
-            return Integer.compare(
-                Integer.parseInt(o1.getProperty("distance").toString()),
-                Integer.parseInt(o2.getProperty("distance").toString()));
-            /*}*/
-          }
-        });
+    Collections.sort(events, TAGS_SEARCH_RELEVANCE);
 
     // Convert events list to json
     String json = Utils.convertToJson(events);

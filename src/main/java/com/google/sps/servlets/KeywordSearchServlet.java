@@ -53,6 +53,49 @@ public class KeywordSearchServlet extends HttpServlet {
       new ArrayList<String>(Arrays.asList("the", "is", "for", "in", "of", "so", "to"));
   // Conversion rate from mi to km
   private static final double MI_TO_KM = 1.609;
+  // Keywords retrieved from the frontend in the doGet method
+  private List<String> searchKeywords;
+  /**
+   * Comparator used to compare the relevance of two events to the user and their search keywords
+   */
+  private final Comparator<Entity> KEYWORD_SEARCH_RELEVANCE =
+      new Comparator<Entity>() {
+        @Override
+        public int compare(Entity o1, Entity o2) {
+          List<String> o1List = (List<String>) o1.getProperty("keywords");
+          List<String> o2List = (List<String>) o2.getProperty("keywords");
+          List<Long> o1Values = (List<Long>) o1.getProperty("keywordsValues");
+          List<Long> o2Values = (List<Long>) o2.getProperty("keywordsValues");
+          double intersectionRatioO1 = SearchServlet.intersection(o1List, searchKeywords);
+          double intersectionRatioO2 = SearchServlet.intersection(o2List, searchKeywords);
+          // Sort by which event has more keywords in common with the search keywords
+          int compareKeywordsInCommon =
+              Double.compare(
+                  intersectionRatioO2 * o2List.size(), intersectionRatioO1 * o1List.size());
+          if (compareKeywordsInCommon != 0) {
+            return compareKeywordsInCommon;
+          }
+          // Sort by which has a higher occurrence score
+          int compareOccurrence =
+              Double.compare(
+                  occurrenceScore(o2List, searchKeywords, o2Values),
+                  occurrenceScore(o1List, searchKeywords, o1Values));
+          if (compareOccurrence != 0) {
+            return compareOccurrence;
+          }
+
+          // Sort by which event has less keywords
+          int compareSize = Integer.compare(o1List.size(), o2List.size());
+          if (compareSize != 0) {
+            return compareSize;
+          } else {
+            // Sort by which event is closer to the user
+            return Integer.compare(
+                Integer.parseInt(o1.getProperty("distance").toString()),
+                Integer.parseInt(o2.getProperty("distance").toString()));
+          }
+        }
+      };
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -60,7 +103,7 @@ public class KeywordSearchServlet extends HttpServlet {
     String searchQuery = request.getParameter("searchQuery");
 
     // List of keywords we're using to search
-    List<String> searchKeywords = new ArrayList<String>(getSeparateWords(searchQuery));
+    searchKeywords = new ArrayList<String>(getSeparateWords(searchQuery));
     for (int i = 0; i < searchKeywords.size(); i++) {
       searchKeywords.set(i, searchKeywords.get(i).toLowerCase());
     }
@@ -103,44 +146,7 @@ public class KeywordSearchServlet extends HttpServlet {
         e -> ((int) e.getProperty("distance")) > cutoff || ((int) e.getProperty("distance")) < 0);
 
     // Sort list by most keywords in common with search
-    Collections.sort(
-        events,
-        new Comparator<Entity>() {
-          public int compare(Entity o1, Entity o2) {
-            List<String> o1List = (List<String>) o1.getProperty("keywords");
-            List<String> o2List = (List<String>) o2.getProperty("keywords");
-            List<Long> o1Values = (List<Long>) o1.getProperty("keywordsValues");
-            List<Long> o2Values = (List<Long>) o2.getProperty("keywordsValues");
-            double intersectionRatioO1 = SearchServlet.intersection(o1List, searchKeywords);
-            double intersectionRatioO2 = SearchServlet.intersection(o2List, searchKeywords);
-            // Sort by which event has more keywords in common with the search keywords
-            int compareKeywordsInCommon =
-                Double.compare(
-                    intersectionRatioO2 * o2List.size(), intersectionRatioO1 * o1List.size());
-            if (compareKeywordsInCommon != 0) {
-              return compareKeywordsInCommon;
-            }
-            // Sort by which has a higher occurrence score
-            int compareOccurrence =
-                Double.compare(
-                    occurrenceScore(o2List, searchKeywords, o2Values),
-                    occurrenceScore(o1List, searchKeywords, o1Values));
-            if (compareOccurrence != 0) {
-              return compareOccurrence;
-            }
-
-            // Sort by which event has less keywords
-            int compareSize = Integer.compare(o1List.size(), o2List.size());
-            if (compareSize != 0) {
-              return compareSize;
-            } else {
-              // Sort by which event is closer to the user
-              return Integer.compare(
-                  Integer.parseInt(o1.getProperty("distance").toString()),
-                  Integer.parseInt(o2.getProperty("distance").toString()));
-            }
-          }
-        });
+    Collections.sort(events, KEYWORD_SEARCH_RELEVANCE);
 
     // Convert events list to json
     String json = Utils.convertToJson(events);
