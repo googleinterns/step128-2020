@@ -185,8 +185,12 @@ public class KeywordSearchServlet extends HttpServlet {
     while (finalMap.size() < NUM_KEYWORDS && count < mergeList.size()) {
       Map.Entry e = mergeList.get(count);
       // Exclude words with less appearances than the cutoff
-      if (((int) e.getValue()) < MIN_INSTANCES) break;
-      else if (count >= mergeList.size()) break;
+      if (((int) e.getValue()) < MIN_INSTANCES) {
+        break;
+      }
+      else if (count >= mergeList.size()) {
+        break;
+      }
       // Exclude common useless words (in, a, the, etc)
       else if (!IRRELEVANT_WORDS.contains(e.getKey().toString())) {
         finalMap.put(e.getKey().toString(), (int) e.getValue());
@@ -290,8 +294,8 @@ public class KeywordSearchServlet extends HttpServlet {
   /**
    * Returns a the total number of weighted occurrences of keywords in a list.
    *
-   * @param tagListA List of words to be processed
-   * @param tagListB List of keywords
+   * @param keyListA List of words to be processed
+   * @param keyListB List of keywords
    * @param valueListA List of values corresponding to the number of each keyword from list A
    * @return Double total weighted occurrences of keywords
    */
