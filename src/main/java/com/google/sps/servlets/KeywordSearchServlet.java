@@ -158,7 +158,7 @@ public class KeywordSearchServlet extends HttpServlet {
    *
    * @param title String representing the title text to be processed
    * @param desc String representing the description text to be processed
-   * @return List containing most important words from the string
+   * @return Map containing most important words and their weighted occurrences from the string
    */
   public static Map<String, Integer> getKeywords(String title, String desc) {
     // TODO: convert to lowercase in processing (figure out acronyms)
@@ -197,6 +197,12 @@ public class KeywordSearchServlet extends HttpServlet {
     return finalMap;
   }
 
+  /**
+   * Returns the keywords for a map.
+   *
+   * @param map Map containing the keywords and their weighted occurrences
+   * @return List containing the keywords only
+   */
   public static List<String> getKeywordMapKeys(Map<String, Integer> map) {
     List<String> list = new ArrayList<String>();
     List<Map.Entry<String, Integer>> mapList =
@@ -214,6 +220,12 @@ public class KeywordSearchServlet extends HttpServlet {
     return list;
   }
 
+  /**
+   * Returns the keyword values for a map.
+   *
+   * @param map Map containing the keywords and their weighted occurrences
+   * @return List containing the keyword values only
+   */
   public static List<Integer> getKeywordMapValues(Map<String, Integer> map) {
     List<Integer> list = new ArrayList<Integer>();
     List<Map.Entry<String, Integer>> mapList =
