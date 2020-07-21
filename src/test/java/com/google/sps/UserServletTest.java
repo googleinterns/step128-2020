@@ -497,7 +497,7 @@ public final class UserServletTest {
     String[] tags = {"blm"};
     entity.setIndexedProperty("tags", Arrays.asList(tags));
     entity.setProperty("creator", "test@example.com");
-    entity.setProperty("eventKey", "agR0ZXN0cgsLEgVFdmVudBgCDA");
+    entity.setProperty("eventKey", "agR0ZXN0cgsLEgVFdmVudBgDDA");
     entity.setProperty("attendeeCount", 1L);
     entity.setProperty("unformattedStart", "13:00");
     entity.setProperty("unformattedEnd", "");
@@ -519,7 +519,7 @@ public final class UserServletTest {
     String[] tags = {"education"};
     entity.setIndexedProperty("tags", Arrays.asList(tags));
     entity.setProperty("creator", "another@example.com");
-    entity.setProperty("eventKey", "agR0ZXN0cgsLEgVFdmVudBgDDA");
+    entity.setProperty("eventKey", "agR0ZXN0cgsLEgVFdmVudBgFDA");
     entity.setProperty("attendeeCount", 1L);
     entity.setProperty("unformattedStart", "10:00");
     entity.setProperty("unformattedEnd", "");

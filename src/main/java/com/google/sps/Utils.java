@@ -28,7 +28,11 @@ import com.google.maps.model.DistanceMatrix;
 import com.google.maps.model.GeocodingResult;
 import com.google.maps.model.LatLng;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.Map;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
@@ -181,4 +185,62 @@ public class Utils {
               .compareTo(b.getProperty("eventName").toString());
         }
       };
+
+  /** creates a comparator based on entity dot product with a given vector. */
+  public static Comparator<Entity> getComparatorByInterestMatch(Map<String, Integer> metrics) {
+    Comparator<Entity> result =
+        new Comparator<Entity>() {
+          @Override
+          public int compare(Entity a, Entity b) {
+            if (!a.getKind().equals("Event") || !b.getKind().equals("Event")) {
+              throw new IllegalArgumentException("must be event items");
+            }
+            Map<String, Integer> v1 = Interactions.buildVectorForEvent(a);
+            Map<String, Integer> v2 = Interactions.buildVectorForEvent(b);
+            return Integer.compare(
+                Interactions.dotProduct(v1, metrics), Interactions.dotProduct(v2, metrics));
+          }
+        };
+    return result;
+  }
+
+  /** Format time to standard format. */
+  public static String formatTime(String time) {
+    DateFormat inFormat = new SimpleDateFormat("HH:mm");
+    DateFormat outFormat = new SimpleDateFormat("h:mm a");
+
+    Date unformattedTime = null;
+    String formattedTime = "";
+    try {
+      unformattedTime = inFormat.parse(time);
+    } catch (ParseException e) {
+      LOGGER.info("Could not parse time " + e);
+    }
+
+    if (unformattedTime != null) {
+      formattedTime = outFormat.format(unformattedTime);
+    }
+
+    return formattedTime;
+  }
+
+  /** Format date to fit Month Day, Year format. */
+  public static String formatDate(String date) {
+    DateFormat inFormat = new SimpleDateFormat("yyyy-MM-dd");
+    DateFormat outFormat = new SimpleDateFormat("EEEE, MMMMM dd, yyyy");
+
+    Date unformattedDate = null;
+    String formattedDate = "";
+    try {
+      unformattedDate = inFormat.parse(date);
+    } catch (ParseException e) {
+      LOGGER.info("Could not parse date " + e);
+    }
+
+    if (unformattedDate != null) {
+      formattedDate = outFormat.format(unformattedDate);
+    }
+
+    return formattedDate;
+  }
 }
