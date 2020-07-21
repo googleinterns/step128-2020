@@ -182,6 +182,8 @@ public class UserServlet extends HttpServlet {
         LOGGER.info("event " + eventId + " has already been saved");
         return;
       }
+
+      // update attendee count
       Object attendees = eventEntity.getProperty("attendeeCount");
       int attendeeCount = 1;
       if (attendees != null) {
@@ -194,6 +196,10 @@ public class UserServlet extends HttpServlet {
       }
       eventEntity.setProperty("attendeeCount", attendeeCount);
       datastore.put(eventEntity);
+
+      // record interaction
+      int delta = Interactions.recordInteraction(userID, keyId, Interactions.SAVE_SCORE + Interactions.UNSAVE_DELTA);
+        Interactions.updatePrefs(userEntity, tags, delta);
       saved.add(eventId);
       userEntity.setProperty("saved", saved);
     } catch (EntityNotFoundException e) {
@@ -214,6 +220,7 @@ public class UserServlet extends HttpServlet {
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     Key eventKey = KeyFactory.createKey("Event", eventId);
     try {
+      // update attendee count
       Entity eventEntity = datastore.get(eventKey);
       Object attendees = eventEntity.getProperty("attendeeCount");
       int attendeeCount = -1;
@@ -230,6 +237,11 @@ public class UserServlet extends HttpServlet {
       }
       eventEntity.setProperty("attendeeCount", attendeeCount);
       datastore.put(eventEntity);
+
+      // record interaction
+      int delta = Interactions.recordInteraction(userID, keyId, Interactions.SAVE_SCORE + Interactions.UNSAVE_DELTA);
+        Interactions.updatePrefs(userEntity, tags, delta);
+
     } catch (EntityNotFoundException e) {
       LOGGER.info("event " + eventId + " does not exist");
     }
