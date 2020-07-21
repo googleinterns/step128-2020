@@ -22,7 +22,6 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
-import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
 import com.google.gson.Gson;
 import com.google.sps.Firebase;
@@ -84,9 +83,9 @@ public class EditEventServlet extends HttpServlet {
               Entity userEntity = datastore.get(userKey);
 
               if (userEntity != null) {
-                boolean belongsToUser = isUsersEvent(userID, keyRequested);
+                String creator = eventRequested.getProperty("creator").toString();
 
-                if (belongsToUser == true) {
+                if (creator.equals(userID)) {
                   request = populateRequest(request, eventRequested);
                   request
                       .getRequestDispatcher("/WEB-INF/jsp/edit-event-form.jsp")
@@ -115,10 +114,11 @@ public class EditEventServlet extends HttpServlet {
     }
   }
 
-  /** 
-  * Update the specified datastore entity with fields from the request.
-  * @return the updated Event entity 
-  */
+  /**
+   * Update the specified datastore entity with fields from the request.
+   *
+   * @return the updated Event entity
+   */
   private Entity updateEvent(HttpServletRequest request, Entity event) {
     // Get the input from the form.
     String eventName = getParameter(request, "event-name", "");
@@ -211,32 +211,5 @@ public class EditEventServlet extends HttpServlet {
       throw new IOException("Request is missing parameter");
     }
     return eventKey;
-  }
-
-  /**
-   * Checks if the event queried belongs to the user logged in.
-   *
-   * @return a boolean 'exists' which contains if the event belongs to the user
-   */
-  private boolean isUsersEvent(String userID, Key entityKey) {
-    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    String eventKeyString = KeyFactory.keyToString(entityKey);
-    boolean exists = false;
-
-    // Query events created by user logged in.
-    Query query =
-        new Query("Event")
-            .setFilter(new Query.FilterPredicate("creator", Query.FilterOperator.EQUAL, userID));
-    PreparedQuery queried = datastore.prepare(query);
-
-    // Checks if the event is in the list of events created by the user.
-    for (Entity e : queried.asIterable()) {
-      String userEventKey = e.getProperty("eventKey").toString();
-
-      if (userEventKey.equals(eventKeyString)) {
-        exists = true;
-      }
-    }
-    return exists;
   }
 }
