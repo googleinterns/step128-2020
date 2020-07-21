@@ -276,24 +276,23 @@ public class KeywordSearchServlet extends HttpServlet {
   }
 
   /**
-   * Returns a ratio of the number of tags a list has in common with another.
+   * Returns a the total number of weighted occurrences of keywords in a list.
    *
-   * @param tagListA List of tags to be compared
-   * @param tagListB List of tags to be compared against
+   * @param tagListA List of words to be processed
+   * @param tagListB List of keywords
    * @param valueListA List of values corresponding to the number of each keyword from list A
-   * @return Double ratio of number of tags in common to total number of tags
+   * @return Double total weighted occurrences of keywords
    */
   public static Double occurrenceScore(
       List<String> keyListA, List<String> keyListB, List<Long> valueListA) {
-    // Catches divide by zero
-    if (keyListA.size() == 0) {
-      return 0.0;
-    }
     List<String> keyListC = new ArrayList<String>(keyListA);
     keyListC.retainAll(keyListB);
     double total = 0;
     for (String key : keyListC) {
-      total += valueListA.get(keyListA.indexOf(key));
+      int index = keyListA.indexOf(key);
+      if (index != -1 && index < valueListA.size()) {
+        total += valueListA.get(index);
+      }
     }
     return total;
   }

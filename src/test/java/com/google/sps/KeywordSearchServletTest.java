@@ -287,6 +287,66 @@ public final class KeywordSearchServletTest {
   }
 
   @Test
+  public void testOccurrenceScore() {
+    double oScore =
+        testKeywordSearchServlet.occurrenceScore(
+            new ArrayList<String>(Arrays.asList("blm", "protest")),
+            new ArrayList<String>(Arrays.asList("blm")),
+            new ArrayList<Long>(Arrays.asList(3L, 2L)));
+    assertEquals(3, oScore, 0.0002);
+  }
+
+  @Test
+  public void testOccurrenceScoreAdding() {
+    double oScore =
+        testKeywordSearchServlet.occurrenceScore(
+            new ArrayList<String>(Arrays.asList("blm", "protest")),
+            new ArrayList<String>(Arrays.asList("blm", "protest")),
+            new ArrayList<Long>(Arrays.asList(3L, 2L)));
+    assertEquals(5, oScore, 0.0002);
+  }
+
+  @Test
+  public void testOccurrenceScoreNoKeywords() {
+    double oScore =
+        testKeywordSearchServlet.occurrenceScore(
+            new ArrayList<String>(Arrays.asList()),
+            new ArrayList<String>(Arrays.asList("blm")),
+            new ArrayList<Long>(Arrays.asList(3L, 2L)));
+    assertEquals(0, oScore, 0.0002);
+  }
+
+  @Test
+  public void testOccurrenceScoreNoValues() {
+    double oScore =
+        testKeywordSearchServlet.occurrenceScore(
+            new ArrayList<String>(Arrays.asList("blm", "protest")),
+            new ArrayList<String>(Arrays.asList("blm")),
+            new ArrayList<Long>(Arrays.asList()));
+    assertEquals(0, oScore, 0.0002);
+  }
+
+  @Test
+  public void testOccurrenceScoreMismatchValues() {
+    double oScore =
+        testKeywordSearchServlet.occurrenceScore(
+            new ArrayList<String>(Arrays.asList("blm", "protest")),
+            new ArrayList<String>(Arrays.asList("blm", "protest")),
+            new ArrayList<Long>(Arrays.asList(3L)));
+    assertEquals(3, oScore, 0.0002);
+  }
+
+  @Test
+  public void testOccurrenceScoreMismatchKeywords() {
+    double oScore =
+        testKeywordSearchServlet.occurrenceScore(
+            new ArrayList<String>(Arrays.asList("blm")),
+            new ArrayList<String>(Arrays.asList("blm", "protest")),
+            new ArrayList<Long>(Arrays.asList(3L, 2L)));
+    assertEquals(3, oScore, 0.0002);
+  }
+
+  @Test
   public void checkSortedByNumberOfKeywords() throws Exception {
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
