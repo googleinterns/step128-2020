@@ -18,7 +18,6 @@
 /** *********************************************************************
  * Utility methods/onload methods (all pages)
  ***********************************************************************/
-let url = '';
 let loggedIn = false;
 
 // Firebase configuration
@@ -69,8 +68,12 @@ function loadActions(doAfter) {
   }, function(error) {
     console.log(error);
   });
+
+  // makes sure tasks are initialized in queue properly
+  fetch('/worker');
 }
 
+let url = '';
 /**
  * DEPRECATED: Use Firebase system instead
  * checks for login status and fetches login/logout url
@@ -307,6 +310,7 @@ function generateMobileNavLayout() {
 
 // option constants to use with getEvents
 const recommendedForYou = 0;
+const recommendNotLoggedIn = 0.5;
 const savedEvents = 1;
 const createdEvents = 2;
 const searchResults = 3;
@@ -378,7 +382,13 @@ async function getEvents(events, index, option) {
     noElementsBox.className = 'no-events';
     const noElementsText = document.createElement('div');
     noElementsText.className = 'no-events-text';
-    if (option == savedEvents) {
+    if (option == recommendedForYou) {
+      noElementsText.innerText = 'No events to recommend yet! Click the ' +
+          '‘Find’ tab to find some events that interest you.';
+    } else if (option == recommendNotLoggedIn) {
+      noElementsText.innerText = 'Please login first to get event ' +
+          'recommendations!';
+    } else if (option == savedEvents) {
       noElementsText.innerText = 'You have not saved any events yet! ' +
           'Click the ‘Find’ tab to to find an event you would like to save.';
     } else if (option == createdEvents) {
@@ -484,6 +494,9 @@ async function getEvents(events, index, option) {
     const attendeeCountContainerElement = document.createElement('div');
     if (option == recommendedForYou) {
       // "recommended for you"
+      attendeeCountContainerElement.innerText = dummyText;
+    } else if (option == recommendNotLoggedIn) {
+      // TODO: determine what goes here
       attendeeCountContainerElement.innerText = dummyText;
     } else if (option == savedEvents) {
       // unsave an event
@@ -722,7 +735,7 @@ function getCookie(cname) {
  *
  * @return {string} the location of the user
  */
-function getLocation() {
+async function getLocation() {
   return new Promise((resolve) => {
     const locationCookie = getCookie('location');
     let location = '';
@@ -883,11 +896,16 @@ async function getRecommendedEvents() {
           .then((response) => response.json())
           .then(function(js) {
             // TODO: change this fetch call to get recommendations instead
-            getEvents(dummyEvents, 1, 0);
+            getEvents(dummyEvents, 0, recommendedForYou);
           });
     });
   } else {
-    alert('Please log in first!');
+    fetch('/user')
+        .then((response) => response.json())
+        .then(function(js) {
+          // TODO: change this fetch call to get recommendations instead
+          getEvents(js, 0, recommendNotLoggedIn);
+        });
   }
   getSearchDistanceSettings();
 }

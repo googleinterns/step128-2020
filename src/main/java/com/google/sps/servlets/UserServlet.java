@@ -52,7 +52,7 @@ public class UserServlet extends HttpServlet {
 
     String userToken = request.getParameter("userToken");
     String userID = "";
-    if (Firebase.isUserLoggedIn(userToken)) {
+    if (userToken != null && Firebase.isUserLoggedIn(userToken)) {
       userID = Firebase.authenticateUser(userToken);
       Key userKey = KeyFactory.createKey("User", userID);
       Entity userEntity = null;
