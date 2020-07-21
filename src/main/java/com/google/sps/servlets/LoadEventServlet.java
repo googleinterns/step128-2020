@@ -22,9 +22,9 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
 import com.google.sps.Firebase;
+import com.google.sps.Interactions;
 import com.google.sps.Utils;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 import javax.servlet.ServletException;
@@ -56,16 +56,22 @@ public class LoadEventServlet extends HttpServlet {
           if (Firebase.isUserLoggedIn(userToken)) {
             String userID = Firebase.authenticateUser(userToken);
             Key userKey = KeyFactory.createKey("User", userID);
+            List<String> tags = (List<String>) eventRequested.getProperty("tags");
+            Entity userEntity = null;
             try {
-              Entity userEntity = datastore.get(userKey);
-              alreadySaved = alreadySaved(eventRequested.getKey().getId(), userEntity);
+              userEntity = datastore.get(userKey);
+              alreadySaved = UserServlet.alreadySaved(eventRequested.getKey().getId(), userEntity);
 
             } catch (EntityNotFoundException exception) {
               // datastore entry has not been created yet for this user, create it now
-              Entity entity = new Entity(userKey);
-              entity.setProperty("firebaseID", userID);
-              datastore.put(entity);
+              userEntity = new Entity(userKey);
+              userEntity.setProperty("firebaseID", userID);
             }
+            int delta =
+                Interactions.recordInteraction(
+                    userID, keyRequested.getId(), Interactions.CREATE_SCORE);
+            Interactions.updatePrefs(userEntity, tags, delta);
+            datastore.put(userEntity);
           }
         }
         request = populateRequest(request, eventRequested, alreadySaved);
@@ -128,23 +134,5 @@ public class LoadEventServlet extends HttpServlet {
       throw new IOException("Request is missing parameter");
     }
     return eventKey;
-  }
-
-  /**
-   * Checks if user has already saved an event.
-   *
-   * @return the index of the event in user's saved list, or -1 if not found
-   */
-  private int alreadySaved(long eventId, Entity userEntity) {
-    List<Long> saved = (ArrayList<Long>) userEntity.getProperty("saved");
-    if (saved == null) {
-      saved = new ArrayList<>();
-    }
-    for (int i = 0; i < saved.size(); i++) {
-      if (saved.get(i) == eventId) {
-        return i;
-      }
-    }
-    return -1;
   }
 }
