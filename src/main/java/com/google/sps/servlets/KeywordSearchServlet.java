@@ -287,7 +287,7 @@ public class KeywordSearchServlet extends HttpServlet {
 
   /**
    * Returns the weighted occurrence (occurrences of title keywords * 2 + occurrences of desc) of
-   * keywords contained in both the search query and event
+   * keywords contained in both the search query and event.
    *
    * @param eventKeywords List of keywords generated for an event
    * @param searchKeywords List of search keywords
