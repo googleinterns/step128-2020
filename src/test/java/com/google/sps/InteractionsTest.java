@@ -15,16 +15,28 @@
 package com.google.sps;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.PreparedQuery;
+import com.google.appengine.api.datastore.PreparedQuery.TooManyResultsException;
+import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Query.CompositeFilterOperator;
+import com.google.appengine.api.datastore.Query.FilterOperator;
+import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
+import com.google.sps.servlets.EventServlet;
+import com.google.sps.servlets.LoadEventServlet;
 import com.google.sps.servlets.SurveyServlet;
+import com.google.sps.servlets.UserServlet;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -45,9 +57,9 @@ import org.powermock.modules.junit4.PowerMockRunner;
 public final class InteractionsTest {
   private final LocalServiceTestHelper helper =
       new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
-  private SurveyServlet testSurveyServlet;
+  private static final SurveyServlet testSurveyServlet = new SurveySurvlet();
 
-  private void takeSurvey(String email) throws MalformedURLException, IOException {
+  private void takeSurvey(String email) throws IOException {
     HttpServletRequest request = mock(HttpServletRequest.class);
     TestingUtil.mockFirebase(request, email);
 
@@ -65,7 +77,6 @@ public final class InteractionsTest {
   @Before
   public void setUp() throws IOException {
     helper.setUp();
-    testSurveyServlet = new SurveyServlet();
   }
 
   @After
@@ -131,5 +142,41 @@ public final class InteractionsTest {
     v2.put("2", 2);
 
     assertEquals(4, Interactions.dotProduct(v1, v2));
+  }
+
+  @Test
+  public void recordMiscInteractions() throws IOException {
+    EventServlet eventServlet = new EventServlet();
+    LoadEventServlet loadServlet = new LoadEventServlet();
+    UserServlet userServlet = new UserServlet();
+
+    // blm protest (test@example), book drive (another@example), lake clean up(test@example)
+    UserServletTest.postEventsSetup();
+    List<Entity> allEntities = UserServletTest.callGet("", "");
+
+    //test@example.com -> created blm protest, created lake clean up, saved book drive, viewed all 3
+    //another @example.com -> created book drive, saved book drive, viewed lake clean up
+    // person@example.com -> saved blm protest, viewed blm protest, unsaved blm protest, viewed lake clean up
+  }
+
+  /** Makes sure interactions have been recorded correctly in datastore. */
+  public static void assertExpectedInteraction(String userId, long eventId, int value) {
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    Query q =
+        new Query("Interaction")
+            .setFilter(
+                CompositeFilterOperator.and(
+                    new FilterPredicate("user", FilterOperator.EQUAL, userId),
+                    new FilterPredicate("event", FilterOperator.EQUAL, eventId)));
+    PreparedQuery pq = datastore.prepare(q);
+    try {
+      Entity interactionEntity = pq.asSingleEntity();
+      int score = Integer.parseInt(interactionEntity.getProperty("rating").toString());
+      assertEquals(value, score);
+    } catch (TooManyResultsException e) {
+      fail();
+    } catch (NullPointerException e) {
+      fail();
+    }
   }
 }
