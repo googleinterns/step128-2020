@@ -153,28 +153,32 @@ public class UserServlet extends HttpServlet {
       userEntity.setProperty("firebaseID", userID);
       datastore.put(userEntity);
     }
-    List<Long> saved = (ArrayList<Long>) userEntity.getProperty("saved");
-    if (saved == null) {
-      saved = new ArrayList<>();
-    }
+    // List<Long> saved = (ArrayList<Long>) userEntity.getProperty("saved");
+    // if (saved == null) {
+    //   saved = new ArrayList<>();
+    // }
     switch (request.getParameter("action")) {
       case "save":
-        postHandleSave(saved, eventId);
+        postHandleSave(userEntity, eventId);
         break;
       case "unsave":
-        postHandleUnsave(saved, eventId);
+        postHandleUnsave(userEntity, eventId);
         break;
       default:
         throw new IOException("missing or invalid parameters");
     }
-    userEntity.setProperty("saved", saved);
+    // userEntity.setProperty("saved", saved);
     datastore.put(userEntity);
 
     response.sendRedirect("/my-events.html");
   }
 
   // adds event id to list if it is not already present
-  private void postHandleSave(List<Long> saved, long eventId) {
+  private void postHandleSave(Entity userEntity, long eventId) {
+    List<Long> saved = (ArrayList<Long>) userEntity.getProperty("saved");
+    if (saved == null) {
+      saved = new ArrayList<>();
+    }
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     Key eventKey = KeyFactory.createKey("Event", eventId);
     try {
@@ -196,43 +200,67 @@ public class UserServlet extends HttpServlet {
       eventEntity.setProperty("attendeeCount", attendeeCount);
       datastore.put(eventEntity);
       saved.add(eventId);
+      userEntity.setProperty("saved", saved);
     } catch (EntityNotFoundException e) {
       LOGGER.info("event " + eventId + " does not exist");
     }
   }
 
   // removes event id from list if it is present
-  private void postHandleUnsave(List<Long> saved, long eventId) {
-    for (int i = 0; i < saved.size(); i++) {
-      if (saved.get(i) == eventId) {
-        saved.remove(i);
+  private void postHandleUnsave(Entity userEntity, long eventId) {
+    int i = alreadySaved(eventId, userEntity);
+    // for (int i = 0; i < saved.size(); i++) {
+    if (i >= 0) {
+      List<Long> saved = (List<Long>) userEntity.getProperty("saved");
+      saved.remove(i);
 
-        DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-        Key eventKey = KeyFactory.createKey("Event", eventId);
-        try {
-          Entity eventEntity = datastore.get(eventKey);
-          Object attendees = eventEntity.getProperty("attendeeCount");
-          int attendeeCount = -1;
-          if (attendees != null) {
-            try {
-              attendeeCount += Integer.parseInt(attendees.toString());
-            } catch (NumberFormatException num) {
-              LOGGER.info("error parsing attendee count for event id " + eventId);
-              attendeeCount = 0;
-            }
-          }
-          if (attendeeCount < 0) {
+      DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+      Key eventKey = KeyFactory.createKey("Event", eventId);
+      try {
+        Entity eventEntity = datastore.get(eventKey);
+        Object attendees = eventEntity.getProperty("attendeeCount");
+        int attendeeCount = -1;
+        if (attendees != null) {
+          try {
+            attendeeCount += Integer.parseInt(attendees.toString());
+          } catch (NumberFormatException num) {
+            LOGGER.info("error parsing attendee count for event id " + eventId);
             attendeeCount = 0;
           }
-          eventEntity.setProperty("attendeeCount", attendeeCount);
-          datastore.put(eventEntity);
-        } catch (EntityNotFoundException e) {
-          LOGGER.info("event " + eventId + " does not exist");
         }
+        if (attendeeCount < 0) {
+          attendeeCount = 0;
+        }
+        eventEntity.setProperty("attendeeCount", attendeeCount);
+        datastore.put(eventEntity);
+      } catch (EntityNotFoundException e) {
+        LOGGER.info("event " + eventId + " does not exist");
+      }
+      userEntity.setProperty("saved", saved);
+      return;
+    }
+    // }
+    LOGGER.info("event " + eventId + " has not been saved yet");
+  }
 
-        return;
+  /**
+   * Checks if an event has been already saved by a user.
+   *
+   * @return the event's index in the user's saved items, or -1 if not present
+   */
+  public static int alreadySaved(long eventId, Entity userEntity) {
+    if (!userEntity.getKind().equals("User")) {
+      throw new IllegalArgumentException("must be user item");
+    }
+    List<Long> saved = (ArrayList<Long>) userEntity.getProperty("saved");
+    if (saved == null) {
+      return -1;
+    }
+    for (int i = 0; i < saved.size(); i++) {
+      if (saved.get(i) == eventId) {
+        return i;
       }
     }
-    LOGGER.info("event " + eventId + " has not been saved yet");
+    return -1;
   }
 }
