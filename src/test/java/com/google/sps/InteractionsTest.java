@@ -153,6 +153,14 @@ public final class InteractionsTest {
     // blm protest (test@example), book drive (another@example), lake clean up(test@example)
     UserServletTest.postEventsSetup();
     List<Entity> allEntities = UserServletTest.callGet("", "");
+    long id0 = allEntities.get(0).getKey().getId(); // blm protest (test@example)
+    long id1 = allEntities.get(1).getKey().getId(); // book drive (another @example)
+    long id2 = allEntities.get(2).getKey().getId(); // lake clean up (test@example)
+
+    UserServletTest.callPost(id1, "save", "test@example.com");
+    UserServletTest.callPost(id1, "save", "test@example.com");
+    UserServletTest.callPost(id1, "save", "another@example.com");
+    UserServletTest.callPost(id1, "save", "person@example.com");
 
     //test@example.com -> created blm protest, created lake clean up, saved book drive, viewed all 3
     //another @example.com -> created book drive, saved book drive, viewed lake clean up
