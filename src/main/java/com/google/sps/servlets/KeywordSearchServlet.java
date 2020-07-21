@@ -67,9 +67,9 @@ public class KeywordSearchServlet extends HttpServlet {
     searchKeywords.removeAll(IRRELEVANT_WORDS);
 
     Query query = null;
-    // Check if there are no tags
+    // Check if there are no keywords
     if (!searchQuery.equals("")) {
-      // Filter to check if the event has any of tags we're searching for
+      // Filter to check if the event has any of the keywords we're searching for
       Filter keywordsFilter = new FilterPredicate("keywords", FilterOperator.IN, searchKeywords);
       query = new Query("Event").setFilter(keywordsFilter);
     } else {
@@ -102,7 +102,7 @@ public class KeywordSearchServlet extends HttpServlet {
     events.removeIf(
         e -> ((int) e.getProperty("distance")) > cutoff || ((int) e.getProperty("distance")) < 0);
 
-    // Sort list by most tags in common with search
+    // Sort list by most keywords in common with search
     Collections.sort(
         events,
         new Comparator<Entity>() {
@@ -167,7 +167,7 @@ public class KeywordSearchServlet extends HttpServlet {
 
     // Merge maps
     // Title occurrence values multiplied by 2 to give more weight than description
-    titleMap.forEach((key, value) -> descMap.merge(key, value * 2, (v1, v2) -> v1 + (v2 * 2)));
+    titleMap.forEach((key, value) -> descMap.merge(key, value * 2, (v1, v2) -> v1 + v2));
     List<Map.Entry<String, Integer>> mergeList =
         new ArrayList<Map.Entry<String, Integer>>(descMap.entrySet());
 
@@ -181,10 +181,8 @@ public class KeywordSearchServlet extends HttpServlet {
 
     // Add top results to the final list
     Map<String, Integer> finalMap = new HashMap<String, Integer>();
-    List<String> finalList = new ArrayList<String>();
-    List<Integer> finalValues = new ArrayList<Integer>();
     int count = 0;
-    while (finalList.size() < NUM_KEYWORDS && count < mergeList.size()) {
+    while (finalMap.size() < NUM_KEYWORDS && count < mergeList.size()) {
       Map.Entry e = mergeList.get(count);
       // Exclude words with less appearances than the cutoff
       if (((int) e.getValue()) < MIN_INSTANCES) break;
@@ -192,8 +190,6 @@ public class KeywordSearchServlet extends HttpServlet {
       // Exclude common useless words (in, a, the, etc)
       else if (!IRRELEVANT_WORDS.contains(e.getKey().toString())) {
         finalMap.put(e.getKey().toString(), (int) e.getValue());
-        finalList.add(e.getKey().toString());
-        finalValues.add((int) e.getValue());
       }
       count++;
     }

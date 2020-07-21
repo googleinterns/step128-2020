@@ -86,21 +86,21 @@ public final class KeywordSearchServletTest {
                 "Environment Climate Change Protest",
                 "Toy Drive for the Kids",
                 "Athan Downs Park clean up",
-                "Youth Ballet Bake Sale"));
+                "Support Youth Ballet Bake Sale"));
 
     possibleDescriptions =
         new ArrayList<String>(
             Arrays.asList(
-                "Black Lives Matter.",
+                "Support the Black Lives Matter movement. support",
                 "Climate change is one of the most important issues facing us right now.",
-                "Collecting donations of toys for the children's hospital.",
+                "Collecting donations of toys to support the children's hospital. location location location support support",
                 "Bring bags and gloves.",
                 "Hi everyone, we're doing this to support the Youth America Grand Prix competitors this year.",
                 "BLM. BLM. BLM.",
                 "This is one of the most important issues facing us right now.",
                 "Collecting donations of toys for the kids hospital.",
                 "Bring bags and gloves.",
-                "Hi everyone, we're doing this to support the Youth America Grand Prix competitors this year."));
+                "Hi everyone, we're doing this to support the Youth America Grand Prix competitors this year. location location location"));
 
     possibleLocations =
         new ArrayList<String>(
@@ -336,7 +336,7 @@ public final class KeywordSearchServletTest {
   }
 
   @Test
-  public void checkSortedByNumberOfInstancesOfKeywords() throws Exception {
+  public void checkSortedByOccurrenceScore() throws Exception {
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
 
@@ -367,6 +367,91 @@ public final class KeywordSearchServletTest {
     // Order results like sorting algorithm will
     List<String> desiredOrder =
         new ArrayList<String>(Arrays.asList("BLM Protest in LA", "BLM Protest"));
+    List<Entity> orderedEvents = SearchTagsServletTest.orderEvents(desiredOrder, events);
+
+    // Convert expected events to JSON for comparison
+    String expected = Utils.convertToJson(orderedEvents);
+    assertEquals(expected, result);
+  }
+
+  @Test
+  public void checkSortedByLocation() throws Exception {
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpServletResponse response = mock(HttpServletResponse.class);
+
+    StringWriter sw = new StringWriter();
+    PrintWriter pw = new PrintWriter(sw);
+
+    when(response.getWriter()).thenReturn(pw);
+
+    // Send the request to the servlet with param
+    when(request.getParameter("searchQuery")).thenReturn("location");
+    when(request.getParameter("location")).thenReturn("Los Angeles, CA");
+    when(request.getParameter("searchDistance")).thenReturn("5000");
+
+    mockUtils();
+
+    testKeywordSearchServlet.doGet(request, response);
+
+    // Get the JSON response from the server
+    String result = sw.getBuffer().toString().trim();
+
+    // Get the events we were expecting the search to return
+    // from the datastore and assemble our expected
+    List<Integer> ids = new ArrayList<Integer>(Arrays.asList(0, 1));
+    List<Entity> events =
+        fetchIDsFromDataStore(
+            new ArrayList<String>(Arrays.asList("Toy Drive", "Support Youth Ballet Bake Sale")));
+
+    // Order results like sorting algorithm will
+    List<String> desiredOrder =
+        new ArrayList<String>(Arrays.asList("Toy Drive", "Support Youth Ballet Bake Sale"));
+    List<Entity> orderedEvents = SearchTagsServletTest.orderEvents(desiredOrder, events);
+
+    // Convert expected events to JSON for comparison
+    String expected = Utils.convertToJson(orderedEvents);
+    assertEquals(expected, result);
+  }
+
+  @Test
+  public void checkSortedMultipleWordQuery() throws Exception {
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpServletResponse response = mock(HttpServletResponse.class);
+
+    StringWriter sw = new StringWriter();
+    PrintWriter pw = new PrintWriter(sw);
+
+    when(response.getWriter()).thenReturn(pw);
+
+    // Send the request to the servlet with param
+    when(request.getParameter("searchQuery")).thenReturn("support blm");
+    when(request.getParameter("location")).thenReturn("Los Angeles, CA");
+    when(request.getParameter("searchDistance")).thenReturn("5000");
+
+    mockUtils();
+
+    testKeywordSearchServlet.doGet(request, response);
+
+    // Get the JSON response from the server
+    String result = sw.getBuffer().toString().trim();
+
+    // Get the events we were expecting the search to return
+    // from the datastore and assemble our expected
+    List<Integer> ids = new ArrayList<Integer>(Arrays.asList(0, 1));
+    List<Entity> events =
+        fetchIDsFromDataStore(
+            new ArrayList<String>(
+                Arrays.asList(
+                    "BLM Protest",
+                    "BLM Protest in LA",
+                    "Toy Drive",
+                    "Support Youth Ballet Bake Sale")));
+
+    // Order results like sorting algorithm will
+    List<String> desiredOrder =
+        new ArrayList<String>(
+            Arrays.asList(
+                "BLM Protest", "BLM Protest in LA", "Toy Drive", "Support Youth Ballet Bake Sale"));
     List<Entity> orderedEvents = SearchTagsServletTest.orderEvents(desiredOrder, events);
 
     // Convert expected events to JSON for comparison
