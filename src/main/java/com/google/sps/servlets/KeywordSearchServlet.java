@@ -56,7 +56,7 @@ public class KeywordSearchServlet extends HttpServlet {
   // Keywords retrieved from the frontend in the doGet method
   private List<String> searchKeywords;
   /**
-   * Comparator used to compare the relevance of two events to the user and their search keywords
+   * Comparator used to compare the relevance of two events to the user and their search keywords.
    */
   private final Comparator<Entity> KEYWORD_SEARCH_RELEVANCE =
       new Comparator<Entity>() {
