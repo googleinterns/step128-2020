@@ -18,7 +18,6 @@
 /** *********************************************************************
  * Utility methods/onload methods (all pages)
  ***********************************************************************/
-let url = '';
 let loggedIn = false;
 
 // Firebase configuration
@@ -69,8 +68,12 @@ function loadActions(doAfter) {
   }, function(error) {
     console.log(error);
   });
+
+  // makes sure tasks are initialized in queue properly
+  fetch('/worker');
 }
 
+let url = '';
 /**
  * DEPRECATED: Use Firebase system instead
  * checks for login status and fetches login/logout url
@@ -307,6 +310,7 @@ function generateMobileNavLayout() {
 
 // option constants to use with getEvents
 const recommendedForYou = 0;
+const recommendNotLoggedIn = 0.5;
 const savedEvents = 1;
 const createdEvents = 2;
 const searchResults = 3;
@@ -378,7 +382,13 @@ async function getEvents(events, index, option) {
     noElementsBox.className = 'no-events';
     const noElementsText = document.createElement('div');
     noElementsText.className = 'no-events-text';
-    if (option == savedEvents) {
+    if (option == recommendedForYou) {
+      noElementsText.innerText = 'No events to recommend yet! Click the ' +
+          '‘Find’ tab to find some events that interest you.';
+    } else if (option == recommendNotLoggedIn) {
+      noElementsText.innerText = 'Please login first to get event ' +
+          'recommendations!';
+    } else if (option == savedEvents) {
       noElementsText.innerText = 'You have not saved any events yet! ' +
           'Click the ‘Find’ tab to to find an event you would like to save.';
     } else if (option == createdEvents) {
@@ -484,6 +494,9 @@ async function getEvents(events, index, option) {
     const attendeeCountContainerElement = document.createElement('div');
     if (option == recommendedForYou) {
       // "recommended for you"
+      attendeeCountContainerElement.innerText = dummyText;
+    } else if (option == recommendNotLoggedIn) {
+      // TODO: determine what goes here
       attendeeCountContainerElement.innerText = dummyText;
     } else if (option == savedEvents) {
       // unsave an event
@@ -602,49 +615,51 @@ function changeSearchDistance() {
  * Creates the search distance settings on the page
  */
 async function getSearchDistanceSettings() {
-  const locationSettingsElements =
-   document.getElementsByClassName('location-settings');
-  const locationSettingsElement = locationSettingsElements[0];
+  getLocation().then((location) => {
+    const locationSettingsElements =
+    document.getElementsByClassName('location-settings');
+    const locationSettingsElement = locationSettingsElements[0];
 
-  // TODO get from server where the user's location is to set by default.
-  locationSettingsElement.innerHTML = '';
-  const currentLocationElement = document.createElement('div');
-  currentLocationElement.className = 'current-location';
-  currentLocationElement.innerText = 'Current Location: ' +
-     'Los Angeles, CA';
-  locationSettingsElement.appendChild(currentLocationElement);
-  locationSettingsElement.appendChild(
-      document.createTextNode(' '));
+    // TODO get from server where the user's location is to set by default.
+    locationSettingsElement.innerHTML = '';
+    const currentLocationElement = document.createElement('div');
+    currentLocationElement.className = 'current-location';
+    currentLocationElement.innerText = 'Current Location: ' +
+      location;
+    locationSettingsElement.appendChild(currentLocationElement);
+    locationSettingsElement.appendChild(
+        document.createTextNode(' '));
 
-  const changeLinkElement = document.createElement('a');
-  changeLinkElement.setAttribute('href', '');
-  changeLinkElement.innerText = 'Change Location';
-  locationSettingsElement.appendChild(changeLinkElement);
+    const changeLinkElement = document.createElement('a');
+    changeLinkElement.setAttribute('href', 'javascript:changeLocation()');
+    changeLinkElement.innerText = 'Change Location';
+    locationSettingsElement.appendChild(changeLinkElement);
 
-  const distanceElement = document.createElement('div');
-  distanceElement.className = 'distance';
-  distanceElement.appendChild(
-      document.createTextNode('Searching within '));
-  locationSettingsElement.appendChild(distanceElement);
+    const distanceElement = document.createElement('div');
+    distanceElement.className = 'distance';
+    distanceElement.appendChild(
+        document.createTextNode('Searching within '));
+    locationSettingsElement.appendChild(distanceElement);
 
-  const selectElement = document.createElement('select');
-  selectElement.id = 'searchDistance';
-  selectElement.setAttribute('onchange', 'changeSearchDistance()');
-  distanceElement.appendChild(selectElement);
+    const selectElement = document.createElement('select');
+    selectElement.id = 'searchDistance';
+    selectElement.setAttribute('onchange', 'changeSearchDistance()');
+    distanceElement.appendChild(selectElement);
 
-  const distanceList = [5, 10, 25, 50];
-  distanceList.forEach(function(distance) {
-    const optionElement = document.createElement('option');
-    optionElement.value = distance;
-    optionElement.innerText = distance;
-    if (distance == searchDistance) {
-      optionElement.setAttribute('selected', 'true');
-    }
-    selectElement.appendChild(optionElement);
+    const distanceList = [5, 10, 25, 50];
+    distanceList.forEach(function(distance) {
+      const optionElement = document.createElement('option');
+      optionElement.value = distance;
+      optionElement.innerText = distance;
+      if (distance == searchDistance) {
+        optionElement.setAttribute('selected', 'true');
+      }
+      selectElement.appendChild(optionElement);
+    });
+
+    distanceElement.appendChild(
+        document.createTextNode(' mi'));
   });
-
-  distanceElement.appendChild(
-      document.createTextNode(' mi'));
 }
 
 /**
@@ -679,6 +694,87 @@ function generateRainbowTags() {
       colorIndex++;
     }
     elements[e].innerHTML = tagHTML;
+  }
+}
+
+/**
+ * Sets value of a cookie.
+ *
+ * @param {string} cname name of the cookie
+ * @param {string} cvalue name of the value
+ */
+function setCookie(cname, cvalue) {
+  document.cookie = cname + '=' + cvalue + '; ';
+}
+
+/**
+ * Gets value of a cookie.
+ *
+ * @param {string} cname name of the cookie
+ * @return {string} the value of the requested cookie
+ */
+function getCookie(cname) {
+  const name = cname + '=';
+  const decodedCookie = decodeURIComponent(document.cookie);
+  const cArr = decodedCookie.split(';');
+  for (let i = 0; i < cArr.length; i++) {
+    let c = cArr[i];
+    while (c.charAt(0) == ' ') {
+      c = c.substring(1);
+    }
+    if (c.indexOf(name) == 0) {
+      return c.substring(name.length, c.length);
+    }
+  }
+  return '';
+}
+
+/**
+ * Retrieves the users location, prioritizing the datastore
+ * but falling back on cookies
+ *
+ * @return {string} the location of the user
+ */
+async function getLocation() {
+  return new Promise((resolve) => {
+    const locationCookie = getCookie('location');
+    let location = '';
+    getUserIDToken().then((userToken) => {
+      fetch('/location?userToken=' + userToken)
+          .then((response) => response.json())
+          .then(function(js) {
+            const locationDatastore = js;
+            if (locationDatastore != '' &&
+                locationCookie != locationDatastore) {
+              setCookie('location', locationDatastore);
+              location = locationDatastore;
+            } else {
+              location = locationCookie;
+            }
+            resolve(location);
+          });
+    });
+  });
+}
+
+/**
+ * Prompts the user to enter their zipcode to change their location
+ */
+function changeLocation() {
+  const location = prompt('Please enter your zipcode:', '');
+  if (location == null || location == '') {
+    console.log('incomplete');
+  } else {
+    setCookie('location', location);
+    getUserIDToken().then((userToken) => {
+      const params = new URLSearchParams();
+      params.append('zip', location);
+      params.append('userToken', userToken);
+      fetch(new Request('/location', {method: 'POST', body: params}))
+          .then(() => {
+            getSearchDistanceSettings();
+          });
+    });
   }
 }
 
@@ -800,11 +896,16 @@ async function getRecommendedEvents() {
           .then((response) => response.json())
           .then(function(js) {
             // TODO: change this fetch call to get recommendations instead
-            getEvents(dummyEvents, 1, 0);
+            getEvents(dummyEvents, 0, recommendedForYou);
           });
     });
   } else {
-    alert('Please log in first!');
+    fetch('/user')
+        .then((response) => response.json())
+        .then(function(js) {
+          // TODO: change this fetch call to get recommendations instead
+          getEvents(js, 0, recommendNotLoggedIn);
+        });
   }
   getSearchDistanceSettings();
 }
@@ -869,8 +970,9 @@ async function unsaveEvent(eventId) {
     params.append('event', eventId);
     params.append('action', 'unsave');
     params.append('userToken', userToken);
-    fetch(new Request('/user', {method: 'POST', body: params}));
-    window.location.href = '/my-events.html';
+    fetch(new Request('/user', {method: 'POST', body: params})).then(() => {
+      window.location.href = '/my-events.html';
+    });
   });
 }
 
@@ -964,7 +1066,7 @@ function updateTagBox() {
 /**
  * Placeholder function for search functionality
  */
-async function search() {
+function search() {
   let url = '?tags=';
   tagsSearch.forEach(function(tag) {
     if (tag == 'LGBTQ+') {
@@ -978,12 +1080,15 @@ async function search() {
     url = url.substring(0, url.length - 1);
   }
 
-  // TODO get user location
-  url += '&searchDistance=' + searchDistance + '&location=' + 'Los Angeles, CA';
+  getLocation().then((location) => {
+    // TODO get user location
+    url += '&searchDistance=' + searchDistance + '&location=' + location;
 
-  const response = await fetch('/search' + url);
-  const events = await response.json();
-  getEvents(events, 0, 3);
+    fetch('/search' + url).then((response) => response.json())
+        .then(function(responseJson) {
+          getEvents(responseJson, 0, 3);
+        });
+  });
 }
 
 /* **********************************************************************
@@ -1198,7 +1303,8 @@ function saveEvent(eventId) {
     params.append('event', eventId);
     params.append('action', 'save');
     params.append('userToken', userToken);
-    fetch(new Request('/user', {method: 'POST', body: params}));
-    window.location.href = '/my-events.html';
+    fetch(new Request('/user', {method: 'POST', body: params})).then(() => {
+      window.location.href = '/my-events.html';
+    });
   });
 }
