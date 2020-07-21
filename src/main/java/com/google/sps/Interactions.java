@@ -29,9 +29,9 @@ public class Interactions {
   private static final Logger LOGGER = Logger.getLogger(Interactions.class.getName());
 
   // contributions to user's interest metrics for each action
-  public static final int VIEW_SCORE = 1;
-  public static final int SAVE_SCORE = 3;
-  public static final int CREATE_SCORE = 5;
+  public static final int VIEW_SCORE = 4;
+  public static final int SAVE_SCORE = 8;
+  public static final int CREATE_SCORE = 10;
 
   // interest categories, matches question order on survey pages
   public static final String[] metrics = {"environment", "blm", "volunteer", "education", "LGBTQ+"};
