@@ -116,6 +116,7 @@ public class EditEventServlet extends HttpServlet {
   }
 
   /** 
+  * Update the specified datastore entity with fields from the request.
   * @return the updated Event entity 
   */
   private Entity updateEvent(HttpServletRequest request, Entity event) {
@@ -128,8 +129,8 @@ public class EditEventServlet extends HttpServlet {
     String date = getParameter(request, "date", "");
     String startTime = getParameter(request, "start-time", "");
     String endTime = getParameter(request, "end-time", "");
-    String coverPhoto = getParameter(request, "cover-photo", "");
-    String tagsStr = getParameter(request, "all-tags", "");
+    final String coverPhoto = getParameter(request, "cover-photo", "");
+    final String tagsStr = getParameter(request, "all-tags", "");
 
     final String fullAddress = String.format("%1$s, %2$s, %3$s", streetAddress, city, state);
     final String formattedDate = Utils.formatDate(date);
