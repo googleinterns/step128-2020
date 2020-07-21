@@ -14,6 +14,8 @@
 
 package com.google.sps.servlets;
 
+import static com.google.sps.Utils.getParameter;
+
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
@@ -112,12 +114,12 @@ public class EventServlet extends HttpServlet {
     String tagsStr = getParameter(request, "all-tags", "");
 
     final String fullAddress = String.format("%1$s, %2$s, %3$s", streetAddress, city, state);
-    final String formattedDate = formatDate(date);
-    final String formattedTime = formatTime(startTime);
+    final String formattedDate = Utils.formatDate(date);
+    final String formattedTime = Utils.formatTime(startTime);
 
     String formattedTimeEnd = "";
     if (endTime != "") {
-      formattedTimeEnd = formatTime(endTime);
+      formattedTimeEnd = Utils.formatTime(endTime);
     }
 
     Entity eventEntity = new Entity("Event");
@@ -138,57 +140,5 @@ public class EventServlet extends HttpServlet {
     eventEntity.setIndexedProperty("tags", tagsList);
 
     return eventEntity;
-  }
-
-  /**
-   * @return the request parameter, or the default value if the parameter was not specified by the
-   *     client
-   */
-  private String getParameter(HttpServletRequest request, String name, String defaultValue) {
-    String value = request.getParameter(name);
-    if (value == null) {
-      return defaultValue;
-    }
-    return value;
-  }
-
-  /** Format time to standard format. */
-  private String formatTime(String time) {
-    DateFormat inFormat = new SimpleDateFormat("HH:mm");
-    DateFormat outFormat = new SimpleDateFormat("h:mm a");
-
-    Date unformattedTime = null;
-    String formattedTime = "";
-    try {
-      unformattedTime = inFormat.parse(time);
-    } catch (ParseException e) {
-      LOGGER.info("Could not parse time " + e);
-    }
-
-    if (unformattedTime != null) {
-      formattedTime = outFormat.format(unformattedTime);
-    }
-
-    return formattedTime;
-  }
-
-  /** Format date to fit Month Day, Year format. */
-  private String formatDate(String date) {
-    DateFormat inFormat = new SimpleDateFormat("yyyy-MM-dd");
-    DateFormat outFormat = new SimpleDateFormat("EEEE, MMMMM dd, yyyy");
-
-    Date unformattedDate = null;
-    String formattedDate = "";
-    try {
-      unformattedDate = inFormat.parse(date);
-    } catch (ParseException e) {
-      LOGGER.info("Could not parse date " + e);
-    }
-
-    if (unformattedDate != null) {
-      formattedDate = outFormat.format(unformattedDate);
-    }
-
-    return formattedDate;
   }
 }
