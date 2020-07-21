@@ -14,6 +14,7 @@
 
 package com.google.sps;
 
+import static com.google.appengine.api.datastore.FetchOptions.Builder.withLimit;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.anyString;
@@ -26,7 +27,12 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
+import com.google.appengine.api.datastore.PreparedQuery;
+import com.google.appengine.api.datastore.PreparedQuery.TooManyResultsException;
 import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Query.CompositeFilterOperator;
+import com.google.appengine.api.datastore.Query.FilterOperator;
+import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.gson.Gson;
@@ -104,6 +110,27 @@ public final class UserServletTest {
       if (goalIds.get(i) != resultIds.get(i)) {
         fail();
       }
+    }
+  }
+
+  /** Makes sure interactions have been recorded correctly in datastore. */
+  private void assertExpectedInteraction(String userId, long eventId, int value) {
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    Query q =
+        new Query("Interaction")
+            .setFilter(
+                CompositeFilterOperator.and(
+                    new FilterPredicate("user", FilterOperator.EQUAL, userId),
+                    new FilterPredicate("event", FilterOperator.EQUAL, eventId)));
+    PreparedQuery pq = datastore.prepare(q);
+    try {
+      Entity interactionEntity = pq.asSingleEntity();
+      int score = Integer.parseInt(interactionEntity.getProperty("rating").toString());
+      assertEquals(value, score);
+    } catch (TooManyResultsException e) {
+      fail();
+    } catch (NullPointerException e) {
+      fail();
     }
   }
 
@@ -193,6 +220,8 @@ public final class UserServletTest {
   @Test
   public void saveAnEvent() throws IOException {
     postEventsSetup();
+
+    // blm protest (test@example), book drive (another@example), lake clean up(test@example)
     List<Entity> allEntities = callGet("", "");
 
     Entity entityToSave = allEntities.get(0);
@@ -226,15 +255,25 @@ public final class UserServletTest {
 
     long id0 = allEntities.get(0).getKey().getId();
     long id1 = allEntities.get(1).getKey().getId();
+    long id2 = allEntities.get(2).getKey().getId();
     List<Entity> goalList = new ArrayList<>();
     goalList.add(allEntities.get(0));
-    goalList.add(allEntities.get(1));
+    goalList.add(allEntities.get(2));
 
     // login and save these two events
-    callPost(id0, "save", "test@example.com");
-    callPost(id1, "save", "test@example.com");
+    callPost(id0, "save", "another@example.com");
+    callPost(id2, "save", "another@example.com");
 
-    assertListsEqual(goalList, callGet("saved", "test@example.com"));
+    // make sure interactions are recorded properly
+    assertListsEqual(goalList, callGet("saved", "another@example.com"));
+    assertExpectedInteraction("another@example.com", id0, Interactions.SAVE_SCORE);
+    assertExpectedInteraction("another@example.com", id1, Interactions.CREATE_SCORE);
+    assertExpectedInteraction("another@example.com", id2, Interactions.SAVE_SCORE);
+    assertExpectedInteraction("test@example.com", id0, Interactions.CREATE_SCORE);
+    assertExpectedInteraction("test@example.com", id2, Interactions.CREATE_SCORE);
+
+    DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
+    assertEquals(5, ds.prepare(new Query("Interaction")).countEntities(withLimit(10)));
   }
 
   @Test
@@ -243,7 +282,7 @@ public final class UserServletTest {
 
     // for reference, get list of existing entities with their auto-assigned keys
     List<Entity> allEntities = callGet("", "");
-    long id = allEntities.get(0).getKey().getId();
+    long id = allEntities.get(1).getKey().getId();
 
     // save an event, then unsave it
     callPost(id, "save", "test@example.com");
@@ -260,6 +299,8 @@ public final class UserServletTest {
     } catch (EntityNotFoundException exception) {
       fail();
     }
+    assertExpectedInteraction(
+        "test@example.com", id, Interactions.SAVE_SCORE + Interactions.UNSAVE_DELTA);
   }
 
   @Test
@@ -267,9 +308,9 @@ public final class UserServletTest {
     postEventsSetup();
 
     List<Entity> allEntities = callGet("", "");
-    long id = allEntities.get(0).getKey().getId();
+    long id = allEntities.get(1).getKey().getId();
     List<Entity> goal = new ArrayList<>();
-    goal.add(allEntities.get(0));
+    goal.add(allEntities.get(1));
 
     // save an event, then save it again
     callPost(id, "save", "test@example.com");
@@ -284,6 +325,7 @@ public final class UserServletTest {
     } catch (EntityNotFoundException exception) {
       fail();
     }
+    assertExpectedInteraction("test@example.com", id, Interactions.SAVE_SCORE);
   }
 
   @Test
@@ -307,6 +349,7 @@ public final class UserServletTest {
     for (Entity eventEntity : ds.prepare(new Query("Event")).asIterable()) {
       assertEquals(0L, Integer.parseInt(eventEntity.getProperty("attendeeCount").toString()));
     }
+    assertEquals(3, ds.prepare(new Query("Interaction")).countEntities(withLimit(10)));
   }
 
   @Test
@@ -335,6 +378,7 @@ public final class UserServletTest {
     } catch (EntityNotFoundException exception) {
       fail();
     }
+    assertEquals(3, ds.prepare(new Query("Interaction")).countEntities(withLimit(10)));
   }
 
   @Test
