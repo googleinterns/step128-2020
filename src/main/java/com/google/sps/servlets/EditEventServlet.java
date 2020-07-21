@@ -48,7 +48,6 @@ public class EditEventServlet extends HttpServlet {
       String userID = Firebase.authenticateUser(userToken);
 
       Key keyRequested = getEventKey(request, "key");
-
       Query query = new Query("Event", keyRequested);
 
       DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
@@ -62,48 +61,6 @@ public class EditEventServlet extends HttpServlet {
 
     // Redirect back to the my-events HTML page.
     response.sendRedirect("/my-events.html");
-  }
-
-  /** @return the updated Event entity */
-  private Entity updateEvent(HttpServletRequest request, Entity event) {
-    // Get the input from the form.
-    String eventName = getParameter(request, "event-name", "");
-    String eventDescription = getParameter(request, "event-description", "");
-    String streetAddress = getParameter(request, "street-address", "");
-    String city = getParameter(request, "city", "");
-    String state = getParameter(request, "state", "");
-    String date = getParameter(request, "date", "");
-    String startTime = getParameter(request, "start-time", "");
-    String endTime = getParameter(request, "end-time", "");
-    String coverPhoto = getParameter(request, "cover-photo", "");
-    String tagsStr = getParameter(request, "all-tags", "");
-
-    String fullAddress = String.format("%1$s, %2$s, %3$s", streetAddress, city, state);
-    String formattedDate = Utils.formatDate(date);
-    String formattedTime = Utils.formatTime(startTime);
-
-    String formattedTimeEnd = "";
-    if (endTime != "") {
-      formattedTimeEnd = Utils.formatTime(endTime);
-    }
-
-    event.setProperty("eventName", eventName);
-    event.setProperty("eventDescription", eventDescription);
-    event.setProperty("address", fullAddress);
-    event.setProperty("date", formattedDate);
-    event.setProperty("startTime", formattedTime);
-    event.setProperty("endTime", formattedTimeEnd);
-    event.setProperty("coverPhoto", coverPhoto);
-    event.setProperty("attendeeCount", 0);
-    event.setProperty("unformattedStart", startTime);
-    event.setProperty("unformattedEnd", endTime);
-    event.setProperty("unformattedDate", date);
-
-    Gson gson = new Gson();
-    String[] tags = gson.fromJson(tagsStr, String[].class);
-    event.setIndexedProperty("tags", Arrays.asList(tags));
-
-    return event;
   }
 
   @Override
@@ -156,6 +113,50 @@ public class EditEventServlet extends HttpServlet {
       LOGGER.info("Could not retrieve event " + e);
       request.getRequestDispatcher("/WEB-INF/jsp/event-not-found.jsp").forward(request, response);
     }
+  }
+
+  /** 
+  * @return the updated Event entity 
+  */
+  private Entity updateEvent(HttpServletRequest request, Entity event) {
+    // Get the input from the form.
+    String eventName = getParameter(request, "event-name", "");
+    String eventDescription = getParameter(request, "event-description", "");
+    String streetAddress = getParameter(request, "street-address", "");
+    String city = getParameter(request, "city", "");
+    String state = getParameter(request, "state", "");
+    String date = getParameter(request, "date", "");
+    String startTime = getParameter(request, "start-time", "");
+    String endTime = getParameter(request, "end-time", "");
+    String coverPhoto = getParameter(request, "cover-photo", "");
+    String tagsStr = getParameter(request, "all-tags", "");
+
+    final String fullAddress = String.format("%1$s, %2$s, %3$s", streetAddress, city, state);
+    final String formattedDate = Utils.formatDate(date);
+    final String formattedTime = Utils.formatTime(startTime);
+
+    String formattedTimeEnd = "";
+    if (endTime != "") {
+      formattedTimeEnd = Utils.formatTime(endTime);
+    }
+
+    event.setProperty("eventName", eventName);
+    event.setProperty("eventDescription", eventDescription);
+    event.setProperty("address", fullAddress);
+    event.setProperty("date", formattedDate);
+    event.setProperty("startTime", formattedTime);
+    event.setProperty("endTime", formattedTimeEnd);
+    event.setProperty("coverPhoto", coverPhoto);
+    event.setProperty("attendeeCount", 0);
+    event.setProperty("unformattedStart", startTime);
+    event.setProperty("unformattedEnd", endTime);
+    event.setProperty("unformattedDate", date);
+
+    Gson gson = new Gson();
+    String[] tags = gson.fromJson(tagsStr, String[].class);
+    event.setIndexedProperty("tags", Arrays.asList(tags));
+
+    return event;
   }
 
   /**
