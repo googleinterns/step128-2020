@@ -35,8 +35,9 @@
 
 /* content */
 
-body {
+body, html {
   font: 100%/1.6 "Google", "Trebuchet MS", Helvetica, sans-serif;
+  height: 100%;
   margin: 0px;
   padding: 0;
 }
@@ -607,20 +608,48 @@ input[type=time] {
 /* login */
 .firebaseui-background {
   background-color: #ffd966;
-  height: 100vh;
+  min-height: calc(100% - 270px);
   min-width: 100%;
 }
 
 #firebaseui-auth-container {
-  left: 50%;
-  position: absolute;
+    text-align: center;
+    padding-top: 10%;
+}
+
+.firebaseui-idp-list>.firebaseui-list-item {
+  margin-bottom: 20px;
   text-align: center;
-  top: 200px;
-  transform: translate(-50%, -50%);
+}
+
+.firebaseui-idp-button {
+  direction: ltr;
+  font-weight: 500;
+  height: auto;
+  line-height: normal;
+  min-width: 350px;
+  min-height: 75px;
+  padding: 8px 16px;
+  text-align: left;
+  width: 100%;
+}
+
+.firebaseui-idp-text {
+  font-size: 21px;
+  padding-left: 16px;
+  text-transform: none;
+  vertical-align: middle;
+}
+
+.firebaseui-tos {
+  color: #757575;
+  direction: ltr;
+  font-size: 16px;
+  margin-bottom: 24px;
+  margin-top: 0;
 }
 
 /* tag colors */
-
 .blm {
   background-color: black;
 }
