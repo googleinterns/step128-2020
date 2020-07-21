@@ -14,6 +14,8 @@
 
 package com.google.sps.servlets;
 
+import static com.google.sps.Utils.getParameter;
+
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
@@ -22,9 +24,11 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
+import com.google.gson.Gson;
 import com.google.sps.Firebase;
 import com.google.sps.Utils;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -38,11 +42,76 @@ public class EditEventServlet extends HttpServlet {
   private static final Logger LOGGER = Logger.getLogger(LoadEventServlet.class.getName());
 
   @Override
+  public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    String userToken = request.getParameter("userToken");
+    if (Firebase.isUserLoggedIn(userToken)) {
+      String userID = Firebase.authenticateUser(userToken);
+
+      Key keyRequested = getEventKey(request, "key");
+
+      Query query = new Query("Event", keyRequested);
+
+      DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+      Entity eventRequested = datastore.prepare(query).asSingleEntity();
+
+      Entity eventEntity = updateEvent(request, eventRequested);
+      datastore.put(eventEntity);
+    } else {
+      throw new IOException("Cannot edit an event while not logged in");
+    }
+
+    // Redirect back to the my-events HTML page.
+    response.sendRedirect("/my-events.html");
+  }
+
+  /** @return the updated Event entity */
+  private Entity updateEvent(HttpServletRequest request, Entity event) {
+    // Get the input from the form.
+    String eventName = getParameter(request, "event-name", "");
+    String eventDescription = getParameter(request, "event-description", "");
+    String streetAddress = getParameter(request, "street-address", "");
+    String city = getParameter(request, "city", "");
+    String state = getParameter(request, "state", "");
+    String date = getParameter(request, "date", "");
+    String startTime = getParameter(request, "start-time", "");
+    String endTime = getParameter(request, "end-time", "");
+    String coverPhoto = getParameter(request, "cover-photo", "");
+    String tagsStr = getParameter(request, "all-tags", "");
+
+    String fullAddress = String.format("%1$s, %2$s, %3$s", streetAddress, city, state);
+    String formattedDate = Utils.formatDate(date);
+    String formattedTime = Utils.formatTime(startTime);
+
+    String formattedTimeEnd = "";
+    if (endTime != "") {
+      formattedTimeEnd = Utils.formatTime(endTime);
+    }
+
+    event.setProperty("eventName", eventName);
+    event.setProperty("eventDescription", eventDescription);
+    event.setProperty("address", fullAddress);
+    event.setProperty("date", formattedDate);
+    event.setProperty("startTime", formattedTime);
+    event.setProperty("endTime", formattedTimeEnd);
+    event.setProperty("coverPhoto", coverPhoto);
+    event.setProperty("attendeeCount", 0);
+    event.setProperty("unformattedStart", startTime);
+    event.setProperty("unformattedEnd", endTime);
+    event.setProperty("unformattedDate", date);
+
+    Gson gson = new Gson();
+    String[] tags = gson.fromJson(tagsStr, String[].class);
+    event.setIndexedProperty("tags", Arrays.asList(tags));
+
+    return event;
+  }
+
+  @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response)
       throws ServletException, IOException {
     Key keyRequested;
     try {
-      keyRequested = getEventKey(request);
+      keyRequested = getEventKey(request, "Event");
       if (keyRequested != null) {
         Query query = new Query("Event", keyRequested);
 
@@ -126,11 +195,13 @@ public class EditEventServlet extends HttpServlet {
    *
    * @return the key from the request parameter.
    */
-  private Key getEventKey(HttpServletRequest request) throws IllegalArgumentException, IOException {
+  private Key getEventKey(HttpServletRequest request, String name)
+      throws IllegalArgumentException, IOException {
     Key eventKey = null;
+
     // Get the string from the request.
-    if (request.getParameter("Event") != null) {
-      String eventKeyString = request.getParameter("Event");
+    if (request.getParameter(name) != null) {
+      String eventKeyString = request.getParameter(name);
 
       // Convert String to type Key.
       eventKey = KeyFactory.stringToKey(eventKeyString);
