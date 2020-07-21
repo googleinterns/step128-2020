@@ -76,7 +76,7 @@ public final class TestingUtil {
   }
 
   /**
-   * Use the current url to login/logout.
+   * Use the current url to login/logout (DEPRECATED)
    *
    * @param email If logging in, will log into this user's account.
    */
