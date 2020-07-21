@@ -187,12 +187,10 @@ public class KeywordSearchServlet extends HttpServlet {
       // Exclude words with less appearances than the cutoff
       if (((int) e.getValue()) < MIN_INSTANCES) {
         break;
-      }
-      else if (count >= mergeList.size()) {
+      } else if (count >= mergeList.size()) {
         break;
-      }
-      // Exclude common useless words (in, a, the, etc)
-      else if (!IRRELEVANT_WORDS.contains(e.getKey().toString())) {
+      } else if (!IRRELEVANT_WORDS.contains(e.getKey().toString())) {
+        // Exclude common useless words (in, a, the, etc)
         finalMap.put(e.getKey().toString(), (int) e.getValue());
       }
       count++;
