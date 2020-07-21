@@ -25,6 +25,7 @@ import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.SortDirection;
 import com.google.gson.Gson;
 import com.google.sps.Firebase;
+import com.google.sps.Interactions;
 import com.google.sps.Utils;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -198,8 +199,14 @@ public class UserServlet extends HttpServlet {
       datastore.put(eventEntity);
 
       // record interaction
-      int delta = Interactions.recordInteraction(userID, keyId, Interactions.SAVE_SCORE + Interactions.UNSAVE_DELTA);
+      int delta =
+          Interactions.recordInteraction(
+              userEntity.getKey().getName(), eventId, Interactions.SAVE_SCORE);
+      List<String> tags = (List<String>) eventEntity.getProperty("tags");
+      if (tags != null) {
         Interactions.updatePrefs(userEntity, tags, delta);
+      }
+
       saved.add(eventId);
       userEntity.setProperty("saved", saved);
     } catch (EntityNotFoundException e) {
@@ -239,9 +246,15 @@ public class UserServlet extends HttpServlet {
       datastore.put(eventEntity);
 
       // record interaction
-      int delta = Interactions.recordInteraction(userID, keyId, Interactions.SAVE_SCORE + Interactions.UNSAVE_DELTA);
+      int delta =
+          Interactions.recordInteraction(
+              userEntity.getKey().getName(),
+              eventId,
+              Interactions.SAVE_SCORE + Interactions.UNSAVE_DELTA);
+      List<String> tags = (List<String>) eventEntity.getProperty("tags");
+      if (tags != null) {
         Interactions.updatePrefs(userEntity, tags, delta);
-
+      }
     } catch (EntityNotFoundException e) {
       LOGGER.info("event " + eventId + " does not exist");
     }
