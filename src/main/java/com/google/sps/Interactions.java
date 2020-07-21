@@ -41,7 +41,7 @@ public class Interactions {
   public static final int SAVE_SCORE = 8;
   public static final int CREATE_SCORE = 10;
 
-  // affects on scores of "undoing" actions
+  // effects on scores when "undoing" actions
   public static final int UNSAVE_DELTA = -2;
   public static final int DELETE_DELTA = -3;
 
