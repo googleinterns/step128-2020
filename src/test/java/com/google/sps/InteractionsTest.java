@@ -57,7 +57,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 public final class InteractionsTest {
   private final LocalServiceTestHelper helper =
       new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
-  private static final SurveyServlet testSurveyServlet = new SurveySurvlet();
+  private static final SurveyServlet testSurveyServlet = new SurveyServlet();
 
   private void takeSurvey(String email) throws IOException {
     HttpServletRequest request = mock(HttpServletRequest.class);
@@ -146,6 +146,7 @@ public final class InteractionsTest {
 
   @Test
   public void recordMiscInteractions() throws IOException {
+          PowerMockito.mockStatic(Firebase.class);
     EventServlet eventServlet = new EventServlet();
     LoadEventServlet loadServlet = new LoadEventServlet();
     UserServlet userServlet = new UserServlet();
@@ -156,15 +157,39 @@ public final class InteractionsTest {
     long id0 = allEntities.get(0).getKey().getId(); // blm protest (test@example)
     long id1 = allEntities.get(1).getKey().getId(); // book drive (another @example)
     long id2 = allEntities.get(2).getKey().getId(); // lake clean up (test@example)
+    String key0 = allEntities.get(0).getParameter("eventKey").toString();
+    String key1 = allEntities.get(1).getParameter("eventKey").toString();
+    String key2 = allEntities.get(2).getParameter("eventKey").toString();
 
     UserServletTest.callPost(id1, "save", "test@example.com");
     UserServletTest.callPost(id1, "save", "test@example.com");
     UserServletTest.callPost(id1, "save", "another@example.com");
     UserServletTest.callPost(id1, "save", "person@example.com");
 
-    //test@example.com -> created blm protest, created lake clean up, saved book drive, viewed all 3
-    //another @example.com -> created book drive, saved book drive, viewed lake clean up
-    // person@example.com -> saved blm protest, viewed blm protest, unsaved blm protest, viewed lake clean up
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpServletResponse response = mock(HttpServletResponse.class);
+
+    when(request.getParameter("userToken")).thenReturn("test@example.com");
+    PowerMockito.when(Firebase.isUserLoggedIn(anyString())).thenCallRealMethod();
+    PowerMockito.when(Firebase.authenticateUser(anyString())).thenReturn(dummyToken);
+
+    when(request.getParameter("Event")).thenReturn(key0);
+
+    when(request.getParameter("Event")).thenReturn(key1);
+
+
+
+    when(request.getParameter("Event")).thenReturn(key2);
+
+
+
+    testEventServlet.doPost(request, response);
+
+    // test@example.com -> created blm protest, created lake clean up, saved book drive, viewed all
+    // 3
+    // another @example.com -> created book drive, saved book drive, viewed lake clean up
+    // person@example.com -> saved blm protest, viewed blm protest, unsaved blm protest, viewed lake
+    // clean up
   }
 
   /** Makes sure interactions have been recorded correctly in datastore. */
