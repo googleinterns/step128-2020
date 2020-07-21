@@ -108,27 +108,6 @@ public final class UserServletTest {
     }
   }
 
-  //   /** Makes sure interactions have been recorded correctly in datastore. */
-  //   private void assertExpectedInteraction(String userId, long eventId, int value) {
-  //     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-  //     Query q =
-  //         new Query("Interaction")
-  //             .setFilter(
-  //                 CompositeFilterOperator.and(
-  //                     new FilterPredicate("user", FilterOperator.EQUAL, userId),
-  //                     new FilterPredicate("event", FilterOperator.EQUAL, eventId)));
-  //     PreparedQuery pq = datastore.prepare(q);
-  //     try {
-  //       Entity interactionEntity = pq.asSingleEntity();
-  //       int score = Integer.parseInt(interactionEntity.getProperty("rating").toString());
-  //       assertEquals(value, score);
-  //     } catch (TooManyResultsException e) {
-  //       fail();
-  //     } catch (NullPointerException e) {
-  //       fail();
-  //     }
-  //   }
-
   /** Sets up the datastore helper and authentication utility for each test. */
   @Before
   public void setUp() throws IOException {
