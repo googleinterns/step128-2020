@@ -280,32 +280,30 @@ public class KeywordSearchServlet extends HttpServlet {
     Map<String, Integer> map = new HashMap<String, Integer>();
     for (String w : words) {
       w = w.toLowerCase();
-      if (map.containsKey(w)) {
-        map.put(w, map.get(w) + 1);
-      } else {
-        map.put(w, 1);
-      }
+      map.put(w, map.getOrDefault(w, 0) + 1);
     }
     return map;
   }
 
   /**
-   * Returns a the total number of weighted occurrences of keywords in a list.
+   * Returns the weighted occurrence (occurrences of title keywords * 2 + occurrences of desc) of
+   * keywords contained in both the search query and event
    *
-   * @param keyListA List of words to be processed
-   * @param keyListB List of keywords
-   * @param valueListA List of values corresponding to the number of each keyword from list A
+   * @param eventKeywords List of keywords generated for an event
+   * @param searchKeywords List of search keywords
+   * @param eventKeywordValues List of values corresponding to the number of each keyword from the
+   *     event
    * @return Double total weighted occurrences of keywords
    */
   public static Double occurrenceScore(
-      List<String> keyListA, List<String> keyListB, List<Long> valueListA) {
-    List<String> keyListC = new ArrayList<String>(keyListA);
-    keyListC.retainAll(keyListB);
+      List<String> eventKeywords, List<String> searchKeywords, List<Long> eventKeywordValues) {
+    List<String> mutualKeywords = new ArrayList<String>(eventKeywords);
+    mutualKeywords.retainAll(searchKeywords);
     double total = 0;
-    for (String key : keyListC) {
-      int index = keyListA.indexOf(key);
-      if (index != -1 && index < valueListA.size()) {
-        total += valueListA.get(index);
+    for (String key : mutualKeywords) {
+      int index = eventKeywords.indexOf(key);
+      if (index != -1 && index < eventKeywordValues.size()) {
+        total += eventKeywordValues.get(index);
       }
     }
     return total;
