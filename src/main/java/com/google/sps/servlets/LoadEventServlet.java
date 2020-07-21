@@ -69,7 +69,7 @@ public class LoadEventServlet extends HttpServlet {
             }
             int delta =
                 Interactions.recordInteraction(
-                    userID, keyRequested.getId(), Interactions.CREATE_SCORE);
+                    userID, keyRequested.getId(), Interactions.VIEW_SCORE, false);
             Interactions.updatePrefs(userEntity, tags, delta);
             datastore.put(userEntity);
           }

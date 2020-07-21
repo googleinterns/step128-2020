@@ -201,7 +201,7 @@ public class UserServlet extends HttpServlet {
       // record interaction
       int delta =
           Interactions.recordInteraction(
-              userEntity.getKey().getName(), eventId, Interactions.SAVE_SCORE);
+              userEntity.getKey().getName(), eventId, Interactions.SAVE_SCORE, false);
       List<String> tags = (List<String>) eventEntity.getProperty("tags");
       if (tags != null) {
         Interactions.updatePrefs(userEntity, tags, delta);
@@ -250,7 +250,8 @@ public class UserServlet extends HttpServlet {
           Interactions.recordInteraction(
               userEntity.getKey().getName(),
               eventId,
-              Interactions.SAVE_SCORE + Interactions.UNSAVE_DELTA);
+              Interactions.SAVE_SCORE + Interactions.UNSAVE_DELTA,
+              true);
       List<String> tags = (List<String>) eventEntity.getProperty("tags");
       if (tags != null) {
         Interactions.updatePrefs(userEntity, tags, delta);

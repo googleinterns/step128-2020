@@ -75,7 +75,7 @@ public class EventServlet extends HttpServlet {
       userEntity = new Entity(userKey);
       userEntity.setProperty("firebaseID", userID);
     }
-    int delta = Interactions.recordInteraction(userID, keyId, Interactions.CREATE_SCORE);
+    int delta = Interactions.recordInteraction(userID, keyId, Interactions.CREATE_SCORE, false);
     Interactions.updatePrefs(userEntity, tags, delta);
     datastore.put(userEntity);
 
