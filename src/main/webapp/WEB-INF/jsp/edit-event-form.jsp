@@ -15,7 +15,7 @@
     <div class="form-container">
       <h1>Edit event</h1>
       <form action="/edit-event" method="POST" id="eventform" name="eventform">
-        <input type="hidden" id="key-value" value="${key}">
+        <input type="hidden" id="key" name="key" value="${key}">
         <div class="form-section">
           <div class="form-label">
             <label for="event-name">*Event name:</label>
