@@ -15,7 +15,11 @@
 package com.google.sps;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyObject;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
@@ -63,6 +67,7 @@ public final class KeywordSearchServletTest {
   private List<LatLng> possibleLatLngs;
   private List<Integer> possibleDistances;
 
+  /** Sets up the datastore helper and adds a bunch of events for testing purposes. */
   @Before
   public void setUp() {
     helper.setUp();
@@ -93,14 +98,17 @@ public final class KeywordSearchServletTest {
             Arrays.asList(
                 "Support the Black Lives Matter movement. support",
                 "Climate change is one of the most important issues facing us right now.",
-                "Collecting donations of toys to support the children's hospital. location location location support support",
+                "Collecting donations of toys to support the children's hospital."
+                    + "location location location support support",
                 "Bring bags and gloves.",
-                "Hi everyone, we're doing this to support the Youth America Grand Prix competitors this year.",
+                "Hi everyone, we're doing this to support the Youth America Grand Prix"
+                    + "competitors this year.",
                 "BLM. BLM. BLM.",
                 "This is one of the most important issues facing us right now.",
                 "Collecting donations of toys for the kids hospital.",
                 "Bring bags and gloves.",
-                "Hi everyone, we're doing this to support the Youth America Grand Prix competitors this year. location location location"));
+                "Hi everyone, we're doing this to support the Youth America Grand Prix "
+                    + "competitors this year. location location location"));
 
     possibleLocations =
         new ArrayList<String>(
@@ -288,62 +296,62 @@ public final class KeywordSearchServletTest {
 
   @Test
   public void testOccurrenceScore() {
-    double oScore =
+    double occScore =
         testKeywordSearchServlet.occurrenceScore(
             new ArrayList<String>(Arrays.asList("blm", "protest")),
             new ArrayList<String>(Arrays.asList("blm")),
             new ArrayList<Long>(Arrays.asList(3L, 2L)));
-    assertEquals(3, oScore, 0.0002);
+    assertEquals(3, occScore, 0.0002);
   }
 
   @Test
   public void testOccurrenceScoreAdding() {
-    double oScore =
+    double occScore =
         testKeywordSearchServlet.occurrenceScore(
             new ArrayList<String>(Arrays.asList("blm", "protest")),
             new ArrayList<String>(Arrays.asList("blm", "protest")),
             new ArrayList<Long>(Arrays.asList(3L, 2L)));
-    assertEquals(5, oScore, 0.0002);
+    assertEquals(5, occScore, 0.0002);
   }
 
   @Test
   public void testOccurrenceScoreNoKeywords() {
-    double oScore =
+    double occScore =
         testKeywordSearchServlet.occurrenceScore(
             new ArrayList<String>(Arrays.asList()),
             new ArrayList<String>(Arrays.asList("blm")),
             new ArrayList<Long>(Arrays.asList(3L, 2L)));
-    assertEquals(0, oScore, 0.0002);
+    assertEquals(0, occScore, 0.0002);
   }
 
   @Test
   public void testOccurrenceScoreNoValues() {
-    double oScore =
+    double occScore =
         testKeywordSearchServlet.occurrenceScore(
             new ArrayList<String>(Arrays.asList("blm", "protest")),
             new ArrayList<String>(Arrays.asList("blm")),
             new ArrayList<Long>(Arrays.asList()));
-    assertEquals(0, oScore, 0.0002);
+    assertEquals(0, occScore, 0.0002);
   }
 
   @Test
   public void testOccurrenceScoreMismatchValues() {
-    double oScore =
+    double occScore =
         testKeywordSearchServlet.occurrenceScore(
             new ArrayList<String>(Arrays.asList("blm", "protest")),
             new ArrayList<String>(Arrays.asList("blm", "protest")),
             new ArrayList<Long>(Arrays.asList(3L)));
-    assertEquals(3, oScore, 0.0002);
+    assertEquals(3, occScore, 0.0002);
   }
 
   @Test
   public void testOccurrenceScoreMismatchKeywords() {
-    double oScore =
+    double occScore =
         testKeywordSearchServlet.occurrenceScore(
             new ArrayList<String>(Arrays.asList("blm")),
             new ArrayList<String>(Arrays.asList("blm", "protest")),
             new ArrayList<Long>(Arrays.asList(3L, 2L)));
-    assertEquals(3, oScore, 0.0002);
+    assertEquals(3, occScore, 0.0002);
   }
 
   @Test
