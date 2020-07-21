@@ -40,7 +40,7 @@ public class Recommend {
     // get user prefs
     Map<String, Map<String, Integer>> userPrefs = new HashMap<>();
     for (Entity e : queriedUsers) {
-    //   userPrefs.put(e.getKey().getName(), Interactions.buildVectorForEvent(e));
+      //   userPrefs.put(e.getKey().getName(), Interactions.buildVectorForEvent(e));
     }
 
     Iterable<Entity> currentRecs = datastore.prepare(new Query("UserRecs")).asIterable();
