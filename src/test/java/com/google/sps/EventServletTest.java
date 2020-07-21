@@ -95,6 +95,7 @@ public final class EventServletTest {
     // Assert only one Entity was posted to Datastore.
     DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
     assertEquals(1, ds.prepare(new Query("Event")).countEntities(withLimit(10)));
+    assertEquals(1, ds.prepare(new Query("Interaction")).countEntities(withLimit(10)));
   }
 
   @Test
@@ -124,6 +125,14 @@ public final class EventServletTest {
     // Assert all three Entities were posted to Datastore.
     DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
     assertEquals(3, ds.prepare(new Query("Event")).countEntities(withLimit(10)));
+    Iterable<Entity> interactions = ds.prepare(new Query("Interaction")).asIterable();
+    int size = 0;
+    for (Entity e : interactions) {
+      size++;
+      assertEquals(Interactions.CREATE_SCORE, Integer.parseInt(e.getProperty("rating").toString()));
+      assertEquals("test@example.com", e.getProperty("user").toString());
+    }
+    assertEquals(3, size);
   }
 
   @Test

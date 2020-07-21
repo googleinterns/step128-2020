@@ -17,17 +17,21 @@ package com.google.sps.servlets;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.google.sps.Firebase;
+import com.google.sps.Interactions;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.logging.Logger;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -47,25 +51,39 @@ public class EventServlet extends HttpServlet {
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
     String userToken = request.getParameter("userToken");
-    if (Firebase.isUserLoggedIn(userToken)) {
-      String userID = Firebase.authenticateUser(userToken);
-      Entity eventEntity = populateEvent(request);
-      eventEntity.setProperty("creator", userID);
-
-      DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-      datastore.put(eventEntity);
-
-      allocateEventKey(eventEntity);
-
-    } else {
+    if (!Firebase.isUserLoggedIn(userToken)) {
       throw new IOException("Cannot create an event while not logged in");
     }
+    String userID = Firebase.authenticateUser(userToken);
+    Entity eventEntity = populateEvent(request);
+    eventEntity.setProperty("creator", userID);
+
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    datastore.put(eventEntity);
+
+    long keyId = allocateEventKey(eventEntity);
+
+    Key userKey = KeyFactory.createKey("User", userID);
+    List<String> tags = (List<String>) eventEntity.getProperty("tags");
+
+    // keep track of user interests and interactions
+    Entity userEntity = null;
+    try {
+      userEntity = datastore.get(userKey);
+    } catch (EntityNotFoundException exception) {
+      // datastore entry has not been created yet for this user, create it now
+      userEntity = new Entity(userKey);
+      userEntity.setProperty("firebaseID", userID);
+    }
+    int delta = Interactions.recordInteraction(userID, keyId, Interactions.CREATE_SCORE);
+    Interactions.updatePrefs(userEntity, tags, delta);
+    datastore.put(userEntity);
 
     // Redirect back to the my-events HTML page.
     response.sendRedirect("/my-events.html");
   }
 
-  private void allocateEventKey(Entity event) {
+  private long allocateEventKey(Entity event) {
     Key eventKey = event.getKey();
     String keyString = KeyFactory.keyToString(eventKey);
 
@@ -76,6 +94,7 @@ public class EventServlet extends HttpServlet {
 
     eventCreated.setProperty("eventKey", keyString);
     datastore.put(eventCreated);
+    return eventKey.getId();
   }
 
   /** @return the Event entity */
@@ -111,8 +130,8 @@ public class EventServlet extends HttpServlet {
     eventEntity.setProperty("attendeeCount", 0);
 
     Gson gson = new Gson();
-    String[] tags = gson.fromJson(tagsStr, String[].class);
-    eventEntity.setIndexedProperty("tags", Arrays.asList(tags));
+    List<String> tagsList = gson.fromJson(tagsStr, new TypeToken<ArrayList<String>>() {}.getType());
+    eventEntity.setIndexedProperty("tags", tagsList);
 
     return eventEntity;
   }
