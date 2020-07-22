@@ -108,7 +108,7 @@ public class Interactions {
    *
    * @param userId the user's id as identified in datastore
    * @param eventId the event's id as identified in datastore
-   * @return the interaction entity, or null if none exists.
+   * @return the interaction entity, or null if none exist.
    */
   public static Entity hasInteraction(String userId, long eventId) {
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
@@ -123,13 +123,13 @@ public class Interactions {
     try {
       interaction = pq.asSingleEntity();
     } catch (TooManyResultsException e) {
-      // clear all
+      // clear all to "reset" if there are too many
       List<Key> toDelete = new ArrayList<>();
       for (Entity entity : pq.asIterable()) {
         toDelete.add(entity.getKey());
       }
       LOGGER.warning(
-          "multiple entries found for "
+          "multiple interactions found for "
               + userId
               + " and "
               + eventId
@@ -137,7 +137,6 @@ public class Interactions {
               + toDelete.size()
               + " entries.");
       datastore.delete(toDelete);
-      // leave interaction as null
     }
     return interaction;
   }
@@ -174,7 +173,7 @@ public class Interactions {
         interactionEntity.setProperty("rating", score);
       }
     }
-   
+    // update timestamp of the interaction
     interactionEntity.setProperty("timestamp", System.currentTimeMillis());
     datastore.put(interactionEntity);
     return delta;
