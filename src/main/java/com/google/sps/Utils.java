@@ -29,6 +29,7 @@ import com.google.maps.model.GeocodingResult;
 import com.google.maps.model.LatLng;
 import java.io.IOException;
 import java.util.Comparator;
+import java.util.Map;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 
@@ -158,7 +159,7 @@ public class Utils {
   public static Entity makeUserEntity(String userId, boolean addToDatastore) {
     return makeUserEntity(userId, "", addToDatastore);
   }
-  
+
   /** Orders a map from greatest to least based off its values. */
   public static final Comparator<Map.Entry<String, Integer>> ORDER_MAP_GREATEST_TO_LEAST =
       new Comparator<Map.Entry<String, Integer>>() {
