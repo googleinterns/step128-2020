@@ -132,7 +132,7 @@ public class Utils {
   }
 
   /**
-   * Creates and returns a new Entity for a given userId
+   * Creates and returns a new Entity for a given userId.
    *
    * @param userId to identify this user in datastore
    * @param location user's location
@@ -150,7 +150,7 @@ public class Utils {
   }
 
   /**
-   * Creates and returns a new Entity for a given userId, no location given
+   * Creates and returns a new Entity for a given userId, no location given.
    *
    * @param userId to identify this user in datastore
    * @param addToDatastore if true, will add this entity to datastore as well

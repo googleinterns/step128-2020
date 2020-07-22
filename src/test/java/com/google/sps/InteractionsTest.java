@@ -34,10 +34,8 @@ import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
-import com.google.sps.servlets.EventServlet;
 import com.google.sps.servlets.LoadEventServlet;
 import com.google.sps.servlets.SurveyServlet;
-import com.google.sps.servlets.UserServlet;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -154,31 +152,25 @@ public final class InteractionsTest {
   @Test
   public void recordMiscInteractions() throws IOException, ServletException {
     PowerMockito.mockStatic(Firebase.class);
-
-    EventServlet eventServlet = new EventServlet();
-    LoadEventServlet loadServlet = new LoadEventServlet();
-    UserServlet userServlet = new UserServlet();
-    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    final LoadEventServlet loadServlet = new LoadEventServlet();
+    final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
     // blm protest (test@example), book drive (another@example), lake clean up(test@example)
     UserServletTest.postEventsSetup();
     List<Entity> allEntities = UserServletTest.callGet("", "");
-    long id0 = allEntities.get(0).getKey().getId(); // blm protest (test@example)
-    long id1 = allEntities.get(1).getKey().getId(); // book drive (another @example)
-    long id2 = allEntities.get(2).getKey().getId(); // lake clean up (test@example)
-    String key0 = allEntities.get(0).getProperty("eventKey").toString();
-    String key1 = allEntities.get(1).getProperty("eventKey").toString();
-    String key2 = allEntities.get(2).getProperty("eventKey").toString();
+    final long id0 = allEntities.get(0).getKey().getId();
+    final long id1 = allEntities.get(1).getKey().getId();
+    final long id2 = allEntities.get(2).getKey().getId();
 
-    UserServletTest.callPost(id1, "save", "person@example.com");
+    final String key0 = allEntities.get(0).getProperty("eventKey").toString();
+    final String key1 = allEntities.get(1).getProperty("eventKey").toString();
+    final String key2 = allEntities.get(2).getProperty("eventKey").toString();
 
     HttpServletRequest request = mock(HttpServletRequest.class);
-    HttpServletResponse response = mock(HttpServletResponse.class);
     RequestDispatcher dispatcher = mock(RequestDispatcher.class);
     when(request.getRequestDispatcher("/WEB-INF/jsp/display-event.jsp")).thenReturn(dispatcher);
 
-    // actions by test@example: created blm protest, created lake clean up, saved book drive, viewed
-    // all
+    // test@example: created blm protest, created lake clean up, saved book drive, viewed all
     String dummyToken = "test@example.com";
 
     UserServletTest.callPost(id1, "save", dummyToken);
@@ -188,6 +180,7 @@ public final class InteractionsTest {
     PowerMockito.when(Firebase.isUserLoggedIn(anyString())).thenCallRealMethod();
     PowerMockito.when(Firebase.authenticateUser(anyString())).thenReturn(dummyToken);
 
+    HttpServletResponse response = mock(HttpServletResponse.class);
     when(request.getParameter("Event")).thenReturn(key0);
     loadServlet.doGet(request, response);
 
@@ -202,7 +195,7 @@ public final class InteractionsTest {
     assertExpectedInteraction(dummyToken, id1, Interactions.SAVE_SCORE);
     assertExpectedInteraction(dummyToken, id2, Interactions.CREATE_SCORE);
 
-    // actions by another@example: created book drive, saved book drive, viewed lake clean up
+    // another@example: created book drive, saved book drive, viewed lake clean up
     dummyToken = "another@example.com";
 
     UserServletTest.callPost(id1, "save", "another@example.com");
