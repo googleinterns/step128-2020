@@ -93,14 +93,4 @@ public class Interactions {
     }
     return result;
   }
-
-  public static void dummyMethod() {
-      // to have some coverage diff
-      System.out.println("test");
-      System.out.println("test");
-      System.out.println("test");
-      System.out.println("test");
-      System.out.println("test");
-      System.out.println("test");
-  }
 }
