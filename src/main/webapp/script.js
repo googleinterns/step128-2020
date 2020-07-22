@@ -455,7 +455,7 @@ async function getEvents(events, index, option) {
       eventItemHeaderElement.appendChild(eventImageElement);
       eventItemDetailsElement.appendChild(eventItemTitleElement);
     } else {
-      // image is outisde of event-item-info
+      // image is outside of event-item-info
       // event-item-title is part of event-item-details
       eventItemElement.appendChild(eventImageElement);
       eventItemElement.appendChild(eventItemInfoElement);
@@ -1008,7 +1008,6 @@ function search() {
     if (searchBarElement.value == '') {
       servlet = 'search';
     }
-    console.log(servlet + url);
 
     fetch('/' + servlet + url).then((response) => response.json())
         .then(function(responseJson) {

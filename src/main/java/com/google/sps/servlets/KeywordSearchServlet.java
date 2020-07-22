@@ -137,8 +137,6 @@ public class KeywordSearchServlet extends HttpServlet {
     }
     // TODO: find a better way to implement the above elses
 
-    System.out.println(searchKeywords);
-
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     PreparedQuery results = datastore.prepare(query);
     List<Entity> events =
