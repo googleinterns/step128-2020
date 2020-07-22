@@ -43,32 +43,44 @@ public class Recommend {
     if (spark == null || datastore == null) {
       init();
     }
+    // keep track of ids and hashcodes -- spark requires numeric entries
+    final Map<Integer, String> userIdHash = new HashMap<>();
+    final Map<Integer, Long> eventIdHash = new HashMap<>();
+
+    // get user entities with their preferences
     Iterable<Entity> queriedUsers = datastore.prepare(new Query("User")).asIterable();
-    // get user prefs
-    Map<Integer, String> userIdHash = new HashMap<>();
     Map<String, Map<String, Integer>> userPrefs = new HashMap<>();
     for (Entity e : queriedUsers) {
       String id = e.getKey().getName();
-      userPrefs.put(id, Interactions.buildVectorForEntity(e));
+      userPrefs.put(id, Interactions.buildVectorForUser(e));
       userIdHash.put(id.hashCode(), id);
     }
-    Map<Integer, Long> eventIdHash = new HashMap<>();
-    Dataset<Row> ratings = makeRatingsDataframe(eventIdHash);
+
+    // get event entities
+    Iterable<Entity> queriedEvents = datastore.prepare(new Query("Event")).asIterable();
+    Map<Long, Map<String, Integer>> eventInfo = new HashMap<>();
+    for (Entity e : queriedEvents) {
+      long id = e.getKey().getId();
+      eventInfo.put(id, Interactions.buildVectorForEvent(e));
+      eventIdHash.put((Long.toString(id)).hashCode(), id);
+    }
+
+    List<Key> toDelete = new ArrayList<>();
+    Dataset<Row> ratings = makeDataframeAndPreprocess(toDelete);
     ALSModel model = trainModel(null, ratings);
 
     Dataset<Row> userRecs = model.recommendForAllUsers(150);
     List<Row> userRecsList = userRecs.collectAsList();
     for (Row recRow : userRecsList) {
-      int hash = recRow.getInt(0); // hashcode of user id
-      List<Row> predScores = recRow.getList(1); // id-score pairs for items
-
+      String userId = userIdHash.get(recRow.getInt(0));
+      List<Row> predScores = recRow.getList(1);
       for (Row itemRow : predScores) {
-        int itemHash = itemRow.getInt(0); // hashcode of event id
-        float predScore = itemRow.getFloat(1); // pred score
+        long eventId = eventIdHash.get(itemRow.getInt(0));
+        float predScore = itemRow.getFloat(1);
       }
     }
 
-    Iterable<Entity> currentRecs = datastore.prepare(new Query("UserRecs")).asIterable();
+    datastore.delete(toDelete);
   }
 
   /**
@@ -101,10 +113,13 @@ public class Recommend {
   }
 
   /**
-   * Constructs ratings dataframe. Also keeps track of event ids with their hashcodes and deletes
-   * oldest Interaction entries from datastore.
+   * Constructs ratings dataframe. Also keeps track of event ids with their hashcodes and oldest
+   * Interaction entries to delete from datastore.
+   *
+   * @param eventIdHash Save hashCodes of eventIds as Strings (longs get cast to int by spark)
+   * @param toDelete Save list of keys to delete, if interaction entities need to be flushed
    */
-  private static Dataset<Row> makeRatingsDataframe(Map<Integer, Long> eventIdHash) {
+  private static Dataset<Row> makeDataframeAndPreprocess(List<Key> toDelete) {
     Iterable<Entity> queriedInteractions =
         datastore
             .prepare(new Query("Interaction").addSort("timestamp", Query.SortDirection.DESCENDING))
@@ -120,16 +135,15 @@ public class Recommend {
       if (rate != null) {
         count++;
         ratings.add(rate);
-        long eventId = Long.parseLong(entity.getProperty("event").toString());
-        eventIdHash.put(rate.getEventId(), eventId);
+      } else {
+        // something wrong with this entry, delete it
+        toDelete.add(entity.getKey());
       }
     }
     // delete the oldest Interaction entries from datastore
-    List<Key> toDelete = new ArrayList<>();
     while (itr.hasNext()) {
       toDelete.add(itr.next().getKey());
     }
-    datastore.delete(toDelete);
     return spark.createDataFrame(ratings, EventRating.class);
   }
 
