@@ -91,7 +91,7 @@ public final class InteractionsTest {
 
   @Test
   public void checkInterestMetrics() throws IOException {
-    // a basic test to make sure Interactions.getInterestMetrics() works as intended
+    // a basic test to make sure Interactions.buildVectorForUser() works as intended
     String email = "test@example.com";
     takeSurvey(email);
 
@@ -102,25 +102,10 @@ public final class InteractionsTest {
     expectedSurvey.put("education", 2);
     expectedSurvey.put("LGBTQ+", 4);
 
-    assertEquals(expectedSurvey, Interactions.getInterestMetrics(email));
-  }
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    Entity userEntity = datastore.prepare(new Query("User")).asSingleEntity();
 
-  @Test
-  public void noUserForCheckMetrics() throws IOException {
-    // call Interactions.getInterestMetrics() on nonexistent user
-    HttpServletRequest request = mock(HttpServletRequest.class);
-    String email = "test@example.com";
-    TestingUtil.mockFirebase(request, email);
-
-    when(request.getParameter("environment")).thenReturn("3");
-    when(request.getParameter("blm")).thenReturn("4");
-    when(request.getParameter("volunteer")).thenReturn("3");
-    when(request.getParameter("education")).thenReturn("2");
-    when(request.getParameter("LGBTQ+")).thenReturn("4");
-    HttpServletResponse response = mock(HttpServletResponse.class);
-    testSurveyServlet.doPost(request, response);
-
-    assertEquals(null, Interactions.getInterestMetrics("other@example.com"));
+    assertEquals(expectedSurvey, Interactions.buildVectorForUser(userEntity));
   }
 
   @Test
@@ -133,7 +118,7 @@ public final class InteractionsTest {
     expectedVector.put("LGBTQ+", 0);
 
     Entity entity = UserServletTest.createBlmProtestEvent();
-    assertEquals(expectedVector, Interactions.buildVectorForEntity(entity));
+    assertEquals(expectedVector, Interactions.buildVectorForEvent(entity));
   }
 
   @Test
