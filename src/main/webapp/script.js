@@ -672,9 +672,8 @@ async function getSearchDistanceSettings() {
 const colors = ['#FF0900', '#FF7F00', '#FFB742', '#00F11D', '#0079FF',
   '#A800FF'];
 const tagsAll = ['environment', 'blm', 'volunteer', 'education', 'LGBTQ+'];
-const tagsSearch = [];
 const tagsBox = [...tagsAll];
-const tagsOnEvent = [];
+const tagsSelected = [];
 
 /**
  * Generates all the rainbow tags on a page.
@@ -782,9 +781,6 @@ function changeLocation() {
  * Methods for create-event-form and edit-event form
  * **********************************************************************/
 
-/* This is an array to keep track of the current form's selected tags. */
-const tagsSelected = [];
-
 /**
  * Inverts the apperance of a selected tag and adds it to the list
  * of selected tags
@@ -793,10 +789,8 @@ const tagsSelected = [];
 function toggleTagEvent(tag) {
   const boxIndex = tagsBox.indexOf(tag);
   if (boxIndex > -1) {
-    tagsOnEvent[boxIndex] = !tagsOnEvent[boxIndex];
-
     if (tagsSelected.includes(tag)) {
-      tagsSelected.splice(boxIndex);
+      tagsSelected.splice(tagsSelected.indexOf(tag));
     } else {
       tagsSelected.push(tag);
     }
@@ -867,7 +861,7 @@ function updateTagBox() {
     else spanElement.className = 'tag ' + tag;
 
     // if tag is on the event, invert it
-    if (tagsOnEvent[i]) {
+    if (tagsSelected.includes(tag)) {
       spanElement.className = spanElement.className + ' invert';
       spanElement.innerText = '✓' + tag;
     } else {
@@ -1010,9 +1004,13 @@ function search() {
   getLocation().then((location) => {
     url += '&searchDistance=' + searchDistance + '&location=' + location;
 
-    console.log(url);
+    let servlet = 'ksearch';
+    if (searchBarElement.value == '') {
+      servlet = 'search';
+    }
+    console.log(servlet + url);
 
-    fetch('/ksearch' + url).then((response) => response.json())
+    fetch('/' + servlet + url).then((response) => response.json())
         .then(function(responseJson) {
           getEvents(responseJson, 0, 3);
         });
