@@ -375,13 +375,13 @@ public final class UserServletTest {
   /** Performs the GET request to return a list of events. */
   public static List<Entity> callGet(String get, String dummyToken) throws IOException {
     HttpServletRequest request = mock(HttpServletRequest.class);
-    HttpServletResponse response = mock(HttpServletResponse.class);
     PowerMockito.mockStatic(Firebase.class);
     when(request.getParameter("get")).thenReturn(get);
     PowerMockito.when(request.getParameter("userToken")).thenReturn(dummyToken);
     PowerMockito.when(Firebase.isUserLoggedIn(anyString())).thenCallRealMethod();
     PowerMockito.when(Firebase.authenticateUser(anyString())).thenReturn(dummyToken);
 
+    HttpServletResponse response = mock(HttpServletResponse.class);
     StringWriter out = new StringWriter();
     PrintWriter writer = new PrintWriter(out);
     when(response.getWriter()).thenReturn(writer);
