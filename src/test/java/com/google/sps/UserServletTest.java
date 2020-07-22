@@ -395,13 +395,13 @@ public final class UserServletTest {
   /** Performs the POST request to save or unsave an event with a given id. */
   public static void callPost(long id, String action, String dummyToken) throws IOException {
     HttpServletRequest request = mock(HttpServletRequest.class);
-    HttpServletResponse response = mock(HttpServletResponse.class);
     PowerMockito.mockStatic(Firebase.class);
     when(request.getParameter("event")).thenReturn(id + "");
     when(request.getParameter("action")).thenReturn(action);
     when(request.getParameter("userToken")).thenReturn(dummyToken);
     PowerMockito.when(Firebase.isUserLoggedIn(anyString())).thenCallRealMethod();
     PowerMockito.when(Firebase.authenticateUser(anyString())).thenReturn(dummyToken);
+    HttpServletResponse response = mock(HttpServletResponse.class);
     testUserServlet.doPost(request, response);
   }
 
