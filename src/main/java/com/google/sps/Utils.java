@@ -130,7 +130,7 @@ public class Utils {
     return distance;
   }
 
-  /** Orders a map from greatest to least based off its values */
+  /** Orders a map from greatest to least based off its values. */
   public static final Comparator<Map.Entry<String, Integer>> ORDER_MAP_GREATEST_TO_LEAST =
       new Comparator<Map.Entry<String, Integer>>() {
         public int compare(Map.Entry<String, Integer> o1, Map.Entry<String, Integer> o2) {
