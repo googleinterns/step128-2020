@@ -16,12 +16,16 @@ package com.google.sps;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.EntityNotFoundException;
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.PreparedQuery.TooManyResultsException;
 import com.google.appengine.api.datastore.Query;
@@ -38,12 +42,15 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
@@ -145,11 +152,13 @@ public final class InteractionsTest {
   }
 
   @Test
-  public void recordMiscInteractions() throws IOException {
-          PowerMockito.mockStatic(Firebase.class);
+  public void recordMiscInteractions() throws IOException, ServletException {
+    PowerMockito.mockStatic(Firebase.class);
+
     EventServlet eventServlet = new EventServlet();
     LoadEventServlet loadServlet = new LoadEventServlet();
     UserServlet userServlet = new UserServlet();
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
     // blm protest (test@example), book drive (another@example), lake clean up(test@example)
     UserServletTest.postEventsSetup();
@@ -157,39 +166,111 @@ public final class InteractionsTest {
     long id0 = allEntities.get(0).getKey().getId(); // blm protest (test@example)
     long id1 = allEntities.get(1).getKey().getId(); // book drive (another @example)
     long id2 = allEntities.get(2).getKey().getId(); // lake clean up (test@example)
-    String key0 = allEntities.get(0).getParameter("eventKey").toString();
-    String key1 = allEntities.get(1).getParameter("eventKey").toString();
-    String key2 = allEntities.get(2).getParameter("eventKey").toString();
+    String key0 = allEntities.get(0).getProperty("eventKey").toString();
+    String key1 = allEntities.get(1).getProperty("eventKey").toString();
+    String key2 = allEntities.get(2).getProperty("eventKey").toString();
 
-    UserServletTest.callPost(id1, "save", "test@example.com");
-    UserServletTest.callPost(id1, "save", "test@example.com");
-    UserServletTest.callPost(id1, "save", "another@example.com");
     UserServletTest.callPost(id1, "save", "person@example.com");
 
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
+    RequestDispatcher dispatcher = mock(RequestDispatcher.class);
+    when(request.getRequestDispatcher("/WEB-INF/jsp/display-event.jsp")).thenReturn(dispatcher);
 
-    when(request.getParameter("userToken")).thenReturn("test@example.com");
+    // actions by test@example: created blm protest, created lake clean up, saved book drive, viewed
+    // all
+    String dummyToken = "test@example.com";
+
+    UserServletTest.callPost(id1, "save", dummyToken);
+    UserServletTest.callPost(id1, "save", dummyToken);
+
+    when(request.getParameter("userToken")).thenReturn(dummyToken);
     PowerMockito.when(Firebase.isUserLoggedIn(anyString())).thenCallRealMethod();
     PowerMockito.when(Firebase.authenticateUser(anyString())).thenReturn(dummyToken);
 
     when(request.getParameter("Event")).thenReturn(key0);
+    loadServlet.doGet(request, response);
 
     when(request.getParameter("Event")).thenReturn(key1);
-
-
+    loadServlet.doGet(request, response);
 
     when(request.getParameter("Event")).thenReturn(key2);
+    loadServlet.doGet(request, response);
+    loadServlet.doGet(request, response);
 
+    assertExpectedInteraction(dummyToken, id0, Interactions.CREATE_SCORE);
+    assertExpectedInteraction(dummyToken, id1, Interactions.SAVE_SCORE);
+    assertExpectedInteraction(dummyToken, id2, Interactions.CREATE_SCORE);
 
+    // actions by another@example: created book drive, saved book drive, viewed lake clean up
+    dummyToken = "another@example.com";
 
-    testEventServlet.doPost(request, response);
+    UserServletTest.callPost(id1, "save", "another@example.com");
 
-    // test@example.com -> created blm protest, created lake clean up, saved book drive, viewed all
-    // 3
-    // another @example.com -> created book drive, saved book drive, viewed lake clean up
-    // person@example.com -> saved blm protest, viewed blm protest, unsaved blm protest, viewed lake
-    // clean up
+    when(request.getParameter("userToken")).thenReturn(dummyToken);
+    PowerMockito.when(Firebase.isUserLoggedIn(anyString())).thenCallRealMethod();
+    PowerMockito.when(Firebase.authenticateUser(anyString())).thenReturn(dummyToken);
+
+    when(request.getParameter("Event")).thenReturn(key2);
+    loadServlet.doGet(request, response);
+
+    assertExpectedInteraction(dummyToken, id1, Interactions.CREATE_SCORE);
+    assertExpectedInteraction(dummyToken, id2, Interactions.VIEW_SCORE);
+
+    // person@example: saved blm protest, viewed blm protest, unsaved blm protest, viewed lake
+    // cleanup
+    dummyToken = "person@example.com";
+
+    UserServletTest.callPost(id0, "save", "person@example.com");
+
+    when(request.getParameter("userToken")).thenReturn(dummyToken);
+    PowerMockito.when(Firebase.isUserLoggedIn(anyString())).thenCallRealMethod();
+    PowerMockito.when(Firebase.authenticateUser(anyString())).thenReturn(dummyToken);
+
+    when(request.getParameter("Event")).thenReturn(key0);
+    loadServlet.doGet(request, response);
+
+    UserServletTest.callPost(id0, "unsave", "person@example.com");
+
+    when(request.getParameter("Event")).thenReturn(key2);
+    loadServlet.doGet(request, response);
+
+    assertExpectedInteraction(dummyToken, id0, Interactions.SAVE_SCORE + Interactions.UNSAVE_DELTA);
+    assertExpectedInteraction(dummyToken, id2, Interactions.VIEW_SCORE);
+
+    // check that user interests have been saved correctly
+    try {
+      Key userKey = KeyFactory.createKey("User", "test@example.com");
+      Entity userEntity = datastore.get(userKey);
+      assertEquals(
+          Interactions.CREATE_SCORE,
+          Integer.parseInt(userEntity.getProperty("environment").toString()));
+      assertEquals(
+          Interactions.CREATE_SCORE, Integer.parseInt(userEntity.getProperty("blm").toString()));
+      assertEquals(
+          Interactions.SAVE_SCORE,
+          Integer.parseInt(userEntity.getProperty("education").toString()));
+
+      userKey = KeyFactory.createKey("User", "another@example.com");
+      userEntity = datastore.get(userKey);
+      assertEquals(
+          Interactions.VIEW_SCORE,
+          Integer.parseInt(userEntity.getProperty("environment").toString()));
+      assertEquals(
+          Interactions.CREATE_SCORE,
+          Integer.parseInt(userEntity.getProperty("education").toString()));
+
+      userKey = KeyFactory.createKey("User", "person@example.com");
+      userEntity = datastore.get(userKey);
+      assertEquals(
+          Interactions.VIEW_SCORE,
+          Integer.parseInt(userEntity.getProperty("environment").toString()));
+      assertEquals(
+          Interactions.SAVE_SCORE + Interactions.UNSAVE_DELTA,
+          Integer.parseInt(userEntity.getProperty("blm").toString()));
+    } catch (EntityNotFoundException e) {
+      fail();
+    }
   }
 
   /** Makes sure interactions have been recorded correctly in datastore. */
