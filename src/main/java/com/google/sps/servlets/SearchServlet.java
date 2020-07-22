@@ -120,6 +120,10 @@ public class SearchServlet extends HttpServlet {
 
     // Convert events list to json
     String json = Utils.convertToJson(events);
+    System.out.println("Actual:");
+    for (Entity e : events) {
+      System.out.println(e.getProperty("eventName"));
+    }
 
     response.setContentType("application/json;");
     response.getWriter().println(json);
