@@ -54,11 +54,11 @@ public class KeywordSearchServlet extends HttpServlet {
   // Conversion rate from mi to km
   private static final double MI_TO_KM = 1.609;
   // Keywords retrieved from the frontend in the doGet method
-  private List<String> searchKeywords;
+  private static List<String> searchKeywords;
   /**
    * Comparator used to compare the relevance of two events to the user and their search keywords.
    */
-  private final Comparator<Entity> KEYWORD_SEARCH_RELEVANCE =
+  private static final Comparator<Entity> KEYWORD_SEARCH_RELEVANCE =
       new Comparator<Entity>() {
         @Override
         public int compare(Entity o1, Entity o2) {
@@ -177,13 +177,7 @@ public class KeywordSearchServlet extends HttpServlet {
     List<Map.Entry<String, Integer>> mergeList =
         new ArrayList<Map.Entry<String, Integer>>(descMap.entrySet());
 
-    Collections.sort(
-        mergeList,
-        new Comparator<Map.Entry<String, Integer>>() {
-          public int compare(Map.Entry<String, Integer> o1, Map.Entry<String, Integer> o2) {
-            return (o2.getValue()).compareTo(o1.getValue());
-          }
-        });
+    Collections.sort(mergeList, Utils.ORDER_MAP_GREATEST_TO_LEAST);
 
     // Add top results to the final list
     Map<String, Integer> finalMap = new HashMap<String, Integer>();
@@ -215,13 +209,7 @@ public class KeywordSearchServlet extends HttpServlet {
     List<String> list = new ArrayList<String>();
     List<Map.Entry<String, Integer>> mapList =
         new ArrayList<Map.Entry<String, Integer>>(map.entrySet());
-    Collections.sort(
-        mapList,
-        new Comparator<Map.Entry<String, Integer>>() {
-          public int compare(Map.Entry<String, Integer> o1, Map.Entry<String, Integer> o2) {
-            return (o2.getValue()).compareTo(o1.getValue());
-          }
-        });
+    Collections.sort(mapList, Utils.ORDER_MAP_GREATEST_TO_LEAST);
     for (int i = 0; i < mapList.size(); i++) {
       list.add(mapList.get(i).getKey().toString());
     }
@@ -238,13 +226,7 @@ public class KeywordSearchServlet extends HttpServlet {
     List<Integer> list = new ArrayList<Integer>();
     List<Map.Entry<String, Integer>> mapList =
         new ArrayList<Map.Entry<String, Integer>>(map.entrySet());
-    Collections.sort(
-        mapList,
-        new Comparator<Map.Entry<String, Integer>>() {
-          public int compare(Map.Entry<String, Integer> o1, Map.Entry<String, Integer> o2) {
-            return (o2.getValue()).compareTo(o1.getValue());
-          }
-        });
+    Collections.sort(mapList, Utils.ORDER_MAP_GREATEST_TO_LEAST);
     for (int i = 0; i < mapList.size(); i++) {
       list.add(mapList.get(i).getValue());
     }
