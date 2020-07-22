@@ -75,11 +75,8 @@ public class Interactions {
     return result;
   }
 
-  /** simplistic method that builds a vector from an entity (subject to change). */
-  public static Map<String, Integer> buildVectorForEvent(Entity eventEntity) {
-    if (!eventEntity.getKind().equals("Event")) {
-      throw new IllegalArgumentException("must be event items");
-    }
+  /** Simplistic method that builds a vector from an entity (subject to change). */
+  public static Map<String, Integer> buildVectorForEntity(Entity eventEntity) {
     String tags = eventEntity.getProperty("tags").toString();
     if (tags == null) {
       return new HashMap<>();

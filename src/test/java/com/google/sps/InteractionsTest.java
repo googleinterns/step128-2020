@@ -133,7 +133,7 @@ public final class InteractionsTest {
     expectedVector.put("LGBTQ+", 0);
 
     Entity entity = UserServletTest.createBlmProtestEvent();
-    assertEquals(expectedVector, Interactions.buildVectorForEvent(entity));
+    assertEquals(expectedVector, Interactions.buildVectorForEntity(entity));
   }
 
   @Test
