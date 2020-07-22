@@ -8,6 +8,7 @@ import com.google.appengine.api.datastore.Query;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -28,6 +29,17 @@ public class Recommend {
   // multipliers for score calculation
   private static final double ALREADY_VIEWED = 1.2;
   private static final double ALREADY_SAVED = 0.6;
+
+  // comparator to sort doubles in descending order
+  private static final Comparator<Double> SCORE_DESCENDING =
+      new Comparator<Double>() {
+        @Override
+        public int compare(Double a, Double b) {
+          return Double.compare(b, a);
+        }
+      };
+
+  private static final Logger LOGGER = Logger.getLogger(Recommend.class.getName());
 
   private static SparkSession spark;
   private static DatastoreService datastore;
@@ -53,10 +65,11 @@ public class Recommend {
     final Map<Integer, String> userIdHash = new HashMap<>();
     final Map<Integer, Long> eventIdHash = new HashMap<>();
 
-    // keep track of metrics for each user and event
+    // keep track of metrics and location for each user and event
     final Map<String, Map<String, Integer>> userPrefs = new HashMap<>();
     final Map<Long, Map<String, Integer>> eventInfo = new HashMap<>();
     final Map<String, String> userLocations = new HashMap<>();
+    final Map<Long, String> eventLocations = new HashMap<>();
 
     // get user entities with their preferences
     Iterable<Entity> queriedUsers = datastore.prepare(new Query("User")).asIterable();
@@ -76,6 +89,7 @@ public class Recommend {
       long id = e.getKey().getId();
       eventInfo.put(id, Interactions.buildVectorForEvent(e));
       eventIdHash.put((Long.toString(id)).hashCode(), id);
+      userLocations.put(id, e.getProperty("address").toString());
     }
 
     List<Key> toDelete = new ArrayList<>();
@@ -92,7 +106,7 @@ public class Recommend {
       Map<String, Integer> userVector = userPrefs.get(userId);
       String userLocation = userLocations.get(userId);
 
-      Map<Double, List<Long>> userTopRecs = new TreeMap<>(); // TODO: add comparator
+      Map<Double, List<Long>> userTopRecs = new TreeMap<>(SCORE_DESCENDING);
       for (Row itemRow : predScores) {
         long eventId = eventIdHash.get(itemRow.getInt(0));
         float predScore = itemRow.getFloat(1);
@@ -124,6 +138,8 @@ public class Recommend {
         }
         eventsWithScore.add(eventId);
       }
+
+      // TODO: save user recs
     }
     datastore.delete(toDelete);
   }
@@ -141,8 +157,10 @@ public class Recommend {
     model.setColdStartStrategy("drop");
     try {
       model.write().overwrite().save(path);
+      LOGGER.info("model saved at " + path);
     } catch (IOException e) {
       // do nothing
+      LOGGER.info("failed to save model");
     }
     return model;
   }
@@ -209,7 +227,7 @@ public class Recommend {
     public EventRating(String userId, long eventId, float rating, long timestamp) {
       // all fields must be numeric
       this.userId = userId.hashCode();
-      // spark implicitly casts long to int
+      // spark implicitly casts long to int otherwise
       this.eventId = (Long.toString(eventId)).hashCode();
       this.rating = rating;
       this.timestamp = timestamp;
