@@ -12,6 +12,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 import org.apache.spark.ml.evaluation.RegressionEvaluator;
 import org.apache.spark.ml.recommendation.ALS;
 import org.apache.spark.ml.recommendation.ALSModel;
@@ -21,7 +23,11 @@ import org.apache.spark.sql.SparkSession;
 
 public class Recommend {
 
+  // keep and use up to this many Interaction entities
   private static final int UPPER_LIMIT = 5_000_000;
+  // multipliers for score calculation
+  private static final double ALREADY_VIEWED = 1.2;
+  private static final double ALREADY_SAVED = 0.6;
 
   private static SparkSession spark;
   private static DatastoreService datastore;
@@ -47,18 +53,25 @@ public class Recommend {
     final Map<Integer, String> userIdHash = new HashMap<>();
     final Map<Integer, Long> eventIdHash = new HashMap<>();
 
+    // keep track of metrics for each user and event
+    final Map<String, Map<String, Integer>> userPrefs = new HashMap<>();
+    final Map<Long, Map<String, Integer>> eventInfo = new HashMap<>();
+    final Map<String, String> userLocations = new HashMap<>();
+
     // get user entities with their preferences
     Iterable<Entity> queriedUsers = datastore.prepare(new Query("User")).asIterable();
-    Map<String, Map<String, Integer>> userPrefs = new HashMap<>();
     for (Entity e : queriedUsers) {
       String id = e.getKey().getName();
       userPrefs.put(id, Interactions.buildVectorForUser(e));
       userIdHash.put(id.hashCode(), id);
+      String location = e.getProperty("location").toString();
+      if (location != null && location.length() > 0) {
+        userLocations.put(id, location);
+      }
     }
 
     // get event entities
     Iterable<Entity> queriedEvents = datastore.prepare(new Query("Event")).asIterable();
-    Map<Long, Map<String, Integer>> eventInfo = new HashMap<>();
     for (Entity e : queriedEvents) {
       long id = e.getKey().getId();
       eventInfo.put(id, Interactions.buildVectorForEvent(e));
@@ -66,20 +79,52 @@ public class Recommend {
     }
 
     List<Key> toDelete = new ArrayList<>();
-    Dataset<Row> ratings = makeDataframeAndPreprocess(toDelete);
-    ALSModel model = trainModel(null, ratings);
+    Dataset<Row> ratings =
+        makeDataframeAndPreprocess(userPrefs.keySet(), eventInfo.keySet(), toDelete);
 
+    // compute recommendations from matrix factorization
+    ALSModel model = trainModel(null, ratings);
     Dataset<Row> userRecs = model.recommendForAllUsers(150);
     List<Row> userRecsList = userRecs.collectAsList();
     for (Row recRow : userRecsList) {
       String userId = userIdHash.get(recRow.getInt(0));
       List<Row> predScores = recRow.getList(1);
+      Map<String, Integer> userVector = userPrefs.get(userId);
+      String userLocation = userLocations.get(userId);
+
+      Map<Double, List<Long>> userTopRecs = new TreeMap<>(); // TODO: add comparator
       for (Row itemRow : predScores) {
         long eventId = eventIdHash.get(itemRow.getInt(0));
         float predScore = itemRow.getFloat(1);
+
+        // calculate score for this item
+        int dotProduct = Interactions.dotProduct(userVector, eventInfo.get(eventId));
+        double totalScore = dotProduct * predScore; // todo: calculate
+
+        // adjust scaling based on user's past interaction with event
+        Entity interactionEntity = Interactions.hasInteraction(userId, eventId);
+        if (interactionEntity == null) {
+        } else {
+          int interactionScore =
+              Integer.parseInt(interactionEntity.getProperty("rating").toString());
+          if (interactionScore >= Interactions.SAVE_SCORE) {
+            totalScore *= ALREADY_SAVED;
+          } else if (interactionScore == Interactions.VIEW_SCORE) {
+            totalScore *= ALREADY_VIEWED;
+          }
+        }
+
+        // TODO: adjust scaling based on user's location, if location is saved
+
+        // add item to ranking
+        List<Long> eventsWithScore = userTopRecs.get(totalScore);
+        if (eventsWithScore == null) {
+          eventsWithScore = new ArrayList<>();
+          userTopRecs.put(totalScore, eventsWithScore);
+        }
+        eventsWithScore.add(eventId);
       }
     }
-
     datastore.delete(toDelete);
   }
 
@@ -113,28 +158,34 @@ public class Recommend {
   }
 
   /**
-   * Constructs ratings dataframe. Also keeps track of event ids with their hashcodes and oldest
-   * Interaction entries to delete from datastore.
+   * Constructs ratings dataframe. Also flushes outdated Interaction entities from datastore.
    *
-   * @param eventIdHash Save hashCodes of eventIds as Strings (longs get cast to int by spark)
-   * @param toDelete Save list of keys to delete, if interaction entities need to be flushed
+   * @param users List of users that datastore is keeping track of.
+   * @param events List of existing events that datastore is keeping track of.
+   * @param toDelete Save list of keys to delete, if interaction entities need to be flushed.
    */
-  private static Dataset<Row> makeDataframeAndPreprocess(List<Key> toDelete) {
+  private static Dataset<Row> makeDataframeAndPreprocess(
+      Set<String> users, Set<Long> events, List<Key> toDelete) {
     Iterable<Entity> queriedInteractions =
         datastore
             .prepare(new Query("Interaction").addSort("timestamp", Query.SortDirection.DESCENDING))
             .asIterable();
     Iterator<Entity> itr = queriedInteractions.iterator();
     int count = 0;
-    // convert Entities to spark-friendly format
     List<EventRating> ratings = new ArrayList<>();
-    // keep track of eventId hashcodes and eventIds
     while (itr.hasNext() && count < UPPER_LIMIT) {
       Entity entity = itr.next();
+      // convert Entities to spark-friendly format
       EventRating rate = EventRating.parseEntity(entity);
       if (rate != null) {
-        count++;
-        ratings.add(rate);
+        if (!users.contains(rate.getUserId())
+            || !events.contains(Long.parseLong(entity.getProperty("event").toString()))) {
+          // delete interaction of user or event id is invalid
+          toDelete.add(entity.getKey());
+        } else {
+          count++;
+          ratings.add(rate);
+        }
       } else {
         // something wrong with this entry, delete it
         toDelete.add(entity.getKey());
