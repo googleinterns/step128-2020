@@ -20,7 +20,15 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
+import com.google.appengine.api.datastore.PreparedQuery;
+import com.google.appengine.api.datastore.PreparedQuery.TooManyResultsException;
+import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Query.CompositeFilterOperator;
+import com.google.appengine.api.datastore.Query.FilterOperator;
+import com.google.appengine.api.datastore.Query.FilterPredicate;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -29,9 +37,13 @@ public class Interactions {
   private static final Logger LOGGER = Logger.getLogger(Interactions.class.getName());
 
   // contributions to user's interest metrics for each action
-  public static final int VIEW_SCORE = 1;
-  public static final int SAVE_SCORE = 3;
-  public static final int CREATE_SCORE = 5;
+  public static final int VIEW_SCORE = 4;
+  public static final int SAVE_SCORE = 8;
+  public static final int CREATE_SCORE = 10;
+
+  // effects on scores when "undoing" actions
+  public static final int UNSAVE_DELTA = -2;
+  public static final int DELETE_DELTA = -3;
 
   // interest categories, matches question order on survey pages
   public static final String[] metrics = {"environment", "blm", "volunteer", "education", "LGBTQ+"};
@@ -92,5 +104,80 @@ public class Interactions {
       }
     }
     return result;
+  }
+
+  /**
+   * Creates an Interaction entity in datastore recording an interaction between user and event.
+   *
+   * @param userId the user's id as identified in datastore
+   * @param eventId the event's id as identified in datastore
+   * @param score the new rating by the user for the event
+   * @param forceOverride if false, only overwrites if new score > old score
+   * @return change of user's rating on an item (saves highest score only)
+   */
+  public static int recordInteraction(
+      String userId, long eventId, int score, boolean forceOverride) {
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    Query q =
+        new Query("Interaction")
+            .setFilter(
+                CompositeFilterOperator.and(
+                    new FilterPredicate("user", FilterOperator.EQUAL, userId),
+                    new FilterPredicate("event", FilterOperator.EQUAL, eventId)));
+    PreparedQuery pq = datastore.prepare(q);
+    Entity interactionEntity = null;
+    int delta = score;
+    try {
+      interactionEntity = pq.asSingleEntity();
+      int prevScore = Integer.parseInt(interactionEntity.getProperty("rating").toString());
+      if (forceOverride || prevScore < score) {
+        interactionEntity.setProperty("rating", score);
+        delta = score - prevScore;
+      } else {
+        delta = 0;
+      }
+    } catch (TooManyResultsException e) {
+      // delete existing entries and re-create later
+      List<Key> toDelete = new ArrayList<>();
+      for (Entity entity : pq.asIterable()) {
+        toDelete.add(entity.getKey());
+      }
+      LOGGER.warning(
+          "multiple entries found for "
+              + userId
+              + " and "
+              + eventId
+              + ". Deleting "
+              + toDelete.size()
+              + " entries.");
+      datastore.delete(toDelete);
+    } catch (NullPointerException e) {
+      // do nothing, pass to finally block
+      LOGGER.info("No entries yet for " + userId + " and " + eventId + ". Creating one now.");
+    } finally {
+      if (interactionEntity == null) {
+        interactionEntity = new Entity("Interaction");
+        interactionEntity.setProperty("user", userId);
+        interactionEntity.setProperty("event", eventId);
+        interactionEntity.setProperty("rating", score);
+      }
+      interactionEntity.setProperty("timestamp", System.currentTimeMillis());
+      datastore.put(interactionEntity);
+    }
+    return delta;
+  }
+
+  /** Updates user preference map. */
+  public static void updatePrefs(Entity userEntity, List<String> tags, int score) {
+    if (!userEntity.getKind().equals("User")) {
+      throw new IllegalArgumentException("must be user item");
+    }
+    for (String s : tags) {
+      if (userEntity.hasProperty(s)) {
+        userEntity.setProperty(s, score + Integer.parseInt(userEntity.getProperty(s).toString()));
+      } else {
+        userEntity.setProperty(s, score);
+      }
+    }
   }
 }

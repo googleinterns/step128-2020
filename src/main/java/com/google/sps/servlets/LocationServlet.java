@@ -49,11 +49,8 @@ public class LocationServlet extends HttpServlet {
       try {
         userEntity = datastore.get(userKey);
       } catch (EntityNotFoundException exception) {
-        // datastore entry has not been created yet for this user, create it now
-        userEntity = new Entity(userKey);
-        userEntity.setProperty("firebaseID", userID);
-        userEntity.setProperty("location", "");
-        datastore.put(userEntity);
+        userEntity = Utils.makeUserEntity(userID, "", true);
+        LOGGER.info("No entity found for " + userID + ", creating one now.");
       }
       location = userEntity.getProperty("location").toString();
     }

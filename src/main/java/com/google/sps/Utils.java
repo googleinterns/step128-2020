@@ -14,6 +14,8 @@
 
 package com.google.sps;
 
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.gson.Gson;
 import com.google.maps.DistanceMatrixApi;
@@ -130,6 +132,34 @@ public class Utils {
     return distance;
   }
 
+  /**
+   * Creates and returns a new Entity for a given userId.
+   *
+   * @param userId to identify this user in datastore
+   * @param location user's location
+   * @param addToDatastore if true, will add this entity to datastore as well
+   */
+  public static Entity makeUserEntity(String userId, String location, boolean addToDatastore) {
+    Entity userEntity = new Entity("User", userId);
+    userEntity.setProperty("firebaseID", userId);
+    userEntity.setProperty("location", location);
+    if (addToDatastore) {
+      DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+      datastore.put(userEntity);
+    }
+    return userEntity;
+  }
+
+  /**
+   * Creates and returns a new Entity for a given userId, no location given.
+   *
+   * @param userId to identify this user in datastore
+   * @param addToDatastore if true, will add this entity to datastore as well
+   */
+  public static Entity makeUserEntity(String userId, boolean addToDatastore) {
+    return makeUserEntity(userId, "", addToDatastore);
+  }
+
   /** Orders a map from greatest to least based off its values. */
   public static final Comparator<Map.Entry<String, Integer>> ORDER_MAP_GREATEST_TO_LEAST =
       new Comparator<Map.Entry<String, Integer>>() {
@@ -151,22 +181,4 @@ public class Utils {
               .compareTo(b.getProperty("eventName").toString());
         }
       };
-
-  /** creates a comparator based on entity dot product with a given vector. */
-  public static Comparator<Entity> getComparatorByInterestMatch(Map<String, Integer> metrics) {
-    Comparator<Entity> result =
-        new Comparator<Entity>() {
-          @Override
-          public int compare(Entity a, Entity b) {
-            if (!a.getKind().equals("Event") || !b.getKind().equals("Event")) {
-              throw new IllegalArgumentException("must be event items");
-            }
-            Map<String, Integer> v1 = Interactions.buildVectorForEvent(a);
-            Map<String, Integer> v2 = Interactions.buildVectorForEvent(b);
-            return Integer.compare(
-                Interactions.dotProduct(v1, metrics), Interactions.dotProduct(v2, metrics));
-          }
-        };
-    return result;
-  }
 }
