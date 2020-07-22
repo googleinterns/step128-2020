@@ -73,6 +73,7 @@ public class EventServlet extends HttpServlet {
       userEntity = datastore.get(userKey);
     } catch (EntityNotFoundException exception) {
       userEntity = Utils.makeUserEntity(userID, false);
+      LOGGER.info("No entity found for " + userID + ", creating one now.");
     }
     int delta = Interactions.recordInteraction(userID, keyId, Interactions.CREATE_SCORE, false);
     Interactions.updatePrefs(userEntity, tags, delta);

@@ -50,6 +50,7 @@ public class LocationServlet extends HttpServlet {
         userEntity = datastore.get(userKey);
       } catch (EntityNotFoundException exception) {
         userEntity = Utils.makeUserEntity(userID, "", true);
+        LOGGER.info("No entity found for " + userID + ", creating one now.");
       }
       location = userEntity.getProperty("location").toString();
     }

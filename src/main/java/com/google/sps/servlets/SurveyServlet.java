@@ -54,6 +54,7 @@ public class SurveyServlet extends HttpServlet {
         userEntity = datastore.get(userKey);
       } catch (EntityNotFoundException e) {
         userEntity = Utils.makeUserEntity(userID, true);
+        LOGGER.info("No entity found for " + userID + ", creating one now.");
       }
 
       // save score of each survey metric as an entity property

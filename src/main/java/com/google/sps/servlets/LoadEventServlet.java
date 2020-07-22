@@ -63,6 +63,7 @@ public class LoadEventServlet extends HttpServlet {
               alreadySaved = UserServlet.alreadySaved(eventRequested.getKey().getId(), userEntity);
             } catch (EntityNotFoundException exception) {
               userEntity = Utils.makeUserEntity(userID, false);
+              LOGGER.info("No entity found for " + userID + ", creating one now.");
             }
             int delta =
                 Interactions.recordInteraction(

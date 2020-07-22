@@ -142,9 +142,18 @@ public class Interactions {
       for (Entity entity : pq.asIterable()) {
         toDelete.add(entity.getKey());
       }
+      LOGGER.warning(
+          "multiple entries found for "
+              + userId
+              + " and "
+              + eventId
+              + ". Deleting "
+              + toDelete.size()
+              + " entries.");
       datastore.delete(toDelete);
     } catch (NullPointerException e) {
       // do nothing, pass to finally block
+      LOGGER.info("No entries yet for " + userId + " and " + eventId + ". Creating one now.");
     } finally {
       if (interactionEntity == null) {
         interactionEntity = new Entity("Interaction");

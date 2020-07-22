@@ -61,6 +61,7 @@ public class UserServlet extends HttpServlet {
         userEntity = datastore.get(userKey);
       } catch (EntityNotFoundException exception) {
         userEntity = Utils.makeUserEntity(userID, true);
+        LOGGER.info("No entity found for " + userID + ", creating one now.");
       }
       switch (request.getParameter("get")) {
         case "saved":
@@ -147,6 +148,7 @@ public class UserServlet extends HttpServlet {
       userEntity = datastore.get(userKey);
     } catch (EntityNotFoundException exception) {
       userEntity = Utils.makeUserEntity(userID, false);
+      LOGGER.info("No entity found for " + userID + ", creating one now.");
     }
     switch (request.getParameter("action")) {
       case "save":
