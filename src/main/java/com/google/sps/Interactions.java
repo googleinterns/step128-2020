@@ -104,16 +104,13 @@ public class Interactions {
   }
 
   /**
-   * Creates an Interaction entity in datastore recording an interaction between user and event.
+   * Check if there exists an interaction entry between a given user and event.
    *
    * @param userId the user's id as identified in datastore
    * @param eventId the event's id as identified in datastore
-   * @param score the new rating by the user for the event
-   * @param forceOverride if false, only overwrites if new score > old score
-   * @return change of user's rating on an item (saves highest score only)
+   * @return the interaction entity, or null if none exists.
    */
-  public static int recordInteraction(
-      String userId, long eventId, int score, boolean forceOverride) {
+  public static Entity hasInteraction(String userId, long eventId) {
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     Query q =
         new Query("Interaction")
@@ -122,19 +119,11 @@ public class Interactions {
                     new FilterPredicate("user", FilterOperator.EQUAL, userId),
                     new FilterPredicate("event", FilterOperator.EQUAL, eventId)));
     PreparedQuery pq = datastore.prepare(q);
-    Entity interactionEntity = null;
-    int delta = score;
+    Entity interaction = null;
     try {
-      interactionEntity = pq.asSingleEntity();
-      int prevScore = Integer.parseInt(interactionEntity.getProperty("rating").toString());
-      if (forceOverride || prevScore < score) {
-        interactionEntity.setProperty("rating", score);
-        delta = score - prevScore;
-      } else {
-        delta = 0;
-      }
+      interaction = pq.asSingleEntity();
     } catch (TooManyResultsException e) {
-      // delete existing entries and re-create later
+      // clear all
       List<Key> toDelete = new ArrayList<>();
       for (Entity entity : pq.asIterable()) {
         toDelete.add(entity.getKey());
@@ -148,19 +137,46 @@ public class Interactions {
               + toDelete.size()
               + " entries.");
       datastore.delete(toDelete);
-    } catch (NullPointerException e) {
-      // do nothing, pass to finally block
-      LOGGER.info("No entries yet for " + userId + " and " + eventId + ". Creating one now.");
-    } finally {
-      if (interactionEntity == null) {
-        interactionEntity = new Entity("Interaction");
-        interactionEntity.setProperty("user", userId);
-        interactionEntity.setProperty("event", eventId);
+      // leave interaction as null
+    }
+    return interaction;
+  }
+
+  /**
+   * Creates an Interaction entity in datastore recording an interaction between user and event.
+   *
+   * @param userId the user's id as identified in datastore
+   * @param eventId the event's id as identified in datastore
+   * @param score the new rating by the user for the event
+   * @param forceOverride if false, only overwrites if new score > old score
+   * @return change of user's rating on an item (saves highest score only)
+   */
+  public static int recordInteraction(
+      String userId, long eventId, int score, boolean forceOverride) {
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    Entity interactionEntity = hasInteraction(userId, eventId);
+    int delta = score;
+    if (interactionEntity == null) {
+      interactionEntity = new Entity("Interaction");
+      interactionEntity.setProperty("user", userId);
+      interactionEntity.setProperty("event", eventId);
+      interactionEntity.setProperty("rating", score);
+    } else {
+      if (interactionEntity.hasProperty("rating")) {
+        int prevScore = Integer.parseInt(interactionEntity.getProperty("rating").toString());
+        if (forceOverride || prevScore < score) {
+          interactionEntity.setProperty("rating", score);
+          delta = score - prevScore;
+        } else {
+          delta = 0;
+        }
+      } else {
         interactionEntity.setProperty("rating", score);
       }
-      interactionEntity.setProperty("timestamp", System.currentTimeMillis());
-      datastore.put(interactionEntity);
     }
+   
+    interactionEntity.setProperty("timestamp", System.currentTimeMillis());
+    datastore.put(interactionEntity);
     return delta;
   }
 
@@ -168,6 +184,9 @@ public class Interactions {
   public static void updatePrefs(Entity userEntity, List<String> tags, int score) {
     if (!userEntity.getKind().equals("User")) {
       throw new IllegalArgumentException("must be user item");
+    }
+    if(score == 0) {
+      return;
     }
     for (String s : tags) {
       if (userEntity.hasProperty(s)) {
