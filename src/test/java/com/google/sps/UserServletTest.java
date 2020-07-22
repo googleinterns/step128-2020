@@ -192,9 +192,9 @@ public final class UserServletTest {
     postEventsSetup();
     List<Entity> allEntities = callGet("", "");
 
-    long id0 = allEntities.get(0).getKey().getId();
-    long id1 = allEntities.get(1).getKey().getId();
-    long id2 = allEntities.get(2).getKey().getId();
+    final long id0 = allEntities.get(0).getKey().getId();
+    final long id1 = allEntities.get(1).getKey().getId();
+    final long id2 = allEntities.get(2).getKey().getId();
     List<Entity> goalList = new ArrayList<>();
     goalList.add(allEntities.get(0));
     goalList.add(allEntities.get(2));
