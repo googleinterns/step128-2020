@@ -28,6 +28,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Map;
 import java.util.logging.Logger;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -113,6 +114,10 @@ public class EventServlet extends HttpServlet {
     Gson gson = new Gson();
     String[] tags = gson.fromJson(tagsStr, String[].class);
     eventEntity.setIndexedProperty("tags", Arrays.asList(tags));
+
+    Map<String, Integer> keywords = KeywordSearchServlet.getKeywords(eventName, eventDescription);
+    eventEntity.setProperty("keywords", KeywordSearchServlet.getKeywordMapKeys(keywords));
+    eventEntity.setProperty("keywordsValues", KeywordSearchServlet.getKeywordMapValues(keywords));
 
     return eventEntity;
   }

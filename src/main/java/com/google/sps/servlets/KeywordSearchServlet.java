@@ -111,25 +111,33 @@ public class KeywordSearchServlet extends HttpServlet {
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     // String search query input
-    String searchQuery = request.getParameter("searchQuery");
+    String searchQuery = request.getParameter("searchKeywords");
 
     Query query = null;
     // Check if there are no keywords
     if (searchQuery != null) {
-      // List of keywords we're using to search
-      searchKeywords = new ArrayList<String>(getSeparateWords(searchQuery));
-      for (int i = 0; i < searchKeywords.size(); i++) {
-        searchKeywords.set(i, searchKeywords.get(i).toLowerCase());
-      }
-      searchKeywords.removeAll(IRRELEVANT_WORDS);
+      if (!searchQuery.equals("")) {
+        // List of keywords we're using to search
+        searchKeywords = new ArrayList<String>(getSeparateWords(searchQuery));
+        for (int i = 0; i < searchKeywords.size(); i++) {
+          searchKeywords.set(i, searchKeywords.get(i).toLowerCase());
+        }
+        searchKeywords.removeAll(IRRELEVANT_WORDS);
 
-      // Filter to check if the event has any of the keywords we're searching for
-      Filter keywordsFilter = new FilterPredicate("keywords", FilterOperator.IN, searchKeywords);
-      query = new Query("Event").setFilter(keywordsFilter);
+        // Filter to check if the event has any of the keywords we're searching for
+        Filter keywordsFilter = new FilterPredicate("keywords", FilterOperator.IN, searchKeywords);
+        query = new Query("Event").setFilter(keywordsFilter);
+      } else {
+        searchKeywords = new ArrayList<String>();
+        query = new Query("Event");
+      }
     } else {
       searchKeywords = new ArrayList<String>();
       query = new Query("Event");
     }
+    // TODO: find a better way to implement the above elses
+
+    System.out.println(searchKeywords);
 
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     PreparedQuery results = datastore.prepare(query);
