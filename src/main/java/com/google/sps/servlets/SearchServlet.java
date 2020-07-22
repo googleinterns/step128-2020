@@ -141,6 +141,9 @@ public class SearchServlet extends HttpServlet {
    */
   public static Double intersection(List<String> tagListA, List<String> tagListB) {
     // Catches divide by zero
+    if (tagListA == null || tagListB == null) {
+      return 0.0;
+    }
     if (tagListA.size() == 0) {
       return 0.0;
     }

@@ -1010,7 +1010,7 @@ function search() {
   getLocation().then((location) => {
     url += '&searchDistance=' + searchDistance + '&location=' + location;
 
-    fetch('/search' + url).then((response) => response.json())
+    fetch('/ksearch' + url).then((response) => response.json())
         .then(function(responseJson) {
           getEvents(responseJson, 0, 3);
         });
