@@ -65,52 +65,71 @@ public class EditEventServlet extends HttpServlet {
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response)
       throws ServletException, IOException {
-    Key keyRequested;
+
+    Key keyRequested = null;
     try {
       keyRequested = getEventKey(request, "Event");
-      if (keyRequested != null) {
-        Query query = new Query("Event", keyRequested);
-
-        DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-        Entity eventRequested = datastore.prepare(query).asSingleEntity();
-
-        String userToken = request.getParameter("userToken");
-        if (userToken != null) {
-          if (Firebase.isUserLoggedIn(userToken)) {
-            String userID = Firebase.authenticateUser(userToken);
-            Key userKey = KeyFactory.createKey("User", userID);
-            try {
-              Entity userEntity = datastore.get(userKey);
-
-              if (userEntity != null) {
-                String creator = eventRequested.getProperty("creator").toString();
-
-                if (creator.equals(userID)) {
-                  request = populateRequest(request, eventRequested);
-                  request
-                      .getRequestDispatcher("/WEB-INF/jsp/edit-event-form.jsp")
-                      .forward(request, response);
-                } else {
-                  request
-                      .getRequestDispatcher("/WEB-INF/jsp/access-denied.jsp")
-                      .forward(request, response);
-                }
-              }
-            } catch (EntityNotFoundException exception) {
-              // datastore entry has not been created yet for this user, create it now
-              Entity entity = new Entity(userKey);
-              entity.setProperty("firebaseID", userID);
-              datastore.put(entity);
-              request
-                  .getRequestDispatcher("/WEB-INF/jsp/access-denied.jsp")
-                  .forward(request, response);
-            }
-          }
-        }
+      if (keyRequested == null) {
+        throw new NullPointerException();
       }
-    } catch (IllegalArgumentException | IOException | NullPointerException | ServletException e) {
+    } catch (IllegalArgumentException | IOException e) {
       LOGGER.info("Could not retrieve event " + e);
       request.getRequestDispatcher("/WEB-INF/jsp/event-not-found.jsp").forward(request, response);
+      return;
+    }
+
+    Query query = new Query("Event", keyRequested);
+
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    Entity eventRequested = datastore.prepare(query).asSingleEntity();
+
+    String userToken = null;
+    try {
+      userToken = request.getParameter("userToken");
+      if (userToken == null) {
+        throw new IOException("User Token not found.");
+      }
+    } catch (IOException e) {
+      LOGGER.info("Request parameters error: " + e);
+      request.getRequestDispatcher("/WEB-INF/jsp/access-denied.jsp").forward(request, response);
+      return;
+    }
+
+    String userID = null;
+    Key userKey = null;
+    try {
+      if (Firebase.isUserLoggedIn(userToken)) {
+        userID = Firebase.authenticateUser(userToken);
+        userKey = KeyFactory.createKey("User", userID);
+      } else {
+        throw new IOException("User is not logged in.");
+      }
+    } catch (IllegalArgumentException | IOException e) {
+      LOGGER.info("Login error: " + e);
+      request.getRequestDispatcher("/WEB-INF/jsp/access-denied.jsp").forward(request, response);
+      return;
+    }
+
+    try {
+      Entity userEntity = datastore.get(userKey);
+      if (userEntity == null) {
+        throw new EntityNotFoundException(userKey);
+      }
+    } catch (EntityNotFoundException exception) {
+      // datastore entry has not been created yet for this user, create it now
+      Entity entity = new Entity(userKey);
+      entity.setProperty("firebaseID", userID);
+      datastore.put(entity);
+      request.getRequestDispatcher("/WEB-INF/jsp/access-denied.jsp").forward(request, response);
+      return;
+    }
+
+    String creator = eventRequested.getProperty("creator").toString();
+    if (creator.equals(userID)) {
+      request = populateRequest(request, eventRequested);
+      request.getRequestDispatcher("/WEB-INF/jsp/edit-event-form.jsp").forward(request, response);
+    } else {
+      request.getRequestDispatcher("/WEB-INF/jsp/access-denied.jsp").forward(request, response);
     }
   }
 
@@ -201,15 +220,16 @@ public class EditEventServlet extends HttpServlet {
       throws IllegalArgumentException, IOException {
     Key eventKey = null;
 
-    // Get the string from the request.
-    if (request.getParameter(name) != null) {
-      String eventKeyString = request.getParameter(name);
-
-      // Convert String to type Key.
-      eventKey = KeyFactory.stringToKey(eventKeyString);
-    } else {
+    if (request.getParameter(name) == null) {
       throw new IOException("Request is missing parameter");
     }
+
+    // Get the event key string from the request.
+    String eventKeyString = request.getParameter(name);
+
+    // Convert String to type Key.
+    eventKey = KeyFactory.stringToKey(eventKeyString);
+
     return eventKey;
   }
 }
