@@ -672,6 +672,7 @@ async function getSearchDistanceSettings() {
 const colors = ['#FF0900', '#FF7F00', '#FFB742', '#00F11D', '#0079FF',
   '#A800FF'];
 const tagsAll = ['environment', 'blm', 'volunteer', 'education', 'LGBTQ+'];
+const tagsSearch = [];
 const tagsBox = [...tagsAll];
 const tagsOnEvent = [];
 
@@ -790,16 +791,9 @@ const tagsSelected = [];
  * @param {String} tag the name of the tag to be toggled
  */
 function toggleTagEvent(tag) {
-  console.log(tag);
   const boxIndex = tagsBox.indexOf(tag);
-  console.log(boxIndex);
   if (boxIndex > -1) {
-    //tagsOnEvent[boxIndex] = !tagsOnEvent[boxIndex];
-    if (tagsOnEvent.includes(tag)) {
-      tagsOnEvent.splice(tagsOnEvent.indexOf(boxIndex));
-    } else {
-      tagsOnEvent.push(tag);
-    }
+    tagsOnEvent[boxIndex] = !tagsOnEvent[boxIndex];
 
     if (tagsSelected.includes(tag)) {
       tagsSelected.splice(boxIndex);
@@ -816,9 +810,9 @@ function toggleTagEvent(tag) {
  * and display error.
  */
 function verifyTags() {
-  if (tagsOnEvent.length > 0) {
+  if (tagsSelected.length > 0) {
     // Convert tags selected array into string
-    const jsonArray = JSON.stringify(tagsOnEvent);
+    const jsonArray = JSON.stringify(tagsSelected);
     const tags = createHiddenInput(jsonArray);
     getUserIDToken().then((preToken) => {
       const userToken = createHiddenInput(preToken);
@@ -829,7 +823,7 @@ function verifyTags() {
       document.getElementById('eventform').appendChild(userToken);
 
       document.eventform.submit();
-      tagsOnEvent.splice(0, tagsOnEvent.length);
+      tagsSelected.splice(0, tagsSelected.length);
     });
   } else {
     // Display error and prevent from sumbission
@@ -873,7 +867,7 @@ function updateTagBox() {
     else spanElement.className = 'tag ' + tag;
 
     // if tag is on the event, invert it
-    if (tagsOnEvent.includes(tag)) {
+    if (tagsOnEvent[i]) {
       spanElement.className = spanElement.className + ' invert';
       spanElement.innerText = '✓' + tag;
     } else {
@@ -1001,7 +995,7 @@ function search() {
   const elements = document.getElementsByClassName('search-bar');
   const searchBarElement = elements[0];
   let url = '?searchKeywords=' + searchBarElement.value + '&tags=';
-  tagsOnEvent.forEach(function(tag) {
+  tagsSelected.forEach(function(tag) {
     if (tag == 'LGBTQ+') {
       url += 'LGBTQ%2B' + ',';
     } else {
@@ -1016,13 +1010,9 @@ function search() {
   getLocation().then((location) => {
     url += '&searchDistance=' + searchDistance + '&location=' + location;
 
-    let servlet = 'ksearch';
-    if (searchBarElement.value == undefined) {
-      servlet = 'search'
-    }
-    console.log(servlet + url);
+    console.log(url);
 
-    fetch('/' + servlet + url).then((response) => response.json())
+    fetch('/ksearch' + url).then((response) => response.json())
         .then(function(responseJson) {
           getEvents(responseJson, 0, 3);
         });

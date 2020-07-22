@@ -365,7 +365,7 @@ public final class KeywordSearchServletTest {
     when(response.getWriter()).thenReturn(pw);
 
     // Send the request to the servlet with param
-    when(request.getParameter("searchKeywords")).thenReturn("Protest");
+    when(request.getParameter("searchQuery")).thenReturn("Protest");
     when(request.getParameter("location")).thenReturn("Los Angeles, CA");
     when(request.getParameter("searchDistance")).thenReturn("5000");
 
@@ -414,7 +414,7 @@ public final class KeywordSearchServletTest {
     when(response.getWriter()).thenReturn(pw);
 
     // Send the request to the servlet with param
-    when(request.getParameter("searchKeywords")).thenReturn("BLM");
+    when(request.getParameter("searchQuery")).thenReturn("BLM");
     when(request.getParameter("location")).thenReturn("Los Angeles, CA");
     when(request.getParameter("searchDistance")).thenReturn("5000");
 
@@ -453,7 +453,7 @@ public final class KeywordSearchServletTest {
     when(response.getWriter()).thenReturn(pw);
 
     // Send the request to the servlet with param
-    when(request.getParameter("searchKeywords")).thenReturn("location");
+    when(request.getParameter("searchQuery")).thenReturn("location");
     when(request.getParameter("location")).thenReturn("Los Angeles, CA");
     when(request.getParameter("searchDistance")).thenReturn("5000");
 
@@ -492,7 +492,7 @@ public final class KeywordSearchServletTest {
     when(response.getWriter()).thenReturn(pw);
 
     // Send the request to the servlet with param
-    when(request.getParameter("searchKeywords")).thenReturn("support blm");
+    when(request.getParameter("searchQuery")).thenReturn("support blm");
     when(request.getParameter("location")).thenReturn("Los Angeles, CA");
     when(request.getParameter("searchDistance")).thenReturn("5000");
 
