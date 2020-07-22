@@ -14,6 +14,9 @@
 
 package com.google.sps;
 
+import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
+import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
+import com.google.sps.Recommend.EventRating;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -26,6 +29,7 @@ import org.apache.spark.ml.recommendation.ALSModel;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -45,6 +49,8 @@ public final class RecommendTest {
   private static final Map<Integer, String> HASH_NAMES = new HashMap<>();
 
   private static SparkSession spark;
+  private static final LocalServiceTestHelper helper =
+      new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
 
   // active datasets
   private static Dataset<Row> ratings;
@@ -54,6 +60,8 @@ public final class RecommendTest {
   /** Initializes the spark session and reads in data from CSV files. */
   @Before
   public void setUp() throws IOException {
+    helper.setUp();
+
     // sets up sparksession and reads in CSV data
     spark =
         SparkSession.builder()
@@ -72,6 +80,11 @@ public final class RecommendTest {
     ratings = spark.createDataFrame(ratingsRdd, EventRating.class);
 
     getEvents(EVENTS);
+  }
+
+  @After
+  public void tearDown() {
+    helper.tearDown();
   }
 
   @Test
@@ -94,7 +107,8 @@ public final class RecommendTest {
     Dataset<Row>[] splits = ratings.randomSplit(new double[] {0.8, 0.2});
     training = splits[0];
     test = splits[1];
-    ALSModel model = Recommend.trainModel(MODEL_PATH, training);
+    // ALSModel model = Recommend.trainModel(MODEL_PATH, training);
+    ALSModel model = ALSModel.load(MODEL_PATH);
 
     Dataset<Row> predictions = model.transform(test);
     double rmse = Recommend.evaluatePredictions(predictions);
