@@ -158,6 +158,14 @@ public class Utils {
   public static Entity makeUserEntity(String userId, boolean addToDatastore) {
     return makeUserEntity(userId, "", addToDatastore);
   }
+  
+  /** Orders a map from greatest to least based off its values. */
+  public static final Comparator<Map.Entry<String, Integer>> ORDER_MAP_GREATEST_TO_LEAST =
+      new Comparator<Map.Entry<String, Integer>>() {
+        public int compare(Map.Entry<String, Integer> o1, Map.Entry<String, Integer> o2) {
+          return (o2.getValue()).compareTo(o1.getValue());
+        }
+      };
 
   // comparators to apply sort to results
   public static final Comparator<Entity> ORDER_BY_NAME =

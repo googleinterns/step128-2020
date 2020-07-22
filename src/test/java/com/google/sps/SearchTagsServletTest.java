@@ -272,6 +272,48 @@ public final class SearchTagsServletTest {
   }
 
   @Test
+  public void checkNoTags() throws Exception {
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpServletResponse response = mock(HttpServletResponse.class);
+
+    StringWriter sw = new StringWriter();
+    PrintWriter pw = new PrintWriter(sw);
+
+    when(response.getWriter()).thenReturn(pw);
+
+    // Send the request to the servlet with param
+    when(request.getParameter("tags")).thenReturn("");
+    when(request.getParameter("location")).thenReturn("Los Angeles, CA");
+    when(request.getParameter("searchDistance")).thenReturn("5000");
+
+    mockUtils();
+
+    testSearchServlet.doGet(request, response);
+
+    // Get the JSON response from the server
+    String result = sw.getBuffer().toString().trim();
+
+    // Get the events we were expecting the search to return
+    // from the datastore and assemble our expected
+    List<Integer> ids = new ArrayList<Integer>(Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11));
+    List<Entity> events = fetchIDsFromDataStore(ids);
+
+    // Order results like sorting algorithm will
+    List<String> desiredOrder =
+        new ArrayList<String>(
+            Arrays.asList("0", "5", "9", "1", "6", "10", "2", "7", "11", "3", "8", "4"));
+    List<Entity> orderedEvents = orderEvents(desiredOrder, events);
+
+    // Convert expected events to JSON for comparison
+    String expected = Utils.convertToJson(orderedEvents);
+    System.out.println("Expected:");
+    for (Entity e : orderedEvents) {
+      System.out.println(e.getProperty("eventName"));
+    }
+    assertEquals(expected, result);
+  }
+
+  @Test
   public void correctNumberTagsInCommon() throws IOException {
     List<String> tagListA = new ArrayList<String>(Arrays.asList("environment", "blm", "volunteer"));
     List<String> tagListB = new ArrayList<String>(Arrays.asList("blm"));
@@ -303,7 +345,7 @@ public final class SearchTagsServletTest {
    * @param events List of events to be ordered
    * @return List containing the events ordered
    */
-  private static List<Entity> orderEvents(List<String> desiredOrder, List<Entity> events) {
+  public static List<Entity> orderEvents(List<String> desiredOrder, List<Entity> events) {
     List<Entity> orderedEvents = new ArrayList<Entity>();
     for (int o = 0; o < desiredOrder.size(); o++) {
       for (int i = 0; i < events.size(); i++) {
@@ -321,7 +363,7 @@ public final class SearchTagsServletTest {
    * @param ids List containing the ids of the entities to fetch from the Datastore
    * @return List containing the requested entities
    */
-  private static List<Entity> fetchIDsFromDataStore(List<Integer> ids) {
+  public static List<Entity> fetchIDsFromDataStore(List<Integer> ids) {
     Filter idFilter = new FilterPredicate("eventName", FilterOperator.IN, ids);
     Query query = new Query("Event").setFilter(idFilter);
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
