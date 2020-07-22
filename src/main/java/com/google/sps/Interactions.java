@@ -17,9 +17,7 @@ package com.google.sps;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.PreparedQuery.TooManyResultsException;
 import com.google.appengine.api.datastore.Query;
@@ -52,31 +50,28 @@ public class Interactions {
    * returns a map of a user's interest levels with respect to each tag. returns null if user not
    * found.
    */
-  public static Map<String, Integer> getInterestMetrics(String userID) {
-    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    Key userKey = KeyFactory.createKey("User", userID);
+  public static Map<String, Integer> buildVectorForUser(Entity userEntity) {
+    if (!userEntity.getKind().equals("User")) {
+      throw new IllegalArgumentException("entity must be of type User");
+    }
     Map<String, Integer> result = new HashMap<>();
-    Entity userEntity;
-    try {
-      userEntity = datastore.get(userKey);
-      for (String param : metrics) {
-        if (userEntity.hasProperty(param)) {
-          int score = Integer.parseInt(userEntity.getProperty(param).toString());
-          result.put(param, score);
-        } else {
-          // default val is 0
-          result.put(param, 0);
-        }
+    for (String param : metrics) {
+      if (userEntity.hasProperty(param)) {
+        int score = Integer.parseInt(userEntity.getProperty(param).toString());
+        result.put(param, score);
+      } else {
+        // default val is 0
+        result.put(param, 0);
       }
-    } catch (EntityNotFoundException e) {
-      LOGGER.warning("ERROR: email not found " + userID);
-      return null;
     }
     return result;
   }
 
   /** Simplistic method that builds a vector from an entity (subject to change). */
-  public static Map<String, Integer> buildVectorForEntity(Entity eventEntity) {
+  public static Map<String, Integer> buildVectorForEvent(Entity eventEntity) {
+    if (!eventEntity.getKind().equals("Event")) {
+      throw new IllegalArgumentException("entity must be of type Event");
+    }
     String tags = eventEntity.getProperty("tags").toString();
     if (tags == null) {
       return new HashMap<>();
@@ -184,7 +179,7 @@ public class Interactions {
     if (!userEntity.getKind().equals("User")) {
       throw new IllegalArgumentException("must be user item");
     }
-    if(score == 0) {
+    if (score == 0) {
       return;
     }
     for (String s : tags) {
