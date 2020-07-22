@@ -53,8 +53,8 @@ footer {
   height: 6%;
   justify-content: center;
   margin: 0;
-  text-align: center;
   padding: 0;
+  text-align: center;
 }
 
 footer h4, footer p {
@@ -768,28 +768,55 @@ h1 {
   width: 30vw;
 }
 
-/* login */
+/* login -- options */
 .firebaseui-background {
+  align-items: center;
+  justify-content: center;
   background-color: #ffd966;
-  height: 84vh;
+  display: flex;
+  height: 84%;
+  margin: 0;
   min-width: 100%;
+  padding: 0;
 }
 
 #firebaseui-auth-container {
-  left: 50%;
-  position: absolute;
+  padding-bottom: 15vh;
+}
+
+.firebaseui-container {
+  align-items: center;
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: center;
+  margin: 0;
+  max-width: none;
+}
+
+.firebaseui-card-content {
+  padding: 0;
+  height: 70%;
+  margin-bottom: 2vh;
+}
+
+.firebaseui-idp-list>.firebaseui-list-item {
+  margin-bottom: 1.5vh;
   text-align: center;
-  top: 25vh;
-  transform: translate(-50%, -50%);
 }
 
 .firebaseui-tos {
-  font-size: 2em;
-  line-height: 1.3em;
+  font-size: 1.2vh;
+  line-height: 1.3;
   text-align: center;
 }
 
-.firebaseui-idp-button, .firebaseui-tenant-button {
+.firebaseui-idp-button {
+  min-height: 15em;
+  min-width: 60vw;
+  padding: 1em 3em;
+}
+
+.firebaseui-tenant-button {
   min-width: 80vw;
   min-height: 15em;
 }
@@ -804,8 +831,80 @@ h1 {
   width: 5em;
 }
 
-/* tags and tag colors */
+.mdl-button {
+  font-size: .6em;
+}
 
+.firebaseui-card-footer {
+  padding: 0;
+  width: 60vw;
+}
+
+/** login -- entering credentials */
+.firebaseui-container.mdl-card {
+  overflow: visible;
+  padding: 4vw;
+}
+
+.firebaseui-card-header {
+    padding: 0;
+}
+
+.firebaseui-title {
+  font-size: 2em;
+  padding-bottom: 2em;
+    
+}
+
+.mdl-textfield--floating-label.is-dirty .mdl-textfield__label {
+  font-size: 1.7em;
+  top: .2em;
+  visibility: visible;
+}
+
+input.firebaseui-input, input.firebaseui-input-invalid {
+  direction: ltr;
+  font-size: 1.5em;
+  text-align: left;
+}
+
+.firebaseui-link {
+  font-size: 1.2vh;
+}
+
+.mdl-textfield {
+  font-size: 1vh;
+  max-width: 100%;
+  margin: 0;
+  padding: 1.2vh 0;
+  position: relative;
+}
+
+.firebaseui-tos-list {
+  list-style: none;
+  margin-left: 0;
+  padding-inline-start: 0;
+}
+
+.firebaseui-inline-list-item {
+  display: inline-block;
+  margin-left: 1.2vh;
+  margin-right: 1.2vh;
+  margin-top: 2vh;
+}
+
+.firebaseui-button {
+  display: inline-block;
+  height: 3.5vh;
+  margin-left: 1vw;
+  min-width: 8vh;
+}
+
+.mdl-button.firebaseui-button {
+  font-size: 1.2vh;
+}
+
+/* tags and tag colors */
 .tag {
   color: white;
   border-radius: 1vw;

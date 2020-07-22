@@ -1154,6 +1154,7 @@ const uiConfig = {
   tosUrl: '<your-tos-url>',
   // Privacy policy url/callback.
   privacyPolicyUrl: function() {
+    // TODO: change privacy policy url
     window.location.assign('<your-privacy-policy-url>');
   },
 };
