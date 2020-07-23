@@ -758,6 +758,17 @@ async function getLocation() {
 }
 
 /**
+ * Checks if the user has a current location and if not sets it to the default
+ */
+async function checkLocation() {
+  const location = await getLocation();
+  if (location == '') {
+    setCookie('location', '90001');
+  }
+  return Promise.resolve();
+}
+
+/**
  * Prompts the user to enter their zipcode to change their location
  */
 function changeLocation() {
@@ -984,9 +995,11 @@ async function unsaveEvent(eventId) {
  * Load all actions for the search page.
  */
 function searchLoadActions() {
-  updateSearchBar();
-  updateTagBox();
-  getSearchDistanceSettings();
+  checkLocation().then(() => {
+    updateSearchBar();
+    updateTagBox();
+    getSearchDistanceSettings();
+  });
 }
 
 /**
