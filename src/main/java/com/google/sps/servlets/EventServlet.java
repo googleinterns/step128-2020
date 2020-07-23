@@ -31,6 +31,7 @@ import com.google.sps.Utils;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -134,6 +135,10 @@ public class EventServlet extends HttpServlet {
     Gson gson = new Gson();
     List<String> tagsList = gson.fromJson(tagsStr, new TypeToken<ArrayList<String>>() {}.getType());
     eventEntity.setIndexedProperty("tags", tagsList);
+
+    Map<String, Integer> keywords = KeywordSearchServlet.getKeywords(eventName, eventDescription);
+    eventEntity.setProperty("keywords", KeywordSearchServlet.getKeywordMapKeys(keywords));
+    eventEntity.setProperty("keywordsValues", KeywordSearchServlet.getKeywordMapValues(keywords));
 
     return eventEntity;
   }

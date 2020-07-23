@@ -120,10 +120,6 @@ public class SearchServlet extends HttpServlet {
 
     // Convert events list to json
     String json = Utils.convertToJson(events);
-    System.out.println("Actual:");
-    for (Entity e : events) {
-      System.out.println(e.getProperty("eventName"));
-    }
 
     response.setContentType("application/json;");
     response.getWriter().println(json);
@@ -141,6 +137,9 @@ public class SearchServlet extends HttpServlet {
    */
   public static Double intersection(List<String> tagListA, List<String> tagListB) {
     // Catches divide by zero
+    if (tagListA == null || tagListB == null) {
+      return 0.0;
+    }
     if (tagListA.size() == 0) {
       return 0.0;
     }

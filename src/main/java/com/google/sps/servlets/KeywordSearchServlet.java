@@ -62,10 +62,21 @@ public class KeywordSearchServlet extends HttpServlet {
       new Comparator<Entity>() {
         @Override
         public int compare(Entity o1, Entity o2) {
-          List<String> o1List = (List<String>) o1.getProperty("keywords");
-          List<String> o2List = (List<String>) o2.getProperty("keywords");
-          List<Long> o1Values = (List<Long>) o1.getProperty("keywordsValues");
-          List<Long> o2Values = (List<Long>) o2.getProperty("keywordsValues");
+          List<String> o1List = null;
+          List<String> o2List = null;
+          List<Long> o1Values = null;
+          List<Long> o2Values = null;
+          if (o1 == null || o2 == null) {
+            o1List = new ArrayList<String>();
+            o2List = new ArrayList<String>();
+            o1Values = new ArrayList<Long>();
+            o2Values = new ArrayList<Long>();
+          } else {
+            o1List = (List<String>) o1.getProperty("keywords");
+            o2List = (List<String>) o2.getProperty("keywords");
+            o1Values = (List<Long>) o1.getProperty("keywordsValues");
+            o2Values = (List<Long>) o2.getProperty("keywordsValues");
+          }
           double intersectionRatioO1 = SearchServlet.intersection(o1List, searchKeywords);
           double intersectionRatioO2 = SearchServlet.intersection(o2List, searchKeywords);
           // Sort by which event has more keywords in common with the search keywords
@@ -100,23 +111,24 @@ public class KeywordSearchServlet extends HttpServlet {
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     // String search query input
-    String searchQuery = request.getParameter("searchQuery");
-
-    // List of keywords we're using to search
-    searchKeywords = new ArrayList<String>(getSeparateWords(searchQuery));
-    for (int i = 0; i < searchKeywords.size(); i++) {
-      searchKeywords.set(i, searchKeywords.get(i).toLowerCase());
-    }
-    searchKeywords.removeAll(IRRELEVANT_WORDS);
+    String searchQuery = request.getParameter("searchKeywords");
 
     Query query = null;
     // Check if there are no keywords
-    if (!searchQuery.equals("")) {
+    if (searchQuery == null || searchQuery.equals("")) {
+      searchKeywords = new ArrayList<String>();
+      query = new Query("Event");
+    } else {
+      // List of keywords we're using to search
+      searchKeywords = new ArrayList<String>(getSeparateWords(searchQuery));
+      for (int i = 0; i < searchKeywords.size(); i++) {
+        searchKeywords.set(i, searchKeywords.get(i).toLowerCase());
+      }
+      searchKeywords.removeAll(IRRELEVANT_WORDS);
+
       // Filter to check if the event has any of the keywords we're searching for
       Filter keywordsFilter = new FilterPredicate("keywords", FilterOperator.IN, searchKeywords);
       query = new Query("Event").setFilter(keywordsFilter);
-    } else {
-      query = new Query("Event");
     }
 
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
