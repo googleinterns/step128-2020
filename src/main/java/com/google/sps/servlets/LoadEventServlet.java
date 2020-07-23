@@ -82,7 +82,7 @@ public class LoadEventServlet extends HttpServlet {
       request.getRequestDispatcher("/WEB-INF/jsp/display-event.jsp").forward(request, response);
       return;
     }
-          
+
     Entity userEntity = null;
     try {
       userEntity = datastore.get(userKey);
@@ -146,15 +146,17 @@ public class LoadEventServlet extends HttpServlet {
    */
   private Key getEventKey(HttpServletRequest request) throws IllegalArgumentException, IOException {
     Key eventKey = null;
-    // Get the string from the request.
-    if (request.getParameter("Event") != null) {
-      String eventKeyString = request.getParameter("Event");
 
-      // Convert String to type Key.
-      eventKey = KeyFactory.stringToKey(eventKeyString);
-    } else {
+    if (request.getParameter("Event") == null) {
       throw new IOException("Request is missing parameter");
     }
+
+    // Get the string from the request.
+    String eventKeyString = request.getParameter("Event");
+
+    // Convert String to type Key.
+    eventKey = KeyFactory.stringToKey(eventKeyString);
+
     return eventKey;
   }
 }
