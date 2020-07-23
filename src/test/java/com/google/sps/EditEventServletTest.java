@@ -34,6 +34,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -42,6 +43,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @RunWith(PowerMockRunner.class)
 @SuppressStaticInitializationFor({"com.google.sps.Firebase"})
 @PrepareForTest({Firebase.class})
+@PowerMockIgnore("okhttp3.*")
 public final class EditEventServletTest {
   private final LocalServiceTestHelper helper =
       new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
@@ -63,6 +65,25 @@ public final class EditEventServletTest {
   @After
   public void tearDown() {
     helper.tearDown();
+  }
+
+  @Test(expected = Test.None.class)
+  public void accessEditEventPage() throws IOException, ServletException {
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    RequestDispatcher dispatcher = mock(RequestDispatcher.class);
+
+    String email = "test@example.com";
+    TestingUtil.mockFirebase(request, email);
+
+    // Full request params. The edit event form should be called.
+    when(request.getParameter("Event")).thenReturn(goalKeyString);
+    when(request.getParameter("userToken")).thenReturn(email);
+    when(request.getRequestDispatcher("/WEB-INF/jsp/edit-event-form.jsp")).thenReturn(dispatcher);
+    doNothing().when(dispatcher).forward(request, response);
+    doNothing().when(request).setAttribute(anyString(), any(Object.class));
+
+    testServlet.doGet(request, response);
   }
 
   @Test(expected = Test.None.class)
@@ -128,7 +149,7 @@ public final class EditEventServletTest {
 
     // There is no event key in the request.
     when(request.getParameter("Event")).thenReturn(goalKeyString);
-    when(request.getParameter("userToken")).thenReturn("");
+    when(request.getParameter("userToken")).thenReturn(null);
     when(request.getRequestDispatcher("/WEB-INF/jsp/access-denied.jsp")).thenReturn(dispatcher);
     doNothing().when(dispatcher).forward(request, response);
 
@@ -180,6 +201,7 @@ public final class EditEventServletTest {
     goalEntity = new Entity("Event");
     goalEntity.setProperty("eventName", "Lake Clean Up");
     goalEntity.setProperty("eventDescription", "We're cleaning up the lake");
+    goalEntity.setProperty("address", "678 Lakeview Way, Lakeside, Michigan");
     goalEntity.setProperty("streetAddress", "678 Lakeview Way");
     goalEntity.setProperty("city", "Lakeside");
     goalEntity.setProperty("state", "Michigan");
@@ -199,6 +221,9 @@ public final class EditEventServletTest {
 
     Key goalKey = goalEntity.getKey();
     goalKeyString = KeyFactory.keyToString(goalKey);
+
+    goalEntity.setProperty("eventKey", goalKeyString);
+    ds.put(goalEntity);
   }
 
   private void createUser(String user) {
