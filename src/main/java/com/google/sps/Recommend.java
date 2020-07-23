@@ -50,18 +50,18 @@ public class Recommend {
 
   /** Initializes the SparkSession. */
   private static void init() {
-      if(spark == null) {
-spark =
-        SparkSession.builder()
-            .appName("Java Spark SQL basic example")
-            .config("spark.master", "local[*]")
-            .getOrCreate();
-    spark.sparkContext().setLogLevel("ERROR");
-      }
-    
-if(datastore == null) {
-    datastore = DatastoreServiceFactory.getDatastoreService();
-}
+    if (spark == null) {
+      spark =
+          SparkSession.builder()
+              .appName("Java Spark SQL basic example")
+              .config("spark.master", "local[*]")
+              .getOrCreate();
+      spark.sparkContext().setLogLevel("ERROR");
+    }
+
+    if (datastore == null) {
+      datastore = DatastoreServiceFactory.getDatastoreService();
+    }
   }
 
   /** Rebuilds recommendation model and calculates recommendations for users. */
@@ -153,9 +153,8 @@ if(datastore == null) {
       userPrefs.remove(userId);
     }
 
-    for(String userId : userPrefs.keySet()) {
+    for (String userId : userPrefs.keySet()) {}
 
-    }
     datastore.delete(toDelete);
   }
 
