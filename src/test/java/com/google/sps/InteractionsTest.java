@@ -266,6 +266,47 @@ public final class InteractionsTest {
     }
   }
 
+  @Test
+  public void tooManyInteractions() throws IOException, ServletException {
+    UserServletTest.postEventsSetup();
+    List<Entity> allEntities = UserServletTest.callGet("", "");
+    long id = allEntities.get(0).getKey().getId();
+    String user = "dummy@example.com";
+    // make two interaction entities for the same user-event pair and put into datastore
+    Entity firstEntity = new Entity("Interaction");
+    firstEntity.setProperty("user", user);
+    firstEntity.setProperty("event", id);
+    firstEntity.setProperty("rating", Interactions.CREATE_SCORE);
+    Entity secondEntity = new Entity("Interaction");
+    secondEntity.setProperty("user", user);
+    secondEntity.setProperty("event", id);
+    secondEntity.setProperty("rating", Interactions.SAVE_SCORE);
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    datastore.put(firstEntity);
+    datastore.put(secondEntity);
+    // login and view the item
+    PowerMockito.mockStatic(Firebase.class);
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    RequestDispatcher dispatcher = mock(RequestDispatcher.class);
+    when(request.getRequestDispatcher("/WEB-INF/jsp/display-event.jsp")).thenReturn(dispatcher);
+    when(request.getParameter("userToken")).thenReturn(user);
+    PowerMockito.when(Firebase.isUserLoggedIn(anyString())).thenCallRealMethod();
+    PowerMockito.when(Firebase.authenticateUser(anyString())).thenReturn(user);
+    when(request.getParameter("Event"))
+        .thenReturn(allEntities.get(0).getProperty("eventKey").toString());
+
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    LoadEventServlet loadServlet = new LoadEventServlet();
+    loadServlet.doGet(request, response);
+
+    try {
+      // previous two items should have been deleted
+      assertExpectedInteraction(user, id, Interactions.VIEW_SCORE);
+    } catch (TooManyResultsException e) {
+      fail();
+    }
+  }
+
   /** Makes sure interactions have been recorded correctly in datastore. */
   public static void assertExpectedInteraction(String userId, long eventId, int value) {
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
