@@ -79,7 +79,14 @@ public final class RecommendTest {
     test();
   }
 
-  /** 
+  private void getUsersAndInteractions(String usersFile, String ratingsFile)
+      throws FileNotFoundException {
+    Scanner scan = new Scanner(new File(usersFile));
+
+    scan.close();
+  }
+
+  /**
    * Adds events to datastore from a CSV file.
    *
    * @param path Location of CSV file containing event information.
