@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.logging.Logger;
 import org.apache.spark.ml.evaluation.RegressionEvaluator;
 import org.apache.spark.ml.recommendation.ALS;
 import org.apache.spark.ml.recommendation.ALSModel;
@@ -89,7 +90,7 @@ public class Recommend {
       long id = e.getKey().getId();
       eventInfo.put(id, Interactions.buildVectorForEvent(e));
       eventIdHash.put((Long.toString(id)).hashCode(), id);
-      userLocations.put(id, e.getProperty("address").toString());
+      eventLocations.put(id, e.getProperty("address").toString());
     }
 
     List<Key> toDelete = new ArrayList<>();
