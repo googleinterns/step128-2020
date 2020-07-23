@@ -78,6 +78,7 @@ public final class LoadEventServletTest {
 
     // Display-event JSP should be called. If not, test will fail.
     when(request.getParameter("Event")).thenReturn(goalKeyString);
+    when(request.getParameter("userToken")).thenReturn(email);
     when(request.getRequestDispatcher("/WEB-INF/jsp/display-event.jsp")).thenReturn(dispatcher);
     doNothing().when(dispatcher).forward(request, response);
 
@@ -170,6 +171,70 @@ public final class LoadEventServletTest {
     // will fail.
     when(request.getParameter("Event")).thenReturn("agR0ZXN0cgsLEgVFdmVudBgBDZ");
     when(request.getRequestDispatcher("/WEB-INF/jsp/event-not-found.jsp")).thenReturn(dispatcher);
+    doNothing().when(dispatcher).forward(request, response);
+
+    try {
+      testServlet.doGet(request, response);
+    } catch (Exception e) {
+      fail();
+    }
+  }
+
+  @Test(expected = Test.None.class)
+  public void eventLoadNotLoggedIn() throws IOException, ServletException {
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    RequestDispatcher dispatcher = mock(RequestDispatcher.class);
+
+    String email = "test@example.com";
+    TestingUtil.mockFirebase(request, email);
+
+    // Not logged in. Display-event JSP should be called. If not, test will fail.
+    when(Firebase.isUserLoggedIn(anyString())).thenReturn(false);
+    when(request.getParameter("Event")).thenReturn(goalKeyString);
+    when(request.getRequestDispatcher("/WEB-INF/jsp/display-event.jsp")).thenReturn(dispatcher);
+    doNothing().when(dispatcher).forward(request, response);
+
+    try {
+      testServlet.doGet(request, response);
+    } catch (Exception e) {
+      fail();
+    }
+  }
+
+  @Test(expected = Test.None.class)
+  public void eventLoadNoUserToken() throws IOException, ServletException {
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    RequestDispatcher dispatcher = mock(RequestDispatcher.class);
+
+    String email = "test@example.com";
+    TestingUtil.mockFirebase(request, email);
+
+    //  Not userToken. Display-event JSP should be called. If not, test will fail.
+    when(request.getParameter("Event")).thenReturn(goalKeyString);
+    when(request.getRequestDispatcher("/WEB-INF/jsp/display-event.jsp")).thenReturn(dispatcher);
+    doNothing().when(dispatcher).forward(request, response);
+
+    try {
+      testServlet.doGet(request, response);
+    } catch (Exception e) {
+      fail();
+    }
+  }
+
+  @Test(expected = Test.None.class)
+  public void eventLoadUserNotCreated() throws IOException, ServletException {
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    RequestDispatcher dispatcher = mock(RequestDispatcher.class);
+
+    String email = "notcreated@example.com";
+    TestingUtil.mockFirebase(request, email);
+
+    // User not created. Display-event JSP should be called. If not, test will fail.
+    when(request.getParameter("Event")).thenReturn(goalKeyString);
+    when(request.getRequestDispatcher("/WEB-INF/jsp/display-event.jsp")).thenReturn(dispatcher);
     doNothing().when(dispatcher).forward(request, response);
 
     try {
