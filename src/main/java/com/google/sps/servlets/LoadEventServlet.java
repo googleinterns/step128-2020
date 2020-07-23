@@ -65,7 +65,7 @@ public class LoadEventServlet extends HttpServlet {
               userEntity = Utils.makeUserEntity(userID, false);
               LOGGER.info("No entity found for " + userID + ", creating one now.");
             }
-            int delta =
+            float delta =
                 Interactions.recordInteraction(
                     userID, keyRequested.getId(), Interactions.VIEW_SCORE, false);
             Interactions.updatePrefs(userEntity, tags, delta);
