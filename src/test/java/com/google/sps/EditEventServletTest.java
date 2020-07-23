@@ -71,7 +71,7 @@ public final class EditEventServletTest {
   }
 
   @Test
-  public void updateEvent() throws IOException, ServletException {
+  public void updateEventField() throws IOException, ServletException {
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
 
@@ -102,6 +102,42 @@ public final class EditEventServletTest {
     Entity postedEntity = datastore.prepare(query).asSingleEntity();
 
     assertEquals("UPDATED: Lake Clean Up", postedEntity.getProperty("eventName"));
+  }
+
+  @Test
+  public void updateMultipleEventFields() throws IOException, ServletException {
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpServletResponse response = mock(HttpServletResponse.class);
+
+    String email = "test@example.com";
+    TestingUtil.mockFirebase(request, email);
+
+    // Full request params. The edit event form should be called.
+    when(request.getParameter("key")).thenReturn(goalKeyString);
+    when(request.getParameter("userToken")).thenReturn(email);
+    when(request.getParameter("event-name")).thenReturn("UPDATED: Lake Clean Up");
+    when(request.getParameter("event-description")).thenReturn("We're cleaning up the lake");
+    when(request.getParameter("street-address")).thenReturn("678 Lakeview Way");
+    when(request.getParameter("city")).thenReturn("Lakeside");
+    when(request.getParameter("state")).thenReturn("Michigan");
+    when(request.getParameter("date")).thenReturn("2020-05-17");
+    when(request.getParameter("start-time")).thenReturn("14:00");
+    when(request.getParameter("end-time")).thenReturn("");
+    when(request.getParameter("cover-photo")).thenReturn("/img-2030121");
+    String[] tags = {"environment, volunteer"};
+    when(request.getParameter("all-tags")).thenReturn(Utils.convertToJson(tags));
+
+    testServlet.doPost(request, response);
+
+    Key key = KeyFactory.stringToKey(goalKeyString);
+    Query query = new Query("Event", key);
+
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    Entity postedEntity = datastore.prepare(query).asSingleEntity();
+
+    // Assert multiple fields have been updated.
+    assertEquals(Arrays.asList(tags), postedEntity.getProperty("tags"));
+    assertEquals("", postedEntity.getProperty("endTime"));
   }
 
   @Test(expected = IOException.class)
