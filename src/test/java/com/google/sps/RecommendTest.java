@@ -14,11 +14,14 @@
 
 package com.google.sps;
 
+import static com.google.appengine.api.datastore.FetchOptions.Builder.withLimit;
+
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
+import com.google.appengine.api.datastore.Query;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.sps.Recommend.EventRating;
@@ -76,15 +79,21 @@ public final class RecommendTest {
   @Test
   public void doTests() throws IOException {
 
-    // test();
     addInfoToDatastore(RATINGS, EVENTS);
+    DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
+    System.out.println(ds.prepare(new Query("Interaction")).countEntities(withLimit(250)));
+    System.out.println(ds.prepare(new Query("Event")).countEntities(withLimit(250)));
+    System.out.println(ds.prepare(new Query("User")).countEntities(withLimit(250)));
+    Recommend.calculateRecommend();
   }
 
+  /** Adds all info from ratings CSV and events CSV file to datastore */
   private void addInfoToDatastore(String ratingsFile, String eventsFile)
       throws FileNotFoundException {
     final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     final Map<Long, List<String>> eventInfo = new HashMap<>();
     final Map<String, Entity> users = new HashMap<>();
+    final Map<Long, Long> fakeAndRealIds = new HashMap<>();
     // scan events and event data
     Scanner scan = new Scanner(new File(eventsFile));
     while (scan.hasNext()) {
@@ -95,6 +104,11 @@ public final class RecommendTest {
       }
     }
     scan.close();
+    for (Entity entity : datastore.prepare(new Query("Event")).asIterable()) {
+      long id = entity.getKey().getId();
+      long otherId = Long.parseLong(entity.getProperty("eventId").toString());
+      fakeAndRealIds.put(otherId, id);
+    }
     // scan ratings and save users
     scan = new Scanner(new File(ratingsFile));
     while (scan.hasNext()) {
@@ -104,7 +118,10 @@ public final class RecommendTest {
         if (tags != null) {
           float delta =
               Interactions.recordInteraction(
-                  interaction.userId, interaction.eventId, interaction.rating, true);
+                  interaction.userId,
+                  fakeAndRealIds.get(interaction.eventId),
+                  interaction.rating,
+                  true);
 
           Entity userEntity = users.get(interaction.userId);
           if (userEntity == null) {
@@ -165,12 +182,12 @@ public final class RecommendTest {
         }
       }
       // Create an event entity (other unneeded fields are omitted)
-      Key eventKey = KeyFactory.createKey("User", eventId);
-      eventEntity = new Entity(eventKey);
+      eventEntity = new Entity("Event");
       eventEntity.setProperty("eventName", eventName);
       eventEntity.setProperty("eventDescription", eventDesc);
       eventEntity.setProperty("address", ""); // TODO
       eventEntity.setIndexedProperty("tags", tagsList);
+      eventEntity.setProperty("eventId", eventId);
       // save tag info for easier access later
       eventInfo.put(eventId, tagsList);
     } catch (NumberFormatException e) {

@@ -67,7 +67,7 @@ public class Recommend {
     final Map<Integer, Long> eventIdHash = new HashMap<>();
 
     // keep track of metrics and location for each user and event
-    final Map<String, Map<String, Integer>> userPrefs = new HashMap<>();
+    final Map<String, Map<String, Float>> userPrefs = new HashMap<>();
     final Map<Long, Map<String, Integer>> eventInfo = new HashMap<>();
     final Map<String, String> userLocations = new HashMap<>();
     final Map<Long, String> eventLocations = new HashMap<>();
@@ -104,7 +104,7 @@ public class Recommend {
     for (Row recRow : userRecsList) {
       String userId = userIdHash.get(recRow.getInt(0));
       List<Row> predScores = recRow.getList(1);
-      Map<String, Integer> userVector = userPrefs.get(userId);
+      Map<String, Float> userVector = userPrefs.get(userId);
       String userLocation = userLocations.get(userId);
 
       Map<Double, List<Long>> userTopRecs = new TreeMap<>(SCORE_DESCENDING);
@@ -113,15 +113,15 @@ public class Recommend {
         float predScore = itemRow.getFloat(1);
 
         // calculate score for this item
-        int dotProduct = Interactions.dotProduct(userVector, eventInfo.get(eventId));
+        float dotProduct = Interactions.dotProduct(userVector, eventInfo.get(eventId));
         double totalScore = dotProduct * predScore; // todo: calculate
 
         // adjust scaling based on user's past interaction with event
         Entity interactionEntity = Interactions.hasInteraction(userId, eventId);
         if (interactionEntity == null) {
         } else {
-          int interactionScore =
-              Integer.parseInt(interactionEntity.getProperty("rating").toString());
+          float interactionScore =
+              Float.parseFloat(interactionEntity.getProperty("rating").toString());
           if (interactionScore >= Interactions.SAVE_SCORE) {
             totalScore *= ALREADY_SAVED;
           } else if (interactionScore == Interactions.VIEW_SCORE) {
