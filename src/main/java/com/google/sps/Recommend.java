@@ -50,21 +50,24 @@ public class Recommend {
 
   /** Initializes the SparkSession. */
   private static void init() {
-    spark =
+      if(spark == null) {
+spark =
         SparkSession.builder()
             .appName("Java Spark SQL basic example")
             .config("spark.master", "local[*]")
             .getOrCreate();
     spark.sparkContext().setLogLevel("ERROR");
-
+      }
+    
+if(datastore == null) {
     datastore = DatastoreServiceFactory.getDatastoreService();
+}
   }
 
   /** Rebuilds recommendation model and calculates recommendations for users. */
   public static void calculateRecommend() throws IOException {
-    if (spark == null || datastore == null) {
-      init();
-    }
+    init();
+
     // keep track of ids and hashcodes -- spark requires numeric entries
     final Map<Integer, String> userIdHash = new HashMap<>();
     final Map<Integer, Long> eventIdHash = new HashMap<>();
@@ -101,7 +104,6 @@ public class Recommend {
     List<Key> toDelete = new ArrayList<>();
     Dataset<Row> ratings =
         makeDataframeAndPreprocess(userIdHash.keySet(), eventIdHash.keySet(), toDelete);
-    // ratings.show();
 
     // compute recommendations from matrix factorization
     ALSModel model = trainModel(null, ratings);
@@ -148,27 +150,13 @@ public class Recommend {
       }
 
       saveRecsToDatastore(userId, userTopRecs);
+      userPrefs.remove(userId);
+    }
+
+    for(String userId : userPrefs.keySet()) {
+
     }
     datastore.delete(toDelete);
-  }
-
-  private static void saveRecsToDatastore(String userId, Map<Double, List<Long>> recs) {
-    List<Long> recsList = new ArrayList<>();
-    for (Double score : recs.keySet()) {
-      for (Long l : recs.get(score)) {
-        recsList.add(l);
-      }
-    }
-    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    Key recKey = KeyFactory.createKey("Recommendation", userId);
-    Entity recEntity = null;
-    try {
-      recEntity = datastore.get(recKey);
-    } catch (EntityNotFoundException e) {
-      recEntity = new Entity(recKey);
-    }
-    recEntity.setProperty("recs", recsList);
-    datastore.put(recEntity);
   }
 
   /**
@@ -237,6 +225,26 @@ public class Recommend {
       toDelete.add(itr.next().getKey());
     }
     return spark.createDataFrame(ratings, EventRating.class);
+  }
+
+  /** Stores a recommendation datastore entry for the given user ID. */
+  private static void saveRecsToDatastore(String userId, Map<Double, List<Long>> recs) {
+    List<Long> recsList = new ArrayList<>();
+    for (Double score : recs.keySet()) {
+      for (Long l : recs.get(score)) {
+        recsList.add(l);
+      }
+    }
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    Key recKey = KeyFactory.createKey("Recommendation", userId);
+    Entity recEntity = null;
+    try {
+      recEntity = datastore.get(recKey);
+    } catch (EntityNotFoundException e) {
+      recEntity = new Entity(recKey);
+    }
+    recEntity.setProperty("recs", recsList);
+    datastore.put(recEntity);
   }
 
   public static class EventRating implements Serializable {
