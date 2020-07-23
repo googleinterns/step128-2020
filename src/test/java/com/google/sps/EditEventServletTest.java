@@ -56,7 +56,8 @@ public final class EditEventServletTest {
     testServlet = new EditEventServlet();
 
     createGoalEntity();
-    createUsers();
+    createUser("test");
+    createUser("wrong");
   }
 
   @After
@@ -70,11 +71,11 @@ public final class EditEventServletTest {
     HttpServletResponse response = mock(HttpServletResponse.class);
     RequestDispatcher dispatcher = mock(RequestDispatcher.class);
 
-    // There are no request parameters.
+    // There are no request parameters. If this JSP is not called, exception not handled correctly.
     when(request.getRequestDispatcher("/WEB-INF/jsp/event-not-found.jsp")).thenReturn(dispatcher);
     doNothing().when(dispatcher).forward(request, response);
 
-    // Should handle IllegalArgumentException.
+    // Should handle IOException.
     testServlet.doGet(request, response);
   }
 
@@ -173,7 +174,7 @@ public final class EditEventServletTest {
     testServlet.doGet(request, response);
   }
 
-  public void createGoalEntity() {
+  private void createGoalEntity() {
     String[] tags = {"environment"};
 
     goalEntity = new Entity("Event");
@@ -200,18 +201,14 @@ public final class EditEventServletTest {
     goalKeyString = KeyFactory.keyToString(goalKey);
   }
 
-  public void createUsers() {
-    Key userKey = KeyFactory.createKey("User", "test@example.com");
+  private void createUser(String user) {
+    String email = user + "@example.com";
+    Key userKey = KeyFactory.createKey("User", email);
+
     Entity entity = new Entity(userKey);
+    entity.setProperty("firebaseID", email);
 
-    entity.setProperty("firebaseID", "test@example.com");
     DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
-    ds.put(entity);
-
-    Key userKeyWrong = KeyFactory.createKey("User", "wrong@example.com");
-    Entity entityWrong = new Entity(userKeyWrong);
-
-    entityWrong.setProperty("firebaseID", "wrong@example.com");
     ds.put(entity);
   }
 }
