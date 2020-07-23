@@ -81,9 +81,19 @@ public final class RecommendTest {
 
   private void getUsersAndInteractions(String usersFile, String ratingsFile)
       throws FileNotFoundException {
+    final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     Scanner scan = new Scanner(new File(usersFile));
+    scan.nextLine(); // flush the header line
 
+    Map<String, Entity> usersWithId = new HashMap<>();
+    while(scan.hasNext()) {
+    Key userKey = KeyFactory.createKey("User", "");
+    }
     scan.close();
+  }
+
+  private Entity parseUsers(String line) {
+
   }
 
   /**
@@ -92,8 +102,8 @@ public final class RecommendTest {
    * @param path Location of CSV file containing event information.
    */
   private void addEventsToDatastore(String path) throws FileNotFoundException {
+    final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     Scanner scan = new Scanner(new File(path));
-    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     while (scan.hasNext()) {
       String line = scan.nextLine();
       Entity event = parseEventEntity(line);
