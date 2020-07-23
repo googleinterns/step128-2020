@@ -14,6 +14,8 @@
 
 package com.google.sps;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
 
 import com.google.appengine.api.datastore.DatastoreService;
@@ -21,6 +23,7 @@ import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
+import com.google.appengine.api.datastore.Query;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.sps.servlets.EditEventServlet;
@@ -67,6 +70,57 @@ public final class EditEventServletTest {
     helper.tearDown();
   }
 
+  @Test
+  public void updateEvent() throws IOException, ServletException {
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpServletResponse response = mock(HttpServletResponse.class);
+
+    String email = "test@example.com";
+    TestingUtil.mockFirebase(request, email);
+
+    // Full request params. The edit event form should be called.
+    when(request.getParameter("key")).thenReturn(goalKeyString);
+    when(request.getParameter("userToken")).thenReturn(email);
+    when(request.getParameter("event-name")).thenReturn("UPDATED: Lake Clean Up");
+    when(request.getParameter("event-description")).thenReturn("We're cleaning up the lake");
+    when(request.getParameter("street-address")).thenReturn("678 Lakeview Way");
+    when(request.getParameter("city")).thenReturn("Lakeside");
+    when(request.getParameter("state")).thenReturn("Michigan");
+    when(request.getParameter("date")).thenReturn("2020-05-17");
+    when(request.getParameter("start-time")).thenReturn("14:00");
+    when(request.getParameter("end-time")).thenReturn("15:00");
+    when(request.getParameter("cover-photo")).thenReturn("/img-2030121");
+    String[] tags = {"environment"};
+    when(request.getParameter("all-tags")).thenReturn(Utils.convertToJson(tags));
+
+    testServlet.doPost(request, response);
+
+    Key key = KeyFactory.stringToKey(goalKeyString);
+    Query query = new Query("Event", key);
+
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    Entity postedEntity = datastore.prepare(query).asSingleEntity();
+
+    assertEquals("UPDATED: Lake Clean Up", postedEntity.getProperty("eventName"));
+  }
+
+  @Test(expected = IOException.class)
+  public void updateAttemptNotLoggedIn() throws IOException, ServletException {
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpServletResponse response = mock(HttpServletResponse.class);
+
+    String email = "notloggedin@example.com";
+    TestingUtil.mockFirebase(request, email);
+
+    // Response should be called.
+    when(request.getParameter("userToken")).thenReturn(email);
+    when(Firebase.isUserLoggedIn(anyString())).thenReturn(false);
+    doNothing().when(response).sendRedirect(anyString());
+
+    // IOException should be thrown.
+    testServlet.doPost(request, response);
+  }
+
   @Test(expected = Test.None.class)
   public void accessEditEventPage() throws IOException, ServletException {
     HttpServletRequest request = mock(HttpServletRequest.class);
@@ -83,7 +137,11 @@ public final class EditEventServletTest {
     doNothing().when(dispatcher).forward(request, response);
     doNothing().when(request).setAttribute(anyString(), any(Object.class));
 
-    testServlet.doGet(request, response);
+    try {
+      testServlet.doGet(request, response);
+    } catch (Exception e) {
+      fail();
+    }
   }
 
   @Test(expected = Test.None.class)
@@ -92,12 +150,19 @@ public final class EditEventServletTest {
     HttpServletResponse response = mock(HttpServletResponse.class);
     RequestDispatcher dispatcher = mock(RequestDispatcher.class);
 
-    // There are no request parameters. If this JSP is not called, exception not handled correctly.
+    String email = "test@example.com";
+    TestingUtil.mockFirebase(request, email);
+
+    // No request params. Should invoke event not found JSP- If not error will be thrown.
     when(request.getRequestDispatcher("/WEB-INF/jsp/event-not-found.jsp")).thenReturn(dispatcher);
     doNothing().when(dispatcher).forward(request, response);
 
     // Should handle IOException.
-    testServlet.doGet(request, response);
+    try {
+      testServlet.doGet(request, response);
+    } catch (Exception e) {
+      fail();
+    }
   }
 
   @Test(expected = Test.None.class)
@@ -109,14 +174,18 @@ public final class EditEventServletTest {
     String email = "test@example.com";
     TestingUtil.mockFirebase(request, email);
 
-    // There is a wrong event key in the request.
+    // Invalid key. Should invoke event not found JSP- If not error will be thrown.
     when(request.getParameter("Event")).thenReturn("abcde");
     when(request.getParameter("userToken")).thenReturn(email);
     when(request.getRequestDispatcher("/WEB-INF/jsp/event-not-found.jsp")).thenReturn(dispatcher);
     doNothing().when(dispatcher).forward(request, response);
 
     // Should handle IllegalArgumentException.
-    testServlet.doGet(request, response);
+    try {
+      testServlet.doGet(request, response);
+    } catch (Exception e) {
+      fail();
+    }
   }
 
   @Test(expected = Test.None.class)
@@ -128,14 +197,18 @@ public final class EditEventServletTest {
     String email = "test@example.com";
     TestingUtil.mockFirebase(request, email);
 
-    // There is no event key in the request.
+    // No event key. Should invoke event not found JSP- If not error will be thrown.
     when(request.getParameter("Event")).thenReturn("");
     when(request.getParameter("userToken")).thenReturn(email);
     when(request.getRequestDispatcher("/WEB-INF/jsp/event-not-found.jsp")).thenReturn(dispatcher);
     doNothing().when(dispatcher).forward(request, response);
 
     // Should handle IllegalArgumentException.
-    testServlet.doGet(request, response);
+    try {
+      testServlet.doGet(request, response);
+    } catch (Exception e) {
+      fail();
+    }
   }
 
   @Test(expected = Test.None.class)
@@ -147,14 +220,42 @@ public final class EditEventServletTest {
     String email = "test@example.com";
     TestingUtil.mockFirebase(request, email);
 
-    // There is no event key in the request.
+    // No userToken. Should invoke access denied JSP- If not error will be thrown.
     when(request.getParameter("Event")).thenReturn(goalKeyString);
     when(request.getParameter("userToken")).thenReturn(null);
     when(request.getRequestDispatcher("/WEB-INF/jsp/access-denied.jsp")).thenReturn(dispatcher);
     doNothing().when(dispatcher).forward(request, response);
 
-    // Should handle IllegalArgumentException.
-    testServlet.doGet(request, response);
+    // Should handle IOException.
+    try {
+      testServlet.doGet(request, response);
+    } catch (Exception e) {
+      fail();
+    }
+  }
+
+  @Test(expected = Test.None.class)
+  public void exceptionHandelingForNotLoggedIn() throws IOException, ServletException {
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    RequestDispatcher dispatcher = mock(RequestDispatcher.class);
+
+    String email = "notloggedin@example.com";
+    TestingUtil.mockFirebase(request, email);
+
+    // Should invoke access denied JSP- If not error will be thrown.
+    when(request.getParameter("Event")).thenReturn(goalKeyString);
+    when(request.getParameter("userToken")).thenReturn(email);
+    when(Firebase.isUserLoggedIn(anyString())).thenReturn(false);
+    when(request.getRequestDispatcher("/WEB-INF/jsp/access-denied.jsp")).thenReturn(dispatcher);
+    doNothing().when(dispatcher).forward(request, response);
+
+    // Should handle IOException.
+    try {
+      testServlet.doGet(request, response);
+    } catch (Exception e) {
+      fail();
+    }
   }
 
   @Test(expected = Test.None.class)
@@ -166,14 +267,17 @@ public final class EditEventServletTest {
     String email = "wrong@example.com";
     TestingUtil.mockFirebase(request, email);
 
-    // There is no event key in the request.
+    // Should invoke access denied JSP- If not error will be thrown.
     when(request.getParameter("Event")).thenReturn(goalKeyString);
     when(request.getParameter("userToken")).thenReturn(email);
     when(request.getRequestDispatcher("/WEB-INF/jsp/access-denied.jsp")).thenReturn(dispatcher);
     doNothing().when(dispatcher).forward(request, response);
 
-    // Should handle IllegalArgumentException.
-    testServlet.doGet(request, response);
+    try {
+      testServlet.doGet(request, response);
+    } catch (Exception e) {
+      fail();
+    }
   }
 
   @Test(expected = Test.None.class)
@@ -185,14 +289,18 @@ public final class EditEventServletTest {
     String email = "newemail@example.com";
     TestingUtil.mockFirebase(request, email);
 
-    // There is no event key in the request.
+    // Should invoke access denied JSP- If not error will be thrown.
     when(request.getParameter("Event")).thenReturn(goalKeyString);
     when(request.getParameter("userToken")).thenReturn(email);
     when(request.getRequestDispatcher("/WEB-INF/jsp/access-denied.jsp")).thenReturn(dispatcher);
     doNothing().when(dispatcher).forward(request, response);
 
-    // Should handle IllegalArgumentException.
-    testServlet.doGet(request, response);
+    // Should handle IOException.
+    try {
+      testServlet.doGet(request, response);
+    } catch (Exception e) {
+      fail();
+    }
   }
 
   private void createGoalEntity() {
