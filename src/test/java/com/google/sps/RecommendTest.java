@@ -26,7 +26,6 @@ import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
-import com.google.sps.Recommend.EventRating;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -35,11 +34,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
-import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.ml.recommendation.ALSModel;
-import org.apache.spark.sql.Dataset;
-import org.apache.spark.sql.Row;
-import org.apache.spark.sql.SparkSession;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -54,18 +48,9 @@ public final class RecommendTest {
   private static final String EVENTS = "src/test/data/events.csv";
   private static final String MODEL_PATH = "src/test/data/eventsmodel";
 
-  // dataframes only take numeric info, so event items, user ids are mapped to their hashcodes for
-  // printing info
-  private static final Map<Integer, Event> EVENT_INFO = new HashMap<>();
-  private static final Map<Integer, String> HASH_NAMES = new HashMap<>();
-
+  private static final Map<Long, Event> EVENT_INFO = new HashMap<>();
   private static final LocalServiceTestHelper helper =
       new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
-
-  // active datasets
-  private static Dataset<Row> ratings;
-  private static Dataset<Row> training;
-  private static Dataset<Row> test;
 
   /** Initializes the spark session and reads in data from CSV files. */
   @Before
@@ -92,7 +77,7 @@ public final class RecommendTest {
       System.out.println(entity.getKey().getName());
       List<Long> userRecs = (List<Long>) entity.getProperty("recs");
       for (int i = 0; i < userRecs.size() && i < 10; i++) {
-        System.out.println("  " + EVENT_INFO.get(Long.toString(userRecs.get(i)).hashCode()));
+        System.out.println("  " + EVENT_INFO.get(userRecs.get(i)));
       }
       System.out.println();
     }
@@ -102,28 +87,22 @@ public final class RecommendTest {
   private void addInfoToDatastore(String ratingsFile, String eventsFile)
       throws FileNotFoundException {
     final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    final Map<Long, List<String>> eventInfo = new HashMap<>();
     final Map<String, Entity> users = new HashMap<>();
     // scan events and event data
     Scanner scan = new Scanner(new File(eventsFile));
     while (scan.hasNext()) {
-      String line = scan.nextLine();
-      Entity event = parseEventEntity(line, eventInfo);
+      Entity event = parseEventEntity(scan.nextLine());
       if (event != null) {
         datastore.put(event);
-      }
-      Event eventObj = Event.parseEvent(line);
-      if (eventObj != null) {
-        EVENT_INFO.put((Long.toString(eventObj.getId())).hashCode(), eventObj);
       }
     }
     scan.close();
     // scan ratings and save users
     scan = new Scanner(new File(ratingsFile));
     while (scan.hasNext()) {
-      Interaction interaction = parseInteraction(scan.nextLine());
+      Interaction interaction = Interaction.parseInteraction(scan.nextLine());
       if (interaction != null) {
-        List<String> tags = eventInfo.get(interaction.eventId);
+        List<String> tags = EVENT_INFO.get(interaction.eventId).getTags();
         if (tags != null) {
           float delta =
               Interactions.recordInteraction(
@@ -139,34 +118,14 @@ public final class RecommendTest {
         }
       }
     }
+    scan.close();
     for (String id : users.keySet()) {
       datastore.put(users.get(id));
     }
   }
 
-  /** Parses one line from ratings.csv and returns it as an Interaction object. */
-  private Interaction parseInteraction(String line) throws FileNotFoundException {
-    String[] fields = line.split(",");
-    if (fields.length < 3) {
-      return null;
-    }
-    try {
-      String userId = fields[0];
-      float rating = Float.parseFloat(fields[1]);
-      long eventId = Long.parseLong(fields[2]);
-      return new Interaction(userId, eventId, rating);
-    } catch (NumberFormatException e) {
-      return null;
-    }
-  }
-
-  /**
-   * Parses one line from events.csv and returns as an entity.
-   *
-   * @param input A single input line.
-   * @param eventInfo A place to keep track of event Ids and corresponding tags.
-   */
-  private Entity parseEventEntity(String input, Map<Long, List<String>> eventInfo) {
+  /** Parses one line from events.csv and returns as an entity. */
+  private Entity parseEventEntity(String input) {
     String[] fields = input.split(",");
     if (fields.length < 4) {
       return null;
@@ -187,102 +146,21 @@ public final class RecommendTest {
           tagsList.add(t);
         }
       }
+      Event event = new Event(eventId, eventName, eventDesc, tagsList);
+      EVENT_INFO.put(eventId, event);
+
       // Create an event entity (other unneeded fields are omitted)
       Key eventKey = KeyFactory.createKey("Event", eventId);
       eventEntity = new Entity(eventKey);
       eventEntity.setProperty("eventName", eventName);
       eventEntity.setProperty("eventDescription", eventDesc);
-      eventEntity.setProperty("address", ""); // TODO
+      eventEntity.setProperty("address", "location"); // TODO
       eventEntity.setIndexedProperty("tags", tagsList);
       // save tag info for easier access later
-      eventInfo.put(eventId, tagsList);
     } catch (NumberFormatException e) {
       eventEntity = null;
     }
     return eventEntity;
-  }
-
-  /** Builds and evaluates model once, printing all relevant results. */
-  public double test() throws IOException {
-    SparkSession spark =
-        SparkSession.builder()
-            .appName("Java Spark SQL basic example")
-            .config("spark.master", "local[*]")
-            .getOrCreate();
-    spark.sparkContext().setLogLevel("ERROR");
-
-    JavaRDD<EventRating> ratingsRdd =
-        spark
-            .read()
-            .textFile(RATINGS)
-            .javaRDD()
-            .map(EventRating::parseRating)
-            .filter(rating -> rating != null);
-    ratings = spark.createDataFrame(ratingsRdd, EventRating.class);
-
-    getEvents(EVENTS);
-
-    Dataset<Row>[] splits = ratings.randomSplit(new double[] {0.8, 0.2});
-    training = splits[0];
-    test = splits[1];
-    // ALSModel model = Recommend.trainModel(MODEL_PATH, training);
-    ALSModel model = ALSModel.load(MODEL_PATH);
-
-    Dataset<Row> predictions = model.transform(test);
-    double rmse = Recommend.evaluatePredictions(predictions);
-
-    Dataset<Row> userRecs = model.recommendForAllUsers(10);
-
-    List<Row> predList = predictions.collectAsList();
-    List<Row> recsList = userRecs.collectAsList();
-    printRecs(recsList);
-    printPreds(predList);
-    System.out.println("Root-mean-square error = " + rmse);
-    return rmse;
-  }
-
-  /** Prints and parses relevant information from predicitions dataframe. */
-  private void printPreds(List<Row> preds) {
-    for (Row r : preds) {
-      int eventHash = r.getInt(0);
-      float actual = r.getFloat(1);
-      int userHash = r.getInt(2);
-      float predicted = r.getFloat(3);
-      System.out.println(
-          EVENT_INFO.get(eventHash).getEventName()
-              + "  "
-              + HASH_NAMES.get(userHash)
-              + " predicted: "
-              + predicted
-              + " actual: "
-              + actual);
-    }
-  }
-
-  /** Prints and parses relevant information from recommendations dataframe. */
-  private void printRecs(List<Row> recs) {
-    for (Row r : recs) {
-      List<Row> o = r.getList(1);
-      int hash = r.getInt(0);
-      System.out.println(HASH_NAMES.get(hash));
-      for (Row row : o) {
-        System.out.println(
-            "  " + EVENT_INFO.get(row.getInt(0)).getEventName() + "   " + row.getFloat(1));
-      }
-    }
-  }
-
-  /** Builds event list from CSV file. */
-  private void getEvents(String path) throws FileNotFoundException {
-    Scanner scan = new Scanner(new File(path));
-    while (scan.hasNext()) {
-      String line = scan.nextLine();
-      Event event = Event.parseEvent(line);
-      if (event != null) {
-        EVENT_INFO.put((Long.toString(event.getId())).hashCode(), event);
-      }
-    }
-    scan.close();
   }
 
   private static class Interaction {
@@ -295,40 +173,10 @@ public final class RecommendTest {
       this.eventId = eventId;
       this.rating = rating;
     }
-  }
 
-  /** Utility class for parsing CSV and converting it to dataframe-friendly format. */
-  public static class EventRating {
-    private int userId;
-    private int eventId;
-    private float rating;
-
-    public EventRating() {}
-
-    /** Creates an EventRating object and saves it to the hashcode - userId mapping. */
-    public EventRating(String userId, long eventId, float rating) {
-      this.userId = userId.hashCode(); // all fields must be numeric
-      this.eventId = (Long.toString(eventId)).hashCode();
-      this.rating = rating;
-
-      HASH_NAMES.put(this.userId, userId);
-    }
-
-    public int getUserId() {
-      return userId;
-    }
-
-    public int getEventId() {
-      return eventId;
-    }
-
-    public float getRating() {
-      return rating;
-    }
-
-    /** Creates and returns EventRating object from a CSV input line. */
-    public static EventRating parseRating(String str) {
-      String[] fields = str.split(",");
+    /** Parses one line from ratings.csv and returns it as an Interaction object. */
+    private static Interaction parseInteraction(String line) throws FileNotFoundException {
+      String[] fields = line.split(",");
       if (fields.length < 3) {
         return null;
       }
@@ -336,7 +184,7 @@ public final class RecommendTest {
         String userId = fields[0];
         float rating = Float.parseFloat(fields[1]);
         long eventId = Long.parseLong(fields[2]);
-        return new EventRating(userId, eventId, rating);
+        return new Interaction(userId, eventId, rating);
       } catch (NumberFormatException e) {
         return null;
       }
@@ -351,11 +199,14 @@ public final class RecommendTest {
     private String[] tags;
 
     /** Creates an Event object. */
-    public Event(long eventId, String eventName, String eventDesc, String[] tags) {
+    public Event(long eventId, String eventName, String eventDesc, List<String> tagsList) {
       this.eventId = eventId;
       this.eventName = eventName;
       this.eventDesc = eventDesc;
-      this.tags = tags;
+      tags = new String[tagsList.size()];
+      for (int i = 0; i < tagsList.size(); i++) {
+        tags[i] = tagsList.get(i);
+      }
     }
 
     public String toString() {
@@ -370,21 +221,12 @@ public final class RecommendTest {
       return eventName;
     }
 
-    /** Creates and returns Event object from a CSV input line. */
-    public static Event parseEvent(String str) {
-      String[] fields = str.split(",");
-      if (fields.length < 4) {
-        return null;
+    public List<String> getTags() {
+      List<String> result = new ArrayList<>();
+      for (String t : tags) {
+        result.add(t);
       }
-      try {
-        long eventId = Long.parseLong(fields[0]);
-        String eventName = fields[1];
-        String eventDesc = fields[2];
-        String[] tags = fields[3].split("-");
-        return new Event(eventId, eventName, eventDesc, tags);
-      } catch (NumberFormatException e) {
-        return null;
-      }
+      return result;
     }
   }
 }
