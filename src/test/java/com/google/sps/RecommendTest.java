@@ -14,12 +14,18 @@
 
 package com.google.sps;
 
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.sps.Recommend.EventRating;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,7 +45,7 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public final class RecommendTest {
   // file paths
-  private static final String RATINGS = "src/test/data/userdatav2.csv";
+  private static final String RATINGS = "src/test/data/ratings.csv";
   private static final String EVENTS = "src/test/data/events.csv";
   private static final String MODEL_PATH = "src/test/data/eventsmodel";
 
@@ -48,7 +54,6 @@ public final class RecommendTest {
   private static final Map<Integer, Event> EVENT_INFO = new HashMap<>();
   private static final Map<Integer, String> HASH_NAMES = new HashMap<>();
 
-  private static SparkSession spark;
   private static final LocalServiceTestHelper helper =
       new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
 
@@ -61,9 +66,76 @@ public final class RecommendTest {
   @Before
   public void setUp() throws IOException {
     helper.setUp();
+  }
 
-    // sets up sparksession and reads in CSV data
-    spark =
+  @After
+  public void tearDown() {
+    helper.tearDown();
+  }
+
+  @Test
+  public void doTests() throws IOException {
+
+    test();
+  }
+
+  /** 
+   * Adds events to datastore from a CSV file.
+   *
+   * @param path Location of CSV file containing event information.
+   */
+  private void addEventsToDatastore(String path) throws FileNotFoundException {
+    Scanner scan = new Scanner(new File(path));
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    while (scan.hasNext()) {
+      String line = scan.nextLine();
+      Entity event = parseEventEntity(line);
+      if (event != null) {
+        datastore.put(event);
+      }
+    }
+    scan.close();
+  }
+
+  /** Parses one line from events.csv and returns as an entity */
+  private Entity parseEventEntity(String input) {
+    String[] fields = input.split(",");
+    if (fields.length < 4) {
+      return null;
+    }
+    Entity eventEntity = null;
+    try {
+      long eventId = Long.parseLong(fields[0]);
+      String eventName = fields[1];
+      String eventDesc = fields[2];
+      List<String> tagsList = new ArrayList<>();
+      String[] tags = fields[3].split("-");
+      for (String t : tags) {
+        tagsList.add(t);
+      }
+      if (fields.length > 4) {
+        String[] tags2 = fields[4].split("-");
+        for (String t : tags2) {
+          tagsList.add(t);
+        }
+      }
+
+      // Create an event entity (unneeded fields are omitted)
+      Key eventKey = KeyFactory.createKey("User", eventId);
+      eventEntity = new Entity(eventKey);
+      eventEntity.setProperty("eventName", eventName);
+      eventEntity.setProperty("eventDescription", eventDesc);
+      eventEntity.setProperty("address", ""); // TODO
+      eventEntity.setIndexedProperty("tags", tagsList);
+    } catch (NumberFormatException e) {
+      eventEntity = null;
+    }
+    return eventEntity;
+  }
+
+  /** Builds and evaluates model once, printing all relevant results. */
+  public double test() throws IOException {
+    SparkSession spark =
         SparkSession.builder()
             .appName("Java Spark SQL basic example")
             .config("spark.master", "local[*]")
@@ -80,30 +152,7 @@ public final class RecommendTest {
     ratings = spark.createDataFrame(ratingsRdd, EventRating.class);
 
     getEvents(EVENTS);
-  }
 
-  @After
-  public void tearDown() {
-    helper.tearDown();
-  }
-
-  @Test
-  public void doTests() throws IOException {
-    testMultiple(1);
-  }
-
-  /** Builds and evaluates model multiple times, printing out the average RMSE. */
-  public final void testMultiple(int count) throws IOException {
-    double rmse = 0;
-    for (int i = 0; i < count; i++) {
-      System.out.println("Running test " + (i + 1) + " out of " + count);
-      rmse += test();
-    }
-    System.out.println("Average RMSE: " + rmse / count);
-  }
-
-  /** Builds and evaluates model once, printing all relevant results. */
-  public double test() throws IOException {
     Dataset<Row>[] splits = ratings.randomSplit(new double[] {0.8, 0.2});
     training = splits[0];
     test = splits[1];
@@ -243,7 +292,7 @@ public final class RecommendTest {
     /** Creates and returns Event object from a CSV input line. */
     public static Event parseEvent(String str) {
       String[] fields = str.split(",");
-      if (fields.length != 4) {
+      if (fields.length < 4) {
         return null;
       }
       try {
