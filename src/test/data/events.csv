@@ -8,7 +8,7 @@ eventId,eventName,eventDescription,tags,additional tags
 7,bake sale for [blm?],We're organizing a bake sale at [location] to raise money for the BLM movement. All proceeds will be donated to [org name]. Please email [email address] if you'd like to help out.,blm-volunteer,fundraiser
 8,pride parade,Come show your support the LGBTQ+ community!,lgbtq+,activism
 9,craft market for lgbtq org,We're organizing a craft market to raise money for our organization which focuses on LGBTQ+ advocacy. Send an email to [email address] if you'd like to sell or just drop by to see what we're offering!,lgbtq+-volunteer,
-0,Canned food drive,Donations will be donated to [organization name]. Come and drop off some cans! Volunteers are needed too.,volunteer,donations
+10,Canned food drive,Donations will be donated to [organization name]. Come and drop off some cans! Volunteers are needed too.,volunteer,donations
 11,Retirement home volunteering,We are organizing a holiday event for our residents at [retirement home]. A small group of volunteers is needed to help us setup and facilitate. Please send and email to [email] for more details and to RSVP.,volunteer,
 12,volunteers for marathon,We need volunteers for the [marathon name] Marathon. Volunteers will be tasked with handling registration and distributing water at checkpoints. Donations are accepted!,volunteer,donations
 13,community blood drive,We're organizing a blood drive that will be donated to [hospital name]. Please drop by and donate some of your blood! Volunteers are needed also. Contact [email] for more details. ,volunteer,healthcare-item donation
