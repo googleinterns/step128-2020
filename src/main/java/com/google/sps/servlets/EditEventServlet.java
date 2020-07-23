@@ -68,9 +68,6 @@ public class EditEventServlet extends HttpServlet {
     Key keyRequested = null;
     try {
       keyRequested = getEventKey(request, "Event");
-      if (keyRequested == null) {
-        throw new IllegalArgumentException();
-      }
     } catch (IllegalArgumentException | IOException e) {
       LOGGER.info("Could not retrieve event " + e);
       request.getRequestDispatcher("/WEB-INF/jsp/event-not-found.jsp").forward(request, response);
