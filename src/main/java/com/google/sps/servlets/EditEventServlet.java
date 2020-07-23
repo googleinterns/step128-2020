@@ -65,12 +65,11 @@ public class EditEventServlet extends HttpServlet {
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response)
       throws ServletException, IOException {
-
     Key keyRequested = null;
     try {
       keyRequested = getEventKey(request, "Event");
       if (keyRequested == null) {
-        throw new NullPointerException();
+        throw new IllegalArgumentException();
       }
     } catch (IllegalArgumentException | IOException e) {
       LOGGER.info("Could not retrieve event " + e);
