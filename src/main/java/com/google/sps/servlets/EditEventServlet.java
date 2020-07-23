@@ -108,9 +108,6 @@ public class EditEventServlet extends HttpServlet {
 
     try {
       Entity userEntity = datastore.get(userKey);
-      if (userEntity == null) {
-        throw new EntityNotFoundException(userKey);
-      }
     } catch (EntityNotFoundException exception) {
       // datastore entry has not been created yet for this user, create it now
       Entity entity = new Entity(userKey);
