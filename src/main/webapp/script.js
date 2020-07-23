@@ -1059,7 +1059,6 @@ async function unsaveEvent(eventId) {
  */
 function searchLoadActions() {
   checkLocation().then(() => {
-    updateSearchBar();
     updateTagBox();
     getSearchDistanceSettings();
   });
