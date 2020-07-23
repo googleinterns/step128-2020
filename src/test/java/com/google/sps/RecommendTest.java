@@ -76,46 +76,74 @@ public final class RecommendTest {
   @Test
   public void doTests() throws IOException {
 
-    test();
+    // test();
+    addInfoToDatastore(RATINGS, EVENTS);
   }
 
-  private void getUsersAndInteractions(String usersFile, String ratingsFile)
+  private void addInfoToDatastore(String ratingsFile, String eventsFile)
       throws FileNotFoundException {
     final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    Scanner scan = new Scanner(new File(usersFile));
-    scan.nextLine(); // flush the header line
-
-    Map<String, Entity> usersWithId = new HashMap<>();
-    while(scan.hasNext()) {
-    Key userKey = KeyFactory.createKey("User", "");
-    }
-    scan.close();
-  }
-
-  private Entity parseUsers(String line) {
-
-  }
-
-  /**
-   * Adds events to datastore from a CSV file.
-   *
-   * @param path Location of CSV file containing event information.
-   */
-  private void addEventsToDatastore(String path) throws FileNotFoundException {
-    final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    Scanner scan = new Scanner(new File(path));
+    final Map<Long, List<String>> eventInfo = new HashMap<>();
+    final Map<String, Entity> users = new HashMap<>();
+    // scan events and event data
+    Scanner scan = new Scanner(new File(eventsFile));
     while (scan.hasNext()) {
       String line = scan.nextLine();
-      Entity event = parseEventEntity(line);
+      Entity event = parseEventEntity(line, eventInfo);
       if (event != null) {
         datastore.put(event);
       }
     }
     scan.close();
+    // scan ratings and save users
+    scan = new Scanner(new File(ratingsFile));
+    while (scan.hasNext()) {
+      Interaction interaction = parseInteraction(scan.nextLine());
+      if (interaction != null) {
+        List<String> tags = eventInfo.get(interaction.eventId);
+        if (tags != null) {
+          float delta =
+              Interactions.recordInteraction(
+                  interaction.userId, interaction.eventId, interaction.rating, true);
+
+          Entity userEntity = users.get(interaction.userId);
+          if (userEntity == null) {
+            Key userKey = KeyFactory.createKey("User", interaction.userId);
+            userEntity = new Entity(userKey);
+            users.put(interaction.userId, userEntity);
+          }
+          Interactions.updatePrefs(userEntity, tags, delta);
+        }
+      }
+    }
+    for (String id : users.keySet()) {
+      datastore.put(users.get(id));
+    }
   }
 
-  /** Parses one line from events.csv and returns as an entity */
-  private Entity parseEventEntity(String input) {
+  /** Parses one line from ratings.csv and returns it as an Interaction object. */
+  private Interaction parseInteraction(String line) throws FileNotFoundException {
+    String[] fields = line.split(",");
+    if (fields.length < 3) {
+      return null;
+    }
+    try {
+      String userId = fields[0];
+      float rating = Float.parseFloat(fields[1]);
+      long eventId = Long.parseLong(fields[2]);
+      return new Interaction(userId, eventId, rating);
+    } catch (NumberFormatException e) {
+      return null;
+    }
+  }
+
+  /**
+   * Parses one line from events.csv and returns as an entity.
+   *
+   * @param input A single input line.
+   * @param eventInfo A place to keep track of event Ids and corresponding tags.
+   */
+  private Entity parseEventEntity(String input, Map<Long, List<String>> eventInfo) {
     String[] fields = input.split(",");
     if (fields.length < 4) {
       return null;
@@ -136,14 +164,15 @@ public final class RecommendTest {
           tagsList.add(t);
         }
       }
-
-      // Create an event entity (unneeded fields are omitted)
+      // Create an event entity (other unneeded fields are omitted)
       Key eventKey = KeyFactory.createKey("User", eventId);
       eventEntity = new Entity(eventKey);
       eventEntity.setProperty("eventName", eventName);
       eventEntity.setProperty("eventDescription", eventDesc);
       eventEntity.setProperty("address", ""); // TODO
       eventEntity.setIndexedProperty("tags", tagsList);
+      // save tag info for easier access later
+      eventInfo.put(eventId, tagsList);
     } catch (NumberFormatException e) {
       eventEntity = null;
     }
@@ -231,6 +260,18 @@ public final class RecommendTest {
       }
     }
     scan.close();
+  }
+
+  private static class Interaction {
+    private String userId;
+    private long eventId;
+    private float rating;
+
+    private Interaction(String userId, long eventId, float rating) {
+      this.userId = userId;
+      this.eventId = eventId;
+      this.rating = rating;
+    }
   }
 
   /** Utility class for parsing CSV and converting it to dataframe-friendly format. */
