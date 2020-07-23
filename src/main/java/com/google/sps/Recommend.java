@@ -3,7 +3,9 @@ package com.google.sps;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
 import java.io.IOException;
 import java.io.Serializable;
@@ -28,6 +30,7 @@ public class Recommend {
   // keep and use up to this many Interaction entities
   private static final int UPPER_LIMIT = 5_000_000;
   // multipliers for score calculation
+  private static final double NO_INTERACTION = 1.5;
   private static final double ALREADY_VIEWED = 1.2;
   private static final double ALREADY_SAVED = 0.6;
 
@@ -122,6 +125,7 @@ public class Recommend {
         // adjust scaling based on user's past interaction with event
         Entity interactionEntity = Interactions.hasInteraction(userId, eventId);
         if (interactionEntity == null) {
+          totalScore *= NO_INTERACTION;
         } else {
           float interactionScore =
               Float.parseFloat(interactionEntity.getProperty("rating").toString());
@@ -143,9 +147,28 @@ public class Recommend {
         eventsWithScore.add(eventId);
       }
 
-      // TODO: save user recs
+      saveRecsToDatastore(userId, userTopRecs);
     }
     datastore.delete(toDelete);
+  }
+
+  private static void saveRecsToDatastore(String userId, Map<Double, List<Long>> recs) {
+    List<Long> recsList = new ArrayList<>();
+    for (Double score : recs.keySet()) {
+      for (Long l : recs.get(score)) {
+        recsList.add(l);
+      }
+    }
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    Key recKey = KeyFactory.createKey("Recommendation", userId);
+    Entity recEntity = null;
+    try {
+      recEntity = datastore.get(recKey);
+    } catch (EntityNotFoundException e) {
+      recEntity = new Entity(recKey);
+    }
+    recEntity.setProperty("recs", recsList);
+    datastore.put(recEntity);
   }
 
   /**
