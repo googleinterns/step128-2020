@@ -16,7 +16,6 @@ package com.google.sps;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -48,7 +47,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
@@ -151,7 +149,6 @@ public final class InteractionsTest {
 
   @Test
   public void recordMiscInteractions() throws IOException, ServletException {
-    PowerMockito.mockStatic(Firebase.class);
     final LoadEventServlet loadServlet = new LoadEventServlet();
     final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
@@ -175,10 +172,7 @@ public final class InteractionsTest {
 
     UserServletTest.callPost(id1, "save", dummyToken);
     UserServletTest.callPost(id1, "save", dummyToken);
-
-    when(request.getParameter("userToken")).thenReturn(dummyToken);
-    PowerMockito.when(Firebase.isUserLoggedIn(anyString())).thenCallRealMethod();
-    PowerMockito.when(Firebase.authenticateUser(anyString())).thenReturn(dummyToken);
+    TestingUtil.mockFirebase(request, dummyToken);
 
     HttpServletResponse response = mock(HttpServletResponse.class);
     when(request.getParameter("Event")).thenReturn(key0);
@@ -199,10 +193,7 @@ public final class InteractionsTest {
     dummyToken = "another@example.com";
 
     UserServletTest.callPost(id1, "save", "another@example.com");
-
-    when(request.getParameter("userToken")).thenReturn(dummyToken);
-    PowerMockito.when(Firebase.isUserLoggedIn(anyString())).thenCallRealMethod();
-    PowerMockito.when(Firebase.authenticateUser(anyString())).thenReturn(dummyToken);
+    TestingUtil.mockFirebase(request, dummyToken);
 
     when(request.getParameter("Event")).thenReturn(key2);
     loadServlet.doGet(request, response);
@@ -215,10 +206,7 @@ public final class InteractionsTest {
     dummyToken = "person@example.com";
 
     UserServletTest.callPost(id0, "save", "person@example.com");
-
-    when(request.getParameter("userToken")).thenReturn(dummyToken);
-    PowerMockito.when(Firebase.isUserLoggedIn(anyString())).thenCallRealMethod();
-    PowerMockito.when(Firebase.authenticateUser(anyString())).thenReturn(dummyToken);
+    TestingUtil.mockFirebase(request, dummyToken);
 
     when(request.getParameter("Event")).thenReturn(key0);
     loadServlet.doGet(request, response);
@@ -262,6 +250,46 @@ public final class InteractionsTest {
           Interactions.SAVE_SCORE + Interactions.UNSAVE_DELTA,
           Integer.parseInt(userEntity.getProperty("blm").toString()));
     } catch (EntityNotFoundException e) {
+      fail();
+    }
+  }
+
+  @Test
+  public void tooManyInteractions() throws IOException, ServletException {
+    UserServletTest.postEventsSetup();
+    List<Entity> allEntities = UserServletTest.callGet("", "");
+    long id = allEntities.get(0).getKey().getId();
+    String user = "dummy@example.com";
+
+    // make two interaction entities for the same user-event pair and put into datastore
+    Entity firstEntity = new Entity("Interaction");
+    firstEntity.setProperty("user", user);
+    firstEntity.setProperty("event", id);
+    firstEntity.setProperty("rating", Interactions.CREATE_SCORE);
+    Entity secondEntity = new Entity("Interaction");
+    secondEntity.setProperty("user", user);
+    secondEntity.setProperty("event", id);
+    secondEntity.setProperty("rating", Interactions.SAVE_SCORE);
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    datastore.put(firstEntity);
+    datastore.put(secondEntity);
+
+    // login and view the item
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    RequestDispatcher dispatcher = mock(RequestDispatcher.class);
+    when(request.getRequestDispatcher("/WEB-INF/jsp/display-event.jsp")).thenReturn(dispatcher);
+    when(request.getParameter("Event"))
+        .thenReturn(allEntities.get(0).getProperty("eventKey").toString());
+    TestingUtil.mockFirebase(request, user);
+
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    LoadEventServlet loadServlet = new LoadEventServlet();
+    loadServlet.doGet(request, response);
+
+    try {
+      // previous two items should have been deleted
+      assertExpectedInteraction(user, id, Interactions.VIEW_SCORE);
+    } catch (TooManyResultsException e) {
       fail();
     }
   }
