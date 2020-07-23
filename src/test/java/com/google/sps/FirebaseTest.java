@@ -19,6 +19,7 @@ import static org.mockito.Mockito.*;
 
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
+import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseToken;
@@ -68,10 +69,12 @@ public final class FirebaseTest {
 
   @Test
   public void authenticateUserValid() throws IOException {
-    PowerMockito.mockStatic(FirebaseAuth.class);
+    FirebaseApp defaultApp = mock(FirebaseApp.class);
+    FirebaseAuth defaultAuth = mock(FirebaseAuth.class);
     FirebaseToken decodedToken = mock(FirebaseToken.class);
     PowerMockito.mockStatic(Firebase.class);
-    PowerMockito.when(FirebaseAuth.getInstance(any())).thenReturn(null);
+    // PowerMockito.mockStatic(FirebaseAuth.class);
+    PowerMockito.when(FirebaseAuth.getInstance(defaultApp)).thenReturn(defaultAuth);
     try {
       PowerMockito.when(FirebaseAuth.getInstance().verifyIdToken(anyString()))
           .thenReturn(decodedToken);
