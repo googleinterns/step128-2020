@@ -26,6 +26,7 @@ import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestC
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.sps.servlets.LoadEventServlet;
 import java.io.IOException;
+import java.util.Arrays;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -34,10 +35,16 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 /** Tests for LoadEventServlet. */
-@RunWith(JUnit4.class)
+@RunWith(PowerMockRunner.class)
+@SuppressStaticInitializationFor({"com.google.sps.Firebase"})
+@PrepareForTest({Firebase.class})
+@PowerMockIgnore("okhttp3.*")
 public final class LoadEventServletTest {
   private final LocalServiceTestHelper helper =
       new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
@@ -51,23 +58,8 @@ public final class LoadEventServletTest {
     helper.setUp();
     testServlet = new LoadEventServlet();
 
-    goalEntity = new Entity("Event");
-    goalEntity.setProperty("eventName", "Lake Clean Up");
-    goalEntity.setProperty("eventDescription", "We're cleaning up the lake");
-    goalEntity.setProperty("streetAddress", "678 Lakeview Way");
-    goalEntity.setProperty("city", "Lakeside");
-    goalEntity.setProperty("state", "Michigan");
-    goalEntity.setProperty("date", "May 17, 2020");
-    goalEntity.setProperty("startTime", "14:00");
-    goalEntity.setProperty("endTime", "15:00");
-    goalEntity.setProperty("coverPhoto", "/img-2030121");
-    goalEntity.setProperty("tags", "['environment']");
-
-    DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
-    ds.put(goalEntity);
-
-    Key goalKey = goalEntity.getKey();
-    goalKeyString = KeyFactory.keyToString(goalKey);
+    createUser("test");
+    createEntity();
   }
 
   @After
@@ -75,86 +67,157 @@ public final class LoadEventServletTest {
     helper.tearDown();
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test(expected = Test.None.class)
+  public void eventLoadSucessful() throws IOException, ServletException {
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    RequestDispatcher dispatcher = mock(RequestDispatcher.class);
+
+    String email = "test@example.com";
+    TestingUtil.mockFirebase(request, email);
+
+    // Display-event JSP should be called. If not, test will fail.
+    when(request.getParameter("Event")).thenReturn(goalKeyString);
+    when(request.getRequestDispatcher("/WEB-INF/jsp/display-event.jsp")).thenReturn(dispatcher);
+    doNothing().when(dispatcher).forward(request, response);
+
+    try {
+      testServlet.doGet(request, response);
+    } catch (Exception e) {
+      fail();
+    }
+  }
+
+  @Test(expected = Test.None.class)
   public void sendRequestWithNoParameter() throws IOException, ServletException {
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
     RequestDispatcher dispatcher = mock(RequestDispatcher.class);
 
-    // There is no event parameter in the request.
-    when(request.getRequestDispatcher("/WEB-INF/jsp/display-event.jsp")).thenReturn(dispatcher);
+    // No url parameters. Should call event not found jsp - if not test will fail.
+    when(request.getRequestDispatcher("/WEB-INF/jsp/event-not-found.jsp")).thenReturn(dispatcher);
+    doNothing().when(dispatcher).forward(request, response);
 
-    testServlet.doGet(request, response);
-    fail("Expected exception");
+    try {
+      testServlet.doGet(request, response);
+    } catch (Exception e) {
+      fail();
+    }
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test(expected = Test.None.class)
   public void sendRequestWithParameterAndNoKey() throws IOException, ServletException {
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
     RequestDispatcher dispatcher = mock(RequestDispatcher.class);
 
-    // There is no Key associated with the event parameter in the request.
+    // No Key. Should call event not found jsp - if not test will fail.
     when(request.getParameter("Event")).thenReturn("");
-    when(request.getRequestDispatcher("/WEB-INF/jsp/display-event.jsp")).thenReturn(dispatcher);
+    when(request.getRequestDispatcher("/WEB-INF/jsp/event-not-found.jsp")).thenReturn(dispatcher);
+    doNothing().when(dispatcher).forward(request, response);
 
-    testServlet.doGet(request, response);
-    fail("Expected exception");
+    try {
+      testServlet.doGet(request, response);
+    } catch (Exception e) {
+      fail();
+    }
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test(expected = Test.None.class)
   public void sendRequestWithLowercaseParameterAndValidKey() throws IOException, ServletException {
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
     RequestDispatcher dispatcher = mock(RequestDispatcher.class);
 
-    // The event parameter is lowercase in the request.
-    when(request.getParameter("event")).thenReturn("agR0ZXN0cgsLEgVFdmVudBgBDA");
-    when(request.getRequestDispatcher("/WEB-INF/jsp/display-event.jsp")).thenReturn(dispatcher);
+    // The event parameter is lowercase. Should call event not found jsp - if not test will fail.
+    when(request.getParameter("event")).thenReturn(goalKeyString);
+    when(request.getRequestDispatcher("/WEB-INF/jsp/event-not-found.jsp")).thenReturn(dispatcher);
+    doNothing().when(dispatcher).forward(request, response);
 
-    testServlet.doGet(request, response);
-    fail("Expected exception");
+    try {
+      testServlet.doGet(request, response);
+    } catch (Exception e) {
+      fail();
+    }
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test(expected = Test.None.class)
   public void sendRequestWithInvalidLongerKey() throws IOException, ServletException {
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
     RequestDispatcher dispatcher = mock(RequestDispatcher.class);
 
-    // The goal Key String is 'agR0ZXN0cgsLEgVFdmVudBgBDA', an extra character has been added.
-    when(request.getParameter("Event")).thenReturn("agR0ZXN0cgsLEgVFdmVudBgBDAX");
-    when(request.getRequestDispatcher("/WEB-INF/jsp/display-event.jsp")).thenReturn(dispatcher);
+    // An extra character has been added to key. Should call event not found jsp - if not test will
+    // fail.
+    when(request.getParameter("event")).thenReturn(goalKeyString + 'A');
+    when(request.getRequestDispatcher("/WEB-INF/jsp/event-not-found.jsp")).thenReturn(dispatcher);
+    doNothing().when(dispatcher).forward(request, response);
 
-    testServlet.doGet(request, response);
-    fail("Expected exception");
+    try {
+      testServlet.doGet(request, response);
+    } catch (Exception e) {
+      fail();
+    }
   }
 
-  @Test(expected = NullPointerException.class)
-  public void sendRequestWithInvalidShorterKey() throws IOException, ServletException {
-    HttpServletRequest request = mock(HttpServletRequest.class);
-    HttpServletResponse response = mock(HttpServletResponse.class);
-    RequestDispatcher dispatcher = mock(RequestDispatcher.class);
-
-    // The goal Key String is 'agR0ZXN0cgsLEgVFdmVudBgBDA', a character has been removed.
-    when(request.getParameter("Event")).thenReturn("agR0ZXN0cgsLEgVFdmVudBgBD");
-    when(request.getRequestDispatcher("/WEB-INF/jsp/display-event.jsp")).thenReturn(dispatcher);
-
-    testServlet.doGet(request, response);
-    fail("Expected exception");
-  }
-
-  @Test(expected = NullPointerException.class)
+  @Test(expected = Test.None.class)
   public void sendRequestWithValidKeyNotInDatastore() throws IOException, ServletException {
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
     RequestDispatcher dispatcher = mock(RequestDispatcher.class);
 
-    // Key is replaced the valid key not in Datastore.
+    // Key is replaced the valid key not in Datastore. Should call event not found jsp - if not test
+    // will fail.
     when(request.getParameter("Event")).thenReturn("agR0ZXN0cgsLEgVFdmVudBgBDZ");
-    when(request.getRequestDispatcher("/WEB-INF/jsp/display-event.jsp")).thenReturn(dispatcher);
+    when(request.getRequestDispatcher("/WEB-INF/jsp/event-not-found.jsp")).thenReturn(dispatcher);
+    doNothing().when(dispatcher).forward(request, response);
 
-    testServlet.doGet(request, response);
-    fail("Expected exception");
+    try {
+      testServlet.doGet(request, response);
+    } catch (Exception e) {
+      fail();
+    }
+  }
+
+  private void createEntity() {
+    String[] tags = {"volunteer"};
+
+    goalEntity = new Entity("Event");
+    goalEntity.setProperty("eventName", "Book Drive");
+    goalEntity.setProperty("eventDescription", "We're collecting books.");
+    goalEntity.setProperty("address", "456 Library Way, Bookville, Washington");
+    goalEntity.setProperty("streetAddress", "456 Library Way");
+    goalEntity.setProperty("city", "Bookville");
+    goalEntity.setProperty("state", "Washington");
+    goalEntity.setProperty("date", "May 17, 2020");
+    goalEntity.setProperty("startTime", "2:00 PM");
+    goalEntity.setProperty("endTime", "4:00 PM");
+    goalEntity.setProperty("coverPhoto", "/img-2030121");
+    goalEntity.setIndexedProperty("tags", Arrays.asList(tags));
+    goalEntity.setProperty("creator", "test@example.com");
+    goalEntity.setProperty("attendeeCount", 0L);
+    goalEntity.setProperty("unformattedStart", "14:00");
+    goalEntity.setProperty("unformattedEnd", "16:00");
+    goalEntity.setProperty("unformattedDate", "2020-05-17");
+
+    DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
+    ds.put(goalEntity);
+
+    Key goalKey = goalEntity.getKey();
+    goalKeyString = KeyFactory.keyToString(goalKey);
+
+    goalEntity.setProperty("eventKey", goalKeyString);
+    ds.put(goalEntity);
+  }
+
+  private void createUser(String user) {
+    String email = user + "@example.com";
+    Key userKey = KeyFactory.createKey("User", email);
+
+    Entity entity = new Entity(userKey);
+    entity.setProperty("firebaseID", email);
+
+    DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
+    ds.put(entity);
   }
 }
