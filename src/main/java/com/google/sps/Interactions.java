@@ -50,18 +50,18 @@ public class Interactions {
    * returns a map of a user's interest levels with respect to each tag. returns null if user not
    * found.
    */
-  public static Map<String, Integer> buildVectorForUser(Entity userEntity) {
+  public static Map<String, Float> buildVectorForUser(Entity userEntity) {
     if (!userEntity.getKind().equals("User")) {
       throw new IllegalArgumentException("entity must be of type User");
     }
-    Map<String, Integer> result = new HashMap<>();
+    Map<String, Float> result = new HashMap<>();
     for (String param : metrics) {
       if (userEntity.hasProperty(param)) {
-        int score = Integer.parseInt(userEntity.getProperty(param).toString());
+        float score = Float.parseFloat(userEntity.getProperty(param).toString());
         result.put(param, score);
       } else {
         // default val is 0
-        result.put(param, 0);
+        result.put(param, 0.0f);
       }
     }
     return result;
@@ -88,8 +88,8 @@ public class Interactions {
   }
 
   /** utility method that computes the dot product between two vectors. */
-  public static int dotProduct(Map<String, Integer> v1, Map<String, Integer> v2) {
-    int result = 0;
+  public static float dotProduct(Map<String, Float> v1, Map<String, Integer> v2) {
+    float result = 0;
     for (String field : v1.keySet()) {
       if (v2.containsKey(field)) {
         result += v2.get(field) * v1.get(field);

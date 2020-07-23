@@ -64,7 +64,7 @@ public final class InteractionsTest {
       new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
 
   private static final SurveyServlet testSurveyServlet = new SurveyServlet();
-  private static final double FLOAT_THRESHOLD = 0.0002;
+  private static final double FLOAT_THRESHOLD = 0;
 
   private void takeSurvey(String email) throws IOException {
     HttpServletRequest request = mock(HttpServletRequest.class);
@@ -97,12 +97,12 @@ public final class InteractionsTest {
     String email = "test@example.com";
     takeSurvey(email);
 
-    Map<String, Integer> expectedSurvey = new HashMap<>();
-    expectedSurvey.put("environment", 3);
-    expectedSurvey.put("blm", 4);
-    expectedSurvey.put("volunteer", 3);
-    expectedSurvey.put("education", 2);
-    expectedSurvey.put("LGBTQ+", 4);
+    Map<String, Float> expectedSurvey = new HashMap<>();
+    expectedSurvey.put("environment", 3.0f);
+    expectedSurvey.put("blm", 4.0f);
+    expectedSurvey.put("volunteer", 3.0f);
+    expectedSurvey.put("education", 2.0f);
+    expectedSurvey.put("LGBTQ+", 4.0f);
 
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     Entity userEntity = datastore.prepare(new Query("User")).asSingleEntity();
@@ -125,15 +125,15 @@ public final class InteractionsTest {
 
   @Test
   public void checkDotProduct() throws IOException {
-    Map<String, Integer> v1 = new HashMap<>();
-    v1.put("1", 1);
-    v1.put("2", 2);
-    v1.put("3", 3);
+    Map<String, Float> v1 = new HashMap<>();
+    v1.put("1", 1.0f);
+    v1.put("2", 2.0f);
+    v1.put("3", 3.0f);
 
     Map<String, Integer> v2 = new HashMap<>();
     v2.put("2", 2);
 
-    assertEquals(4, Interactions.dotProduct(v1, v2));
+    assertEquals(4.0f, Interactions.dotProduct(v1, v2), FLOAT_THRESHOLD);
   }
 
   @Test
