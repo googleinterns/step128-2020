@@ -78,9 +78,11 @@ public class Recommend {
       String id = e.getKey().getName();
       userPrefs.put(id, Interactions.buildVectorForUser(e));
       userIdHash.put(id.hashCode(), id);
-      String location = e.getProperty("location").toString();
-      if (location != null && location.length() > 0) {
-        userLocations.put(id, location);
+      if (e.hasProperty("location")) {
+        String location = e.getProperty("location").toString();
+        if (location.length() > 0) {
+          userLocations.put(id, location);
+        }
       }
     }
 
@@ -95,7 +97,8 @@ public class Recommend {
 
     List<Key> toDelete = new ArrayList<>();
     Dataset<Row> ratings =
-        makeDataframeAndPreprocess(userPrefs.keySet(), eventInfo.keySet(), toDelete);
+        makeDataframeAndPreprocess(userIdHash.keySet(), eventIdHash.keySet(), toDelete);
+    // ratings.show();
 
     // compute recommendations from matrix factorization
     ALSModel model = trainModel(null, ratings);
@@ -156,12 +159,9 @@ public class Recommend {
         new ALS().setMaxIter(5).setUserCol("userId").setItemCol("eventId").setRatingCol("rating");
     ALSModel model = als.fit(training);
     model.setColdStartStrategy("drop");
-    try {
+    if (path != null) {
       model.write().overwrite().save(path);
       LOGGER.info("model saved at " + path);
-    } catch (IOException e) {
-      // do nothing
-      LOGGER.info("failed to save model");
     }
     return model;
   }
@@ -184,7 +184,7 @@ public class Recommend {
    * @param toDelete Save list of keys to delete, if interaction entities need to be flushed.
    */
   private static Dataset<Row> makeDataframeAndPreprocess(
-      Set<String> users, Set<Long> events, List<Key> toDelete) {
+      Set<Integer> users, Set<Integer> events, List<Key> toDelete) {
     Iterable<Entity> queriedInteractions =
         datastore
             .prepare(new Query("Interaction").addSort("timestamp", Query.SortDirection.DESCENDING))
@@ -197,8 +197,7 @@ public class Recommend {
       // convert Entities to spark-friendly format
       EventRating rate = EventRating.parseEntity(entity);
       if (rate != null) {
-        if (!users.contains(rate.getUserId())
-            || !events.contains(Long.parseLong(entity.getProperty("event").toString()))) {
+        if (!users.contains(rate.getUserId()) || !events.contains(rate.getEventId())) {
           // delete interaction of user or event id is invalid
           toDelete.add(entity.getKey());
         } else {
