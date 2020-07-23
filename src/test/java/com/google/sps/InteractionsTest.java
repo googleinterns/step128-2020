@@ -62,7 +62,9 @@ import org.powermock.modules.junit4.PowerMockRunner;
 public final class InteractionsTest {
   private final LocalServiceTestHelper helper =
       new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
+
   private static final SurveyServlet testSurveyServlet = new SurveyServlet();
+  private static final double FLOAT_THRESHOLD = 0.0002;
 
   private void takeSurvey(String email) throws IOException {
     HttpServletRequest request = mock(HttpServletRequest.class);
@@ -222,37 +224,45 @@ public final class InteractionsTest {
       Entity userEntity = datastore.get(userKey);
       assertEquals(
           Interactions.CREATE_SCORE,
-          Integer.parseInt(userEntity.getProperty("environment").toString()));
+          Float.parseFloat(userEntity.getProperty("environment").toString()),
+          FLOAT_THRESHOLD);
       assertEquals(
-          Interactions.CREATE_SCORE, Integer.parseInt(userEntity.getProperty("blm").toString()));
+          Interactions.CREATE_SCORE,
+          Float.parseFloat(userEntity.getProperty("blm").toString()),
+          FLOAT_THRESHOLD);
       assertEquals(
           Interactions.SAVE_SCORE,
-          Integer.parseInt(userEntity.getProperty("education").toString()));
+          Float.parseFloat(userEntity.getProperty("education").toString()),
+          FLOAT_THRESHOLD);
 
       userKey = KeyFactory.createKey("User", "another@example.com");
       userEntity = datastore.get(userKey);
       assertEquals(
           Interactions.VIEW_SCORE,
-          Integer.parseInt(userEntity.getProperty("environment").toString()));
+          Float.parseFloat(userEntity.getProperty("environment").toString()),
+          FLOAT_THRESHOLD);
       assertEquals(
           Interactions.CREATE_SCORE,
-          Integer.parseInt(userEntity.getProperty("education").toString()));
+          Float.parseFloat(userEntity.getProperty("education").toString()),
+          FLOAT_THRESHOLD);
 
       userKey = KeyFactory.createKey("User", "person@example.com");
       userEntity = datastore.get(userKey);
       assertEquals(
           Interactions.VIEW_SCORE,
-          Integer.parseInt(userEntity.getProperty("environment").toString()));
+          Float.parseFloat(userEntity.getProperty("environment").toString()),
+          FLOAT_THRESHOLD);
       assertEquals(
           Interactions.SAVE_SCORE + Interactions.UNSAVE_DELTA,
-          Integer.parseInt(userEntity.getProperty("blm").toString()));
+          Float.parseFloat(userEntity.getProperty("blm").toString()),
+          FLOAT_THRESHOLD);
     } catch (EntityNotFoundException e) {
       fail();
     }
   }
 
   /** Makes sure interactions have been recorded correctly in datastore. */
-  public static void assertExpectedInteraction(String userId, long eventId, int value) {
+  public static void assertExpectedInteraction(String userId, long eventId, float value) {
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     Query q =
         new Query("Interaction")
@@ -263,8 +273,8 @@ public final class InteractionsTest {
     PreparedQuery pq = datastore.prepare(q);
     try {
       Entity interactionEntity = pq.asSingleEntity();
-      int score = Integer.parseInt(interactionEntity.getProperty("rating").toString());
-      assertEquals(value, score);
+      float score = Float.parseFloat(interactionEntity.getProperty("rating").toString());
+      assertEquals(value, score, FLOAT_THRESHOLD);
     } catch (TooManyResultsException e) {
       fail();
     } catch (NullPointerException e) {

@@ -75,7 +75,7 @@ public class EventServlet extends HttpServlet {
       userEntity = Utils.makeUserEntity(userID, false);
       LOGGER.info("No entity found for " + userID + ", creating one now.");
     }
-    int delta = Interactions.recordInteraction(userID, keyId, Interactions.CREATE_SCORE, false);
+    float delta = Interactions.recordInteraction(userID, keyId, Interactions.CREATE_SCORE, false);
     Interactions.updatePrefs(userEntity, tags, delta);
     datastore.put(userEntity);
 

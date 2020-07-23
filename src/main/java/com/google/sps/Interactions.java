@@ -35,13 +35,13 @@ public class Interactions {
   private static final Logger LOGGER = Logger.getLogger(Interactions.class.getName());
 
   // contributions to user's interest metrics for each action
-  public static final int VIEW_SCORE = 4;
-  public static final int SAVE_SCORE = 8;
-  public static final int CREATE_SCORE = 10;
+  public static final float VIEW_SCORE = 4;
+  public static final float SAVE_SCORE = 8;
+  public static final float CREATE_SCORE = 10;
 
   // effects on scores when "undoing" actions
-  public static final int UNSAVE_DELTA = -2;
-  public static final int DELETE_DELTA = -3;
+  public static final float UNSAVE_DELTA = -2;
+  public static final float DELETE_DELTA = -3;
 
   // interest categories, matches question order on survey pages
   public static final String[] metrics = {"environment", "blm", "volunteer", "education", "LGBTQ+"};
@@ -145,11 +145,11 @@ public class Interactions {
    * @param forceOverride if false, only overwrites if new score > old score
    * @return change of user's rating on an item (saves highest score only)
    */
-  public static int recordInteraction(
-      String userId, long eventId, int score, boolean forceOverride) {
+  public static float recordInteraction(
+      String userId, long eventId, float score, boolean forceOverride) {
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     Entity interactionEntity = hasInteraction(userId, eventId);
-    int delta = score;
+    float delta = score;
     if (interactionEntity == null) {
       interactionEntity = new Entity("Interaction");
       interactionEntity.setProperty("user", userId);
@@ -157,7 +157,7 @@ public class Interactions {
       interactionEntity.setProperty("rating", score);
     } else {
       if (interactionEntity.hasProperty("rating")) {
-        int prevScore = Integer.parseInt(interactionEntity.getProperty("rating").toString());
+        float prevScore = Float.parseFloat(interactionEntity.getProperty("rating").toString());
         if (forceOverride || prevScore < score) {
           interactionEntity.setProperty("rating", score);
           delta = score - prevScore;
@@ -175,7 +175,7 @@ public class Interactions {
   }
 
   /** Updates user preference map. */
-  public static void updatePrefs(Entity userEntity, List<String> tags, int score) {
+  public static void updatePrefs(Entity userEntity, List<String> tags, float score) {
     if (!userEntity.getKind().equals("User")) {
       throw new IllegalArgumentException("must be user item");
     }
@@ -184,7 +184,7 @@ public class Interactions {
     }
     for (String s : tags) {
       if (userEntity.hasProperty(s)) {
-        userEntity.setProperty(s, score + Integer.parseInt(userEntity.getProperty(s).toString()));
+        userEntity.setProperty(s, score + Float.parseFloat(userEntity.getProperty(s).toString()));
       } else {
         userEntity.setProperty(s, score);
       }
