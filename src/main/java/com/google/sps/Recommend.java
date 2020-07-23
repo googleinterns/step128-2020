@@ -252,8 +252,7 @@ public class Recommend {
     private float rating;
     private long timestamp;
 
-    public EventRating() {}
-
+    /** Creates an EventRating object. */
     public EventRating(String userId, long eventId, float rating, long timestamp) {
       // all fields must be numeric
       this.userId = userId.hashCode();
@@ -280,6 +279,7 @@ public class Recommend {
       return timestamp;
     }
 
+    /** Creates an EventRating object from an Interaction Entity. */
     public static EventRating parseEntity(Entity entity) {
       if (!entity.getKind().equals("Interaction")) {
         return null;

@@ -83,7 +83,7 @@ public final class RecommendTest {
     }
   }
 
-  /** Adds all info from ratings CSV and events CSV file to datastore */
+  /** Adds all info from ratings CSV and events CSV file to datastore. */
   private void addInfoToDatastore(String ratingsFile, String eventsFile)
       throws FileNotFoundException {
     final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
@@ -221,6 +221,7 @@ public final class RecommendTest {
       return eventName;
     }
 
+    /** Returns event tags as a List. */
     public List<String> getTags() {
       List<String> result = new ArrayList<>();
       for (String t : tags) {
