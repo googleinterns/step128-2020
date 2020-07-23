@@ -44,42 +44,66 @@ public class LoadEventServlet extends HttpServlet {
     Key keyRequested;
     try {
       keyRequested = getEventKey(request);
-      if (keyRequested != null) {
-        Query query = new Query("Event", keyRequested);
-
-        DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-        Entity eventRequested = datastore.prepare(query).asSingleEntity();
-        int alreadySaved = -1;
-
-        String userToken = request.getParameter("userToken");
-        if (userToken != null) {
-          if (Firebase.isUserLoggedIn(userToken)) {
-            String userID = Firebase.authenticateUser(userToken);
-            Key userKey = KeyFactory.createKey("User", userID);
-            List<String> tags = (List<String>) eventRequested.getProperty("tags");
-            Entity userEntity = null;
-            try {
-              userEntity = datastore.get(userKey);
-              alreadySaved = UserServlet.alreadySaved(eventRequested.getKey().getId(), userEntity);
-            } catch (EntityNotFoundException exception) {
-              userEntity = Utils.makeUserEntity(userID, false);
-              LOGGER.info("No entity found for " + userID + ", creating one now.");
-            }
-            int delta =
-                Interactions.recordInteraction(
-                    userID, keyRequested.getId(), Interactions.VIEW_SCORE, false);
-            Interactions.updatePrefs(userEntity, tags, delta);
-            datastore.put(userEntity);
-          }
-        }
-        request = populateRequest(request, eventRequested, alreadySaved);
-
-        request.getRequestDispatcher("/WEB-INF/jsp/display-event.jsp").forward(request, response);
-      }
-    } catch (IllegalArgumentException | IOException | NullPointerException | ServletException e) {
+    } catch (IllegalArgumentException | IOException e) {
       LOGGER.info("Could not retrieve event " + e);
       request.getRequestDispatcher("/WEB-INF/jsp/event-not-found.jsp").forward(request, response);
+      return;
     }
+
+    Query query = new Query("Event", keyRequested);
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    Entity eventRequested = datastore.prepare(query).asSingleEntity();
+    int alreadySaved = -1;
+
+    String userToken = null;
+    try {
+      userToken = request.getParameter("userToken");
+      if (userToken == null) {
+        throw new IOException("No user token");
+      }
+    } catch (Exception e) {
+      request = populateRequest(request, eventRequested, alreadySaved);
+      request.getRequestDispatcher("/WEB-INF/jsp/display-event.jsp").forward(request, response);
+      return;
+    }
+
+    String userID = null;
+    Key userKey = null;
+    try {
+      if (Firebase.isUserLoggedIn(userToken)) {
+        userID = Firebase.authenticateUser(userToken);
+        userKey = KeyFactory.createKey("User", userID);
+      } else {
+        throw new IOException("User is not logged in.");
+      }
+    } catch (IllegalArgumentException | IOException e) {
+      LOGGER.info("Login error: " + e);
+      request = populateRequest(request, eventRequested, alreadySaved);
+      request.getRequestDispatcher("/WEB-INF/jsp/display-event.jsp").forward(request, response);
+      return;
+    }
+          
+    Entity userEntity = null;
+    try {
+      userEntity = datastore.get(userKey);
+      alreadySaved = UserServlet.alreadySaved(eventRequested.getKey().getId(), userEntity);
+    } catch (EntityNotFoundException exception) {
+      userEntity = Utils.makeUserEntity(userID, false);
+      LOGGER.info("No entity found for " + userID + ", creating one now.");
+      request = populateRequest(request, eventRequested, alreadySaved);
+      request.getRequestDispatcher("/WEB-INF/jsp/display-event.jsp").forward(request, response);
+      return;
+    }
+
+    List<String> tags = (List<String>) eventRequested.getProperty("tags");
+    int delta =
+        Interactions.recordInteraction(
+            userID, keyRequested.getId(), Interactions.VIEW_SCORE, false);
+    Interactions.updatePrefs(userEntity, tags, delta);
+    datastore.put(userEntity);
+
+    request = populateRequest(request, eventRequested, alreadySaved);
+    request.getRequestDispatcher("/WEB-INF/jsp/display-event.jsp").forward(request, response);
   }
 
   /**
