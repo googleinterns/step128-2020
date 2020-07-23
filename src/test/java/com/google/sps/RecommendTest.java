@@ -15,12 +15,14 @@
 package com.google.sps;
 
 import static com.google.appengine.api.datastore.FetchOptions.Builder.withLimit;
+import static org.junit.Assert.assertEquals;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
+import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
@@ -81,10 +83,19 @@ public final class RecommendTest {
 
     addInfoToDatastore(RATINGS, EVENTS);
     DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
-    System.out.println(ds.prepare(new Query("Interaction")).countEntities(withLimit(250)));
-    System.out.println(ds.prepare(new Query("Event")).countEntities(withLimit(250)));
-    System.out.println(ds.prepare(new Query("User")).countEntities(withLimit(250)));
     Recommend.calculateRecommend();
+    PreparedQuery completedRecs = ds.prepare(new Query("Recommendation"));
+    int userCount = ds.prepare(new Query("User")).countEntities(withLimit(250));
+    int recsCount = completedRecs.countEntities(withLimit(250));
+    assertEquals(userCount, recsCount);
+    for (Entity entity : completedRecs.asIterable()) {
+      System.out.println(entity.getKey().getName());
+      List<Long> userRecs = (List<Long>) entity.getProperty("recs");
+      for (int i = 0; i < userRecs.size() && i < 10; i++) {
+        System.out.println("  " + EVENT_INFO.get(Long.toString(userRecs.get(i)).hashCode()));
+      }
+      System.out.println();
+    }
   }
 
   /** Adds all info from ratings CSV and events CSV file to datastore */
@@ -93,7 +104,6 @@ public final class RecommendTest {
     final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     final Map<Long, List<String>> eventInfo = new HashMap<>();
     final Map<String, Entity> users = new HashMap<>();
-    final Map<Long, Long> fakeAndRealIds = new HashMap<>();
     // scan events and event data
     Scanner scan = new Scanner(new File(eventsFile));
     while (scan.hasNext()) {
@@ -102,13 +112,12 @@ public final class RecommendTest {
       if (event != null) {
         datastore.put(event);
       }
+      Event eventObj = Event.parseEvent(line);
+      if (eventObj != null) {
+        EVENT_INFO.put((Long.toString(eventObj.getId())).hashCode(), eventObj);
+      }
     }
     scan.close();
-    for (Entity entity : datastore.prepare(new Query("Event")).asIterable()) {
-      long id = entity.getKey().getId();
-      long otherId = Long.parseLong(entity.getProperty("eventId").toString());
-      fakeAndRealIds.put(otherId, id);
-    }
     // scan ratings and save users
     scan = new Scanner(new File(ratingsFile));
     while (scan.hasNext()) {
@@ -118,10 +127,7 @@ public final class RecommendTest {
         if (tags != null) {
           float delta =
               Interactions.recordInteraction(
-                  interaction.userId,
-                  fakeAndRealIds.get(interaction.eventId),
-                  interaction.rating,
-                  true);
+                  interaction.userId, interaction.eventId, interaction.rating, true);
 
           Entity userEntity = users.get(interaction.userId);
           if (userEntity == null) {
@@ -182,12 +188,12 @@ public final class RecommendTest {
         }
       }
       // Create an event entity (other unneeded fields are omitted)
-      eventEntity = new Entity("Event");
+      Key eventKey = KeyFactory.createKey("Event", eventId);
+      eventEntity = new Entity(eventKey);
       eventEntity.setProperty("eventName", eventName);
       eventEntity.setProperty("eventDescription", eventDesc);
       eventEntity.setProperty("address", ""); // TODO
       eventEntity.setIndexedProperty("tags", tagsList);
-      eventEntity.setProperty("eventId", eventId);
       // save tag info for easier access later
       eventInfo.put(eventId, tagsList);
     } catch (NumberFormatException e) {
