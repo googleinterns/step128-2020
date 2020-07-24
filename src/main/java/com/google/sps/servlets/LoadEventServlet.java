@@ -55,13 +55,9 @@ public class LoadEventServlet extends HttpServlet {
     Entity eventRequested = datastore.prepare(query).asSingleEntity();
     int alreadySaved = -1;
 
-    String userToken = null;
-    try {
-      userToken = request.getParameter("userToken");
-      if (userToken == null) {
-        throw new IOException("No user token");
-      }
-    } catch (IOException e) {
+    String userToken = request.getParameter("userToken");
+    if (userToken == null) {
+      LOGGER.warning("No user token.");
       request = populateRequest(request, eventRequested, alreadySaved);
       request.getRequestDispatcher("/WEB-INF/jsp/display-event.jsp").forward(request, response);
       return;

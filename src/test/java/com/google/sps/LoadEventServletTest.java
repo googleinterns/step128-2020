@@ -197,7 +197,7 @@ public final class LoadEventServletTest {
 
     try {
       testServlet.doGet(request, response);
-    } catch (IOException | NullPointerException e) {
+    } catch (NullPointerException e) {
       fail();
     }
   }
