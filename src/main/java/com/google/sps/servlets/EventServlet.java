@@ -14,6 +14,8 @@
 
 package com.google.sps.servlets;
 
+import static com.google.sps.Utils.getParameter;
+
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
@@ -27,12 +29,9 @@ import com.google.sps.Firebase;
 import com.google.sps.Interactions;
 import com.google.sps.Utils;
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -112,11 +111,12 @@ public class EventServlet extends HttpServlet {
     String tagsStr = getParameter(request, "all-tags", "");
 
     final String fullAddress = String.format("%1$s, %2$s, %3$s", streetAddress, city, state);
-    final String formattedDate = formatDate(date);
-    final String formattedTime = formatTime(startTime);
+    final String formattedDate = Utils.formatDate(date);
+    final String formattedTime = Utils.formatTime(startTime);
 
+    String formattedTimeEnd = "";
     if (endTime != "") {
-      endTime = formatTime(endTime);
+      formattedTimeEnd = Utils.formatTime(endTime);
     }
 
     Entity eventEntity = new Entity("Event");
@@ -125,68 +125,21 @@ public class EventServlet extends HttpServlet {
     eventEntity.setProperty("address", fullAddress);
     eventEntity.setProperty("date", formattedDate);
     eventEntity.setProperty("startTime", formattedTime);
-    eventEntity.setProperty("endTime", endTime);
+    eventEntity.setProperty("endTime", formattedTimeEnd);
     eventEntity.setProperty("coverPhoto", coverPhoto);
     eventEntity.setProperty("attendeeCount", 0);
+    eventEntity.setProperty("unformattedStart", startTime);
+    eventEntity.setProperty("unformattedEnd", endTime);
+    eventEntity.setProperty("unformattedDate", date);
 
     Gson gson = new Gson();
     List<String> tagsList = gson.fromJson(tagsStr, new TypeToken<ArrayList<String>>() {}.getType());
     eventEntity.setIndexedProperty("tags", tagsList);
 
+    Map<String, Integer> keywords = KeywordSearchServlet.getKeywords(eventName, eventDescription);
+    eventEntity.setProperty("keywords", KeywordSearchServlet.getKeywordMapKeys(keywords));
+    eventEntity.setProperty("keywordsValues", KeywordSearchServlet.getKeywordMapValues(keywords));
+
     return eventEntity;
-  }
-
-  /**
-   * @return the request parameter, or the default value if the parameter was not specified by the
-   *     client
-   */
-  private String getParameter(HttpServletRequest request, String name, String defaultValue) {
-    String value = request.getParameter(name);
-    if (value == null) {
-      return defaultValue;
-    }
-    return value;
-  }
-
-  /** Format time to standard format. */
-  private String formatTime(String time) {
-    DateFormat inFormat = new SimpleDateFormat("HH:mm");
-    DateFormat outFormat = new SimpleDateFormat("h:mm a");
-
-    Date unformattedTime = null;
-    String formattedTime = "";
-    try {
-      unformattedTime = inFormat.parse(time);
-    } catch (ParseException e) {
-      LOGGER.info("Could not parse time " + e);
-    }
-
-    if (unformattedTime != null) {
-      formattedTime = outFormat.format(unformattedTime);
-    }
-
-    return formattedTime;
-  }
-
-  /** Format date to fit Month Day, Year format. */
-  private String formatDate(String date) {
-    DateFormat inFormat = new SimpleDateFormat("yyyy-MM-dd");
-    DateFormat outFormat = new SimpleDateFormat("EEEE, MMMMM dd, yyyy");
-
-    Date unformattedDate = null;
-    String formattedDate = "";
-    try {
-      unformattedDate = inFormat.parse(date);
-      System.out.println(unformattedDate);
-    } catch (ParseException e) {
-      LOGGER.info("Could not parse date " + e);
-    }
-
-    if (unformattedDate != null) {
-      formattedDate = outFormat.format(unformattedDate);
-      System.out.println(formattedDate);
-    }
-
-    return formattedDate;
   }
 }

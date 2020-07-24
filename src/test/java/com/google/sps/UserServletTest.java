@@ -67,7 +67,7 @@ public final class UserServletTest {
 
   private void assertEntitiesEqual(Entity goal, Entity resultEntity) {
     Set<String> goalProperties = goal.getProperties().keySet();
-    Set<String> resultProperties = goal.getProperties().keySet();
+    Set<String> resultProperties = resultEntity.getProperties().keySet();
     assertEquals(goalProperties.size(), resultProperties.size());
     for (String s : goalProperties) {
       // ignore attendeeCount, which is checked elsewhere
@@ -372,6 +372,95 @@ public final class UserServletTest {
     }
   }
 
+  @Test
+  public void callWithInvalidParams() throws IOException {
+    String dummyToken = "test@example.com";
+    try {
+      callGet("", dummyToken);
+      fail();
+    } catch (IOException expected) {
+      // test passes -- no action specified
+    }
+
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    PowerMockito.mockStatic(Firebase.class);
+    when(request.getParameter("action")).thenReturn("save");
+    when(request.getParameter("userToken")).thenReturn(dummyToken);
+    PowerMockito.when(Firebase.isUserLoggedIn(anyString())).thenCallRealMethod();
+    PowerMockito.when(Firebase.authenticateUser(anyString())).thenReturn(dummyToken);
+    HttpServletResponse response = mock(HttpServletResponse.class);
+
+    try {
+      testUserServlet.doPost(request, response);
+      fail();
+    } catch (IOException expected) {
+      // test passes -- no event id included
+    }
+
+    try {
+      testUserServlet.doPost(request, response);
+      fail();
+    } catch (IOException expected) {
+      // test passes -- invalid event id format
+    }
+
+    try {
+      when(request.getParameter("event")).thenReturn("event id");
+      testUserServlet.doPost(request, response);
+      fail();
+    } catch (IOException expected) {
+      // test passes -- no event id included
+    }
+
+    try {
+      when(request.getParameter("event")).thenReturn(123 + "");
+      when(request.getParameter("action")).thenReturn("action");
+      testUserServlet.doPost(request, response);
+      fail();
+    } catch (IOException expected) {
+      // test passes -- invalid action
+    }
+  }
+
+  @Test
+  public void alreadySavedNotUser() throws IOException {
+    // tries to call UserServlet.alreadySaved on a non-User entity
+    Entity notUserEntity = new Entity("Event");
+    try {
+      UserServlet.alreadySaved(123, notUserEntity);
+      fail();
+    } catch (IllegalArgumentException expected) {
+      // test passes
+    }
+  }
+
+  @Test
+  public void getNonexistentEventKey() throws IOException {
+    postEventsSetup();
+
+    // blm protest (test@example), book drive (another@example), lake clean up(test@example)
+    List<Entity> allEntities = callGet("", "");
+    long fakeId = 0;
+    for (Entity entity : allEntities) {
+      fakeId += entity.getKey().getId();
+    }
+    Key userKey = KeyFactory.createKey("User", "dummy@example.com");
+    List<Long> saved = new ArrayList<>();
+    saved.add(fakeId);
+    saved.add(allEntities.get(0).getKey().getId());
+    Entity userEntity = new Entity(userKey);
+    userEntity.setProperty("saved", saved);
+
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    datastore.put(userEntity);
+
+    List<Entity> expected = new ArrayList<>();
+    expected.add(allEntities.get(0));
+
+    List<Entity> result = callGet("saved", "dummy@example.com");
+    assertListsEqual(expected, result);
+  }
+
   /** Performs the GET request to return a list of events. */
   public static List<Entity> callGet(String get, String dummyToken) throws IOException {
     HttpServletRequest request = mock(HttpServletRequest.class);
@@ -475,6 +564,11 @@ public final class UserServletTest {
     String[] tags = {"environment"};
     entity.setIndexedProperty("tags", Arrays.asList(tags));
     entity.setProperty("creator", "test@example.com");
+    entity.setProperty("eventKey", "agR0ZXN0cgsLEgVFdmVudBgBDA");
+    entity.setProperty("attendeeCount", 1L);
+    entity.setProperty("unformattedStart", "14:00");
+    entity.setProperty("unformattedEnd", "");
+    entity.setProperty("unformattedDate", "2020-05-17");
 
     return entity;
   }
@@ -492,6 +586,11 @@ public final class UserServletTest {
     String[] tags = {"blm"};
     entity.setIndexedProperty("tags", Arrays.asList(tags));
     entity.setProperty("creator", "test@example.com");
+    entity.setProperty("eventKey", "agR0ZXN0cgsLEgVFdmVudBgDDA");
+    entity.setProperty("attendeeCount", 1L);
+    entity.setProperty("unformattedStart", "13:00");
+    entity.setProperty("unformattedEnd", "");
+    entity.setProperty("unformattedDate", "2020-05-17");
 
     return entity;
   }
@@ -509,6 +608,11 @@ public final class UserServletTest {
     String[] tags = {"education"};
     entity.setIndexedProperty("tags", Arrays.asList(tags));
     entity.setProperty("creator", "another@example.com");
+    entity.setProperty("eventKey", "agR0ZXN0cgsLEgVFdmVudBgFDA");
+    entity.setProperty("attendeeCount", 1L);
+    entity.setProperty("unformattedStart", "10:00");
+    entity.setProperty("unformattedEnd", "");
+    entity.setProperty("unformattedDate", "2020-05-17");
 
     return entity;
   }
