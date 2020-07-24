@@ -190,10 +190,10 @@ public final class LoadEventServletTest {
     TestingUtil.mockFirebase(request, email);
 
     //  Not userToken. Display-event JSP should be called. If not, test will fail.
+    doNothing().when(dispatcher).forward(request, response);
     when(request.getParameter("Event")).thenReturn(correctKey);
     when(request.getParameter("userToken")).thenReturn(null);
     when(request.getRequestDispatcher("/WEB-INF/jsp/display-event.jsp")).thenReturn(dispatcher);
-    doNothing().when(dispatcher).forward(request, response);
 
     try {
       testServlet.doGet(request, response);
@@ -246,8 +246,6 @@ public final class LoadEventServletTest {
   }
 
   private void createEvent() {
-    String[] tags = {"volunteer"};
-
     event = new Entity("Event");
     event.setProperty("eventName", "Book Drive");
     event.setProperty("eventDescription", "We're collecting books.");
@@ -259,6 +257,7 @@ public final class LoadEventServletTest {
     event.setProperty("startTime", "2:00 PM");
     event.setProperty("endTime", "4:00 PM");
     event.setProperty("coverPhoto", "/img-2030121");
+    String[] tags = {"volunteer"};
     event.setIndexedProperty("tags", Arrays.asList(tags));
     event.setProperty("creator", "test@example.com");
     event.setProperty("attendeeCount", 0L);
