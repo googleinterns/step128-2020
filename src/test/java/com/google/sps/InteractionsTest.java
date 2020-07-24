@@ -71,6 +71,11 @@ public final class InteractionsTest {
     when(request.getParameter("volunteer")).thenReturn("3");
     when(request.getParameter("education")).thenReturn("2");
     when(request.getParameter("LGBTQ+")).thenReturn("4");
+    when(request.getParameter("healthcare")).thenReturn("4");
+    when(request.getParameter("civics")).thenReturn("4");
+    when(request.getParameter("fundraiser")).thenReturn("4");
+    when(request.getParameter("activism")).thenReturn("4");
+    when(request.getParameter("item donation")).thenReturn("4");
 
     HttpServletResponse response = mock(HttpServletResponse.class);
     testSurveyServlet.doPost(request, response);
@@ -99,25 +104,18 @@ public final class InteractionsTest {
     expectedSurvey.put("volunteer", 3);
     expectedSurvey.put("education", 2);
     expectedSurvey.put("LGBTQ+", 4);
+    expectedSurvey.put("healthcare", 4);
+    expectedSurvey.put("civics", 4);
+    expectedSurvey.put("fundraiser", 4);
+    expectedSurvey.put("activism", 4);
+    expectedSurvey.put("item donation", 4);
 
     assertEquals(expectedSurvey, Interactions.getInterestMetrics(email));
   }
 
   @Test
   public void noUserForCheckMetrics() throws IOException {
-    // call Interactions.getInterestMetrics() on nonexistent user
-    HttpServletRequest request = mock(HttpServletRequest.class);
-    String email = "test@example.com";
-    TestingUtil.mockFirebase(request, email);
-
-    when(request.getParameter("environment")).thenReturn("3");
-    when(request.getParameter("blm")).thenReturn("4");
-    when(request.getParameter("volunteer")).thenReturn("3");
-    when(request.getParameter("education")).thenReturn("2");
-    when(request.getParameter("LGBTQ+")).thenReturn("4");
-    HttpServletResponse response = mock(HttpServletResponse.class);
-    testSurveyServlet.doPost(request, response);
-
+    takeSurvey("test@example.com");
     assertEquals(null, Interactions.getInterestMetrics("other@example.com"));
   }
 
@@ -129,6 +127,11 @@ public final class InteractionsTest {
     expectedVector.put("volunteer", 0);
     expectedVector.put("education", 0);
     expectedVector.put("LGBTQ+", 0);
+    expectedVector.put("healthcare", 0);
+    expectedVector.put("civics", 0);
+    expectedVector.put("fundraiser", 0);
+    expectedVector.put("activism", 0);
+    expectedVector.put("item donation", 0);
 
     Entity entity = UserServletTest.createBlmProtestEvent();
     assertEquals(expectedVector, Interactions.buildVectorForEvent(entity));
