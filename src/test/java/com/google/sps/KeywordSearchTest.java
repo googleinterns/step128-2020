@@ -33,7 +33,7 @@ import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.maps.model.LatLng;
-import com.google.sps.servlets.CombineSearchServlet;
+import com.google.sps.servlets.SearchServlet;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -58,7 +58,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 public final class KeywordSearchTest {
   private final LocalServiceTestHelper helper =
       new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
-  private CombineSearchServlet testCombineSearchServlet;
+  private SearchServlet testSearchServlet;
   private List<Entity> testEntities;
   private List<String> possibleTags;
   private List<String> possibleNames;
@@ -71,7 +71,7 @@ public final class KeywordSearchTest {
   @Before
   public void setUp() {
     helper.setUp();
-    testCombineSearchServlet = new CombineSearchServlet();
+    testSearchServlet = new SearchServlet();
 
     testEntities = new ArrayList<Entity>();
 
@@ -137,9 +137,9 @@ public final class KeywordSearchTest {
       e.setProperty("eventDescription", desc);
       e.setProperty("address", possibleLocations.get(i));
       e.setProperty("distance", possibleDistances.get(i));
-      Map<String, Integer> keywordsMap = CombineSearchServlet.getKeywords(name, desc);
-      e.setProperty("keywords", CombineSearchServlet.getKeywordMapKeys(keywordsMap));
-      e.setProperty("keywordsValues", CombineSearchServlet.getKeywordMapValues(keywordsMap));
+      Map<String, Integer> keywordsMap = SearchServlet.getKeywords(name, desc);
+      e.setProperty("keywords", SearchServlet.getKeywordMapKeys(keywordsMap));
+      e.setProperty("keywordsValues", SearchServlet.getKeywordMapValues(keywordsMap));
       testEntities.add(e);
     }
 
@@ -152,9 +152,9 @@ public final class KeywordSearchTest {
       e.setProperty("eventDescription", desc);
       e.setProperty("address", possibleLocations.get(i - 5));
       e.setProperty("distance", possibleDistances.get(i - 5));
-      Map<String, Integer> keywordsMap = CombineSearchServlet.getKeywords(name, desc);
-      e.setProperty("keywords", CombineSearchServlet.getKeywordMapKeys(keywordsMap));
-      e.setProperty("keywordsValues", CombineSearchServlet.getKeywordMapValues(keywordsMap));
+      Map<String, Integer> keywordsMap = SearchServlet.getKeywords(name, desc);
+      e.setProperty("keywords", SearchServlet.getKeywordMapKeys(keywordsMap));
+      e.setProperty("keywordsValues", SearchServlet.getKeywordMapValues(keywordsMap));
       testEntities.add(e);
     }
 
@@ -176,7 +176,7 @@ public final class KeywordSearchTest {
     List<String> correctList =
         new ArrayList<String>(
             Arrays.asList("The", "quick", "brown", "fox", "jumps", "over", "the", "lazy", "dog"));
-    List<String> testList = CombineSearchServlet.getSeparateWords(text);
+    List<String> testList = SearchServlet.getSeparateWords(text);
     assertEquals(correctList, testList);
   }
 
@@ -197,7 +197,7 @@ public final class KeywordSearchTest {
                 "personally",
                 "hehe",
                 "okay"));
-    List<String> testList = CombineSearchServlet.getSeparateWords(text);
+    List<String> testList = SearchServlet.getSeparateWords(text);
     assertEquals(correctList, testList);
   }
 
@@ -217,8 +217,7 @@ public final class KeywordSearchTest {
         new ArrayList<String>(
             Arrays.asList("climate", "protest", "environment", "important", "come"));
     List<String> testList =
-        CombineSearchServlet.getKeywordMapKeys(
-            CombineSearchServlet.getKeywords(titleText, descText));
+        SearchServlet.getKeywordMapKeys(SearchServlet.getKeywords(titleText, descText));
     assertEquals(correctList, testList);
   }
 
@@ -237,8 +236,7 @@ public final class KeywordSearchTest {
         new ArrayList<String>(
             Arrays.asList("protest", "climate", "important", "environment", "come"));
     List<String> testList =
-        CombineSearchServlet.getKeywordMapKeys(
-            CombineSearchServlet.getKeywords(titleText, descText));
+        SearchServlet.getKeywordMapKeys(SearchServlet.getKeywords(titleText, descText));
     assertEquals(correctList, testList);
   }
 
@@ -254,8 +252,7 @@ public final class KeywordSearchTest {
     List<String> correctList =
         new ArrayList<String>(Arrays.asList("protest", "environment", "change", "climate"));
     List<String> testList =
-        CombineSearchServlet.getKeywordMapKeys(
-            CombineSearchServlet.getKeywords(titleText, descText));
+        SearchServlet.getKeywordMapKeys(SearchServlet.getKeywords(titleText, descText));
     assertEquals(correctList, testList);
   }
 
@@ -277,8 +274,7 @@ public final class KeywordSearchTest {
         new ArrayList<String>(
             Arrays.asList("important", "movement", "climate", "change", "protest"));
     List<String> testList =
-        CombineSearchServlet.getKeywordMapKeys(
-            CombineSearchServlet.getKeywords(titleText, descText));
+        SearchServlet.getKeywordMapKeys(SearchServlet.getKeywords(titleText, descText));
     assertEquals(correctList, testList);
   }
 
@@ -289,15 +285,14 @@ public final class KeywordSearchTest {
     // climate
     List<String> correctList = new ArrayList<String>(Arrays.asList("climate"));
     List<String> testList =
-        CombineSearchServlet.getKeywordMapKeys(
-            CombineSearchServlet.getKeywords(titleText, descText));
+        SearchServlet.getKeywordMapKeys(SearchServlet.getKeywords(titleText, descText));
     assertEquals(correctList, testList);
   }
 
   @Test
   public void testOccurrenceScore() {
     double occScore =
-        testCombineSearchServlet.occurrenceScore(
+        testSearchServlet.occurrenceScore(
             new ArrayList<String>(Arrays.asList("blm", "protest")),
             new ArrayList<String>(Arrays.asList("blm")),
             new ArrayList<Long>(Arrays.asList(3L, 2L)));
@@ -307,7 +302,7 @@ public final class KeywordSearchTest {
   @Test
   public void testOccurrenceScoreAdding() {
     double occScore =
-        testCombineSearchServlet.occurrenceScore(
+        testSearchServlet.occurrenceScore(
             new ArrayList<String>(Arrays.asList("blm", "protest")),
             new ArrayList<String>(Arrays.asList("blm", "protest")),
             new ArrayList<Long>(Arrays.asList(3L, 2L)));
@@ -317,7 +312,7 @@ public final class KeywordSearchTest {
   @Test
   public void testOccurrenceScoreNoKeywords() {
     double occScore =
-        testCombineSearchServlet.occurrenceScore(
+        testSearchServlet.occurrenceScore(
             new ArrayList<String>(Arrays.asList()),
             new ArrayList<String>(Arrays.asList("blm")),
             new ArrayList<Long>(Arrays.asList(3L, 2L)));
@@ -327,7 +322,7 @@ public final class KeywordSearchTest {
   @Test
   public void testOccurrenceScoreNoValues() {
     double occScore =
-        testCombineSearchServlet.occurrenceScore(
+        testSearchServlet.occurrenceScore(
             new ArrayList<String>(Arrays.asList("blm", "protest")),
             new ArrayList<String>(Arrays.asList("blm")),
             new ArrayList<Long>(Arrays.asList()));
@@ -337,7 +332,7 @@ public final class KeywordSearchTest {
   @Test
   public void testOccurrenceScoreMismatchValues() {
     double occScore =
-        testCombineSearchServlet.occurrenceScore(
+        testSearchServlet.occurrenceScore(
             new ArrayList<String>(Arrays.asList("blm", "protest")),
             new ArrayList<String>(Arrays.asList("blm", "protest")),
             new ArrayList<Long>(Arrays.asList(3L)));
@@ -347,7 +342,7 @@ public final class KeywordSearchTest {
   @Test
   public void testOccurrenceScoreMismatchKeywords() {
     double occScore =
-        testCombineSearchServlet.occurrenceScore(
+        testSearchServlet.occurrenceScore(
             new ArrayList<String>(Arrays.asList("blm")),
             new ArrayList<String>(Arrays.asList("blm", "protest")),
             new ArrayList<Long>(Arrays.asList(3L, 2L)));
@@ -371,7 +366,7 @@ public final class KeywordSearchTest {
 
     mockUtils();
 
-    testCombineSearchServlet.doGet(request, response);
+    testSearchServlet.doGet(request, response);
 
     // Get the JSON response from the server
     String result = sw.getBuffer().toString().trim();
@@ -396,7 +391,7 @@ public final class KeywordSearchTest {
                 "BLM Protest in LA",
                 "Climate Change Protest",
                 "Environment Climate Change Protest"));
-    List<Entity> orderedEvents = SearchTagsServletTest.orderEvents(desiredOrder, events);
+    List<Entity> orderedEvents = TagSearchTest.orderEvents(desiredOrder, events);
 
     // Convert expected events to JSON for comparison
     String expected = Utils.convertToJson(orderedEvents);
@@ -420,7 +415,7 @@ public final class KeywordSearchTest {
 
     mockUtils();
 
-    testCombineSearchServlet.doGet(request, response);
+    testSearchServlet.doGet(request, response);
 
     // Get the JSON response from the server
     String result = sw.getBuffer().toString().trim();
@@ -435,7 +430,7 @@ public final class KeywordSearchTest {
     // Order results like sorting algorithm will
     List<String> desiredOrder =
         new ArrayList<String>(Arrays.asList("BLM Protest in LA", "BLM Protest"));
-    List<Entity> orderedEvents = SearchTagsServletTest.orderEvents(desiredOrder, events);
+    List<Entity> orderedEvents = TagSearchTest.orderEvents(desiredOrder, events);
 
     // Convert expected events to JSON for comparison
     String expected = Utils.convertToJson(orderedEvents);
@@ -459,7 +454,7 @@ public final class KeywordSearchTest {
 
     mockUtils();
 
-    testCombineSearchServlet.doGet(request, response);
+    testSearchServlet.doGet(request, response);
 
     // Get the JSON response from the server
     String result = sw.getBuffer().toString().trim();
@@ -474,7 +469,7 @@ public final class KeywordSearchTest {
     // Order results like sorting algorithm will
     List<String> desiredOrder =
         new ArrayList<String>(Arrays.asList("Toy Drive", "Support Youth Ballet Bake Sale"));
-    List<Entity> orderedEvents = SearchTagsServletTest.orderEvents(desiredOrder, events);
+    List<Entity> orderedEvents = TagSearchTest.orderEvents(desiredOrder, events);
 
     // Convert expected events to JSON for comparison
     String expected = Utils.convertToJson(orderedEvents);
@@ -498,7 +493,7 @@ public final class KeywordSearchTest {
 
     mockUtils();
 
-    testCombineSearchServlet.doGet(request, response);
+    testSearchServlet.doGet(request, response);
 
     // Get the JSON response from the server
     String result = sw.getBuffer().toString().trim();
@@ -520,7 +515,7 @@ public final class KeywordSearchTest {
         new ArrayList<String>(
             Arrays.asList(
                 "BLM Protest", "BLM Protest in LA", "Toy Drive", "Support Youth Ballet Bake Sale"));
-    List<Entity> orderedEvents = SearchTagsServletTest.orderEvents(desiredOrder, events);
+    List<Entity> orderedEvents = TagSearchTest.orderEvents(desiredOrder, events);
 
     // Convert expected events to JSON for comparison
     String expected = Utils.convertToJson(orderedEvents);

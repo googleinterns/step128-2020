@@ -29,7 +29,7 @@ import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.maps.model.LatLng;
-import com.google.sps.servlets.CombineSearchServlet;
+import com.google.sps.servlets.SearchServlet;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -53,7 +53,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 public final class TagSearchTest {
   private final LocalServiceTestHelper helper =
       new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
-  private CombineSearchServlet testCombineSearchServlet;
+  private SearchServlet testSearchServlet;
   private List<Entity> testEntities;
   private List<String> possibleLocations;
   private List<LatLng> possibleLatLngs;
@@ -63,7 +63,7 @@ public final class TagSearchTest {
   @Before
   public void setUp() {
     helper.setUp();
-    testCombineSearchServlet = new CombineSearchServlet();
+    testSearchServlet = new SearchServlet();
     List<String> possibleTags =
         new ArrayList<String>(
             Arrays.asList("environment", "blm", "education", "volunteer", "LGBTQ+"));
@@ -147,7 +147,7 @@ public final class TagSearchTest {
 
     mockUtils();
 
-    testCombineSearchServlet.doGet(request, response);
+    testSearchServlet.doGet(request, response);
 
     // Get the JSON response from the server
     String result = sw.getBuffer().toString().trim();
@@ -179,7 +179,7 @@ public final class TagSearchTest {
 
     mockUtils();
 
-    testCombineSearchServlet.doGet(request, response);
+    testSearchServlet.doGet(request, response);
 
     // Get the JSON response from the server
     String result = sw.getBuffer().toString().trim();
@@ -216,7 +216,7 @@ public final class TagSearchTest {
 
     mockUtils();
 
-    testCombineSearchServlet.doGet(request, response);
+    testSearchServlet.doGet(request, response);
 
     // Get the JSON response from the server
     String result = sw.getBuffer().toString().trim();
@@ -252,7 +252,7 @@ public final class TagSearchTest {
 
     mockUtils();
 
-    testCombineSearchServlet.doGet(request, response);
+    testSearchServlet.doGet(request, response);
 
     // Get the JSON response from the server
     String result = sw.getBuffer().toString().trim();
@@ -288,7 +288,7 @@ public final class TagSearchTest {
 
     mockUtils();
 
-    testCombineSearchServlet.doGet(request, response);
+    testSearchServlet.doGet(request, response);
 
     // Get the JSON response from the server
     String result = sw.getBuffer().toString().trim();
@@ -314,7 +314,7 @@ public final class TagSearchTest {
   public void correctNumberTagsInCommon() throws IOException {
     List<String> tagListA = new ArrayList<String>(Arrays.asList("environment", "blm", "volunteer"));
     List<String> tagListB = new ArrayList<String>(Arrays.asList("blm"));
-    double result = testCombineSearchServlet.intersection(tagListA, tagListB);
+    double result = testSearchServlet.intersection(tagListA, tagListB);
     double correct = 1.0 / 3;
     assertEquals(correct, result, 0.0002);
   }
@@ -323,7 +323,7 @@ public final class TagSearchTest {
   public void tagsInCommonHandlesNoTags() throws IOException {
     List<String> tagListA = new ArrayList<String>();
     List<String> tagListB = new ArrayList<String>();
-    double result = testCombineSearchServlet.intersection(tagListA, tagListB);
+    double result = testSearchServlet.intersection(tagListA, tagListB);
     assertEquals(0.0, result, 0.0002);
   }
 
@@ -331,7 +331,7 @@ public final class TagSearchTest {
   public void handlesNoTagsInCommon() throws IOException {
     List<String> tagListA = new ArrayList<String>(Arrays.asList("education"));
     List<String> tagListB = new ArrayList<String>(Arrays.asList("environment", "blm", "volunteer"));
-    double result = testCombineSearchServlet.intersection(tagListA, tagListB);
+    double result = testSearchServlet.intersection(tagListA, tagListB);
     assertEquals(0.0, result, 0.0002);
   }
 

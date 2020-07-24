@@ -1083,7 +1083,7 @@ function search() {
   getLocation().then((location) => {
     url += '&searchDistance=' + searchDistance + '&location=' + location;
 
-    const servlet = 'csearch';
+    const servlet = 'search';
 
     fetch('/' + servlet + url).then((response) => response.json())
         .then(function(responseJson) {
