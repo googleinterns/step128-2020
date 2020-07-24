@@ -56,10 +56,10 @@ public final class LoadEventServletTest {
   @Before
   public void setUp() {
     helper.setUp();
-    testServlet = new LoadEventServlet();
-
     createUser("test");
     createEntity();
+
+    testServlet = new LoadEventServlet();
   }
 
   @After
@@ -181,7 +181,7 @@ public final class LoadEventServletTest {
   }
 
   @Test(expected = Test.None.class)
-  public void eventLoadNotLoggedIn() throws IOException, ServletException {
+  public void eventLoadNoUserToken() throws IOException, ServletException {
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
     RequestDispatcher dispatcher = mock(RequestDispatcher.class);
@@ -189,8 +189,7 @@ public final class LoadEventServletTest {
     String email = "test@example.com";
     TestingUtil.mockFirebase(request, email);
 
-    // Not logged in. Display-event JSP should be called. If not, test will fail.
-    when(Firebase.isUserLoggedIn(anyString())).thenReturn(false);
+    //  Not userToken. Display-event JSP should be called. If not, test will fail.
     when(request.getParameter("Event")).thenReturn(goalKeyString);
     when(request.getRequestDispatcher("/WEB-INF/jsp/display-event.jsp")).thenReturn(dispatcher);
     doNothing().when(dispatcher).forward(request, response);
@@ -203,7 +202,7 @@ public final class LoadEventServletTest {
   }
 
   @Test(expected = Test.None.class)
-  public void eventLoadNoUserToken() throws IOException, ServletException {
+  public void eventLoadNotLoggedIn() throws IOException, ServletException {
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
     RequestDispatcher dispatcher = mock(RequestDispatcher.class);
@@ -211,7 +210,8 @@ public final class LoadEventServletTest {
     String email = "test@example.com";
     TestingUtil.mockFirebase(request, email);
 
-    //  Not userToken. Display-event JSP should be called. If not, test will fail.
+    // Not logged in. Display-event JSP should be called. If not, test will fail.
+    when(Firebase.isUserLoggedIn(anyString())).thenReturn(false);
     when(request.getParameter("Event")).thenReturn(goalKeyString);
     when(request.getRequestDispatcher("/WEB-INF/jsp/display-event.jsp")).thenReturn(dispatcher);
     doNothing().when(dispatcher).forward(request, response);
