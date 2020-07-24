@@ -101,7 +101,7 @@ public final class LoadEventServletTest {
 
     try {
       testServlet.doGet(request, response);
-    } catch (Exception e) {
+    } catch (IllegalArgumentException | IOException | NullPointerException e) {
       fail();
     }
   }
@@ -119,7 +119,7 @@ public final class LoadEventServletTest {
 
     try {
       testServlet.doGet(request, response);
-    } catch (Exception e) {
+    } catch (IOException | NullPointerException e) {
       fail();
     }
   }
@@ -137,7 +137,7 @@ public final class LoadEventServletTest {
 
     try {
       testServlet.doGet(request, response);
-    } catch (Exception e) {
+    } catch (IllegalArgumentException | NullPointerException e) {
       fail();
     }
   }
@@ -156,7 +156,7 @@ public final class LoadEventServletTest {
 
     try {
       testServlet.doGet(request, response);
-    } catch (Exception e) {
+    } catch (IllegalArgumentException | NullPointerException e) {
       fail();
     }
   }
@@ -175,7 +175,7 @@ public final class LoadEventServletTest {
 
     try {
       testServlet.doGet(request, response);
-    } catch (Exception e) {
+    } catch (IllegalArgumentException | NullPointerException e) {
       fail();
     }
   }
@@ -197,7 +197,7 @@ public final class LoadEventServletTest {
 
     try {
       testServlet.doGet(request, response);
-    } catch (Exception e) {
+    } catch (IOException | NullPointerException e) {
       fail();
     }
   }
@@ -219,7 +219,7 @@ public final class LoadEventServletTest {
 
     try {
       testServlet.doGet(request, response);
-    } catch (Exception e) {
+    } catch (IOException | IllegalArgumentException | NullPointerException e) {
       fail();
     }
   }
@@ -240,7 +240,7 @@ public final class LoadEventServletTest {
 
     try {
       testServlet.doGet(request, response);
-    } catch (Exception e) {
+    } catch (NullPointerException e) {
       fail();
     }
   }
