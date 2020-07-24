@@ -676,8 +676,8 @@ async function getSearchDistanceSettings() {
  */
 const colors = ['#FF0900', '#FF7F00', '#FFB742', '#00F11D', '#0079FF',
   '#A800FF'];
-const tagsAll = ['environment', 'blm', 'volunteer', 'education', 'LGBTQ+',
-    'healthcare', 'civics', 'fundraiser', 'activism', 'item donation'];
+const tagsAll = ['environment', 'blm', 'education', 'LGBTQ+',
+    'healthcare', 'civics', 'volunteer', 'fundraiser', 'activism', 'item donation'];
 const tagsBox = [...tagsAll];
 const tagsSelected = [];
 
@@ -1099,7 +1099,7 @@ function search() {
  * Methods for survey.html
  * **********************************************************************/
 
-const surveyResponses = [-1, -1, -1, -1, -1];
+const surveyResponses = [-1, -1, -1, -1, -1]; // TODO: fix indices
 
 /**
  * Toggles the display of the survey page to indicate which option is selected,
