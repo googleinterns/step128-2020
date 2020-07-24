@@ -46,7 +46,6 @@ public final class RecommendTest {
   // file paths
   private static final String RATINGS = "src/test/data/ratings.csv";
   private static final String EVENTS = "src/test/data/events.csv";
-  private static final String MODEL_PATH = "src/test/data/eventsmodel";
 
   private static final Map<Long, Event> EVENT_INFO = new HashMap<>();
   private static final LocalServiceTestHelper helper =
@@ -69,12 +68,14 @@ public final class RecommendTest {
     DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
     Recommend.calculateRecommend();
     PreparedQuery completedRecs = ds.prepare(new Query("Recommendation"));
-    int userCount = ds.prepare(new Query("User")).countEntities(withLimit(250));
     int recsCount = completedRecs.countEntities(withLimit(250));
+    int userCount = ds.prepare(new Query("User")).countEntities(withLimit(250));
     assertEquals(userCount, recsCount);
+    int eventsCount = ds.prepare(new Query("Event")).countEntities(withLimit(250));
     for (Entity entity : completedRecs.asIterable()) {
       System.out.println(entity.getKey().getName());
       List<Long> userRecs = (List<Long>) entity.getProperty("recs");
+      assertEquals(eventsCount, userRecs.size());
       for (int i = 0; i < userRecs.size() && i < 10; i++) {
         System.out.println("  " + EVENT_INFO.get(userRecs.get(i)));
       }

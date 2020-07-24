@@ -31,7 +31,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.logging.Logger;
-import org.apache.spark.ml.evaluation.RegressionEvaluator;
 import org.apache.spark.ml.recommendation.ALS;
 import org.apache.spark.ml.recommendation.ALSModel;
 import org.apache.spark.sql.Dataset;
@@ -108,26 +107,28 @@ public class Recommend {
     ALSModel model = trainModel(null, ratings);
     Dataset<Row> userRecs = model.recommendForAllUsers(150);
     List<Row> userRecsList = userRecs.collectAsList();
+    // build rankings for each user
     for (Row recRow : userRecsList) {
       String userId = userIdHash.get(recRow.getInt(0));
       List<Row> predScores = recRow.getList(1);
 
-      Map<Double, List<Long>> userTopRecs = new TreeMap<>(SCORE_DESCENDING);
+      Map<Double, Long> userTopRecs = new TreeMap<>(SCORE_DESCENDING);
       for (Row itemRow : predScores) {
         long eventId = eventIdHash.get(itemRow.getInt(0));
         float predScore = itemRow.getFloat(1);
-        if (predScore == 0.0f) {
+        if (predScore < ZERO) {
           predScore = ZERO;
         }
         double totalScore = computeScore(userId, eventId, predScore);
 
         // add item to ranking
-        List<Long> eventsWithScore = userTopRecs.get(totalScore);
-        if (eventsWithScore == null) {
-          eventsWithScore = new ArrayList<>();
-          userTopRecs.put(totalScore, eventsWithScore);
+        while (userTopRecs.containsKey(totalScore)) {
+          Long otherScore = userTopRecs.get(totalScore);
+          userTopRecs.put(totalScore, eventId);
+          eventId = otherScore;
+          totalScore -= 0.01;
         }
-        eventsWithScore.add(eventId);
+        userTopRecs.put(totalScore, eventId);
       }
 
       saveRecsToDatastore(userId, userTopRecs);
@@ -256,12 +257,10 @@ public class Recommend {
   }
 
   /** Stores a recommendation datastore entry for the given user ID. */
-  private static void saveRecsToDatastore(String userId, Map<Double, List<Long>> recs) {
+  private static void saveRecsToDatastore(String userId, Map<Double, Long> recs) {
     List<Long> recsList = new ArrayList<>();
     for (Double score : recs.keySet()) {
-      for (Long l : recs.get(score)) {
-        recsList.add(l);
-      }
+      recsList.add(recs.get(score));
     }
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     Key recKey = KeyFactory.createKey("Recommendation", userId);
