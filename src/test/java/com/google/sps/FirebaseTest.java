@@ -20,8 +20,10 @@ import java.io.IOException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
 
 @RunWith(JUnit4.class)
+@SuppressStaticInitializationFor({"com.google.sps.Firebase"})
 public final class FirebaseTest {
 
   @Test
