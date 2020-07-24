@@ -16,32 +16,13 @@ package com.google.sps;
 
 import static org.junit.Assert.assertEquals;
 
-import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
-import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import java.io.IOException;
-import java.util.logging.Logger;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
 public final class FirebaseTest {
-  private final LocalServiceTestHelper helper =
-      new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
-
-  private static final Logger LOGGER = Logger.getLogger(FirebaseTest.class.getName());
-
-  @Before
-  public void setUp() throws IOException {
-    helper.setUp();
-  }
-
-  @After
-  public void tearDown() {
-    helper.tearDown();
-  }
 
   @Test
   public void userLoggedIn() throws IOException {
