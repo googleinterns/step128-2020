@@ -417,7 +417,11 @@ async function getEvents(events, index, option) {
 
     const eventImageElement = document.createElement('div');
     let primaryTag = event.tags[0];
-    if (primaryTag == 'LGBTQ+') primaryTag = 'LGBTQ';
+    if (primaryTag == 'LGBTQ+') {
+      primaryTag = 'LGBTQ';
+    } else if (primaryTag == 'item donation') {
+      primaryTag = 'donation';
+    }
     eventImageElement.className = 'event-image ' + primaryTag;
 
     const eventItemInfoElement = document.createElement('div');
@@ -672,7 +676,8 @@ async function getSearchDistanceSettings() {
  */
 const colors = ['#FF0900', '#FF7F00', '#FFB742', '#00F11D', '#0079FF',
   '#A800FF'];
-const tagsAll = ['environment', 'blm', 'volunteer', 'education', 'LGBTQ+'];
+const tagsAll = ['environment', 'blm', 'volunteer', 'education', 'LGBTQ+',
+    'healthcare', 'civics', 'fundraiser', 'activism', 'item donation'];
 const tagsBox = [...tagsAll];
 const tagsSelected = [];
 
@@ -846,7 +851,7 @@ function createHiddenInput(jsonArray) {
 }
 
 /**
- * Updates the tag box a page.
+ * Updates the tag box on a page.
  */
 function updateTagBox() {
   const elements = document.getElementsByClassName('tag-box');
@@ -858,8 +863,13 @@ function updateTagBox() {
     spanElement.setAttribute('onclick', 'toggleTagEvent("' + tag +
         '")');
     // class name is now (for example) 'tag environment'
-    if (tag == 'LGBTQ+') spanElement.className = 'tag rainbow';
-    else spanElement.className = 'tag ' + tag;
+    if (tag == 'LGBTQ+') {
+      spanElement.className = 'tag rainbow';
+    } else if (tag == 'item donation') {
+      spanElement.className = 'tag donation';
+    } else {
+      spanElement.className = 'tag ' + tag;
+    }
 
     // if tag is on the event, invert it
     if (tagsSelected.includes(tag)) {
@@ -1153,6 +1163,8 @@ function displayIndividualEvent(id = 0, alreadySaved = -1) {
 
   if (mainColor == 'LGBTQ+') {
     mainColor = 'LGBTQ';
+  } else if (mainColor == 'item donation') {
+    mainColor = 'donation';
   }
 
   loadEventTags(tagArray);

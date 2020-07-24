@@ -947,6 +947,26 @@ input.firebaseui-input, input.firebaseui-input-invalid {
   background-image: linear-gradient(to right, red, orange , gold, forestgreen, royalblue, blueviolet);
 }
 
+.healthcare {
+  background-color: #cc4125ff;
+}
+
+.civics {
+  background-color: #59acbeff;
+}
+
+.fundraiser {
+  background-color: #92b081ff;
+}
+
+.activism {
+  background-color: #8e7cc3ff;
+}
+
+.donation {
+  background-color: #c27ba0ff;
+}
+
 .blm-text {
   color: black;
 }
@@ -965,6 +985,26 @@ input.firebaseui-input, input.firebaseui-input-invalid {
 
 .LGBTQ-text {
   color: indigo;
+}
+
+.healthcare-text {
+  color: #cc4125ff;
+}
+
+.civics-text {
+  color: #59acbeff;
+}
+
+.fundraiser-text {
+  color: #92b081ff;
+}
+
+.activism-text {
+  color: #8e7cc3ff;
+}
+
+.donation-text {
+  color: #c27ba0ff;
 }
 
 .blm.invert {
@@ -990,4 +1030,29 @@ input.firebaseui-input, input.firebaseui-input-invalid {
 
 .rainbow.invert {
   color: black;
+}
+
+.healthcare.invert {
+  background-color: white;
+  color: #cc4125ff;
+}
+
+.civics.invert {
+  background-color: white;
+  color: #59acbeff;
+}
+
+.fundraiser.invert {
+  background-color: white;
+  color: #92b081ff;
+}
+
+.activism.invert {
+  background-color: white;
+  color: #8e7cc3ff;
+}
+
+.donation.invert {
+  background-color: white;
+  color: #c27ba0ff;
 }
