@@ -73,6 +73,11 @@ public final class SurveyServletTest {
     when(request.getParameter("volunteer")).thenReturn("3");
     when(request.getParameter("education")).thenReturn("2");
     when(request.getParameter("LGBTQ+")).thenReturn("4");
+    when(request.getParameter("healthcare")).thenReturn("4");
+    when(request.getParameter("civics")).thenReturn("4");
+    when(request.getParameter("fundraiser")).thenReturn("4");
+    when(request.getParameter("activism")).thenReturn("4");
+    when(request.getParameter("item donation")).thenReturn("4");
 
     testSurveyServlet.doPost(request, response);
 
@@ -83,6 +88,11 @@ public final class SurveyServletTest {
     assertEquals("3", userEntity.getProperty("volunteer"));
     assertEquals("2", userEntity.getProperty("education"));
     assertEquals("4", userEntity.getProperty("LGBTQ+"));
+    assertEquals("4", userEntity.getProperty("healthcare"));
+    assertEquals("4", userEntity.getProperty("civics"));
+    assertEquals("4", userEntity.getProperty("fundraiser"));
+    assertEquals("4", userEntity.getProperty("activism"));
+    assertEquals("4", userEntity.getProperty("item donation"));
   }
 
   @Test
@@ -110,11 +120,9 @@ public final class SurveyServletTest {
       DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
       Entity userEntity = ds.prepare(new Query("User")).asSingleEntity();
 
-      assertEquals(false, userEntity.hasProperty("environment"));
-      assertEquals(false, userEntity.hasProperty("blm"));
-      assertEquals(false, userEntity.hasProperty("volunteer"));
-      assertEquals(false, userEntity.hasProperty("education"));
-      assertEquals(false, userEntity.hasProperty("LGBTQ+"));
+      for (String param : Interactions.metrics) {
+        assertEquals(false, userEntity.hasProperty(param));
+      }
     }
   }
 
@@ -133,6 +141,11 @@ public final class SurveyServletTest {
     when(request.getParameter("volunteer")).thenReturn("3");
     when(request.getParameter("education")).thenReturn("2");
     when(request.getParameter("LGBTQ+")).thenReturn("4");
+    when(request.getParameter("healthcare")).thenReturn("4");
+    when(request.getParameter("civics")).thenReturn("4");
+    when(request.getParameter("fundraiser")).thenReturn("4");
+    when(request.getParameter("activism")).thenReturn("4");
+    when(request.getParameter("item donation")).thenReturn("4");
 
     try {
       testSurveyServlet.doPost(request, response);

@@ -46,7 +46,18 @@ public class Interactions {
   public static final int DELETE_DELTA = -3;
 
   // interest categories, matches question order on survey pages
-  public static final String[] metrics = {"environment", "blm", "volunteer", "education", "LGBTQ+"};
+  public static final String[] metrics = {
+    "environment",
+    "blm",
+    "education",
+    "LGBTQ+",
+    "healthcare",
+    "civics",
+    "volunteer",
+    "fundraiser",
+    "activism",
+    "item donation"
+  };
 
   /**
    * returns a map of a user's interest levels with respect to each tag. returns null if user not
