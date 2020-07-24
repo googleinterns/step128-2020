@@ -15,7 +15,6 @@
 package com.google.sps;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.*;
 
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
@@ -25,15 +24,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.junit.runners.JUnit4;
 
-@PowerMockIgnore("okhttp3.*")
-@RunWith(PowerMockRunner.class)
-@SuppressStaticInitializationFor({"com.google.sps.Firebase"})
-@PrepareForTest({Firebase.class})
+@RunWith(JUnit4.class)
 public final class FirebaseTest {
   private final LocalServiceTestHelper helper =
       new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
