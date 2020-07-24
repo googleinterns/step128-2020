@@ -24,7 +24,6 @@ import com.google.appengine.api.datastore.Query.Filter;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.maps.model.LatLng;
-import com.google.sps.SearchUtils;
 import com.google.sps.Utils;
 import java.io.IOException;
 import java.util.ArrayList;
