@@ -16,6 +16,7 @@ package com.google.sps;
 
 import static com.google.appengine.api.datastore.FetchOptions.Builder.withLimit;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
 
@@ -25,9 +26,15 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.google.sps.servlets.EventServlet;
+import com.google.sps.servlets.KeywordSearchServlet;
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.junit.After;
@@ -141,37 +148,22 @@ public final class EventServletTest {
     when(request.getParameter("start-time")).thenReturn("14:00");
     when(request.getParameter("end-time")).thenReturn("15:00");
     when(request.getParameter("cover-photo")).thenReturn("/img-2030121");
-    String[] tags = {"environment"};
-    when(request.getParameter("all-tags")).thenReturn(Utils.convertToJson(tags));
+    String[] tagsArr = {"environment"};
+    String tagsStr = Utils.convertToJson(tagsArr);
+    when(request.getParameter("all-tags")).thenReturn(tagsStr);
 
     // Post event to Datastore.
     testEventServlet.doPost(request, response);
-
-    // Create what the event Entity should look like, but do not post to
-    // it to Datastore.
-    Entity goalEntity = new Entity("Event");
-    goalEntity.setProperty("eventName", "Lake Clean Up");
-    goalEntity.setProperty("eventDescription", "We're cleaning up the lake");
-    goalEntity.setProperty("address", "678 Lakeview Way, Lakeside, Michigan");
-    goalEntity.setProperty("date", "Sunday, May 17, 2020");
-    goalEntity.setProperty("startTime", "2:00 PM");
-    goalEntity.setProperty("endTime", "3:00 PM");
-    goalEntity.setProperty("coverPhoto", "/img-2030121");
-    goalEntity.setIndexedProperty("tags", Arrays.asList(tags));
-    goalEntity.setProperty("creator", creatorEmail);
-    goalEntity.setProperty("attendeeCount", 0L);
-    goalEntity.setProperty("eventKey", "agR0ZXN0cgsLEgVFdmVudBgBDA");
-    goalEntity.setProperty("unformattedStart", "14:00");
-    goalEntity.setProperty("unformattedEnd", "15:00");
-    goalEntity.setProperty("unformattedDate", "2020-05-17");
 
     // Retrieve the Entity posted to Datastore.
     DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
     Entity postedEntity = ds.prepare(new Query("Event")).asSingleEntity();
 
+    Entity goalEntity = createEntity(creatorEmail, tagsStr);
+
     // Assert the Entity posted to Datastore has the same properties as the
     // the goalEntity.
-    assertEquals(goalEntity.getProperties(), postedEntity.getProperties());
+    assertEntitiesEqual(goalEntity, postedEntity);
   }
 
   @Test
@@ -229,6 +221,52 @@ public final class EventServletTest {
 
       DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
       assertEquals(0, ds.prepare(new Query("Event")).countEntities());
+    }
+  }
+
+  private Entity createEntity(String email, String tagsStr) {
+    // Create what the event Entity should look like, but do not post to
+    // it to Datastore.
+    Entity entity = new Entity("Event");
+    entity.setProperty("eventName", "Lake Clean Up");
+    entity.setProperty("eventDescription", "We're cleaning up the lake");
+    entity.setProperty("address", "678 Lakeview Way, Lakeside, Michigan");
+    entity.setProperty("date", "Sunday, May 17, 2020");
+    entity.setProperty("startTime", "2:00 PM");
+    entity.setProperty("endTime", "3:00 PM");
+    entity.setProperty("coverPhoto", "/img-2030121");
+    entity.setProperty("creator", email);
+    entity.setProperty("attendeeCount", 0L);
+    entity.setProperty("eventKey", "agR0ZXN0cgsLEgVFdmVudBgBDA");
+    entity.setProperty("unformattedStart", "14:00");
+    entity.setProperty("unformattedEnd", "15:00");
+    entity.setProperty("unformattedDate", "2020-05-17");
+
+    // Convert tags and set tag property.
+    Gson gson = new Gson();
+    List<String> tags = gson.fromJson(tagsStr, new TypeToken<ArrayList<String>>() {}.getType());
+    entity.setIndexedProperty("tags", tags);
+
+    // Retrieve keywords and set keyword properties.
+    Map<String, Integer> keywords =
+        KeywordSearchServlet.getKeywords("Lake Clean Up", "We're cleaning up the lake");
+    entity.setProperty("keywords", KeywordSearchServlet.getKeywordMapKeys(keywords));
+    entity.setProperty("keywordsValues", KeywordSearchServlet.getKeywordMapValues(keywords));
+
+    return entity;
+  }
+
+  private void assertEntitiesEqual(Entity goal, Entity resultEntity) {
+    Set<String> goalProperties = goal.getProperties().keySet();
+    Set<String> resultProperties = resultEntity.getProperties().keySet();
+    assertEquals(goalProperties.size(), resultProperties.size());
+    for (String s : goalProperties) {
+      if (s.equals("keywordsValues")) {
+        assertTrue(
+            ((goal.getProperty(s)).toString()).equals((resultEntity.getProperty(s)).toString()));
+      } else {
+        assertEquals(goal.getProperty(s), resultEntity.getProperty(s));
+      }
     }
   }
 }
