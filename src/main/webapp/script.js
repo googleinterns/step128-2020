@@ -1049,6 +1049,16 @@ async function unsaveEvent(eventId) {
 function searchLoadActions() {
   updateTagBox();
   getSearchDistanceSettings();
+
+  // Add a listener to make the search query submit
+  // when the user presses the enter key
+  var searchBarElement = document.getElementsByClassName('search-bar')[0];
+  searchBarElement.addEventListener("keyup", function(event) {
+  if (event.keyCode === 13) {
+   event.preventDefault();
+   document.getElementById("go-button").click();
+  }
+});
 }
 
 /**
