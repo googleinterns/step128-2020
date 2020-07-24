@@ -17,7 +17,7 @@ package com.google.sps;
 import com.google.appengine.api.datastore.Entity;
 import java.io.Serializable;
 
-/** Utility class to help with Spark's dataframe parsing */
+/** Utility class to help with Spark's dataframe parsing. */
 public class EventRating implements Serializable {
   private int userId;
   private int eventId;
