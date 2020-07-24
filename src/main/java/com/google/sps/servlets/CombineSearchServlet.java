@@ -12,12 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
-import com.google.appengine.api.datastore.Entity;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.logging.Logger;
 package com.google.sps.servlets;
 
 import com.google.appengine.api.datastore.DatastoreService;
@@ -30,14 +24,15 @@ import com.google.appengine.api.datastore.Query.Filter;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.maps.model.LatLng;
-import com.google.sps.SearchUtils;
 import com.google.sps.Utils;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -177,41 +172,44 @@ public class CombineSearchServlet extends HttpServlet {
               Integer.parseInt(o2.getProperty("distance").toString()));
         }
       };
-  
+
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     // String search query input
-    String searchQuery = request.getParameter("searchKeywords");
+    String searchQueryKeywords = request.getParameter("searchKeywords");
     // List of all the tags we are searching for
-    searchTags = new ArrayList<String>(Arrays.asList(request.getParameter("tags").split(",")));
+    String searchQueryTags = request.getParameter("tags");
+    if (searchQueryTags != null) {
+      searchTags = new ArrayList<String>(Arrays.asList(searchQueryTags.split(",")));
+    }
 
     // 0 = neither tag nor keyword
     // 1 = tag
     // 2 = keyword
     // 3 = tag and keyword
     int searchType = 0;
-    if (!searchTags.get(0).equals("")) {
-      if (searchQuery == null || searchQuery.equals("")) {
-        // yes tags, no keywords
-       searchType = 1;
-      } else {
-        // yes tags, yes keywords
-        searchType = 3;
-      }
-    } else {
-      if (searchQuery == null || searchQuery.equals("")) {
+    if (searchQueryTags == null || searchTags.get(0).equals("")) {
+      if (searchQueryKeywords == null || searchQueryKeywords.equals("")) {
         // no tags, no keywords
         searchType = 0;
       } else {
         // no tags, yes keywords
         searchType = 2;
       }
+    } else {
+      if (searchQueryKeywords == null || searchQueryKeywords.equals("")) {
+        // yes tags, no keywords
+        searchType = 1;
+      } else {
+        // yes tags, yes keywords
+        searchType = 3;
+      }
     }
 
     Query query = null;
     if (searchType == 2 || searchType == 3) {
       // List of keywords we're using to search
-      searchKeywords = new ArrayList<String>(getSeparateWords(searchQuery));
+      searchKeywords = new ArrayList<String>(getSeparateWords(searchQueryKeywords));
       for (int i = 0; i < searchKeywords.size(); i++) {
         searchKeywords.set(i, searchKeywords.get(i).toLowerCase());
       }
@@ -224,15 +222,16 @@ public class CombineSearchServlet extends HttpServlet {
       case 3:
         Filter tagsFilter = new FilterPredicate("tags", FilterOperator.IN, searchTags);
         query = new Query("Event").setFilter(tagsFilter);
+        break;
       case 2:
         // Filter to check if the event has any of the keywords we're searching for
         Filter keywordsFilter = new FilterPredicate("keywords", FilterOperator.IN, searchKeywords);
         query = new Query("Event").setFilter(keywordsFilter);
-      break;
+        break;
       case 0:
       default:
         query = new Query("Event");
-      break;
+        break;
     }
 
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
@@ -261,8 +260,22 @@ public class CombineSearchServlet extends HttpServlet {
     events.removeIf(
         e -> ((int) e.getProperty("distance")) > cutoff || ((int) e.getProperty("distance")) < 0);
 
-    // Sort list by most keywords in common with search
-    Collections.sort(events, SearchUtils.KEYWORD_SEARCH_RELEVANCE);
+    // Sort list depending on the search type
+    switch (searchType) {
+      case 1:
+        Collections.sort(events, TAGS_SEARCH_RELEVANCE);
+        break;
+      case 2:
+        Collections.sort(events, KEYWORD_SEARCH_RELEVANCE);
+        break;
+      case 3:
+        Collections.sort(events, COMBINE_SEARCH_RELEVANCE);
+        break;
+      case 0:
+      default:
+        Collections.sort(events, TAGS_SEARCH_RELEVANCE);
+        break;
+    }
 
     // Convert events list to json
     String json = Utils.convertToJson(events);
