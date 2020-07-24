@@ -55,7 +55,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @PowerMockIgnore("okhttp3.*")
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({Utils.class})
-public final class KeywordSearchServletTest2 {
+public final class KeywordSearchTest {
   private final LocalServiceTestHelper helper =
       new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
   private CombineSearchServlet testCombineSearchServlet;
