@@ -15,6 +15,7 @@
 package com.google.sps;
 
 import static com.google.appengine.api.datastore.FetchOptions.Builder.withLimit;
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
@@ -25,9 +26,16 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.google.sps.servlets.EventServlet;
+import com.google.sps.servlets.KeywordSearchServlet;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.junit.After;
@@ -141,8 +149,9 @@ public final class EventServletTest {
     when(request.getParameter("start-time")).thenReturn("14:00");
     when(request.getParameter("end-time")).thenReturn("15:00");
     when(request.getParameter("cover-photo")).thenReturn("/img-2030121");
-    String[] tags = {"environment"};
-    when(request.getParameter("all-tags")).thenReturn(Utils.convertToJson(tags));
+    String[] tagsArr = {"environment"};
+    String tagsStr = Utils.convertToJson(tagsArr);
+    when(request.getParameter("all-tags")).thenReturn(tagsStr);
 
     // Post event to Datastore.
     testEventServlet.doPost(request, response);
@@ -157,7 +166,6 @@ public final class EventServletTest {
     goalEntity.setProperty("startTime", "2:00 PM");
     goalEntity.setProperty("endTime", "3:00 PM");
     goalEntity.setProperty("coverPhoto", "/img-2030121");
-    goalEntity.setIndexedProperty("tags", Arrays.asList(tags));
     goalEntity.setProperty("creator", creatorEmail);
     goalEntity.setProperty("attendeeCount", 0L);
     goalEntity.setProperty("eventKey", "agR0ZXN0cgsLEgVFdmVudBgBDA");
@@ -165,13 +173,23 @@ public final class EventServletTest {
     goalEntity.setProperty("unformattedEnd", "15:00");
     goalEntity.setProperty("unformattedDate", "2020-05-17");
 
+    Gson gson = new Gson();
+    List<String> tagsList = gson.fromJson(tagsStr, new TypeToken<ArrayList<String>>() {}.getType());
+    goalEntity.setIndexedProperty("tags", tagsList);
+
+    Map<String, Integer> keywords =
+        KeywordSearchServlet.getKeywords("Lake Clean Up", "We're cleaning up the lake");
+    goalEntity.setProperty("keywords", KeywordSearchServlet.getKeywordMapKeys(keywords));
+    goalEntity.setProperty("keywordsValues", new ArrayList<Integer>(Arrays.asList(3, 3, 2)));
+
     // Retrieve the Entity posted to Datastore.
     DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
     Entity postedEntity = ds.prepare(new Query("Event")).asSingleEntity();
 
     // Assert the Entity posted to Datastore has the same properties as the
     // the goalEntity.
-    assertEquals(goalEntity.getProperties(), postedEntity.getProperties());
+    assertEntitiesEqual(goalEntity, postedEntity);
+    // assertEquals(goalEntity.getProperties(), postedEntity.getProperties());
   }
 
   @Test
@@ -229,6 +247,17 @@ public final class EventServletTest {
 
       DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
       assertEquals(0, ds.prepare(new Query("Event")).countEntities());
+    }
+  }
+
+  private void assertEntitiesEqual(Entity goal, Entity resultEntity) {
+    Set<String> goalProperties = goal.getProperties().keySet();
+    Set<String> resultProperties = resultEntity.getProperties().keySet();
+    assertEquals(goalProperties.size(), resultProperties.size());
+    for (String s : goalProperties) {
+      if (!(s.equals("keywordsValues"))) {
+        assertEquals(goal.getProperty(s), resultEntity.getProperty(s));
+      }
     }
   }
 }
