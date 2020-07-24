@@ -185,7 +185,7 @@ public class Utils {
               .compareTo(b.getProperty("eventName").toString());
         }
       };
-      
+
   /** Format time to standard format. */
   public static String formatTime(String time) {
     DateFormat inFormat = new SimpleDateFormat("HH:mm");
