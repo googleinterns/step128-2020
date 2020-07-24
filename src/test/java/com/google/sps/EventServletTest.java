@@ -33,7 +33,6 @@ import com.google.sps.servlets.EventServlet;
 import com.google.sps.servlets.KeywordSearchServlet;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -181,7 +180,7 @@ public final class EventServletTest {
     Map<String, Integer> keywords =
         KeywordSearchServlet.getKeywords("Lake Clean Up", "We're cleaning up the lake");
     goalEntity.setProperty("keywords", KeywordSearchServlet.getKeywordMapKeys(keywords));
-    goalEntity.setProperty("keywordsValues", new ArrayList<Integer>(Arrays.asList(3, 3, 2)));
+    goalEntity.setProperty("keywordsValues", KeywordSearchServlet.getKeywordMapValues(keywords));
 
     // Retrieve the Entity posted to Datastore.
     DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
