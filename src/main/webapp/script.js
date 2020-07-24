@@ -1073,10 +1073,7 @@ function search() {
   getLocation().then((location) => {
     url += '&searchDistance=' + searchDistance + '&location=' + location;
 
-    let servlet = 'ksearch';
-    if (searchBarElement.value == '') {
-      servlet = 'search';
-    }
+    const servlet = 'csearch';
 
     fetch('/' + servlet + url).then((response) => response.json())
         .then(function(responseJson) {
