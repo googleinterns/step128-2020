@@ -12,6 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+
+import com.google.appengine.api.datastore.Entity;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.logging.Logger;
 package com.google.sps.servlets;
 
 import com.google.appengine.api.datastore.DatastoreService;
@@ -31,19 +37,19 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Logger;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-@WebServlet("/ksearch")
-public class KeywordSearchServlet extends HttpServlet {
+@WebServlet("/csearch")
+public class CombineSearchServlet extends HttpServlet {
 
-  private static final Logger LOGGER = Logger.getLogger(KeywordSearchServlet.class.getName());
+  private static final Logger LOGGER = Logger.getLogger(CombineSearchServlet.class.getName());
+  // Conversion rate from mi to km
+  private static final double MI_TO_KM = 1.609;
   // Number of keywords to produce
   private static final int NUM_KEYWORDS = 5;
   // Minimum number of instances to be considered a keyword
@@ -52,10 +58,41 @@ public class KeywordSearchServlet extends HttpServlet {
   // This list is incomplete
   private static final List<String> IRRELEVANT_WORDS =
       new ArrayList<String>(Arrays.asList("the", "is", "for", "in", "of", "so", "to"));
-  // Conversion rate from mi to km
-  private static final double MI_TO_KM = 1.609;
+
   // Keywords retrieved from the frontend in the doGet method
   private static List<String> searchKeywords;
+  // Tags retrieved from the frontend in the doGet method
+  private static List<String> searchTags;
+
+  /** Comparator used to compare the relevance of two events to the user and their search tags. */
+  private static final Comparator<Entity> TAGS_SEARCH_RELEVANCE =
+      new Comparator<Entity>() {
+        @Override
+        public int compare(Entity o1, Entity o2) {
+          List<String> o1List = (List<String>) o1.getProperty("tags");
+          List<String> o2List = (List<String>) o2.getProperty("tags");
+          // Sort by which event has more tags in common with the search tags
+          int compareTagsInCommon =
+              Double.compare(
+                  intersection(o2List, searchTags) * o2List.size(),
+                  intersection(o1List, searchTags) * o1List.size());
+          if (compareTagsInCommon != 0) {
+            return compareTagsInCommon;
+          }
+          // Sort by which event has a higher ratio of: tags in common with
+          // the search tags to total number of tags
+          int compareRatioOfTagsInCommon =
+              Double.compare(intersection(o2List, searchTags), intersection(o1List, searchTags));
+          if (compareRatioOfTagsInCommon != 0) {
+            return compareRatioOfTagsInCommon;
+          }
+          // Sort by which event is closer to the user
+          return Integer.compare(
+              Integer.parseInt(o1.getProperty("distance").toString()),
+              Integer.parseInt(o2.getProperty("distance").toString()));
+        }
+      };
+
   /**
    * Comparator used to compare the relevance of two events to the user and their search keywords.
    */
@@ -109,27 +146,93 @@ public class KeywordSearchServlet extends HttpServlet {
         }
       };
 
+  /**
+   * Comparator used to compare the relevance of two events to the user and their search
+   * keywords/tags.
+   */
+  public static final Comparator<Entity> COMBINE_SEARCH_RELEVANCE =
+      new Comparator<Entity>() {
+        @Override
+        public int compare(Entity o1, Entity o2) {
+          List<String> o1List = (List<String>) o1.getProperty("tags");
+          List<String> o2List = (List<String>) o2.getProperty("tags");
+          // Sort by which event has more tags in common with the search tags
+          int compareTagsInCommon =
+              Double.compare(
+                  intersection(o2List, searchTags) * o2List.size(),
+                  intersection(o1List, searchTags) * o1List.size());
+          if (compareTagsInCommon != 0) {
+            return compareTagsInCommon;
+          }
+          // Sort by which event has a higher ratio of: tags in common with
+          // the search tags to total number of tags
+          int compareRatioOfTagsInCommon =
+              Double.compare(intersection(o2List, searchTags), intersection(o1List, searchTags));
+          if (compareRatioOfTagsInCommon != 0) {
+            return compareRatioOfTagsInCommon;
+          }
+          // Sort by which event is closer to the user
+          return Integer.compare(
+              Integer.parseInt(o1.getProperty("distance").toString()),
+              Integer.parseInt(o2.getProperty("distance").toString()));
+        }
+      };
+  
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     // String search query input
     String searchQuery = request.getParameter("searchKeywords");
+    // List of all the tags we are searching for
+    searchTags = new ArrayList<String>(Arrays.asList(request.getParameter("tags").split(",")));
+
+    // 0 = neither tag nor keyword
+    // 1 = tag
+    // 2 = keyword
+    // 3 = tag and keyword
+    int searchType = 0;
+    if (!searchTags.get(0).equals("")) {
+      if (searchQuery == null || searchQuery.equals("")) {
+        // yes tags, no keywords
+       searchType = 1;
+      } else {
+        // yes tags, yes keywords
+        searchType = 3;
+      }
+    } else {
+      if (searchQuery == null || searchQuery.equals("")) {
+        // no tags, no keywords
+        searchType = 0;
+      } else {
+        // no tags, yes keywords
+        searchType = 2;
+      }
+    }
 
     Query query = null;
-    // Check if there are no keywords
-    if (searchQuery == null || searchQuery.equals("")) {
-      searchKeywords = new ArrayList<String>();
-      query = new Query("Event");
-    } else {
+    if (searchType == 2 || searchType == 3) {
       // List of keywords we're using to search
       searchKeywords = new ArrayList<String>(getSeparateWords(searchQuery));
       for (int i = 0; i < searchKeywords.size(); i++) {
         searchKeywords.set(i, searchKeywords.get(i).toLowerCase());
       }
       searchKeywords.removeAll(IRRELEVANT_WORDS);
-
-      // Filter to check if the event has any of the keywords we're searching for
-      Filter keywordsFilter = new FilterPredicate("keywords", FilterOperator.IN, searchKeywords);
-      query = new Query("Event").setFilter(keywordsFilter);
+    } else {
+      searchKeywords = new ArrayList<String>();
+    }
+    switch (searchType) {
+      case 1:
+      case 3:
+        Filter tagsFilter = new FilterPredicate("tags", FilterOperator.IN, searchTags);
+        query = new Query("Event").setFilter(tagsFilter);
+      case 2:
+        // Filter to check if the event has any of the keywords we're searching for
+        Filter keywordsFilter = new FilterPredicate("keywords", FilterOperator.IN, searchKeywords);
+        query = new Query("Event").setFilter(keywordsFilter);
+      break;
+      case 0:
+      default:
+        query = new Query("Event");
+      break;
     }
 
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
@@ -159,7 +262,7 @@ public class KeywordSearchServlet extends HttpServlet {
         e -> ((int) e.getProperty("distance")) > cutoff || ((int) e.getProperty("distance")) < 0);
 
     // Sort list by most keywords in common with search
-    Collections.sort(events, KEYWORD_SEARCH_RELEVANCE);
+    Collections.sort(events, SearchUtils.KEYWORD_SEARCH_RELEVANCE);
 
     // Convert events list to json
     String json = Utils.convertToJson(events);
@@ -168,8 +271,81 @@ public class KeywordSearchServlet extends HttpServlet {
     response.getWriter().println(json);
   }
 
-  @Override
-  public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {}
+  public static int compareUsingTags(Entity o1, Entity o2) {
+    List<String> o1List = (List<String>) o1.getProperty("tags");
+    List<String> o2List = (List<String>) o2.getProperty("tags");
+    // Sort by which event has more tags in common with the search tags
+    int compareTagsInCommon =
+        Double.compare(
+            intersection(o2List, searchTags) * o2List.size(),
+            intersection(o1List, searchTags) * o1List.size());
+    if (compareTagsInCommon != 0) {
+      return compareTagsInCommon;
+    }
+    // Sort by which event has a higher ratio of: tags in common with
+    // the search tags to total number of tags
+    int compareRatioOfTagsInCommon =
+        Double.compare(intersection(o2List, searchTags), intersection(o1List, searchTags));
+    return compareRatioOfTagsInCommon;
+  }
+
+  public static int compareUsingKeywords(Entity o1, Entity o2) {
+    List<String> o1List = null;
+    List<String> o2List = null;
+    List<Long> o1Values = null;
+    List<Long> o2Values = null;
+    if (o1 == null || o2 == null) {
+      o1List = new ArrayList<String>();
+      o2List = new ArrayList<String>();
+      o1Values = new ArrayList<Long>();
+      o2Values = new ArrayList<Long>();
+    } else {
+      o1List = (List<String>) o1.getProperty("keywords");
+      o2List = (List<String>) o2.getProperty("keywords");
+      o1Values = (List<Long>) o1.getProperty("keywordsValues");
+      o2Values = (List<Long>) o2.getProperty("keywordsValues");
+    }
+    double intersectionRatioO1 = SearchServlet.intersection(o1List, searchKeywords);
+    double intersectionRatioO2 = SearchServlet.intersection(o2List, searchKeywords);
+    // Sort by which event has more keywords in common with the search keywords
+    int compareKeywordsInCommon =
+        Double.compare(intersectionRatioO2 * o2List.size(), intersectionRatioO1 * o1List.size());
+    if (compareKeywordsInCommon != 0) {
+      return compareKeywordsInCommon;
+    }
+    // Sort by which has a higher occurrence score
+    int compareOccurrence =
+        Double.compare(
+            occurrenceScore(o2List, searchKeywords, o2Values),
+            occurrenceScore(o1List, searchKeywords, o1Values));
+    if (compareOccurrence != 0) {
+      return compareOccurrence;
+    }
+
+    // Sort by which event has less keywords
+    int compareSize = Integer.compare(o1List.size(), o2List.size());
+    return compareSize;
+  }
+
+  /**
+   * Returns a ratio of the number of tags a list has in common with another.
+   *
+   * @param tagListA List of tags to be compared
+   * @param tagListB List of tags to be compared against
+   * @return Double ratio of number of tags in common to total number of tags
+   */
+  public static Double intersection(List<String> tagListA, List<String> tagListB) {
+    // Catches divide by zero
+    if (tagListA == null || tagListB == null) {
+      return 0.0;
+    }
+    if (tagListA.size() == 0) {
+      return 0.0;
+    }
+    List<String> tagListC = new ArrayList<String>(tagListA);
+    tagListC.retainAll(tagListB);
+    return ((double) tagListC.size()) / tagListA.size();
+  }
 
   /**
    * Returns keywords from an event (currently using just the title and description) based off their
