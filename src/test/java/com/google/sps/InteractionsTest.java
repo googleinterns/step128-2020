@@ -60,7 +60,9 @@ import org.powermock.modules.junit4.PowerMockRunner;
 public final class InteractionsTest {
   private final LocalServiceTestHelper helper =
       new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
+
   private static final SurveyServlet testSurveyServlet = new SurveyServlet();
+  private static final double FLOAT_THRESHOLD = 0;
 
   private void takeSurvey(String email) throws IOException {
     HttpServletRequest request = mock(HttpServletRequest.class);
@@ -94,29 +96,26 @@ public final class InteractionsTest {
 
   @Test
   public void checkInterestMetrics() throws IOException {
-    // a basic test to make sure Interactions.getInterestMetrics() works as intended
+    // a basic test to make sure Interactions.buildVectorForUser() works as intended
     String email = "test@example.com";
     takeSurvey(email);
 
-    Map<String, Integer> expectedSurvey = new HashMap<>();
-    expectedSurvey.put("environment", 3);
-    expectedSurvey.put("blm", 4);
-    expectedSurvey.put("volunteer", 3);
-    expectedSurvey.put("education", 2);
-    expectedSurvey.put("LGBTQ+", 4);
-    expectedSurvey.put("healthcare", 4);
-    expectedSurvey.put("civics", 4);
-    expectedSurvey.put("fundraiser", 4);
-    expectedSurvey.put("activism", 4);
-    expectedSurvey.put("item donation", 4);
+    Map<String, Float> expectedSurvey = new HashMap<>();
+    expectedSurvey.put("environment", 3.0f);
+    expectedSurvey.put("blm", 4.0f);
+    expectedSurvey.put("volunteer", 3.0f);
+    expectedSurvey.put("education", 2.0f);
+    expectedSurvey.put("LGBTQ+", 4.0f);
+    expectedSurvey.put("healthcare", 4.0f);
+    expectedSurvey.put("civics", 4.0f);
+    expectedSurvey.put("fundraiser", 4.0f);
+    expectedSurvey.put("activism", 4.0f);
+    expectedSurvey.put("item donation", 4.0f);
 
-    assertEquals(expectedSurvey, Interactions.getInterestMetrics(email));
-  }
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    Entity userEntity = datastore.prepare(new Query("User")).asSingleEntity();
 
-  @Test
-  public void noUserForCheckMetrics() throws IOException {
-    takeSurvey("test@example.com");
-    assertEquals(null, Interactions.getInterestMetrics("other@example.com"));
+    assertEquals(expectedSurvey, Interactions.buildVectorForUser(userEntity));
   }
 
   @Test
@@ -139,15 +138,15 @@ public final class InteractionsTest {
 
   @Test
   public void checkDotProduct() throws IOException {
-    Map<String, Integer> v1 = new HashMap<>();
-    v1.put("1", 1);
-    v1.put("2", 2);
-    v1.put("3", 3);
+    Map<String, Float> v1 = new HashMap<>();
+    v1.put("1", 1.0f);
+    v1.put("2", 2.0f);
+    v1.put("3", 3.0f);
 
     Map<String, Integer> v2 = new HashMap<>();
     v2.put("2", 2);
 
-    assertEquals(4, Interactions.dotProduct(v1, v2));
+    assertEquals(4.0f, Interactions.dotProduct(v1, v2), FLOAT_THRESHOLD);
   }
 
   @Test
@@ -228,30 +227,38 @@ public final class InteractionsTest {
       Entity userEntity = datastore.get(userKey);
       assertEquals(
           Interactions.CREATE_SCORE,
-          Integer.parseInt(userEntity.getProperty("environment").toString()));
+          Float.parseFloat(userEntity.getProperty("environment").toString()),
+          FLOAT_THRESHOLD);
       assertEquals(
-          Interactions.CREATE_SCORE, Integer.parseInt(userEntity.getProperty("blm").toString()));
+          Interactions.CREATE_SCORE,
+          Float.parseFloat(userEntity.getProperty("blm").toString()),
+          FLOAT_THRESHOLD);
       assertEquals(
           Interactions.SAVE_SCORE,
-          Integer.parseInt(userEntity.getProperty("education").toString()));
+          Float.parseFloat(userEntity.getProperty("education").toString()),
+          FLOAT_THRESHOLD);
 
       userKey = KeyFactory.createKey("User", "another@example.com");
       userEntity = datastore.get(userKey);
       assertEquals(
           Interactions.VIEW_SCORE,
-          Integer.parseInt(userEntity.getProperty("environment").toString()));
+          Float.parseFloat(userEntity.getProperty("environment").toString()),
+          FLOAT_THRESHOLD);
       assertEquals(
           Interactions.CREATE_SCORE,
-          Integer.parseInt(userEntity.getProperty("education").toString()));
+          Float.parseFloat(userEntity.getProperty("education").toString()),
+          FLOAT_THRESHOLD);
 
       userKey = KeyFactory.createKey("User", "person@example.com");
       userEntity = datastore.get(userKey);
       assertEquals(
           Interactions.VIEW_SCORE,
-          Integer.parseInt(userEntity.getProperty("environment").toString()));
+          Float.parseFloat(userEntity.getProperty("environment").toString()),
+          FLOAT_THRESHOLD);
       assertEquals(
           Interactions.SAVE_SCORE + Interactions.UNSAVE_DELTA,
-          Integer.parseInt(userEntity.getProperty("blm").toString()));
+          Float.parseFloat(userEntity.getProperty("blm").toString()),
+          FLOAT_THRESHOLD);
     } catch (EntityNotFoundException e) {
       fail();
     }
@@ -298,7 +305,7 @@ public final class InteractionsTest {
   }
 
   /** Makes sure interactions have been recorded correctly in datastore. */
-  public static void assertExpectedInteraction(String userId, long eventId, int value) {
+  public static void assertExpectedInteraction(String userId, long eventId, float value) {
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     Query q =
         new Query("Interaction")
@@ -309,8 +316,8 @@ public final class InteractionsTest {
     PreparedQuery pq = datastore.prepare(q);
     try {
       Entity interactionEntity = pq.asSingleEntity();
-      int score = Integer.parseInt(interactionEntity.getProperty("rating").toString());
-      assertEquals(value, score);
+      float score = Float.parseFloat(interactionEntity.getProperty("rating").toString());
+      assertEquals(value, score, FLOAT_THRESHOLD);
     } catch (TooManyResultsException e) {
       fail();
     } catch (NullPointerException e) {

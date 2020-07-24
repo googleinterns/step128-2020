@@ -53,7 +53,7 @@ public class Firebase {
     FirebaseToken decodedToken = null;
     String uid = "";
     try {
-      decodedToken = FirebaseAuth.getInstance().verifyIdToken(userToken);
+      decodedToken = defaultAuth.verifyIdToken(userToken);
       uid = decodedToken.getUid();
     } catch (FirebaseAuthException e) {
       LOGGER.warning(e.getMessage());

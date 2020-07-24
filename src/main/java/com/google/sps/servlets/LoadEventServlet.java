@@ -44,42 +44,60 @@ public class LoadEventServlet extends HttpServlet {
     Key keyRequested;
     try {
       keyRequested = getEventKey(request);
-      if (keyRequested != null) {
-        Query query = new Query("Event", keyRequested);
-
-        DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-        Entity eventRequested = datastore.prepare(query).asSingleEntity();
-        int alreadySaved = -1;
-
-        String userToken = request.getParameter("userToken");
-        if (userToken != null) {
-          if (Firebase.isUserLoggedIn(userToken)) {
-            String userID = Firebase.authenticateUser(userToken);
-            Key userKey = KeyFactory.createKey("User", userID);
-            List<String> tags = (List<String>) eventRequested.getProperty("tags");
-            Entity userEntity = null;
-            try {
-              userEntity = datastore.get(userKey);
-              alreadySaved = UserServlet.alreadySaved(eventRequested.getKey().getId(), userEntity);
-            } catch (EntityNotFoundException exception) {
-              userEntity = Utils.makeUserEntity(userID, false);
-              LOGGER.info("No entity found for " + userID + ", creating one now.");
-            }
-            int delta =
-                Interactions.recordInteraction(
-                    userID, keyRequested.getId(), Interactions.VIEW_SCORE, false);
-            Interactions.updatePrefs(userEntity, tags, delta);
-            datastore.put(userEntity);
-          }
-        }
-        request = populateRequest(request, eventRequested, alreadySaved);
-
-        request.getRequestDispatcher("/WEB-INF/jsp/display-event.jsp").forward(request, response);
-      }
-    } catch (IllegalArgumentException | IOException | NullPointerException | ServletException e) {
+    } catch (IllegalArgumentException | IOException e) {
       LOGGER.info("Could not retrieve event " + e);
       request.getRequestDispatcher("/WEB-INF/jsp/event-not-found.jsp").forward(request, response);
+      return;
     }
+
+    Query query = new Query("Event", keyRequested);
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    Entity eventRequested = datastore.prepare(query).asSingleEntity();
+    int alreadySaved = -1;
+
+    String userToken = request.getParameter("userToken");
+    if (userToken == null) {
+      LOGGER.warning("No user token.");
+      request = populateRequest(request, eventRequested, alreadySaved);
+      request.getRequestDispatcher("/WEB-INF/jsp/display-event.jsp").forward(request, response);
+      return;
+    }
+
+    String userID = null;
+    Key userKey = null;
+    try {
+      if (Firebase.isUserLoggedIn(userToken)) {
+        userID = Firebase.authenticateUser(userToken);
+        userKey = KeyFactory.createKey("User", userID);
+      } else {
+        throw new IOException("User is not logged in.");
+      }
+    } catch (IllegalArgumentException | IOException e) {
+      LOGGER.info("Login error: " + e);
+      request = populateRequest(request, eventRequested, alreadySaved);
+      request.getRequestDispatcher("/WEB-INF/jsp/display-event.jsp").forward(request, response);
+      return;
+    }
+
+    Entity userEntity = null;
+    try {
+      userEntity = datastore.get(userKey);
+    } catch (EntityNotFoundException exception) {
+      userEntity = Utils.makeUserEntity(userID, false);
+      LOGGER.info("No entity found for " + userID + ", creating one now.");
+    }
+
+    alreadySaved = UserServlet.alreadySaved(eventRequested.getKey().getId(), userEntity);
+
+    List<String> tags = (List<String>) eventRequested.getProperty("tags");
+    float delta =
+        Interactions.recordInteraction(
+            userID, keyRequested.getId(), Interactions.VIEW_SCORE, false);
+    Interactions.updatePrefs(userEntity, tags, delta);
+    datastore.put(userEntity);
+
+    request = populateRequest(request, eventRequested, alreadySaved);
+    request.getRequestDispatcher("/WEB-INF/jsp/display-event.jsp").forward(request, response);
   }
 
   /**
@@ -122,15 +140,17 @@ public class LoadEventServlet extends HttpServlet {
    */
   private Key getEventKey(HttpServletRequest request) throws IllegalArgumentException, IOException {
     Key eventKey = null;
-    // Get the string from the request.
-    if (request.getParameter("Event") != null) {
-      String eventKeyString = request.getParameter("Event");
 
-      // Convert String to type Key.
-      eventKey = KeyFactory.stringToKey(eventKeyString);
-    } else {
+    if (request.getParameter("Event") == null) {
       throw new IOException("Request is missing parameter");
     }
+
+    // Get the string from the request.
+    String eventKeyString = request.getParameter("Event");
+
+    // Convert String to type Key.
+    eventKey = KeyFactory.stringToKey(eventKeyString);
+
     return eventKey;
   }
 }
