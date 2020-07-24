@@ -61,7 +61,7 @@ public class LoadEventServlet extends HttpServlet {
       if (userToken == null) {
         throw new IOException("No user token");
       }
-    } catch (Exception e) {
+    } catch (IOException e) {
       request = populateRequest(request, eventRequested, alreadySaved);
       request.getRequestDispatcher("/WEB-INF/jsp/display-event.jsp").forward(request, response);
       return;
