@@ -125,7 +125,8 @@ public final class EventServletTest {
     int size = 0;
     for (Entity e : interactions) {
       size++;
-      assertEquals(Interactions.CREATE_SCORE, Integer.parseInt(e.getProperty("rating").toString()));
+      assertEquals(
+          Interactions.CREATE_SCORE, Float.parseFloat(e.getProperty("rating").toString()), 0);
       assertEquals("test@example.com", e.getProperty("user").toString());
     }
     assertEquals(3, size);
