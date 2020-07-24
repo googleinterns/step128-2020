@@ -17,9 +17,7 @@ package com.google.sps;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.PreparedQuery.TooManyResultsException;
 import com.google.appengine.api.datastore.Query;
@@ -37,13 +35,13 @@ public class Interactions {
   private static final Logger LOGGER = Logger.getLogger(Interactions.class.getName());
 
   // contributions to user's interest metrics for each action
-  public static final int VIEW_SCORE = 4;
-  public static final int SAVE_SCORE = 8;
-  public static final int CREATE_SCORE = 10;
+  public static final float VIEW_SCORE = 4;
+  public static final float SAVE_SCORE = 8;
+  public static final float CREATE_SCORE = 10;
 
   // effects on scores when "undoing" actions
-  public static final int UNSAVE_DELTA = -2;
-  public static final int DELETE_DELTA = -3;
+  public static final float UNSAVE_DELTA = -2;
+  public static final float DELETE_DELTA = -3;
 
   // interest categories, matches question order on survey pages
   public static final String[] metrics = {"environment", "blm", "volunteer", "education", "LGBTQ+"};
@@ -52,33 +50,27 @@ public class Interactions {
    * returns a map of a user's interest levels with respect to each tag. returns null if user not
    * found.
    */
-  public static Map<String, Integer> getInterestMetrics(String userID) {
-    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    Key userKey = KeyFactory.createKey("User", userID);
-    Map<String, Integer> result = new HashMap<>();
-    Entity userEntity;
-    try {
-      userEntity = datastore.get(userKey);
-      for (String param : metrics) {
-        if (userEntity.hasProperty(param)) {
-          int score = Integer.parseInt(userEntity.getProperty(param).toString());
-          result.put(param, score);
-        } else {
-          // default val is 0
-          result.put(param, 0);
-        }
+  public static Map<String, Float> buildVectorForUser(Entity userEntity) {
+    if (!userEntity.getKind().equals("User")) {
+      throw new IllegalArgumentException("entity must be of type User");
+    }
+    Map<String, Float> result = new HashMap<>();
+    for (String param : metrics) {
+      if (userEntity.hasProperty(param)) {
+        float score = Float.parseFloat(userEntity.getProperty(param).toString());
+        result.put(param, score);
+      } else {
+        // default val is 0
+        result.put(param, 0.0f);
       }
-    } catch (EntityNotFoundException e) {
-      LOGGER.warning("ERROR: email not found " + userID);
-      return null;
     }
     return result;
   }
 
-  /** simplistic method that builds a vector from an entity (subject to change). */
+  /** Simplistic method that builds a vector from an entity (subject to change). */
   public static Map<String, Integer> buildVectorForEvent(Entity eventEntity) {
     if (!eventEntity.getKind().equals("Event")) {
-      throw new IllegalArgumentException("must be event items");
+      throw new IllegalArgumentException("entity must be of type Event");
     }
     String tags = eventEntity.getProperty("tags").toString();
     if (tags == null) {
@@ -96,14 +88,52 @@ public class Interactions {
   }
 
   /** utility method that computes the dot product between two vectors. */
-  public static int dotProduct(Map<String, Integer> v1, Map<String, Integer> v2) {
-    int result = 0;
+  public static float dotProduct(Map<String, Float> v1, Map<String, Integer> v2) {
+    float result = 0;
     for (String field : v1.keySet()) {
       if (v2.containsKey(field)) {
         result += v2.get(field) * v1.get(field);
       }
     }
     return result;
+  }
+
+  /**
+   * Check if there exists an interaction entry between a given user and event.
+   *
+   * @param userId the user's id as identified in datastore
+   * @param eventId the event's id as identified in datastore
+   * @return the interaction entity, or null if none exist.
+   */
+  public static Entity hasInteraction(String userId, long eventId) {
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    Query q =
+        new Query("Interaction")
+            .setFilter(
+                CompositeFilterOperator.and(
+                    new FilterPredicate("user", FilterOperator.EQUAL, userId),
+                    new FilterPredicate("event", FilterOperator.EQUAL, eventId)));
+    PreparedQuery pq = datastore.prepare(q);
+    Entity interaction = null;
+    try {
+      interaction = pq.asSingleEntity();
+    } catch (TooManyResultsException e) {
+      // clear all to "reset" if there are too many
+      List<Key> toDelete = new ArrayList<>();
+      for (Entity entity : pq.asIterable()) {
+        toDelete.add(entity.getKey());
+      }
+      LOGGER.warning(
+          "multiple interactions found for "
+              + userId
+              + " and "
+              + eventId
+              + ". Deleting "
+              + toDelete.size()
+              + " entries.");
+      datastore.delete(toDelete);
+    }
+    return interaction;
   }
 
   /**
@@ -115,66 +145,45 @@ public class Interactions {
    * @param forceOverride if false, only overwrites if new score > old score
    * @return change of user's rating on an item (saves highest score only)
    */
-  public static int recordInteraction(
-      String userId, long eventId, int score, boolean forceOverride) {
+  public static float recordInteraction(
+      String userId, long eventId, float score, boolean forceOverride) {
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    Query q =
-        new Query("Interaction")
-            .setFilter(
-                CompositeFilterOperator.and(
-                    new FilterPredicate("user", FilterOperator.EQUAL, userId),
-                    new FilterPredicate("event", FilterOperator.EQUAL, eventId)));
-    PreparedQuery pq = datastore.prepare(q);
-    Entity interactionEntity = null;
-    int delta = score;
-    try {
-      interactionEntity = pq.asSingleEntity();
-      int prevScore = Integer.parseInt(interactionEntity.getProperty("rating").toString());
-      if (forceOverride || prevScore < score) {
-        interactionEntity.setProperty("rating", score);
-        delta = score - prevScore;
+    Entity interactionEntity = hasInteraction(userId, eventId);
+    float delta = score;
+    if (interactionEntity == null) {
+      interactionEntity = new Entity("Interaction");
+      interactionEntity.setProperty("user", userId);
+      interactionEntity.setProperty("event", eventId);
+      interactionEntity.setProperty("rating", score);
+    } else {
+      if (interactionEntity.hasProperty("rating")) {
+        float prevScore = Float.parseFloat(interactionEntity.getProperty("rating").toString());
+        if (forceOverride || prevScore < score) {
+          interactionEntity.setProperty("rating", score);
+          delta = score - prevScore;
+        } else {
+          delta = 0;
+        }
       } else {
-        delta = 0;
-      }
-    } catch (TooManyResultsException e) {
-      // delete existing entries and re-create later
-      List<Key> toDelete = new ArrayList<>();
-      for (Entity entity : pq.asIterable()) {
-        toDelete.add(entity.getKey());
-      }
-      LOGGER.warning(
-          "multiple entries found for "
-              + userId
-              + " and "
-              + eventId
-              + ". Deleting "
-              + toDelete.size()
-              + " entries.");
-      datastore.delete(toDelete);
-    } catch (NullPointerException e) {
-      // do nothing, pass to finally block
-      LOGGER.info("No entries yet for " + userId + " and " + eventId + ". Creating one now.");
-    } finally {
-      if (interactionEntity == null) {
-        interactionEntity = new Entity("Interaction");
-        interactionEntity.setProperty("user", userId);
-        interactionEntity.setProperty("event", eventId);
         interactionEntity.setProperty("rating", score);
       }
-      interactionEntity.setProperty("timestamp", System.currentTimeMillis());
-      datastore.put(interactionEntity);
     }
+    interactionEntity.setProperty("timestamp", System.currentTimeMillis());
+    datastore.put(interactionEntity);
     return delta;
   }
 
   /** Updates user preference map. */
-  public static void updatePrefs(Entity userEntity, List<String> tags, int score) {
+  public static void updatePrefs(Entity userEntity, List<String> tags, float score) {
     if (!userEntity.getKind().equals("User")) {
       throw new IllegalArgumentException("must be user item");
     }
+    if (score == 0) {
+      return;
+    }
     for (String s : tags) {
       if (userEntity.hasProperty(s)) {
-        userEntity.setProperty(s, score + Integer.parseInt(userEntity.getProperty(s).toString()));
+        userEntity.setProperty(s, score + Float.parseFloat(userEntity.getProperty(s).toString()));
       } else {
         userEntity.setProperty(s, score);
       }

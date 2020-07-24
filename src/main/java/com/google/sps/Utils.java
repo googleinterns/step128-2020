@@ -186,24 +186,6 @@ public class Utils {
         }
       };
 
-  /** creates a comparator based on entity dot product with a given vector. */
-  public static Comparator<Entity> getComparatorByInterestMatch(Map<String, Integer> metrics) {
-    Comparator<Entity> result =
-        new Comparator<Entity>() {
-          @Override
-          public int compare(Entity a, Entity b) {
-            if (!a.getKind().equals("Event") || !b.getKind().equals("Event")) {
-              throw new IllegalArgumentException("must be event items");
-            }
-            Map<String, Integer> v1 = Interactions.buildVectorForEvent(a);
-            Map<String, Integer> v2 = Interactions.buildVectorForEvent(b);
-            return Integer.compare(
-                Interactions.dotProduct(v1, metrics), Interactions.dotProduct(v2, metrics));
-          }
-        };
-    return result;
-  }
-
   /** Format time to standard format. */
   public static String formatTime(String time) {
     DateFormat inFormat = new SimpleDateFormat("HH:mm");

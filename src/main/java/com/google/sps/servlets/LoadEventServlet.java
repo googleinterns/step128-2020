@@ -90,7 +90,7 @@ public class LoadEventServlet extends HttpServlet {
     alreadySaved = UserServlet.alreadySaved(eventRequested.getKey().getId(), userEntity);
 
     List<String> tags = (List<String>) eventRequested.getProperty("tags");
-    int delta =
+    float delta =
         Interactions.recordInteraction(
             userID, keyRequested.getId(), Interactions.VIEW_SCORE, false);
     Interactions.updatePrefs(userEntity, tags, delta);
