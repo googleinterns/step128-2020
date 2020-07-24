@@ -79,14 +79,9 @@ public class EditEventServlet extends HttpServlet {
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     Entity eventRequested = datastore.prepare(query).asSingleEntity();
 
-    String userToken = null;
-    try {
-      userToken = request.getParameter("userToken");
-      if (userToken == null) {
-        throw new IOException("User Token not found.");
-      }
-    } catch (IOException e) {
-      LOGGER.info("Request parameters error: " + e);
+    String userToken = request.getParameter("userToken");
+    if (userToken == null) {
+      LOGGER.warning("No user token.");
       request.getRequestDispatcher("/WEB-INF/jsp/access-denied.jsp").forward(request, response);
       return;
     }
