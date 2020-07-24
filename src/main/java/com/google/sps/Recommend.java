@@ -33,6 +33,7 @@ public class Recommend {
   private static final double NO_INTERACTION = 1.5;
   private static final double ALREADY_VIEWED = 1.2;
   private static final double ALREADY_SAVED = 0.6;
+  private static final float ZERO = 0.1f;
 
   // comparator to sort doubles in descending order
   private static final Comparator<Double> SCORE_DESCENDING =
@@ -48,7 +49,17 @@ public class Recommend {
   private static SparkSession spark;
   private static DatastoreService datastore;
 
-  /** Initializes the SparkSession. */
+  // keep track of ids and hashcodes -- spark requires numeric entries
+  private static Map<Integer, String> userIdHash = new HashMap<>();
+  private static Map<Integer, Long> eventIdHash = new HashMap<>();
+
+  // keep track of metrics and location for each user and event
+  private static Map<String, Map<String, Float>> userPrefs = new HashMap<>();
+  private static Map<Long, Map<String, Integer>> eventInfo = new HashMap<>();
+  private static Map<String, String> userLocations = new HashMap<>();
+  private static Map<Long, String> eventLocations = new HashMap<>();
+
+  /** Initializes the SparkSession, datastore, and other necessary items. */
   private static void init() {
     if (spark == null) {
       spark =
@@ -62,44 +73,19 @@ public class Recommend {
     if (datastore == null) {
       datastore = DatastoreServiceFactory.getDatastoreService();
     }
+
+    userIdHash = new HashMap<>();
+    eventIdHash = new HashMap<>();
+    userPrefs = new HashMap<>();
+    eventInfo = new HashMap<>();
+    userLocations = new HashMap<>();
+    eventLocations = new HashMap<>();
   }
 
   /** Rebuilds recommendation model and calculates recommendations for users. */
   public static void calculateRecommend() throws IOException {
     init();
-
-    // keep track of ids and hashcodes -- spark requires numeric entries
-    final Map<Integer, String> userIdHash = new HashMap<>();
-    final Map<Integer, Long> eventIdHash = new HashMap<>();
-
-    // keep track of metrics and location for each user and event
-    final Map<String, Map<String, Float>> userPrefs = new HashMap<>();
-    final Map<Long, Map<String, Integer>> eventInfo = new HashMap<>();
-    final Map<String, String> userLocations = new HashMap<>();
-    final Map<Long, String> eventLocations = new HashMap<>();
-
-    // get user entities with their preferences
-    Iterable<Entity> queriedUsers = datastore.prepare(new Query("User")).asIterable();
-    for (Entity e : queriedUsers) {
-      String id = e.getKey().getName();
-      userPrefs.put(id, Interactions.buildVectorForUser(e));
-      userIdHash.put(id.hashCode(), id);
-      if (e.hasProperty("location")) {
-        String location = e.getProperty("location").toString();
-        if (location.length() > 0) {
-          userLocations.put(id, location);
-        }
-      }
-    }
-
-    // get event entities
-    Iterable<Entity> queriedEvents = datastore.prepare(new Query("Event")).asIterable();
-    for (Entity e : queriedEvents) {
-      long id = e.getKey().getId();
-      eventInfo.put(id, Interactions.buildVectorForEvent(e));
-      eventIdHash.put((Long.toString(id)).hashCode(), id);
-      eventLocations.put(id, e.getProperty("address").toString());
-    }
+    getInfoFromDatastore();
 
     List<Key> toDelete = new ArrayList<>();
     Dataset<Row> ratings =
@@ -112,34 +98,15 @@ public class Recommend {
     for (Row recRow : userRecsList) {
       String userId = userIdHash.get(recRow.getInt(0));
       List<Row> predScores = recRow.getList(1);
-      Map<String, Float> userVector = userPrefs.get(userId);
-      String userLocation = userLocations.get(userId);
 
       Map<Double, List<Long>> userTopRecs = new TreeMap<>(SCORE_DESCENDING);
-
       for (Row itemRow : predScores) {
         long eventId = eventIdHash.get(itemRow.getInt(0));
         float predScore = itemRow.getFloat(1);
-
-        // calculate score for this item
-        float dotProduct = Interactions.dotProduct(userVector, eventInfo.get(eventId));
-        double totalScore = dotProduct * predScore; // todo: calculate
-
-        // adjust scaling based on user's past interaction with event
-        Entity interactionEntity = Interactions.hasInteraction(userId, eventId);
-        if (interactionEntity == null) {
-          totalScore *= NO_INTERACTION;
-        } else {
-          float interactionScore =
-              Float.parseFloat(interactionEntity.getProperty("rating").toString());
-          if (interactionScore >= Interactions.SAVE_SCORE) {
-            totalScore *= ALREADY_SAVED;
-          } else if (interactionScore == Interactions.VIEW_SCORE) {
-            totalScore *= ALREADY_VIEWED;
-          }
+        if (predScore == 0.0f) {
+          predScore = ZERO;
         }
-
-        // TODO: adjust scaling based on user's location, if location is saved
+        double totalScore = computeScore(userId, eventId, predScore);
 
         // add item to ranking
         List<Long> eventsWithScore = userTopRecs.get(totalScore);
@@ -153,6 +120,9 @@ public class Recommend {
       saveRecsToDatastore(userId, userTopRecs);
       userPrefs.remove(userId);
     }
+
+    // handle users not accounted for by ALSModel
+    for (String userId : userPrefs.keySet()) {}
 
     datastore.delete(toDelete);
   }
@@ -183,6 +153,32 @@ public class Recommend {
             .setLabelCol("rating")
             .setPredictionCol("prediction");
     return evaluator.evaluate(predictions);
+  }
+
+  /** Queries datastore and populates data maps. */
+  private static void getInfoFromDatastore() {
+    // get user entities with their preferences
+    Iterable<Entity> queriedUsers = datastore.prepare(new Query("User")).asIterable();
+    for (Entity e : queriedUsers) {
+      String id = e.getKey().getName();
+      userPrefs.put(id, Interactions.buildVectorForUser(e));
+      userIdHash.put(id.hashCode(), id);
+      if (e.hasProperty("location")) {
+        String location = e.getProperty("location").toString();
+        if (location.length() > 0) {
+          userLocations.put(id, location);
+        }
+      }
+    }
+
+    // get event entities
+    Iterable<Entity> queriedEvents = datastore.prepare(new Query("Event")).asIterable();
+    for (Entity e : queriedEvents) {
+      long id = e.getKey().getId();
+      eventInfo.put(id, Interactions.buildVectorForEvent(e));
+      eventIdHash.put((Long.toString(id)).hashCode(), id);
+      eventLocations.put(id, e.getProperty("address").toString());
+    }
   }
 
   /**
@@ -223,6 +219,37 @@ public class Recommend {
       toDelete.add(itr.next().getKey());
     }
     return spark.createDataFrame(ratings, EventRating.class);
+  }
+
+  /**
+   * Computes cumulative total score for given user and event.
+   *
+   * @param predScore Base score to apply multipliers to.
+   */
+  private static double computeScore(String userId, long eventId, float predScore) {
+    float dotProduct = Interactions.dotProduct(userPrefs.get(userId), eventInfo.get(eventId));
+    double totalScore = dotProduct * predScore;
+
+    // adjust scaling based on user's past interaction with event
+    Entity interactionEntity = Interactions.hasInteraction(userId, eventId);
+    if (interactionEntity == null) {
+      totalScore *= NO_INTERACTION;
+    } else {
+      float interactionScore = Float.parseFloat(interactionEntity.getProperty("rating").toString());
+      if (interactionScore >= Interactions.SAVE_SCORE) {
+        totalScore *= ALREADY_SAVED;
+      } else if (interactionScore == Interactions.VIEW_SCORE) {
+        totalScore *= ALREADY_VIEWED;
+      }
+    }
+
+    String userLocation = userLocations.get(userId);
+    if (userLocation != null) {
+      // TODO: scale based on location
+    }
+
+    totalScore = Math.round(totalScore * 100.0) / 100.0;
+    return totalScore;
   }
 
   /** Stores a recommendation datastore entry for the given user ID. */
