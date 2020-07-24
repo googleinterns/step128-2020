@@ -257,9 +257,15 @@ input {
 }
 
 .form-container .tag-box {
+  align-items: center;
+  display: flex;
+  flex-flow: row wrap;
   font-size: 2em;
+  height: 15vh;
+  justify-content: center;
   min-height: 2.5em;
   overflow: scroll;
+  width: 92%;
 }
 
 .form-container .tag {
@@ -398,9 +404,9 @@ h1 {
 }
 
 .tag-box {
-  overflow: scroll;
   font-size: 2.5em;
-  height: 20vh;
+  height: 25vh;
+  overflow: auto;
 }
 
 .search-tools .tag {
@@ -907,6 +913,7 @@ input.firebaseui-input, input.firebaseui-input-invalid {
 /* tags and tag colors */
 .tag {
   color: white;
+  border: .5vw solid transparent;
   border-radius: 1vw;
   font-weight: bold;
   margin: .5vw;
@@ -956,7 +963,7 @@ input.firebaseui-input, input.firebaseui-input-invalid {
 }
 
 .fundraiser {
-  background-color: #92b081ff;
+  background-color: #587845ff;
 }
 
 .activism {
@@ -964,7 +971,7 @@ input.firebaseui-input, input.firebaseui-input-invalid {
 }
 
 .donation {
-  background-color: #c27ba0ff;
+  background-color: #c85d95ff;
 }
 
 .blm-text {
@@ -996,7 +1003,7 @@ input.firebaseui-input, input.firebaseui-input-invalid {
 }
 
 .fundraiser-text {
-  color: #92b081ff;
+  color: #587845ff;
 }
 
 .activism-text {
@@ -1004,7 +1011,7 @@ input.firebaseui-input, input.firebaseui-input-invalid {
 }
 
 .donation-text {
-  color: #c27ba0ff;
+  color: #c85d95ff;
 }
 
 .blm.invert {
@@ -1044,7 +1051,7 @@ input.firebaseui-input, input.firebaseui-input-invalid {
 
 .fundraiser.invert {
   background-color: white;
-  color: #92b081ff;
+  color: #587845ff;
 }
 
 .activism.invert {
@@ -1054,5 +1061,5 @@ input.firebaseui-input, input.firebaseui-input-invalid {
 
 .donation.invert {
   background-color: white;
-  color: #c27ba0ff;
+  color: #c85d95ff;
 }

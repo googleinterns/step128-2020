@@ -243,6 +243,13 @@ h1 {
   color: #6e9eeb;
 }
 
+.tag-box {
+  align-items: center;
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: center
+}
+
 /* end of search page */
 
 /* Create Page */
@@ -288,6 +295,13 @@ input[type=time] {
 .form-input {
   flex: 90%;
   padding: 10px;
+}
+
+.form-container .tag-box {
+  align-items: center;
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: left;
 }
 
 @media screen and (max-width: 900px) {
@@ -427,6 +441,7 @@ input[type=time] {
 
 .tag {
   color: white;
+  border: 2px solid transparent;
   border-radius: 5px;
   font-weight: bold;
   margin: 2px;
@@ -680,7 +695,7 @@ input[type=time] {
 }
 
 .fundraiser {
-  background-color: #92b081ff;
+  background-color: #587845ff;
 }
 
 .activism {
@@ -688,7 +703,7 @@ input[type=time] {
 }
 
 .donation {
-  background-color: #c27ba0ff;
+  background-color: #c85d95ff;
 }
 
 .LGBTQ {
@@ -725,7 +740,7 @@ input[type=time] {
 }
 
 .fundraiser-text {
-  color: #92b081ff;
+  color: #587845ff;
 }
 
 .activism-text {
@@ -733,7 +748,7 @@ input[type=time] {
 }
 
 .donation-text {
-  color: #c27ba0ff;
+  color: #c85d95ff;
 }
 
 .blm.invert {
@@ -773,7 +788,7 @@ input[type=time] {
 
 .fundraiser.invert {
   background-color: white;
-  color: #92b081ff;
+  color: #587845ff;
 }
 
 .activism.invert {
@@ -783,5 +798,5 @@ input[type=time] {
 
 .donation.invert {
   background-color: white;
-  color: #c27ba0ff;
+  color: #c85d95ff;
 }
