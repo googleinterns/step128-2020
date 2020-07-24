@@ -156,35 +156,11 @@ public final class EventServletTest {
     // Post event to Datastore.
     testEventServlet.doPost(request, response);
 
-    // Create what the event Entity should look like, but do not post to
-    // it to Datastore.
-    Entity goalEntity = new Entity("Event");
-    goalEntity.setProperty("eventName", "Lake Clean Up");
-    goalEntity.setProperty("eventDescription", "We're cleaning up the lake");
-    goalEntity.setProperty("address", "678 Lakeview Way, Lakeside, Michigan");
-    goalEntity.setProperty("date", "Sunday, May 17, 2020");
-    goalEntity.setProperty("startTime", "2:00 PM");
-    goalEntity.setProperty("endTime", "3:00 PM");
-    goalEntity.setProperty("coverPhoto", "/img-2030121");
-    goalEntity.setProperty("creator", creatorEmail);
-    goalEntity.setProperty("attendeeCount", 0L);
-    goalEntity.setProperty("eventKey", "agR0ZXN0cgsLEgVFdmVudBgBDA");
-    goalEntity.setProperty("unformattedStart", "14:00");
-    goalEntity.setProperty("unformattedEnd", "15:00");
-    goalEntity.setProperty("unformattedDate", "2020-05-17");
-
-    Gson gson = new Gson();
-    List<String> tagsList = gson.fromJson(tagsStr, new TypeToken<ArrayList<String>>() {}.getType());
-    goalEntity.setIndexedProperty("tags", tagsList);
-
-    Map<String, Integer> keywords =
-        KeywordSearchServlet.getKeywords("Lake Clean Up", "We're cleaning up the lake");
-    goalEntity.setProperty("keywords", KeywordSearchServlet.getKeywordMapKeys(keywords));
-    goalEntity.setProperty("keywordsValues", KeywordSearchServlet.getKeywordMapValues(keywords));
-
     // Retrieve the Entity posted to Datastore.
     DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
     Entity postedEntity = ds.prepare(new Query("Event")).asSingleEntity();
+
+    Entity goalEntity = createEntity();
 
     // Assert the Entity posted to Datastore has the same properties as the
     // the goalEntity.
@@ -247,6 +223,40 @@ public final class EventServletTest {
       DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
       assertEquals(0, ds.prepare(new Query("Event")).countEntities());
     }
+  }
+
+  private Entity createEntity() {
+    // Create what the event Entity should look like, but do not post to
+    // it to Datastore.
+    Entity entity = new Entity("Event");
+    entity.setProperty("eventName", "Lake Clean Up");
+    entity.setProperty("eventDescription", "We're cleaning up the lake");
+    entity.setProperty("address", "678 Lakeview Way, Lakeside, Michigan");
+    entity.setProperty("date", "Sunday, May 17, 2020");
+    entity.setProperty("startTime", "2:00 PM");
+    entity.setProperty("endTime", "3:00 PM");
+    entity.setProperty("coverPhoto", "/img-2030121");
+    entity.setProperty("creator", "test@example.com");
+    entity.setProperty("attendeeCount", 0L);
+    entity.setProperty("eventKey", "agR0ZXN0cgsLEgVFdmVudBgBDA");
+    entity.setProperty("unformattedStart", "14:00");
+    entity.setProperty("unformattedEnd", "15:00");
+    entity.setProperty("unformattedDate", "2020-05-17");
+
+    // Convert tags and set tag property.
+    String[] tagsArr = {"environment"};
+    String tagsStr = Utils.convertToJson(tagsArr);
+    Gson gson = new Gson();
+    List<String> tags = gson.fromJson(tagsStr, new TypeToken<ArrayList<String>>() {}.getType());
+    entity.setIndexedProperty("tags", tags);
+
+    // Retrieve keywords and set keyword properties.
+    Map<String, Integer> keywords =
+        KeywordSearchServlet.getKeywords("Lake Clean Up", "We're cleaning up the lake");
+    entity.setProperty("keywords", KeywordSearchServlet.getKeywordMapKeys(keywords));
+    entity.setProperty("keywordsValues", KeywordSearchServlet.getKeywordMapValues(keywords));
+
+    return entity;
   }
 
   private void assertEntitiesEqual(Entity goal, Entity resultEntity) {
