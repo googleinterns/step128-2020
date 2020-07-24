@@ -15,7 +15,6 @@
 package com.google.sps;
 
 import static com.google.appengine.api.datastore.FetchOptions.Builder.withLimit;
-import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -160,7 +159,7 @@ public final class EventServletTest {
     DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
     Entity postedEntity = ds.prepare(new Query("Event")).asSingleEntity();
 
-    Entity goalEntity = createEntity();
+    Entity goalEntity = createEntity(creatorEmail, tagsStr);
 
     // Assert the Entity posted to Datastore has the same properties as the
     // the goalEntity.
@@ -225,7 +224,7 @@ public final class EventServletTest {
     }
   }
 
-  private Entity createEntity() {
+  private Entity createEntity(String email, String tagsStr) {
     // Create what the event Entity should look like, but do not post to
     // it to Datastore.
     Entity entity = new Entity("Event");
@@ -236,7 +235,7 @@ public final class EventServletTest {
     entity.setProperty("startTime", "2:00 PM");
     entity.setProperty("endTime", "3:00 PM");
     entity.setProperty("coverPhoto", "/img-2030121");
-    entity.setProperty("creator", "test@example.com");
+    entity.setProperty("creator", email);
     entity.setProperty("attendeeCount", 0L);
     entity.setProperty("eventKey", "agR0ZXN0cgsLEgVFdmVudBgBDA");
     entity.setProperty("unformattedStart", "14:00");
@@ -244,8 +243,6 @@ public final class EventServletTest {
     entity.setProperty("unformattedDate", "2020-05-17");
 
     // Convert tags and set tag property.
-    String[] tagsArr = {"environment"};
-    String tagsStr = Utils.convertToJson(tagsArr);
     Gson gson = new Gson();
     List<String> tags = gson.fromJson(tagsStr, new TypeToken<ArrayList<String>>() {}.getType());
     entity.setIndexedProperty("tags", tags);
