@@ -57,6 +57,14 @@ public final class FormattingTest {
   }
 
   @Test
+  public void unformattableTime() throws IOException {
+    String time = "";
+    String formattedTime = Utils.formatTime(time);
+
+    assertEquals("", formattedTime);
+  }
+
+  @Test
   public void formatSingleDigitMonth() throws IOException {
     String date = "2020-05-17";
     String formattedDate = Utils.formatDate(date);
@@ -70,5 +78,13 @@ public final class FormattingTest {
     String formattedDate = Utils.formatDate(date);
 
     assertEquals("Thursday, December 17, 2020", formattedDate);
+  }
+
+  @Test
+  public void unformattableDate() throws IOException {
+    String date = "";
+    String formattedDate = Utils.formatDate(date);
+
+    assertEquals("", formattedDate);
   }
 }
