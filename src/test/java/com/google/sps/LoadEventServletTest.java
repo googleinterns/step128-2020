@@ -191,6 +191,7 @@ public final class LoadEventServletTest {
 
     //  Not userToken. Display-event JSP should be called. If not, test will fail.
     when(request.getParameter("Event")).thenReturn(correctKey);
+    when(request.getParameter("userToken")).thenReturn(null);
     when(request.getRequestDispatcher("/WEB-INF/jsp/display-event.jsp")).thenReturn(dispatcher);
     doNothing().when(dispatcher).forward(request, response);
 
