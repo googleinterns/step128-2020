@@ -33,6 +33,7 @@ import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.google.sps.servlets.EventServlet;
+import com.google.sps.servlets.KeywordSearchServlet;
 import com.google.sps.servlets.UserServlet;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -41,6 +42,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -71,7 +73,7 @@ public final class UserServletTest {
     assertEquals(goalProperties.size(), resultProperties.size());
     for (String s : goalProperties) {
       // ignore attendeeCount, which is checked elsewhere
-      if (!s.equals("attendeeCount")) {
+      if (!(s.equals("attendeeCount"))) {
         assertEquals(goal.getProperty(s), resultEntity.getProperty(s));
       }
     }
@@ -561,14 +563,23 @@ public final class UserServletTest {
     entity.setProperty("startTime", "2:00 PM");
     entity.setProperty("endTime", "");
     entity.setProperty("coverPhoto", "");
-    String[] tags = {"environment"};
-    entity.setIndexedProperty("tags", Arrays.asList(tags));
     entity.setProperty("creator", "test@example.com");
     entity.setProperty("eventKey", "agR0ZXN0cgsLEgVFdmVudBgBDA");
     entity.setProperty("attendeeCount", 1L);
     entity.setProperty("unformattedStart", "14:00");
     entity.setProperty("unformattedEnd", "");
     entity.setProperty("unformattedDate", "2020-05-17");
+
+    String[] tags = {"environment"};
+    String tagsStr = Utils.convertToJson(tags);
+    Gson gson = new Gson();
+    List<String> tagsList = gson.fromJson(tagsStr, new TypeToken<ArrayList<String>>() {}.getType());
+    entity.setIndexedProperty("tags", tagsList);
+
+    Map<String, Integer> keywords =
+        KeywordSearchServlet.getKeywords("Lake Clean Up", "We're cleaning up the lake");
+    entity.setProperty("keywords", KeywordSearchServlet.getKeywordMapKeys(keywords));
+    entity.setProperty("keywordsValues", new ArrayList<Double>(Arrays.asList(3.0, 3.0, 2.0)));
 
     return entity;
   }
@@ -583,14 +594,23 @@ public final class UserServletTest {
     entity.setProperty("startTime", "1:00 PM");
     entity.setProperty("endTime", "");
     entity.setProperty("coverPhoto", "");
-    String[] tags = {"blm"};
-    entity.setIndexedProperty("tags", Arrays.asList(tags));
     entity.setProperty("creator", "test@example.com");
     entity.setProperty("eventKey", "agR0ZXN0cgsLEgVFdmVudBgDDA");
     entity.setProperty("attendeeCount", 1L);
     entity.setProperty("unformattedStart", "13:00");
     entity.setProperty("unformattedEnd", "");
     entity.setProperty("unformattedDate", "2020-05-17");
+
+    String[] tags = {"blm"};
+    String tagsStr = Utils.convertToJson(tags);
+    Gson gson = new Gson();
+    List<String> tagsList = gson.fromJson(tagsStr, new TypeToken<ArrayList<String>>() {}.getType());
+    entity.setIndexedProperty("tags", tagsList);
+
+    Map<String, Integer> keywords =
+        KeywordSearchServlet.getKeywords("BLM Protest", "Fight for racial justice!");
+    entity.setProperty("keywords", KeywordSearchServlet.getKeywordMapKeys(keywords));
+    entity.setProperty("keywordsValues", new ArrayList<Double>(Arrays.asList(2.0, 2.0)));
 
     return entity;
   }
@@ -605,14 +625,23 @@ public final class UserServletTest {
     entity.setProperty("startTime", "10:00 AM");
     entity.setProperty("endTime", "");
     entity.setProperty("coverPhoto", "");
-    String[] tags = {"education"};
-    entity.setIndexedProperty("tags", Arrays.asList(tags));
     entity.setProperty("creator", "another@example.com");
     entity.setProperty("eventKey", "agR0ZXN0cgsLEgVFdmVudBgFDA");
     entity.setProperty("attendeeCount", 1L);
     entity.setProperty("unformattedStart", "10:00");
     entity.setProperty("unformattedEnd", "");
     entity.setProperty("unformattedDate", "2020-05-17");
+
+    String[] tags = {"education"};
+    String tagsStr = Utils.convertToJson(tags);
+    Gson gson = new Gson();
+    List<String> tagsList = gson.fromJson(tagsStr, new TypeToken<ArrayList<String>>() {}.getType());
+    entity.setIndexedProperty("tags", tagsList);
+
+    Map<String, Integer> keywords =
+        KeywordSearchServlet.getKeywords("Book Drive", "Let's donate books for kids");
+    entity.setProperty("keywords", KeywordSearchServlet.getKeywordMapKeys(keywords));
+    entity.setProperty("keywordsValues", new ArrayList<Double>(Arrays.asList(2.0, 2.0)));
 
     return entity;
   }
