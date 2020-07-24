@@ -10,7 +10,7 @@
     <script src="https://www.gstatic.com/firebasejs/7.15.1/firebase-analytics.js"></script>
     <script src="script.js"></script>
   </head>
-  <body onload="loadActions(updateEventTagBox); loadFields();">
+  <body onload="loadActions(updateEventTagBox); confirmUser();">
     <div class="header"></div>
     <div class="form-container">
       <h1>Edit event</h1>
