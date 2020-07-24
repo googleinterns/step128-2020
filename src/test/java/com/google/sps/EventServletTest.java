@@ -17,6 +17,7 @@ package com.google.sps;
 import static com.google.appengine.api.datastore.FetchOptions.Builder.withLimit;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
 
@@ -189,7 +190,6 @@ public final class EventServletTest {
     // Assert the Entity posted to Datastore has the same properties as the
     // the goalEntity.
     assertEntitiesEqual(goalEntity, postedEntity);
-    // assertEquals(goalEntity.getProperties(), postedEntity.getProperties());
   }
 
   @Test
@@ -255,7 +255,10 @@ public final class EventServletTest {
     Set<String> resultProperties = resultEntity.getProperties().keySet();
     assertEquals(goalProperties.size(), resultProperties.size());
     for (String s : goalProperties) {
-      if (!(s.equals("keywordsValues"))) {
+      if (s.equals("keywordsValues")) {
+        assertTrue(
+            ((goal.getProperty(s)).toString()).equals((resultEntity.getProperty(s)).toString()));
+      } else {
         assertEquals(goal.getProperty(s), resultEntity.getProperty(s));
       }
     }
