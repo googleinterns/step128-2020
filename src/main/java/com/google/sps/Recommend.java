@@ -1,3 +1,17 @@
+// Copyright 2020 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package com.google.sps;
 
 import com.google.appengine.api.datastore.DatastoreService;
@@ -8,7 +22,6 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -243,66 +256,5 @@ public class Recommend {
     }
     recEntity.setProperty("recs", recsList);
     datastore.put(recEntity);
-  }
-
-  public static class EventRating implements Serializable {
-    private int userId;
-    private int eventId;
-    private float rating;
-    private long timestamp;
-
-    /** Creates an EventRating object. */
-    public EventRating(String userId, long eventId, float rating, long timestamp) {
-      // all fields must be numeric
-      this.userId = userId.hashCode();
-      // spark implicitly casts long to int otherwise
-      this.eventId = (Long.toString(eventId)).hashCode();
-      this.rating = rating;
-      this.timestamp = timestamp;
-    }
-
-    // need getters to work with spark.createDataFrame()
-    public int getUserId() {
-      return userId;
-    }
-
-    public int getEventId() {
-      return eventId;
-    }
-
-    public float getRating() {
-      return rating;
-    }
-
-    public long getTimestamp() {
-      return timestamp;
-    }
-
-    /** Creates an EventRating object from an Interaction Entity. */
-    public static EventRating parseEntity(Entity entity) {
-      if (!entity.getKind().equals("Interaction")) {
-        return null;
-      }
-      Object userField = entity.getProperty("user");
-      Object eventField = entity.getProperty("event");
-      Object ratingField = entity.getProperty("rating");
-      Object timeField = entity.getProperty("timestamp");
-      if (userField == null || eventField == null || ratingField == null || timeField == null) {
-        return null;
-      }
-      try {
-        String userId = userField.toString();
-        long eventId = Long.parseLong(eventField.toString());
-        float rating = Float.parseFloat(ratingField.toString());
-        long timestamp = Long.parseLong(timeField.toString());
-        return new EventRating(userId, eventId, rating, timestamp);
-      } catch (NumberFormatException e) {
-        return null;
-      }
-    }
-
-    public String toString() {
-      return userId + " " + eventId + " " + rating + " " + timestamp;
-    }
   }
 }
