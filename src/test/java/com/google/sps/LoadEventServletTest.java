@@ -84,7 +84,7 @@ public final class LoadEventServletTest {
 
     try {
       testServlet.doGet(request, response);
-    } catch (Exception e) {
+    } catch (IllegalArgumentException | IOException | EntityNotFoundException e) {
       fail();
     }
   }
