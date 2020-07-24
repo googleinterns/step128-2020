@@ -86,14 +86,12 @@ public class LoadEventServlet extends HttpServlet {
     Entity userEntity = null;
     try {
       userEntity = datastore.get(userKey);
-      alreadySaved = UserServlet.alreadySaved(eventRequested.getKey().getId(), userEntity);
     } catch (EntityNotFoundException exception) {
       userEntity = Utils.makeUserEntity(userID, false);
       LOGGER.info("No entity found for " + userID + ", creating one now.");
-      request = populateRequest(request, eventRequested, alreadySaved);
-      request.getRequestDispatcher("/WEB-INF/jsp/display-event.jsp").forward(request, response);
-      return;
     }
+
+    alreadySaved = UserServlet.alreadySaved(eventRequested.getKey().getId(), userEntity);
 
     List<String> tags = (List<String>) eventRequested.getProperty("tags");
     int delta =
