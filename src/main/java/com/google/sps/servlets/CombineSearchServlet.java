@@ -68,10 +68,7 @@ public class CombineSearchServlet extends HttpServlet {
           if (tagResult != 0) {
             return tagResult;
           } else {
-            // Sort by which event is closer to the user
-            return Integer.compare(
-                Integer.parseInt(o1.getProperty("distance").toString()),
-                Integer.parseInt(o2.getProperty("distance").toString()));
+            return compareDistances(o1, o2);
           }
         }
       };
@@ -87,10 +84,7 @@ public class CombineSearchServlet extends HttpServlet {
           if (keywordResult != 0) {
             return keywordResult;
           } else {
-            // Sort by which event is closer to the user
-            return Integer.compare(
-                Integer.parseInt(o1.getProperty("distance").toString()),
-                Integer.parseInt(o2.getProperty("distance").toString()));
+            return compareDistances(o1, o2);
           }
         }
       };
@@ -306,6 +300,19 @@ public class CombineSearchServlet extends HttpServlet {
     // Sort by which event has less keywords
     int compareSize = Integer.compare(o1List.size(), o2List.size());
     return compareSize;
+  }
+
+  /**
+   * Compare two event entities by their proximity to the user.
+   *
+   * @param o1 Entity to be compared with
+   * @param o2 Entity to be compared against
+   * @return int comparison result
+   */
+  public static int compareDistances(Entity o1, Entity o2) {
+    return Integer.compare(
+        Integer.parseInt(o1.getProperty("distance").toString()),
+        Integer.parseInt(o2.getProperty("distance").toString()));
   }
 
   /**
