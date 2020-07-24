@@ -49,15 +49,15 @@ public final class LoadEventServletTest {
   private final LocalServiceTestHelper helper =
       new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
   private LoadEventServlet testServlet;
-  private Entity goalEntity;
-  private String goalKeyString;
+  private Entity event;
+  private String correctKey;
 
   /** Set up Entity and Entity key to test for. */
   @Before
   public void setUp() {
     helper.setUp();
     createUser("test");
-    createEntity();
+    createEvent();
 
     testServlet = new LoadEventServlet();
   }
@@ -77,7 +77,7 @@ public final class LoadEventServletTest {
     TestingUtil.mockFirebase(request, email);
 
     // Display-event JSP should be called. If not, test will fail.
-    when(request.getParameter("Event")).thenReturn(goalKeyString);
+    when(request.getParameter("Event")).thenReturn(correctKey);
     when(request.getParameter("userToken")).thenReturn(email);
     when(request.getRequestDispatcher("/WEB-INF/jsp/display-event.jsp")).thenReturn(dispatcher);
     doNothing().when(dispatcher).forward(request, response);
@@ -131,7 +131,7 @@ public final class LoadEventServletTest {
     RequestDispatcher dispatcher = mock(RequestDispatcher.class);
 
     // The event parameter is lowercase. Should call event not found jsp - if not test will fail.
-    when(request.getParameter("event")).thenReturn(goalKeyString);
+    when(request.getParameter("event")).thenReturn(correctKey);
     when(request.getRequestDispatcher("/WEB-INF/jsp/event-not-found.jsp")).thenReturn(dispatcher);
     doNothing().when(dispatcher).forward(request, response);
 
@@ -150,7 +150,7 @@ public final class LoadEventServletTest {
 
     // An extra character has been added to key. Should call event not found jsp - if not test will
     // fail.
-    when(request.getParameter("event")).thenReturn(goalKeyString + 'A');
+    when(request.getParameter("event")).thenReturn(correctKey + 'A');
     when(request.getRequestDispatcher("/WEB-INF/jsp/event-not-found.jsp")).thenReturn(dispatcher);
     doNothing().when(dispatcher).forward(request, response);
 
@@ -190,7 +190,7 @@ public final class LoadEventServletTest {
     TestingUtil.mockFirebase(request, email);
 
     //  Not userToken. Display-event JSP should be called. If not, test will fail.
-    when(request.getParameter("Event")).thenReturn(goalKeyString);
+    when(request.getParameter("Event")).thenReturn(correctKey);
     when(request.getRequestDispatcher("/WEB-INF/jsp/display-event.jsp")).thenReturn(dispatcher);
     doNothing().when(dispatcher).forward(request, response);
 
@@ -212,7 +212,7 @@ public final class LoadEventServletTest {
 
     // Not logged in. Display-event JSP should be called. If not, test will fail.
     when(Firebase.isUserLoggedIn(anyString())).thenReturn(false);
-    when(request.getParameter("Event")).thenReturn(goalKeyString);
+    when(request.getParameter("Event")).thenReturn(correctKey);
     when(request.getRequestDispatcher("/WEB-INF/jsp/display-event.jsp")).thenReturn(dispatcher);
     doNothing().when(dispatcher).forward(request, response);
 
@@ -233,7 +233,7 @@ public final class LoadEventServletTest {
     TestingUtil.mockFirebase(request, email);
 
     // User not created. Display-event JSP should be called. If not, test will fail.
-    when(request.getParameter("Event")).thenReturn(goalKeyString);
+    when(request.getParameter("Event")).thenReturn(correctKey);
     when(request.getRequestDispatcher("/WEB-INF/jsp/display-event.jsp")).thenReturn(dispatcher);
     doNothing().when(dispatcher).forward(request, response);
 
@@ -244,45 +244,45 @@ public final class LoadEventServletTest {
     }
   }
 
-  private void createEntity() {
+  private void createEvent() {
     String[] tags = {"volunteer"};
 
-    goalEntity = new Entity("Event");
-    goalEntity.setProperty("eventName", "Book Drive");
-    goalEntity.setProperty("eventDescription", "We're collecting books.");
-    goalEntity.setProperty("address", "456 Library Way, Bookville, Washington");
-    goalEntity.setProperty("streetAddress", "456 Library Way");
-    goalEntity.setProperty("city", "Bookville");
-    goalEntity.setProperty("state", "Washington");
-    goalEntity.setProperty("date", "May 17, 2020");
-    goalEntity.setProperty("startTime", "2:00 PM");
-    goalEntity.setProperty("endTime", "4:00 PM");
-    goalEntity.setProperty("coverPhoto", "/img-2030121");
-    goalEntity.setIndexedProperty("tags", Arrays.asList(tags));
-    goalEntity.setProperty("creator", "test@example.com");
-    goalEntity.setProperty("attendeeCount", 0L);
-    goalEntity.setProperty("unformattedStart", "14:00");
-    goalEntity.setProperty("unformattedEnd", "16:00");
-    goalEntity.setProperty("unformattedDate", "2020-05-17");
+    event = new Entity("Event");
+    event.setProperty("eventName", "Book Drive");
+    event.setProperty("eventDescription", "We're collecting books.");
+    event.setProperty("address", "456 Library Way, Bookville, Washington");
+    event.setProperty("streetAddress", "456 Library Way");
+    event.setProperty("city", "Bookville");
+    event.setProperty("state", "Washington");
+    event.setProperty("date", "May 17, 2020");
+    event.setProperty("startTime", "2:00 PM");
+    event.setProperty("endTime", "4:00 PM");
+    event.setProperty("coverPhoto", "/img-2030121");
+    event.setIndexedProperty("tags", Arrays.asList(tags));
+    event.setProperty("creator", "test@example.com");
+    event.setProperty("attendeeCount", 0L);
+    event.setProperty("unformattedStart", "14:00");
+    event.setProperty("unformattedEnd", "16:00");
+    event.setProperty("unformattedDate", "2020-05-17");
 
     DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
-    ds.put(goalEntity);
+    ds.put(event);
 
-    Key goalKey = goalEntity.getKey();
-    goalKeyString = KeyFactory.keyToString(goalKey);
+    Key key = event.getKey();
+    correctKey = KeyFactory.keyToString(key);
 
-    goalEntity.setProperty("eventKey", goalKeyString);
-    ds.put(goalEntity);
+    event.setProperty("eventKey", correctKey);
+    ds.put(event);
   }
 
-  private void createUser(String user) {
-    String email = user + "@example.com";
+  private void createUser(String name) {
+    String email = name + "@example.com";
     Key userKey = KeyFactory.createKey("User", email);
 
-    Entity entity = new Entity(userKey);
-    entity.setProperty("firebaseID", email);
+    Entity user = new Entity(userKey);
+    user.setProperty("firebaseID", email);
 
     DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
-    ds.put(entity);
+    ds.put(user);
   }
 }
