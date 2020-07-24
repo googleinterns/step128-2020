@@ -64,27 +64,15 @@ public class CombineSearchServlet extends HttpServlet {
       new Comparator<Entity>() {
         @Override
         public int compare(Entity o1, Entity o2) {
-          List<String> o1List = (List<String>) o1.getProperty("tags");
-          List<String> o2List = (List<String>) o2.getProperty("tags");
-          // Sort by which event has more tags in common with the search tags
-          int compareTagsInCommon =
-              Double.compare(
-                  intersection(o2List, searchTags) * o2List.size(),
-                  intersection(o1List, searchTags) * o1List.size());
-          if (compareTagsInCommon != 0) {
-            return compareTagsInCommon;
+          int tagResult = compareUsingTags(o1, o2);
+          if (tagResult != 0) {
+            return tagResult;
+          } else {
+            // Sort by which event is closer to the user
+            return Integer.compare(
+                Integer.parseInt(o1.getProperty("distance").toString()),
+                Integer.parseInt(o2.getProperty("distance").toString()));
           }
-          // Sort by which event has a higher ratio of: tags in common with
-          // the search tags to total number of tags
-          int compareRatioOfTagsInCommon =
-              Double.compare(intersection(o2List, searchTags), intersection(o1List, searchTags));
-          if (compareRatioOfTagsInCommon != 0) {
-            return compareRatioOfTagsInCommon;
-          }
-          // Sort by which event is closer to the user
-          return Integer.compare(
-              Integer.parseInt(o1.getProperty("distance").toString()),
-              Integer.parseInt(o2.getProperty("distance").toString()));
         }
       };
 
@@ -95,43 +83,9 @@ public class CombineSearchServlet extends HttpServlet {
       new Comparator<Entity>() {
         @Override
         public int compare(Entity o1, Entity o2) {
-          List<String> o1List = null;
-          List<String> o2List = null;
-          List<Long> o1Values = null;
-          List<Long> o2Values = null;
-          if (o1 == null || o2 == null) {
-            o1List = new ArrayList<String>();
-            o2List = new ArrayList<String>();
-            o1Values = new ArrayList<Long>();
-            o2Values = new ArrayList<Long>();
-          } else {
-            o1List = (List<String>) o1.getProperty("keywords");
-            o2List = (List<String>) o2.getProperty("keywords");
-            o1Values = (List<Long>) o1.getProperty("keywordsValues");
-            o2Values = (List<Long>) o2.getProperty("keywordsValues");
-          }
-          double intersectionRatioO1 = SearchServlet.intersection(o1List, searchKeywords);
-          double intersectionRatioO2 = SearchServlet.intersection(o2List, searchKeywords);
-          // Sort by which event has more keywords in common with the search keywords
-          int compareKeywordsInCommon =
-              Double.compare(
-                  intersectionRatioO2 * o2List.size(), intersectionRatioO1 * o1List.size());
-          if (compareKeywordsInCommon != 0) {
-            return compareKeywordsInCommon;
-          }
-          // Sort by which has a higher occurrence score
-          int compareOccurrence =
-              Double.compare(
-                  occurrenceScore(o2List, searchKeywords, o2Values),
-                  occurrenceScore(o1List, searchKeywords, o1Values));
-          if (compareOccurrence != 0) {
-            return compareOccurrence;
-          }
-
-          // Sort by which event has less keywords
-          int compareSize = Integer.compare(o1List.size(), o2List.size());
-          if (compareSize != 0) {
-            return compareSize;
+          int keywordResult = compareUsingKeywords(o1, o2);
+          if (keywordResult != 0) {
+            return keywordResult;
           } else {
             // Sort by which event is closer to the user
             return Integer.compare(
@@ -284,6 +238,13 @@ public class CombineSearchServlet extends HttpServlet {
     response.getWriter().println(json);
   }
 
+  /**
+   * Compare two event entities by their relevance to the user and their search tags.
+   *
+   * @param o1 Entity to be compared with
+   * @param o2 Entity to be compared against
+   * @return int comparison result
+   */
   public static int compareUsingTags(Entity o1, Entity o2) {
     List<String> o1List = (List<String>) o1.getProperty("tags");
     List<String> o2List = (List<String>) o2.getProperty("tags");
@@ -302,6 +263,13 @@ public class CombineSearchServlet extends HttpServlet {
     return compareRatioOfTagsInCommon;
   }
 
+  /**
+   * Compare two event entities by their relevance to the user and their search tags.
+   *
+   * @param o1 Entity to be compared with
+   * @param o2 Entity to be compared against
+   * @return int comparison result
+   */
   public static int compareUsingKeywords(Entity o1, Entity o2) {
     List<String> o1List = null;
     List<String> o2List = null;
