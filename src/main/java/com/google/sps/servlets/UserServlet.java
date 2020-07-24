@@ -195,7 +195,7 @@ public class UserServlet extends HttpServlet {
       datastore.put(eventEntity);
 
       // record interaction
-      int delta =
+      float delta =
           Interactions.recordInteraction(
               userEntity.getKey().getName(), eventId, Interactions.SAVE_SCORE, false);
       List<String> tags = (List<String>) eventEntity.getProperty("tags");
@@ -242,7 +242,7 @@ public class UserServlet extends HttpServlet {
       datastore.put(eventEntity);
 
       // record interaction
-      int delta =
+      float delta =
           Interactions.recordInteraction(
               userEntity.getKey().getName(),
               eventId,
