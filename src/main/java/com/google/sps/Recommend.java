@@ -145,16 +145,6 @@ public class Recommend {
     return model;
   }
 
-  /** Uses RMSE to evaluate a set of predicted data. */
-  public static double evaluatePredictions(Dataset<Row> predictions) {
-    RegressionEvaluator evaluator =
-        new RegressionEvaluator()
-            .setMetricName("rmse")
-            .setLabelCol("rating")
-            .setPredictionCol("prediction");
-    return evaluator.evaluate(predictions);
-  }
-
   /** Queries datastore and populates data maps. */
   private static void getInfoFromDatastore() {
     // get user entities with their preferences
@@ -326,10 +316,6 @@ public class Recommend {
       } catch (NumberFormatException e) {
         return null;
       }
-    }
-
-    public String toString() {
-      return userId + " " + eventId + " " + rating + " " + timestamp;
     }
   }
 }
