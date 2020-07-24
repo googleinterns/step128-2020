@@ -1099,7 +1099,10 @@ function search() {
  * Methods for survey.html
  * **********************************************************************/
 
-const surveyResponses = [-1, -1, -1, -1, -1]; // TODO: fix indices
+const surveyResponses = [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1];
+
+// const tagsAll = ['environment', 'blm', 'education', 'LGBTQ+',
+    // 'healthcare', 'civics', 'volunteer', 'fundraiser', 'activism', 'item donation'];
 
 /**
  * Toggles the display of the survey page to indicate which option is selected,
@@ -1125,24 +1128,24 @@ function toggleSurveyDisplay(question, index) {
  * Verifies the survey is completed. If it is completed, submits.
  */
 function submitSurvey() {
-  if (loggedIn) {
+  getUserIDToken().then((userToken) => {
     const params = new URLSearchParams();
     for (let i = 0; i < surveyResponses.length; i++) {
       const score = surveyResponses[i];
       if (score < 0) {
-        // TODO: streamline this probably
         alert('Please finish the survey first!');
         return;
       } else {
         params.append(tagsAll[i], score);
       }
     }
-    params.append('userToken', getUserIDToken());
-    fetch(new Request('/submit-survey', {method: 'POST', body: params}));
-  } else {
-    // cannot submit while not logged in
-    alert('Please log in first!');
-  }
+    params.append('userToken', userToken);
+    fetch(new Request('/submit-survey', {method: 'POST', body: params}))
+        .then(() => {
+          window.location.href = '/index.html';
+        });
+    
+  });
 }
 
 /* **********************************************************************
