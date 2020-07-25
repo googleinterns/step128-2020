@@ -149,7 +149,7 @@ public final class SearchServletTest {
    * @param desiredLocation LatLng location to be returned in the GeocodingResult[]
    * @return GeocodingResult[] with the desired location inside
    */
-  private static GeocodingResult[] createGeocodingResult(LatLng desiredLocation) {
+  public static GeocodingResult[] createGeocodingResult(LatLng desiredLocation) {
     GeocodingResult[] gr = new GeocodingResult[] {new GeocodingResult()};
     gr[0].geometry = new Geometry();
     gr[0].geometry.location = desiredLocation;
@@ -183,7 +183,7 @@ public final class SearchServletTest {
    * @param locStr String of the address of the location to be Geocoded
    * @param output GeocodingResult[] containing the LatLng the mock should return
    */
-  private static void mockGeocodingApiSetup(String locStr, GeocodingResult[] output)
+  public static void mockGeocodingApiSetup(String locStr, GeocodingResult[] output)
       throws Exception {
     GeocodingApiRequest geoRequest = PowerMockito.mock(GeocodingApiRequest.class);
     PowerMockito.when(geoRequest.address(locStr)).thenReturn(geoRequest);

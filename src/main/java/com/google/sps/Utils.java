@@ -129,7 +129,7 @@ public class Utils {
       LOGGER.warning(e.getMessage());
     }
 
-    if (result.rows[0].elements[0].status.toString().equals("ZERO_RESULTS")) {
+    if (result == null || result.rows[0].elements[0].status.toString().equals("ZERO_RESULTS")) {
       return -1;
     }
     int distance = (int) (result.rows[0].elements[0].distance.inMeters / 1000);
