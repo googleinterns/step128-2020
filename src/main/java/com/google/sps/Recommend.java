@@ -46,6 +46,7 @@ public class Recommend {
   private static final double ALREADY_VIEWED = 1.2;
   private static final double ALREADY_SAVED = 0.6;
   private static final float ZERO = 0.1f;
+  private static final double DISTANCE_BASE = 1.05;
 
   // comparator to sort doubles in descending order
   private static final Comparator<Double> SCORE_DESCENDING =
@@ -104,7 +105,7 @@ public class Recommend {
         makeDataframeAndPreprocess(userIdHash.keySet(), eventIdHash.keySet(), toDelete);
 
     // compute recommendations from matrix factorization
-    ALSModel model = trainModel(null, ratings);
+    ALSModel model = trainModel(ratings);
     Dataset<Row> userRecs = model.recommendForAllUsers(150);
     List<Row> userRecsList = userRecs.collectAsList();
     // build rankings for each user
@@ -147,15 +148,11 @@ public class Recommend {
    * @param path If specified, will save the model parameters at this path
    * @param training Will fit the model to this training dataset
    */
-  public static ALSModel trainModel(String path, Dataset<Row> training) throws IOException {
+  public static ALSModel trainModel(Dataset<Row> training) throws IOException {
     ALS als =
         new ALS().setMaxIter(5).setUserCol("userId").setItemCol("eventId").setRatingCol("rating");
     ALSModel model = als.fit(training);
     model.setColdStartStrategy("drop");
-    if (path != null) {
-      model.write().overwrite().save(path);
-      LOGGER.info("model saved at " + path);
-    }
     return model;
   }
 
@@ -248,8 +245,19 @@ public class Recommend {
     }
 
     String userLocation = userLocations.get(userId);
-    if (userLocation != null) {
-      // TODO: scale based on location
+    String eventLocation = eventLocations.get(eventId);
+    if (userLocation != null && eventLocations != null) {
+    //   int distance =
+    //       Utils.getDistance(Utils.getLatLng(userLocation), Utils.getLatLng(eventLocation));
+    //   if (distance < 0) {
+    //     System.out.println(userId);
+    //     System.out.println(eventId);
+    //     System.out.println(userLocation);
+    //     System.out.println(eventLocation);
+    //     throw new IllegalStateException("distance failed");
+    //   }
+      
+    //   totalScore /= Math.pow(DISTANCE_BASE, distance);
     }
 
     totalScore = Math.round(totalScore * 100.0) / 100.0;
