@@ -909,6 +909,23 @@ function openEditForm(key) {
 }
 
 /**
+ * Confirms if event belongs to user.
+ */
+function confirmUser() {
+  getUserIDToken().then((userToken) => {
+        const key = document.getElementById('key').value;
+        fetch('/confirm-user?Event=' + key + '&userToken=' + userToken).then(response => response.json()).then((access) => {
+                if (access == true) {
+                  updateTagBox();
+                  loadFields();
+                } else {
+                  window.location.href = '/my-events.html';
+                }
+              });
+  });
+}
+
+/**
  * Pre-load input fields from datastore.
  */
 function loadFields() {
