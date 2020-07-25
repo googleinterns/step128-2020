@@ -14,20 +14,15 @@
 
 package com.google.sps.servlets;
 
-import static com.google.sps.Utils.getParameter;
-
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
-import com.google.gson.Gson;
 import com.google.sps.Firebase;
 import com.google.sps.Utils;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -36,16 +31,27 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 @WebServlet("/confirm-user")
-public class DeleteEventServlet extends HttpServlet {
+public class ConfirmUserServlet extends HttpServlet {
 
-  private static final Logger LOGGER = Logger.getLogger(LoadEventServlet.class.getName());
+  private static final Logger LOGGER = Logger.getLogger(ConfirmUserServlet.class.getName());
 
   @Override
-  public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+  public void doGet(HttpServletRequest request, HttpServletResponse response)
+      throws IOException, ServletException {
     String userToken = request.getParameter("userToken");
-    String userID = Firebase.authenticateUser(userToken);
 
-    Key keyRequested = getEventKey(request, "event");
+    String userID = null;
+    try {
+      if (Firebase.isUserLoggedIn(userToken)) {
+        userID = Firebase.authenticateUser(userToken);
+      } else {
+        throw new IOException("User is not logged in.");
+      }
+    } catch (IllegalArgumentException | IOException e) {
+      LOGGER.info("Login error: " + e);
+    }
+
+    Key keyRequested = getEventKey(request, "Event");
     Query query = new Query("Event", keyRequested);
 
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
@@ -53,14 +59,13 @@ public class DeleteEventServlet extends HttpServlet {
 
     String creator = eventRequested.getProperty("creator").toString();
 
-    response.setContentType("text/html");
-    PrintWriter out = response.getWriter();
+    boolean belongs = false;
     if (creator.equals(userID)) {
-      out.append("true");
-    } else {
-      out.append("false");
+      belongs = true;
     }
-    out.close();
+
+    response.setContentType("application/json;");
+    response.getWriter().println(Utils.convertToJson(belongs));
   }
 
   /**
