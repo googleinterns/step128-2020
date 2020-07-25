@@ -16,6 +16,7 @@ package com.google.sps;
 
 import static com.google.appengine.api.datastore.FetchOptions.Builder.withLimit;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.*;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
@@ -43,10 +44,6 @@ import org.junit.runners.JUnit4;
 /** A class to make sure that Spark works as intended. */
 @RunWith(JUnit4.class)
 public final class RecommendTest {
-  // file paths
-  private static final String RATINGS = "src/test/data/ratings.csv";
-  private static final String EVENTS = "src/test/data/events.csv";
-
   private static final Map<Long, Event> EVENT_INFO = new HashMap<>();
   private static final LocalServiceTestHelper helper =
       new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
@@ -64,7 +61,10 @@ public final class RecommendTest {
 
   @Test
   public void doTests() throws IOException {
-    addInfoToDatastore(RATINGS, EVENTS);
+    String users = "src/test/data/users-1.csv";
+    String ratings = "src/test/data/ratings-1.csv";
+    String events = "src/test/data/events-1.csv";
+    addInfoToDatastore(events, users, ratings);
     DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
     Recommend.calculateRecommend();
     PreparedQuery completedRecs = ds.prepare(new Query("Recommendation"));
@@ -83,9 +83,9 @@ public final class RecommendTest {
     }
   }
 
-  /** Adds all info from ratings CSV and events CSV file to datastore. */
-  private void addInfoToDatastore(String ratingsFile, String eventsFile)
-      throws FileNotFoundException {
+  /** Adds all info from ratings CSV, users CSV, events CSV to datastore. */
+  private void addInfoToDatastore(String eventsFile, String usersFile, String ratingsFile)
+      throws FileNotFoundException, IOException {
     final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     final Map<String, Entity> users = new HashMap<>();
     // scan events and event data
@@ -97,7 +97,18 @@ public final class RecommendTest {
       }
     }
     scan.close();
-    // scan ratings and save users
+    // scan users and user data
+    scan = new Scanner(new File(usersFile));
+    scan.nextLine(); // flush the header line
+    while (scan.hasNext()) {
+      Entity userEntity = parseUserEntity(scan.nextLine());
+      if (userEntity != null) {
+        String userId = userEntity.getKey().getName();
+        users.put(userId, userEntity);
+      }
+    }
+    scan.close();
+    // scan ratings
     scan = new Scanner(new File(ratingsFile));
     while (scan.hasNext()) {
       Interaction interaction = Interaction.parseInteraction(scan.nextLine());
@@ -110,9 +121,7 @@ public final class RecommendTest {
 
           Entity userEntity = users.get(interaction.userId);
           if (userEntity == null) {
-            Key userKey = KeyFactory.createKey("User", interaction.userId);
-            userEntity = new Entity(userKey);
-            users.put(interaction.userId, userEntity);
+            throw new IOException("user entity not found");
           }
           Interactions.updatePrefs(userEntity, tags, delta);
         } else {
@@ -126,10 +135,10 @@ public final class RecommendTest {
     }
   }
 
-  /** Parses one line from events.csv and returns as an entity. */
+  /** Parses one line from event CSV and returns as an entity. */
   private Entity parseEventEntity(String input) {
     String[] fields = input.split(",");
-    if (fields.length < 4) {
+    if (fields.length < 5) {
       return null;
     }
     Entity eventEntity = null;
@@ -137,13 +146,14 @@ public final class RecommendTest {
       long eventId = Long.parseLong(fields[0]);
       String eventName = fields[1];
       String eventDesc = fields[2];
+      String eventLocation = fields[3];
       List<String> tagsList = new ArrayList<>();
-      String[] tags = fields[3].split("-");
+      String[] tags = fields[4].split("-");
       for (String t : tags) {
         tagsList.add(t);
       }
-      if (fields.length > 4) {
-        String[] tags2 = fields[4].split("-");
+      if (fields.length > 5) {
+        String[] tags2 = fields[5].split("-");
         for (String t : tags2) {
           tagsList.add(t);
         }
@@ -156,13 +166,33 @@ public final class RecommendTest {
       eventEntity = new Entity(eventKey);
       eventEntity.setProperty("eventName", eventName);
       eventEntity.setProperty("eventDescription", eventDesc);
-      eventEntity.setProperty("address", "location"); // TODO
+      eventEntity.setProperty("address", eventLocation);
       eventEntity.setIndexedProperty("tags", tagsList);
       // save tag info for easier access later
     } catch (NumberFormatException e) {
       eventEntity = null;
     }
     return eventEntity;
+  }
+
+  /** Parses one line from user CSV and returns as an entity. */
+  private Entity parseUserEntity(String input) {
+    String[] fields = input.split(",");
+    if (fields.length != 2) {
+      return null;
+    }
+    Entity userEntity = null;
+    try {
+      String userId = fields[0];
+      String userLocation = fields[1];
+      Key userKey = KeyFactory.createKey("User", userId);
+      userEntity = new Entity(userKey);
+      userEntity.setProperty("location", userLocation);
+      // save tag info for easier access later
+    } catch (NumberFormatException e) {
+      userEntity = null;
+    }
+    return userEntity;
   }
 
   private static class Interaction {
@@ -193,7 +223,7 @@ public final class RecommendTest {
     }
   }
 
-  /** Utility class used for CSV parsing. */
+  /** Utility class used for CSV parsing and data storage. */
   public static class Event {
     private long eventId;
     private String eventName;
