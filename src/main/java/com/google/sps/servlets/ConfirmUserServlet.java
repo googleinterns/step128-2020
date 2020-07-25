@@ -39,17 +39,8 @@ public class ConfirmUserServlet extends HttpServlet {
   public void doGet(HttpServletRequest request, HttpServletResponse response)
       throws IOException, ServletException {
     String userToken = request.getParameter("userToken");
+    String userID = Firebase.authenticateUser(userToken);
 
-    String userID = null;
-    try {
-      if (Firebase.isUserLoggedIn(userToken)) {
-        userID = Firebase.authenticateUser(userToken);
-      } else {
-        throw new IOException("User is not logged in.");
-      }
-    } catch (IllegalArgumentException | IOException e) {
-      LOGGER.info("Login error: " + e);
-    }
 
     Key keyRequested = getEventKey(request, "Event");
     Query query = new Query("Event", keyRequested);
