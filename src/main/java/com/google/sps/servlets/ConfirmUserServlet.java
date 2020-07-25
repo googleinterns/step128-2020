@@ -42,8 +42,10 @@ public class ConfirmUserServlet extends HttpServlet {
     String userID = Firebase.authenticateUser(userToken);
 
 
-    Key keyRequested = getEventKey(request, "Event");
-    Query query = new Query("Event", keyRequested);
+    // Get the event key string from the request.
+    String keyString = request.getParameter("Event");
+    Key key = KeyFactory.stringToKey(keyString);
+    Query query = new Query("Event", key);
 
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     Entity eventRequested = datastore.prepare(query).asSingleEntity();
@@ -57,27 +59,5 @@ public class ConfirmUserServlet extends HttpServlet {
 
     response.setContentType("application/json;");
     response.getWriter().println(Utils.convertToJson(belongs));
-  }
-
-  /**
-   * Retrieves the key string (if any) from the request parameter and converts it to type Key.
-   *
-   * @return the key from the request parameter.
-   */
-  private Key getEventKey(HttpServletRequest request, String name)
-      throws IllegalArgumentException, IOException {
-    Key eventKey = null;
-
-    if (request.getParameter(name) == null) {
-      throw new IOException("Request is missing parameter");
-    }
-
-    // Get the event key string from the request.
-    String eventKeyString = request.getParameter(name);
-
-    // Convert String to type Key.
-    eventKey = KeyFactory.stringToKey(eventKeyString);
-
-    return eventKey;
   }
 }
