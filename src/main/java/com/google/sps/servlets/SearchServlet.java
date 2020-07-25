@@ -113,12 +113,17 @@ public class SearchServlet extends HttpServlet {
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    long startTime = System.nanoTime();
     // String search query input
     String searchQueryKeywords = request.getParameter("searchKeywords");
     // List of all the tags we are searching for
     String searchQueryTags = request.getParameter("tags");
+    int tagCount = 0;
     if (searchQueryTags != null) {
       searchTags = new ArrayList<String>(Arrays.asList(searchQueryTags.split(",")));
+      if (!searchTags.get(0).equals("")) {
+        tagCount = searchTags.size();
+      }
     }
 
     // 0 = neither tag nor keyword
@@ -145,6 +150,7 @@ public class SearchServlet extends HttpServlet {
     }
 
     Query query = null;
+    int keywordCount = 0;
     if (searchType == 2 || searchType == 3) {
       // List of keywords we're using to search
       searchKeywords = new ArrayList<String>(getSeparateWords(searchQueryKeywords));
@@ -152,6 +158,7 @@ public class SearchServlet extends HttpServlet {
         searchKeywords.set(i, searchKeywords.get(i).toLowerCase());
       }
       searchKeywords.removeAll(IRRELEVANT_WORDS);
+      keywordCount = searchKeywords.size();
     } else {
       searchKeywords = new ArrayList<String>();
     }
@@ -174,6 +181,7 @@ public class SearchServlet extends HttpServlet {
 
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     PreparedQuery results = datastore.prepare(query);
+    long entityCount = results.countEntities(FetchOptions.Builder.withDefaults());
     List<Entity> events =
         new ArrayList<Entity>(results.asList(FetchOptions.Builder.withDefaults()));
 
@@ -220,6 +228,14 @@ public class SearchServlet extends HttpServlet {
 
     response.setContentType("application/json;");
     response.getWriter().println(json);
+
+    long endTime = System.nanoTime();
+    long totalTime = (endTime - startTime) / 1000000;
+
+    LOGGER.info(
+        String.format(
+            "Got %1$s results with %2$s tags and %3$s keywords in %4$s ms",
+            entityCount, tagCount, keywordCount, totalTime));
   }
 
   /**
