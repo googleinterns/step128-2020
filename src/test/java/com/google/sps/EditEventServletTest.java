@@ -51,7 +51,7 @@ public final class EditEventServletTest {
   private final LocalServiceTestHelper helper =
       new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
   private EditEventServlet testServlet;
-  private String goalKeyString;
+  private String correctKey;
   private Entity goalEntity;
 
   /** Set up Entity and Entity key to test for. */
@@ -79,7 +79,7 @@ public final class EditEventServletTest {
     TestingUtil.mockFirebase(request, email);
 
     // Full request params. The edit event form should be called.
-    when(request.getParameter("key")).thenReturn(goalKeyString);
+    when(request.getParameter("key")).thenReturn(correctKey);
     when(request.getParameter("userToken")).thenReturn(email);
     when(request.getParameter("event-name")).thenReturn("UPDATED: Lake Clean Up");
     when(request.getParameter("event-description")).thenReturn("We're cleaning up the lake");
@@ -95,7 +95,7 @@ public final class EditEventServletTest {
 
     testServlet.doPost(request, response);
 
-    Key key = KeyFactory.stringToKey(goalKeyString);
+    Key key = KeyFactory.stringToKey(correctKey);
     Query query = new Query("Event", key);
 
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
@@ -113,7 +113,7 @@ public final class EditEventServletTest {
     TestingUtil.mockFirebase(request, email);
 
     // Full request params. The edit event form should be called.
-    when(request.getParameter("key")).thenReturn(goalKeyString);
+    when(request.getParameter("key")).thenReturn(correctKey);
     when(request.getParameter("userToken")).thenReturn(email);
     when(request.getParameter("event-name")).thenReturn("UPDATED: Lake Clean Up");
     when(request.getParameter("event-description")).thenReturn("We're cleaning up the lake");
@@ -129,7 +129,7 @@ public final class EditEventServletTest {
 
     testServlet.doPost(request, response);
 
-    Key key = KeyFactory.stringToKey(goalKeyString);
+    Key key = KeyFactory.stringToKey(correctKey);
     Query query = new Query("Event", key);
 
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
@@ -167,7 +167,7 @@ public final class EditEventServletTest {
     TestingUtil.mockFirebase(request, email);
 
     // Full request params. The edit event form should be called.
-    when(request.getParameter("Event")).thenReturn(goalKeyString);
+    when(request.getParameter("Event")).thenReturn(correctKey);
     when(request.getParameter("userToken")).thenReturn(email);
     when(request.getRequestDispatcher("/WEB-INF/jsp/edit-event-form.jsp")).thenReturn(dispatcher);
     doNothing().when(dispatcher).forward(request, response);
@@ -257,7 +257,7 @@ public final class EditEventServletTest {
     TestingUtil.mockFirebase(request, email);
 
     // No userToken. Should invoke access denied JSP- If not error will be thrown.
-    when(request.getParameter("Event")).thenReturn(goalKeyString);
+    when(request.getParameter("Event")).thenReturn(correctKey);
     when(request.getParameter("userToken")).thenReturn(null);
     when(request.getRequestDispatcher("/WEB-INF/jsp/access-denied.html")).thenReturn(dispatcher);
     doNothing().when(dispatcher).forward(request, response);
@@ -280,7 +280,7 @@ public final class EditEventServletTest {
     TestingUtil.mockFirebase(request, email);
 
     // Should invoke access denied JSP- If not error will be thrown.
-    when(request.getParameter("Event")).thenReturn(goalKeyString);
+    when(request.getParameter("Event")).thenReturn(correctKey);
     when(request.getParameter("userToken")).thenReturn(email);
     when(Firebase.isUserLoggedIn(anyString())).thenReturn(false);
     when(request.getRequestDispatcher("/WEB-INF/jsp/access-denied.html")).thenReturn(dispatcher);
@@ -304,7 +304,7 @@ public final class EditEventServletTest {
     TestingUtil.mockFirebase(request, email);
 
     // Should invoke access denied JSP- If not error will be thrown.
-    when(request.getParameter("Event")).thenReturn(goalKeyString);
+    when(request.getParameter("Event")).thenReturn(correctKey);
     when(request.getParameter("userToken")).thenReturn(email);
     when(request.getRequestDispatcher("/WEB-INF/jsp/access-denied.html")).thenReturn(dispatcher);
     doNothing().when(dispatcher).forward(request, response);
@@ -326,12 +326,40 @@ public final class EditEventServletTest {
     TestingUtil.mockFirebase(request, email);
 
     // Should invoke access denied JSP- If not error will be thrown.
-    when(request.getParameter("Event")).thenReturn(goalKeyString);
+    when(request.getParameter("Event")).thenReturn(correctKey);
     when(request.getParameter("userToken")).thenReturn(email);
     when(request.getRequestDispatcher("/WEB-INF/jsp/access-denied.html")).thenReturn(dispatcher);
     doNothing().when(dispatcher).forward(request, response);
 
     // Should handle IOException.
+    try {
+      testServlet.doGet(request, response);
+    } catch (Exception e) {
+      fail();
+    }
+  }
+
+  @Test(expected = Test.None.class)
+  public void exceptionHandelingCallDeletedEvent() throws IOException, ServletException {
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    RequestDispatcher dispatcher = mock(RequestDispatcher.class);
+
+    String email = "test@example.com";
+    TestingUtil.mockFirebase(request, email);
+
+    // Delete the event to be queried.
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    Key key = KeyFactory.stringToKey(correctKey);
+    datastore.delete(key);
+
+    // Should invoke event not found- If not error will be thrown.
+    when(request.getParameter("Event")).thenReturn(correctKey);
+    when(request.getParameter("userToken")).thenReturn(email);
+    when(request.getRequestDispatcher("/WEB-INF/jsp/event-not-found.jsp")).thenReturn(dispatcher);
+    doNothing().when(dispatcher).forward(request, response);
+
+    // Should handle NullPointerException.
     try {
       testServlet.doGet(request, response);
     } catch (Exception e) {
@@ -364,9 +392,9 @@ public final class EditEventServletTest {
     ds.put(goalEntity);
 
     Key goalKey = goalEntity.getKey();
-    goalKeyString = KeyFactory.keyToString(goalKey);
+    correctKey = KeyFactory.keyToString(goalKey);
 
-    goalEntity.setProperty("eventKey", goalKeyString);
+    goalEntity.setProperty("eventKey", correctKey);
     ds.put(goalEntity);
   }
 
