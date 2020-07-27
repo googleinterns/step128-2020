@@ -106,35 +106,38 @@ public class Recommend {
     Dataset<Row> ratings =
         makeDataframeAndPreprocess(userIdHash.keySet(), eventIdHash.keySet(), toDelete);
 
-    // compute recommendations from matrix factorization
-    ALSModel model = trainModel(ratings);
-    Dataset<Row> userRecs = model.recommendForAllUsers(150);
-    List<Row> userRecsList = userRecs.collectAsList();
-    // build rankings for each user
-    for (Row recRow : userRecsList) {
-      String userId = userIdHash.get(recRow.getInt(0));
-      List<Row> predScores = recRow.getList(1);
+    // skip Spark step if no interactions to work with
+    if (ratings != null) {
+      // compute recommendations from matrix factorization
+      ALSModel model = trainModel(ratings);
+      Dataset<Row> userRecs = model.recommendForAllUsers(150);
+      List<Row> userRecsList = userRecs.collectAsList();
+      // build rankings for each user
+      for (Row recRow : userRecsList) {
+        String userId = userIdHash.get(recRow.getInt(0));
+        List<Row> predScores = recRow.getList(1);
 
-      Map<Double, Long> userTopRecs = new TreeMap<>(SCORE_DESCENDING);
-      for (Row itemRow : predScores) {
-        long eventId = eventIdHash.get(itemRow.getInt(0));
-        float predScore = itemRow.getFloat(1);
-        if (predScore < ZERO) {
-          predScore = ZERO;
+        Map<Double, Long> userTopRecs = new TreeMap<>(SCORE_DESCENDING);
+        for (Row itemRow : predScores) {
+          long eventId = eventIdHash.get(itemRow.getInt(0));
+          float predScore = itemRow.getFloat(1);
+          if (predScore < ZERO) {
+            predScore = ZERO;
+          }
+          double totalScore = computeScore(userId, eventId, predScore);
+          addToRanking(eventId, totalScore, userTopRecs);
         }
-        double totalScore = computeScore(userId, eventId, predScore);
-        addToRanking(eventId, totalScore, userTopRecs);
-      }
 
-      saveRecsToDatastore(userId, userTopRecs);
-      userPrefs.remove(userId);
+        saveRecsToDatastore(userId, userTopRecs);
+        userPrefs.remove(userId);
+      }
     }
 
-    // ALSModel ignores users that have insufficient interaction data
+    // ALSModel will ignore users that have insufficient interaction data
     for (String userId : userPrefs.keySet()) {
       Map<Double, Long> userTopRecs = new TreeMap<>(SCORE_DESCENDING);
       for (Long eventId : eventInfo.keySet()) {
-        double totalScore = computeScore(userId, eventId, 1);
+        double totalScore = computeScore(userId, eventId, 1.0f);
         addToRanking(eventId, totalScore, userTopRecs);
       }
       saveRecsToDatastore(userId, userTopRecs);
@@ -220,6 +223,9 @@ public class Recommend {
     while (itr.hasNext()) {
       toDelete.add(itr.next().getKey());
     }
+    if (ratings.size() == 0) {
+      return null;
+    }
     return spark.createDataFrame(ratings, EventRating.class);
   }
 
@@ -229,7 +235,10 @@ public class Recommend {
    * @param predScore Base score to apply multipliers to.
    */
   private static double computeScore(String userId, long eventId, float predScore) {
-    float dotProduct = Interactions.dotProduct(userPrefs.get(userId), eventInfo.get(eventId));
+    double dotProduct = Interactions.dotProduct(userPrefs.get(userId), eventInfo.get(eventId));
+    if (Math.abs(dotProduct) < ZERO) {
+      dotProduct = ZERO;
+    }
     double totalScore = dotProduct * predScore;
 
     // adjust scaling based on user's past interaction with event
@@ -254,7 +263,7 @@ public class Recommend {
       totalScore /= Math.pow(DISTANCE_BASE, distance);
     }
 
-    totalScore = Math.round(totalScore * 100.0) / 100.0;
+    totalScore = Math.round(totalScore * 1000.0) / 1000.0;
     return totalScore;
   }
 
@@ -264,7 +273,7 @@ public class Recommend {
       Long otherWithScore = userTopRecs.get(score);
       userTopRecs.put(score, eventId);
       eventId = otherWithScore;
-      score -= 0.01;
+      score -= 0.001;
     }
     userTopRecs.put(score, eventId);
   }
