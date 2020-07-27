@@ -24,12 +24,6 @@ import static org.mockito.Mockito.when;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.FetchOptions;
-import com.google.appengine.api.datastore.PreparedQuery;
-import com.google.appengine.api.datastore.Query;
-import com.google.appengine.api.datastore.Query.Filter;
-import com.google.appengine.api.datastore.Query.FilterOperator;
-import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.maps.model.LatLng;
@@ -375,7 +369,7 @@ public final class KeywordSearchTest {
     // from the datastore and assemble our expected
     List<Integer> ids = new ArrayList<Integer>(Arrays.asList(0, 1));
     List<Entity> events =
-        fetchIDsFromDataStore(
+        TestingUtil.fetchIDsFromDataStore(
             new ArrayList<String>(
                 Arrays.asList(
                     "BLM Protest",
@@ -391,7 +385,7 @@ public final class KeywordSearchTest {
                 "BLM Protest in LA",
                 "Climate Change Protest",
                 "Environment Climate Change Protest"));
-    List<Entity> orderedEvents = TagSearchTest.orderEvents(desiredOrder, events);
+    List<Entity> orderedEvents = TestingUtil.orderEvents(desiredOrder, events);
 
     // Convert expected events to JSON for comparison
     String expected = Utils.convertToJson(orderedEvents);
@@ -424,13 +418,13 @@ public final class KeywordSearchTest {
     // from the datastore and assemble our expected
     List<Integer> ids = new ArrayList<Integer>(Arrays.asList(0, 1));
     List<Entity> events =
-        fetchIDsFromDataStore(
+        TestingUtil.fetchIDsFromDataStore(
             new ArrayList<String>(Arrays.asList("BLM Protest", "BLM Protest in LA")));
 
     // Order results like sorting algorithm will
     List<String> desiredOrder =
         new ArrayList<String>(Arrays.asList("BLM Protest in LA", "BLM Protest"));
-    List<Entity> orderedEvents = TagSearchTest.orderEvents(desiredOrder, events);
+    List<Entity> orderedEvents = TestingUtil.orderEvents(desiredOrder, events);
 
     // Convert expected events to JSON for comparison
     String expected = Utils.convertToJson(orderedEvents);
@@ -463,13 +457,13 @@ public final class KeywordSearchTest {
     // from the datastore and assemble our expected
     List<Integer> ids = new ArrayList<Integer>(Arrays.asList(0, 1));
     List<Entity> events =
-        fetchIDsFromDataStore(
+        TestingUtil.fetchIDsFromDataStore(
             new ArrayList<String>(Arrays.asList("Toy Drive", "Support Youth Ballet Bake Sale")));
 
     // Order results like sorting algorithm will
     List<String> desiredOrder =
         new ArrayList<String>(Arrays.asList("Toy Drive", "Support Youth Ballet Bake Sale"));
-    List<Entity> orderedEvents = TagSearchTest.orderEvents(desiredOrder, events);
+    List<Entity> orderedEvents = TestingUtil.orderEvents(desiredOrder, events);
 
     // Convert expected events to JSON for comparison
     String expected = Utils.convertToJson(orderedEvents);
@@ -502,7 +496,7 @@ public final class KeywordSearchTest {
     // from the datastore and assemble our expected
     List<Integer> ids = new ArrayList<Integer>(Arrays.asList(0, 1));
     List<Entity> events =
-        fetchIDsFromDataStore(
+        TestingUtil.fetchIDsFromDataStore(
             new ArrayList<String>(
                 Arrays.asList(
                     "BLM Protest",
@@ -515,7 +509,7 @@ public final class KeywordSearchTest {
         new ArrayList<String>(
             Arrays.asList(
                 "BLM Protest", "BLM Protest in LA", "Toy Drive", "Support Youth Ballet Bake Sale"));
-    List<Entity> orderedEvents = TagSearchTest.orderEvents(desiredOrder, events);
+    List<Entity> orderedEvents = TestingUtil.orderEvents(desiredOrder, events);
 
     // Convert expected events to JSON for comparison
     String expected = Utils.convertToJson(orderedEvents);
@@ -543,40 +537,5 @@ public final class KeywordSearchTest {
     PowerMockito.when(Utils.getParameter(anyObject(), anyString(), anyString()))
         .thenCallRealMethod();
     PowerMockito.when(Utils.convertToJson(any())).thenCallRealMethod();
-  }
-
-  /**
-   * Fetches entities from the datastore using the event names.
-   *
-   * @param eventNames List containing the names of the entities to fetch from the Datastore
-   * @return List containing the requested entities
-   */
-  public static List<Entity> fetchIDsFromDataStore(List<String> eventNames) {
-    Filter idFilter = new FilterPredicate("eventName", FilterOperator.IN, eventNames);
-    Query query = new Query("Event").setFilter(idFilter);
-    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    PreparedQuery results = datastore.prepare(query);
-    List<Entity> events =
-        new ArrayList<Entity>(results.asList(FetchOptions.Builder.withDefaults()));
-    return events;
-  }
-
-  /**
-   * Orders a list of events by a given order.
-   *
-   * @param desiredOrder List containing the eventNames in the order they should be in
-   * @param events List of events to be ordered
-   * @return List containing the events ordered
-   */
-  public static List<Entity> orderEvents(List<String> desiredOrder, List<Entity> events) {
-    List<Entity> orderedEvents = new ArrayList<Entity>();
-    for (int o = 0; o < desiredOrder.size(); o++) {
-      for (int i = 0; i < events.size(); i++) {
-        if (events.get(i).getProperty("eventName").toString().equals(desiredOrder.get(o))) {
-          orderedEvents.add(events.get(i));
-        }
-      }
-    }
-    return orderedEvents;
   }
 }

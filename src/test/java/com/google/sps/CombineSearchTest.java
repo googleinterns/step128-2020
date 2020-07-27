@@ -15,7 +15,11 @@
 package com.google.sps;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyObject;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
@@ -24,12 +28,12 @@ import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestC
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.maps.model.LatLng;
 import com.google.sps.servlets.SearchServlet;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.junit.After;
@@ -44,23 +48,49 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @PowerMockIgnore("okhttp3.*")
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({Utils.class})
-public final class TagSearchTest {
+public final class CombineSearchTest {
   private final LocalServiceTestHelper helper =
       new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
   private SearchServlet testSearchServlet;
   private List<Entity> testEntities;
+  private List<String> possibleTags;
+  private List<String> possibleNames;
+  private List<String> possibleDescriptions;
   private List<String> possibleLocations;
   private List<LatLng> possibleLatLngs;
   private List<Integer> possibleDistances;
 
-  /** Sets up the tests with sample events put into the test datastore. */
+  /** Sets up the datastore helper and adds a bunch of events for testing purposes. */
   @Before
   public void setUp() {
     helper.setUp();
     testSearchServlet = new SearchServlet();
-    List<String> possibleTags =
+
+    testEntities = new ArrayList<Entity>();
+
+    possibleTags =
         new ArrayList<String>(
-            Arrays.asList("environment", "blm", "education", "volunteer", "LGBTQ+"));
+            Arrays.asList("blm", "environment", "environment", "environment", "fundraiser"));
+
+    possibleNames =
+        new ArrayList<String>(
+            Arrays.asList(
+                "BLM Protest",
+                "Climate Change Protest",
+                "Beach clean up",
+                "Park clean up",
+                "Ballet Bake Sale"));
+
+    possibleDescriptions =
+        new ArrayList<String>(
+            Arrays.asList(
+                "Protest",
+                "Climate change is one of the most important issues facing us right now.",
+                "Let's clean and save some turtles.",
+                "Bring bags and gloves.",
+                "Hi everyone, we're doing this to support the Youth America Grand Prix"
+                    + "competitors this year."));
+
     possibleLocations =
         new ArrayList<String>(
             Arrays.asList(
@@ -78,40 +108,22 @@ public final class TagSearchTest {
                 new LatLng(47.6062095, -122.3320708),
                 new LatLng(40.81241989999999, -73.96053429999999)));
     possibleDistances = new ArrayList<Integer>(Arrays.asList(42, 198, 593, 1826, 4497));
-    testEntities = new ArrayList<Entity>();
-    // Single tag events
+
     for (int i = 0; i < 5; i++) {
       Entity e = new Entity("Event");
-      e.setProperty("eventName", "" + i);
+      String name = possibleNames.get(i);
+      String desc = possibleDescriptions.get(i);
+      e.setProperty("eventName", name);
       e.setIndexedProperty("tags", new ArrayList<String>(Arrays.asList(possibleTags.get(i))));
+      e.setProperty("eventDescription", desc);
       e.setProperty("address", possibleLocations.get(i));
       e.setProperty("distance", possibleDistances.get(i));
+      Map<String, Integer> keywordsMap = SearchServlet.getKeywords(name, desc);
+      e.setProperty("keywords", SearchServlet.getKeywordMapKeys(keywordsMap));
+      e.setProperty("keywordsValues", SearchServlet.getKeywordMapValues(keywordsMap));
       testEntities.add(e);
     }
-    // Double tag events
-    for (int i = 5; i < 9; i++) {
-      Entity e = new Entity("Event");
-      e.setProperty("eventName", "" + i);
-      e.setIndexedProperty(
-          "tags",
-          new ArrayList<String>(Arrays.asList(possibleTags.get(i - 5), possibleTags.get(i - 4))));
-      e.setProperty("address", possibleLocations.get(i - 5));
-      e.setProperty("distance", possibleDistances.get(i - 5));
-      testEntities.add(e);
-    }
-    // Triple tag events
-    for (int i = 9; i < 11; i++) {
-      Entity e = new Entity("Event");
-      e.setProperty("eventName", "" + i);
-      e.setIndexedProperty(
-          "tags",
-          new ArrayList<String>(
-              Arrays.asList(
-                  possibleTags.get(i - 9), possibleTags.get(i - 8), possibleTags.get(i - 7))));
-      e.setProperty("address", possibleLocations.get(i - 9));
-      e.setProperty("distance", possibleDistances.get(i - 9));
-      testEntities.add(e);
-    }
+
     // Add all the events to the mock Datastore
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     for (Entity e : testEntities) {
@@ -125,7 +137,7 @@ public final class TagSearchTest {
   }
 
   @Test
-  public void anyQueryAndOutput() throws Exception {
+  public void sortsUsingTagsFirst() throws Exception {
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
 
@@ -135,6 +147,51 @@ public final class TagSearchTest {
     when(response.getWriter()).thenReturn(pw);
 
     // Send the request to the servlet with param
+    when(request.getParameter("searchKeywords")).thenReturn("Protest");
+    when(request.getParameter("tags")).thenReturn("environment,blm");
+    when(request.getParameter("location")).thenReturn("Los Angeles, CA");
+    when(request.getParameter("searchDistance")).thenReturn("5000");
+
+    mockUtils();
+
+    testSearchServlet.doGet(request, response);
+
+    // Get the JSON response from the server
+    String result = sw.getBuffer().toString().trim();
+
+    // Get the events we were expecting the search to return
+    // from the datastore and assemble our expected
+    List<Integer> ids = new ArrayList<Integer>(Arrays.asList(0, 1, 2, 3));
+    List<Entity> events =
+        TestingUtil.fetchIDsFromDataStore(
+            new ArrayList<String>(
+                Arrays.asList(
+                    "BLM Protest", "Climate Change Protest", "Beach clean up", "Park clean up")));
+
+    // Order results like sorting algorithm will
+    List<String> desiredOrder =
+        new ArrayList<String>(
+            Arrays.asList(
+                "BLM Protest", "Climate Change Protest", "Beach clean up", "Park clean up"));
+    List<Entity> orderedEvents = TestingUtil.orderEvents(desiredOrder, events);
+
+    // Convert expected events to JSON for comparison
+    String expected = Utils.convertToJson(orderedEvents);
+    assertEquals(expected, result);
+  }
+
+  @Test
+  public void sortsUsingKeywordsSecond() throws Exception {
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpServletResponse response = mock(HttpServletResponse.class);
+
+    StringWriter sw = new StringWriter();
+    PrintWriter pw = new PrintWriter(sw);
+
+    when(response.getWriter()).thenReturn(pw);
+
+    // Send the request to the servlet with param
+    when(request.getParameter("searchKeywords")).thenReturn("clean");
     when(request.getParameter("tags")).thenReturn("environment");
     when(request.getParameter("location")).thenReturn("Los Angeles, CA");
     when(request.getParameter("searchDistance")).thenReturn("5000");
@@ -147,189 +204,65 @@ public final class TagSearchTest {
     String result = sw.getBuffer().toString().trim();
 
     // Get the events we were expecting the search to return
-    // from the datastore
-    List<String> ids = new ArrayList<String>(Arrays.asList("0", "5", "9"));
-    List<Entity> events = TestingUtil.fetchIDsFromDataStore(ids);
-
-    // Convert expected events to JSON for comparison
-    String expected = Utils.convertToJson(events);
-    assertEquals(expected, result);
-  }
-
-  @Test
-  public void checkSortedByCommonTags() throws Exception {
-    HttpServletRequest request = mock(HttpServletRequest.class);
-    HttpServletResponse response = mock(HttpServletResponse.class);
-
-    StringWriter sw = new StringWriter();
-    PrintWriter pw = new PrintWriter(sw);
-
-    when(response.getWriter()).thenReturn(pw);
-
-    // Send the request to the servlet with param
-    when(request.getParameter("tags")).thenReturn("environment,blm,education");
-    when(request.getParameter("location")).thenReturn("Los Angeles, CA");
-    when(request.getParameter("searchDistance")).thenReturn("5000");
-
-    mockUtils();
-
-    testSearchServlet.doGet(request, response);
-
-    // Get the JSON response from the server
-    String result = sw.getBuffer().toString().trim();
-
-    // Get the events we were expecting the search to return
     // from the datastore and assemble our expected
-    List<String> ids =
-        new ArrayList<String>(Arrays.asList("0", "1", "2", "5", "6", "7", "9", "10"));
-    List<Entity> events = TestingUtil.fetchIDsFromDataStore(ids);
-
-    // Order results like sorting algorithm will
-    List<String> desiredOrder =
-        new ArrayList<String>(Arrays.asList("9", "5", "6", "10", "0", "1", "2", "7"));
-    List<Entity> orderedEvents = TestingUtil.orderEvents(desiredOrder, events);
-
-    // Convert expected events to JSON for comparison
-    String expected = Utils.convertToJson(orderedEvents);
-    assertEquals(expected, result);
-  }
-
-  @Test
-  public void checkDistanceCutoff() throws Exception {
-    HttpServletRequest request = mock(HttpServletRequest.class);
-    HttpServletResponse response = mock(HttpServletResponse.class);
-
-    StringWriter sw = new StringWriter();
-    PrintWriter pw = new PrintWriter(sw);
-
-    when(response.getWriter()).thenReturn(pw);
-
-    // Send the request to the servlet with param
-    when(request.getParameter("tags")).thenReturn("education");
-    when(request.getParameter("location")).thenReturn("Los Angeles, CA");
-    when(request.getParameter("searchDistance")).thenReturn("50");
-
-    mockUtils();
-
-    testSearchServlet.doGet(request, response);
-
-    // Get the JSON response from the server
-    String result = sw.getBuffer().toString().trim();
-
-    // Get the events we were expecting the search to return
-    // from the datastore and assemble our expected
-    List<String> ids = new ArrayList<String>(Arrays.asList("9"));
-    List<Entity> events = TestingUtil.fetchIDsFromDataStore(ids);
-
-    // Order results like sorting algorithm will
-    List<String> desiredOrder = new ArrayList<String>(Arrays.asList("9"));
-    List<Entity> orderedEvents = TestingUtil.orderEvents(desiredOrder, events);
-
-    // Convert expected events to JSON for comparison
-    String expected = Utils.convertToJson(orderedEvents);
-    assertEquals(expected, result);
-  }
-
-  @Test
-  public void checkSingleTagSorted() throws Exception {
-    HttpServletRequest request = mock(HttpServletRequest.class);
-    HttpServletResponse response = mock(HttpServletResponse.class);
-
-    StringWriter sw = new StringWriter();
-    PrintWriter pw = new PrintWriter(sw);
-
-    when(response.getWriter()).thenReturn(pw);
-
-    // Send the request to the servlet with param
-    when(request.getParameter("tags")).thenReturn("education");
-    when(request.getParameter("location")).thenReturn("Los Angeles, CA");
-    when(request.getParameter("searchDistance")).thenReturn("5000");
-
-    mockUtils();
-
-    testSearchServlet.doGet(request, response);
-
-    // Get the JSON response from the server
-    String result = sw.getBuffer().toString().trim();
-
-    // Get the events we were expecting the search to return
-    // from the datastore and assemble our expected
-    List<String> ids = new ArrayList<String>(Arrays.asList("2", "6", "7", "9", "10"));
-    List<Entity> events = TestingUtil.fetchIDsFromDataStore(ids);
-
-    // Order results like sorting algorithm will
-    List<String> desiredOrder = new ArrayList<String>(Arrays.asList("2", "6", "7", "9", "10"));
-    List<Entity> orderedEvents = TestingUtil.orderEvents(desiredOrder, events);
-
-    // Convert expected events to JSON for comparison
-    String expected = Utils.convertToJson(orderedEvents);
-    assertEquals(expected, result);
-  }
-
-  @Test
-  public void checkNoTags() throws Exception {
-    HttpServletRequest request = mock(HttpServletRequest.class);
-    HttpServletResponse response = mock(HttpServletResponse.class);
-
-    StringWriter sw = new StringWriter();
-    PrintWriter pw = new PrintWriter(sw);
-
-    when(response.getWriter()).thenReturn(pw);
-
-    // Send the request to the servlet with param
-    when(request.getParameter("tags")).thenReturn("");
-    when(request.getParameter("location")).thenReturn("Los Angeles, CA");
-    when(request.getParameter("searchDistance")).thenReturn("5000");
-
-    mockUtils();
-
-    testSearchServlet.doGet(request, response);
-
-    // Get the JSON response from the server
-    String result = sw.getBuffer().toString().trim();
-
-    // Get the events we were expecting the search to return
-    // from the datastore and assemble our expected
-    List<String> ids =
-        new ArrayList<String>(
-            Arrays.asList("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11"));
-    List<Entity> events = TestingUtil.fetchIDsFromDataStore(ids);
+    List<Integer> ids = new ArrayList<Integer>(Arrays.asList(1, 2, 3));
+    List<Entity> events =
+        TestingUtil.fetchIDsFromDataStore(
+            new ArrayList<String>(
+                Arrays.asList("Climate Change Protest", "Beach clean up", "Park clean up")));
 
     // Order results like sorting algorithm will
     List<String> desiredOrder =
         new ArrayList<String>(
-            Arrays.asList("0", "5", "9", "1", "6", "10", "2", "7", "11", "3", "8", "4"));
+            Arrays.asList("Beach clean up", "Park clean up", "Climate Change Protest"));
     List<Entity> orderedEvents = TestingUtil.orderEvents(desiredOrder, events);
 
     // Convert expected events to JSON for comparison
     String expected = Utils.convertToJson(orderedEvents);
-
+    System.out.println(orderedEvents);
     assertEquals(expected, result);
   }
 
   @Test
-  public void correctNumberTagsInCommon() throws IOException {
-    List<String> tagListA = new ArrayList<String>(Arrays.asList("environment", "blm", "volunteer"));
-    List<String> tagListB = new ArrayList<String>(Arrays.asList("blm"));
-    double result = testSearchServlet.intersection(tagListA, tagListB);
-    double correct = 1.0 / 3;
-    assertEquals(correct, result, 0.0002);
-  }
+  public void sortsUsingLocationLast() throws Exception {
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpServletResponse response = mock(HttpServletResponse.class);
 
-  @Test
-  public void tagsInCommonHandlesNoTags() throws IOException {
-    List<String> tagListA = new ArrayList<String>();
-    List<String> tagListB = new ArrayList<String>();
-    double result = testSearchServlet.intersection(tagListA, tagListB);
-    assertEquals(0.0, result, 0.0002);
-  }
+    StringWriter sw = new StringWriter();
+    PrintWriter pw = new PrintWriter(sw);
 
-  @Test
-  public void handlesNoTagsInCommon() throws IOException {
-    List<String> tagListA = new ArrayList<String>(Arrays.asList("education"));
-    List<String> tagListB = new ArrayList<String>(Arrays.asList("environment", "blm", "volunteer"));
-    double result = testSearchServlet.intersection(tagListA, tagListB);
-    assertEquals(0.0, result, 0.0002);
+    when(response.getWriter()).thenReturn(pw);
+
+    // Send the request to the servlet with param
+    when(request.getParameter("searchKeywords")).thenReturn("");
+    when(request.getParameter("tags")).thenReturn("environment");
+    when(request.getParameter("location")).thenReturn("Los Angeles, CA");
+    when(request.getParameter("searchDistance")).thenReturn("5000");
+
+    mockUtils();
+
+    testSearchServlet.doGet(request, response);
+
+    // Get the JSON response from the server
+    String result = sw.getBuffer().toString().trim();
+
+    // Get the events we were expecting the search to return
+    // from the datastore and assemble our expected
+    List<Integer> ids = new ArrayList<Integer>(Arrays.asList(1, 2, 3));
+    List<Entity> events =
+        TestingUtil.fetchIDsFromDataStore(
+            new ArrayList<String>(
+                Arrays.asList("Climate Change Protest", "Beach clean up", "Park clean up")));
+
+    // Order results like sorting algorithm will
+    List<String> desiredOrder =
+        new ArrayList<String>(
+            Arrays.asList("Climate Change Protest", "Beach clean up", "Park clean up"));
+    List<Entity> orderedEvents = TestingUtil.orderEvents(desiredOrder, events);
+
+    // Convert expected events to JSON for comparison
+    String expected = Utils.convertToJson(orderedEvents);
+    assertEquals(expected, result);
   }
 
   /** Sets up and executes mocking for the Utils class. */

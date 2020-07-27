@@ -14,16 +14,28 @@
 
 package com.google.sps;
 
+import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.FetchOptions;
+import com.google.appengine.api.datastore.PreparedQuery;
+import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Query.Filter;
+import com.google.appengine.api.datastore.Query.FilterOperator;
+import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.gson.Gson;
 import com.google.sps.servlets.AuthServlet;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.powermock.api.mockito.PowerMockito;
@@ -73,6 +85,41 @@ public final class TestingUtil {
     when(request.getParameter("userToken")).thenReturn(dummyToken);
     PowerMockito.when(Firebase.isUserLoggedIn(anyString())).thenCallRealMethod();
     PowerMockito.when(Firebase.authenticateUser(anyString())).thenReturn(dummyToken);
+  }
+
+  /**
+   * Orders a list of events by a given order.
+   *
+   * @param desiredOrder List containing the eventNames in the order they should be in
+   * @param events List of events to be ordered
+   * @return List containing the events ordered
+   */
+  public static List<Entity> orderEvents(List<String> desiredOrder, List<Entity> events) {
+    List<Entity> orderedEvents = new ArrayList<Entity>();
+    for (int o = 0; o < desiredOrder.size(); o++) {
+      for (int i = 0; i < events.size(); i++) {
+        if (events.get(i).getProperty("eventName").toString().equals(desiredOrder.get(o))) {
+          orderedEvents.add(events.get(i));
+        }
+      }
+    }
+    return orderedEvents;
+  }
+
+  /**
+   * Fetches entities from the datastore using the event names.
+   *
+   * @param eventNames List containing the names of the entities to fetch from the Datastore
+   * @return List containing the requested entities
+   */
+  public static List<Entity> fetchIDsFromDataStore(List<String> eventNames) {
+    Filter idFilter = new FilterPredicate("eventName", FilterOperator.IN, eventNames);
+    Query query = new Query("Event").setFilter(idFilter);
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    PreparedQuery results = datastore.prepare(query);
+    List<Entity> events =
+        new ArrayList<Entity>(results.asList(FetchOptions.Builder.withDefaults()));
+    return events;
   }
 
   /**
