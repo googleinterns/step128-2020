@@ -41,12 +41,14 @@ public class Recommend {
 
   // keep and use up to this many Interaction entities
   private static final int UPPER_LIMIT = 5_000_000;
+
   // multipliers for score calculation
-  private static final double NO_INTERACTION = 1.5;
-  private static final double ALREADY_VIEWED = 1.2;
-  private static final double ALREADY_SAVED = 0.6;
   private static final float ZERO = 0.1f;
-  private static final double DISTANCE_BASE = 1.05;
+  private static final double NO_INTERACTION = 1.5;
+  private static final double ALREADY_SAVED = 0.6;
+  // for distance score calculation
+  private static final double DISTANCE_BASE = 1.04;
+  private static final int INVALID_DISTANCE = 1000;
 
   // comparator to sort doubles in descending order
   private static final Comparator<Double> SCORE_DESCENDING =
@@ -121,23 +123,22 @@ public class Recommend {
           predScore = ZERO;
         }
         double totalScore = computeScore(userId, eventId, predScore);
-
-        // add item to ranking
-        while (userTopRecs.containsKey(totalScore)) {
-          Long otherScore = userTopRecs.get(totalScore);
-          userTopRecs.put(totalScore, eventId);
-          eventId = otherScore;
-          totalScore -= 0.01;
-        }
-        userTopRecs.put(totalScore, eventId);
+        addToRanking(eventId, totalScore, userTopRecs);
       }
 
       saveRecsToDatastore(userId, userTopRecs);
       userPrefs.remove(userId);
     }
 
-    // handle users not accounted for by ALSModel
-    for (String userId : userPrefs.keySet()) {}
+    // ALSModel ignores users that have insufficient interaction data
+    for (String userId : userPrefs.keySet()) {
+      Map<Double, Long> userTopRecs = new TreeMap<>(SCORE_DESCENDING);
+      for (Long eventId : eventInfo.keySet()) {
+        double totalScore = computeScore(userId, eventId, 1);
+        addToRanking(eventId, totalScore, userTopRecs);
+      }
+      saveRecsToDatastore(userId, userTopRecs);
+    }
 
     datastore.delete(toDelete);
   }
@@ -239,29 +240,33 @@ public class Recommend {
       float interactionScore = Float.parseFloat(interactionEntity.getProperty("rating").toString());
       if (interactionScore >= Interactions.SAVE_SCORE) {
         totalScore *= ALREADY_SAVED;
-      } else if (interactionScore == Interactions.VIEW_SCORE) {
-        totalScore *= ALREADY_VIEWED;
       }
     }
 
     String userLocation = userLocations.get(userId);
     String eventLocation = eventLocations.get(eventId);
     if (userLocation != null && eventLocations != null) {
-    //   int distance =
-    //       Utils.getDistance(Utils.getLatLng(userLocation), Utils.getLatLng(eventLocation));
-    //   if (distance < 0) {
-    //     System.out.println(userId);
-    //     System.out.println(eventId);
-    //     System.out.println(userLocation);
-    //     System.out.println(eventLocation);
-    //     throw new IllegalStateException("distance failed");
-    //   }
-      
-    //   totalScore /= Math.pow(DISTANCE_BASE, distance);
+      int distance =
+          Utils.getDistance(Utils.getLatLng(userLocation), Utils.getLatLng(eventLocation));
+      if (distance < 0) {
+        distance = INVALID_DISTANCE;
+      }
+      totalScore /= Math.pow(DISTANCE_BASE, distance);
     }
 
     totalScore = Math.round(totalScore * 100.0) / 100.0;
     return totalScore;
+  }
+
+  /** Adds event and its calculated score to rankings map. */
+  private static void addToRanking(long eventId, double score, Map<Double, Long> userTopRecs) {
+    while (userTopRecs.containsKey(score)) {
+      Long otherWithScore = userTopRecs.get(score);
+      userTopRecs.put(score, eventId);
+      eventId = otherWithScore;
+      score -= 0.01;
+    }
+    userTopRecs.put(score, eventId);
   }
 
   /** Stores a recommendation datastore entry for the given user ID. */
