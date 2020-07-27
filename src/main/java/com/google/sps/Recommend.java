@@ -255,8 +255,7 @@ public class Recommend {
     String userLocation = userLocations.get(userId);
     String eventLocation = eventLocations.get(eventId);
     if (userLocation != null && eventLocations != null) {
-      int distance =
-          Utils.getDistance(Utils.getLatLng(userLocation), Utils.getLatLng(eventLocation));
+      int distance = Utils.getDistance(userLocation, eventLocation);
       if (distance < 0) {
         distance = INVALID_DISTANCE;
       }
