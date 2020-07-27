@@ -1002,7 +1002,7 @@ function deleteEvent() {
 
       fetch('/delete-event', {method: 'POST', body: params}).then(() => {
             window.location.href = '/my-events.html';
-            });
+          });
     });
   }
 }
