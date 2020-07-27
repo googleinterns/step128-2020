@@ -44,11 +44,6 @@ public class EventServlet extends HttpServlet {
   private static final Logger LOGGER = Logger.getLogger(EventServlet.class.getName());
 
   @Override
-  public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    // TODO: Implement doGet function.
-  }
-
-  @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
     String userToken = request.getParameter("userToken");
     if (!Firebase.isUserLoggedIn(userToken)) {
@@ -74,7 +69,7 @@ public class EventServlet extends HttpServlet {
       userEntity = Utils.makeUserEntity(userID, false);
       LOGGER.info("No entity found for " + userID + ", creating one now.");
     }
-    int delta = Interactions.recordInteraction(userID, keyId, Interactions.CREATE_SCORE, false);
+    float delta = Interactions.recordInteraction(userID, keyId, Interactions.CREATE_SCORE, false);
     Interactions.updatePrefs(userEntity, tags, delta);
     datastore.put(userEntity);
 

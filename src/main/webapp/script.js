@@ -417,7 +417,11 @@ async function getEvents(events, index, option) {
 
     const eventImageElement = document.createElement('div');
     let primaryTag = event.tags[0];
-    if (primaryTag == 'LGBTQ+') primaryTag = 'LGBTQ';
+    if (primaryTag == 'LGBTQ+') {
+      primaryTag = 'LGBTQ';
+    } else if (primaryTag == 'item donation') {
+      primaryTag = 'donation';
+    }
     eventImageElement.className = 'event-image ' + primaryTag;
 
     const eventItemInfoElement = document.createElement('div');
@@ -672,7 +676,9 @@ async function getSearchDistanceSettings() {
  */
 const colors = ['#FF0900', '#FF7F00', '#FFB742', '#00F11D', '#0079FF',
   '#A800FF'];
-const tagsAll = ['environment', 'blm', 'volunteer', 'education', 'LGBTQ+'];
+const tagsAll = ['environment', 'blm', 'education', 'LGBTQ+',
+  'healthcare', 'civics', 'volunteer', 'fundraiser', 'activism',
+  'item donation'];
 const tagsBox = [...tagsAll];
 const tagsSelected = [];
 
@@ -755,6 +761,17 @@ async function getLocation() {
           });
     });
   });
+}
+
+/**
+ * Checks if the user has a current location and if not sets it to the default
+ */
+async function checkLocation() {
+  const location = await getLocation();
+  if (location == '') {
+    setCookie('location', '90001');
+  }
+  return Promise.resolve();
 }
 
 /**
@@ -846,7 +863,7 @@ function createHiddenInput(jsonArray) {
 }
 
 /**
- * Updates the tag box a page.
+ * Updates the tag box on a page.
  */
 function updateTagBox() {
   const elements = document.getElementsByClassName('tag-box');
@@ -858,8 +875,13 @@ function updateTagBox() {
     spanElement.setAttribute('onclick', 'toggleTagEvent("' + tag +
         '")');
     // class name is now (for example) 'tag environment'
-    if (tag == 'LGBTQ+') spanElement.className = 'tag rainbow';
-    else spanElement.className = 'tag ' + tag;
+    if (tag == 'LGBTQ+') {
+      spanElement.className = 'tag rainbow';
+    } else if (tag == 'item donation') {
+      spanElement.className = 'tag donation';
+    } else {
+      spanElement.className = 'tag ' + tag;
+    }
 
     // if tag is on the event, invert it
     if (tagsSelected.includes(tag)) {
@@ -1047,18 +1069,19 @@ async function unsaveEvent(eventId) {
  * Load all actions for the search page.
  */
 function searchLoadActions() {
-  updateTagBox();
-  getSearchDistanceSettings();
+  checkLocation().then(() => {
+    updateTagBox();
+    getSearchDistanceSettings();
 
-  // Add a listener to make the search query submit
-  // when the user presses the enter key
-  var searchBarElement = document.getElementsByClassName('search-bar')[0];
-  searchBarElement.addEventListener("keyup", function(event) {
-  if (event.keyCode === 13) {
-   event.preventDefault();
-   document.getElementById("go-button").click();
-  }
-});
+    // Add a listener to make the search query submit
+    // when the user presses the enter key
+    var searchBarElement = document.getElementsByClassName('search-bar')[0];
+    searchBarElement.addEventListener("keyup", function(event) {
+    if (event.keyCode === 13) {
+     event.preventDefault();
+     document.getElementById("go-button").click();
+    }
+  });
 }
 
 /**
@@ -1096,7 +1119,7 @@ function search() {
  * Methods for survey.html
  * **********************************************************************/
 
-const surveyResponses = [-1, -1, -1, -1, -1];
+const surveyResponses = [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1];
 
 /**
  * Toggles the display of the survey page to indicate which option is selected,
@@ -1122,24 +1145,23 @@ function toggleSurveyDisplay(question, index) {
  * Verifies the survey is completed. If it is completed, submits.
  */
 function submitSurvey() {
-  if (loggedIn) {
+  getUserIDToken().then((userToken) => {
     const params = new URLSearchParams();
     for (let i = 0; i < surveyResponses.length; i++) {
       const score = surveyResponses[i];
       if (score < 0) {
-        // TODO: streamline this probably
         alert('Please finish the survey first!');
         return;
       } else {
         params.append(tagsAll[i], score);
       }
     }
-    params.append('userToken', getUserIDToken());
-    fetch(new Request('/submit-survey', {method: 'POST', body: params}));
-  } else {
-    // cannot submit while not logged in
-    alert('Please log in first!');
-  }
+    params.append('userToken', userToken);
+    fetch(new Request('/submit-survey', {method: 'POST', body: params}))
+        .then(() => {
+          window.location.href = '/index.html';
+        });
+  });
 }
 
 /* **********************************************************************
@@ -1160,6 +1182,8 @@ function displayIndividualEvent(id = 0, alreadySaved = -1) {
 
   if (mainColor == 'LGBTQ+') {
     mainColor = 'LGBTQ';
+  } else if (mainColor == 'item donation') {
+    mainColor = 'donation';
   }
 
   loadEventTags(tagArray);

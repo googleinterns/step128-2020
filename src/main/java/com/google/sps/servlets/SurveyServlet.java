@@ -40,7 +40,7 @@ public class SurveyServlet extends HttpServlet {
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
     // store survey results
     Gson gson = new Gson();
-    response.setContentType("application/json");
+    response.setContentType("text/html");
 
     String userToken = request.getParameter("userToken");
     if (Firebase.isUserLoggedIn(userToken)) {
@@ -68,6 +68,7 @@ public class SurveyServlet extends HttpServlet {
 
       datastore.put(userEntity);
       response.sendRedirect("/index.html");
+      return;
     } else {
       throw new IOException("Cannot take survey while not logged in");
     }
