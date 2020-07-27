@@ -259,7 +259,7 @@ public final class EditEventServletTest {
     // No userToken. Should invoke access denied JSP- If not error will be thrown.
     when(request.getParameter("Event")).thenReturn(goalKeyString);
     when(request.getParameter("userToken")).thenReturn(null);
-    when(request.getRequestDispatcher("/WEB-INF/jsp/access-denied.jsp")).thenReturn(dispatcher);
+    when(request.getRequestDispatcher("/WEB-INF/jsp/access-denied.html")).thenReturn(dispatcher);
     doNothing().when(dispatcher).forward(request, response);
 
     // Should handle IOException.
@@ -283,7 +283,7 @@ public final class EditEventServletTest {
     when(request.getParameter("Event")).thenReturn(goalKeyString);
     when(request.getParameter("userToken")).thenReturn(email);
     when(Firebase.isUserLoggedIn(anyString())).thenReturn(false);
-    when(request.getRequestDispatcher("/WEB-INF/jsp/access-denied.jsp")).thenReturn(dispatcher);
+    when(request.getRequestDispatcher("/WEB-INF/jsp/access-denied.html")).thenReturn(dispatcher);
     doNothing().when(dispatcher).forward(request, response);
 
     // Should handle IOException.
@@ -306,7 +306,7 @@ public final class EditEventServletTest {
     // Should invoke access denied JSP- If not error will be thrown.
     when(request.getParameter("Event")).thenReturn(goalKeyString);
     when(request.getParameter("userToken")).thenReturn(email);
-    when(request.getRequestDispatcher("/WEB-INF/jsp/access-denied.jsp")).thenReturn(dispatcher);
+    when(request.getRequestDispatcher("/WEB-INF/jsp/access-denied.html")).thenReturn(dispatcher);
     doNothing().when(dispatcher).forward(request, response);
 
     try {
@@ -328,7 +328,7 @@ public final class EditEventServletTest {
     // Should invoke access denied JSP- If not error will be thrown.
     when(request.getParameter("Event")).thenReturn(goalKeyString);
     when(request.getParameter("userToken")).thenReturn(email);
-    when(request.getRequestDispatcher("/WEB-INF/jsp/access-denied.jsp")).thenReturn(dispatcher);
+    when(request.getRequestDispatcher("/WEB-INF/jsp/access-denied.html")).thenReturn(dispatcher);
     doNothing().when(dispatcher).forward(request, response);
 
     // Should handle IOException.
