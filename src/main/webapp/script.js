@@ -903,15 +903,17 @@ function openEditForm(key) {
 function confirmUser() {
   if (loggedIn) {
     getUserIDToken().then((userToken) => {
-          const key = document.getElementById('key').value;
-          fetch('/confirm-user?Event=' + key + '&userToken=' + userToken).then(response => response.json()).then((access) => {
-                  if (access == true) {
-                    updateTagBox();
-                    loadFields();
-                  } else {
-                    window.location.href = '/access-denied.html';
-                  }
-                });
+      const key = document.getElementById('key').value;
+      fetch('/confirm-user?Event=' + key + '&userToken=' + userToken)
+          .then(response => response.json())
+          .then((access) => {
+            if (access == true) {
+              updateTagBox();
+              loadFields();
+            } else {
+              window.location.href = '/access-denied.html';
+            }
+            });
     });
   } else {
     window.location.href = '/login.html';

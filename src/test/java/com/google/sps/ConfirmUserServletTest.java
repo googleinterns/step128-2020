@@ -50,8 +50,8 @@ public final class ConfirmUserServletTest {
   private final LocalServiceTestHelper helper =
       new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
   private ConfirmUserServlet testServlet;
-  private String goalKeyString;
-  private Entity goalEntity;
+  private Entity event;
+  private String correctKey;
 
   /** Set up Entity and Entity key to test for. */
   @Before
@@ -75,7 +75,7 @@ public final class ConfirmUserServletTest {
 
     String email = "test@example.com";
     TestingUtil.mockFirebase(request, email);
-    when(request.getParameter("Event")).thenReturn(goalKeyString);
+    when(request.getParameter("Event")).thenReturn(correctKey);
     when(request.getParameter("userToken")).thenReturn(email);
 
     HttpServletResponse response = mock(HttpServletResponse.class);
@@ -95,7 +95,7 @@ public final class ConfirmUserServletTest {
 
     String email = "wrong@example.com";
     TestingUtil.mockFirebase(request, email);
-    when(request.getParameter("Event")).thenReturn(goalKeyString);
+    when(request.getParameter("Event")).thenReturn(correctKey);
     when(request.getParameter("userToken")).thenReturn(email);
 
     HttpServletResponse response = mock(HttpServletResponse.class);
@@ -110,34 +110,33 @@ public final class ConfirmUserServletTest {
   }
 
   private void createGoalEntity() {
-    String[] tags = {"environment"};
-
-    goalEntity = new Entity("Event");
-    goalEntity.setProperty("eventName", "Lake Clean Up");
-    goalEntity.setProperty("eventDescription", "We're cleaning up the lake");
-    goalEntity.setProperty("address", "678 Lakeview Way, Lakeside, Michigan");
-    goalEntity.setProperty("streetAddress", "678 Lakeview Way");
-    goalEntity.setProperty("city", "Lakeside");
-    goalEntity.setProperty("state", "Michigan");
-    goalEntity.setProperty("date", "May 17, 2020");
-    goalEntity.setProperty("startTime", "2:00 PM");
-    goalEntity.setProperty("endTime", "3:00 PM");
-    goalEntity.setProperty("coverPhoto", "/img-2030121");
-    goalEntity.setIndexedProperty("tags", Arrays.asList(tags));
-    goalEntity.setProperty("creator", "test@example.com");
-    goalEntity.setProperty("attendeeCount", 0L);
-    goalEntity.setProperty("unformattedStart", "14:00");
-    goalEntity.setProperty("unformattedEnd", "15:00");
-    goalEntity.setProperty("unformattedDate", "2020-05-17");
+    event = new Entity("Event");
+    event.setProperty("eventName", "Book Drive");
+    event.setProperty("eventDescription", "We're collecting books.");
+    event.setProperty("address", "456 Library Way, Bookville, Washington");
+    event.setProperty("streetAddress", "456 Library Way");
+    event.setProperty("city", "Bookville");
+    event.setProperty("state", "Washington");
+    event.setProperty("date", "May 17, 2020");
+    event.setProperty("startTime", "2:00 PM");
+    event.setProperty("endTime", "4:00 PM");
+    event.setProperty("coverPhoto", "/img-2030121");
+    String[] tags = {"volunteer"};
+    event.setIndexedProperty("tags", Arrays.asList(tags));
+    event.setProperty("creator", "test@example.com");
+    event.setProperty("attendeeCount", 0L);
+    event.setProperty("unformattedStart", "14:00");
+    event.setProperty("unformattedEnd", "16:00");
+    event.setProperty("unformattedDate", "2020-05-17");
 
     DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
-    ds.put(goalEntity);
+    ds.put(event);
 
-    Key goalKey = goalEntity.getKey();
-    goalKeyString = KeyFactory.keyToString(goalKey);
+    Key key = event.getKey();
+    correctKey = KeyFactory.keyToString(key);
 
-    goalEntity.setProperty("eventKey", goalKeyString);
-    ds.put(goalEntity);
+    event.setProperty("eventKey", correctKey);
+    ds.put(event);
   }
 
   private void createUser(String user) {
