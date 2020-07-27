@@ -264,7 +264,7 @@ public class SearchServlet extends HttpServlet {
   }
 
   /**
-   * Compare two event entities by their relevance to the user and their search tags.
+   * Compare two event entities by their relevance to the user and their search keywords.
    *
    * @param o1 Entity to be compared with
    * @param o2 Entity to be compared against
