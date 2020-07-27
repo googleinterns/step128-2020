@@ -73,7 +73,6 @@ public final class DeleteEventServletTest {
   @Test
   public void deleteOneEvent() throws IOException, ServletException {
     HttpServletRequest request = mock(HttpServletRequest.class);
-    HttpServletResponse response = mock(HttpServletResponse.class);
 
     String email = "test@example.com";
     TestingUtil.mockFirebase(request, email);
@@ -81,6 +80,7 @@ public final class DeleteEventServletTest {
     when(request.getParameter("event")).thenReturn(correctKey);
     when(request.getParameter("userToken")).thenReturn(email);
 
+    HttpServletResponse response = mock(HttpServletResponse.class);
     testServlet.doPost(request, response);
 
     // Assert no entities in datastore.

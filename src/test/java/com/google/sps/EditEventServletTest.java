@@ -342,8 +342,6 @@ public final class EditEventServletTest {
   @Test(expected = Test.None.class)
   public void exceptionHandelingCallDeletedEvent() throws IOException, ServletException {
     HttpServletRequest request = mock(HttpServletRequest.class);
-    HttpServletResponse response = mock(HttpServletResponse.class);
-    RequestDispatcher dispatcher = mock(RequestDispatcher.class);
 
     String email = "test@example.com";
     TestingUtil.mockFirebase(request, email);
@@ -356,6 +354,9 @@ public final class EditEventServletTest {
     // Should invoke event not found- If not error will be thrown.
     when(request.getParameter("Event")).thenReturn(correctKey);
     when(request.getParameter("userToken")).thenReturn(email);
+
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    RequestDispatcher dispatcher = mock(RequestDispatcher.class);
     when(request.getRequestDispatcher("/WEB-INF/jsp/event-not-found.jsp")).thenReturn(dispatcher);
     doNothing().when(dispatcher).forward(request, response);
 
