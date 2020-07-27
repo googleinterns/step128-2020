@@ -115,7 +115,7 @@
             <img src="images/cancel-button.svg" alt="Cancel button.">
           </a>
           <div class="edit-divider"></div>
-          <a href="/my-events.html">
+          <a href="javascript:deleteEvent()">
             <img src="images/delete-button.svg" alt="Delete button.">
           </a>
         </div>
