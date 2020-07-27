@@ -105,6 +105,9 @@ public class Interactions {
     }
     v1Magnitude = Math.pow(v1Magnitude, .5);
     v2Magnitude = Math.pow(v2Magnitude, .5);
+    if (v1Magnitude == 0.0 || v2Magnitude == 0.0) {
+      return 0.0;
+    }
     return result / (v1Magnitude * v2Magnitude);
   }
 
