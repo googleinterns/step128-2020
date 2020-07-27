@@ -232,14 +232,14 @@ public class Recommend {
   /**
    * Computes cumulative total score for given user and event.
    *
-   * @param predScore Base score to apply multipliers to.
+   * @param baseScore Base score to apply multipliers to.
    */
-  private static double computeScore(String userId, long eventId, float predScore) {
+  public static double computeScore(String userId, long eventId, float baseScore) {
     double dotProduct = Interactions.dotProduct(userPrefs.get(userId), eventInfo.get(eventId));
     if (Math.abs(dotProduct) < ZERO) {
       dotProduct = ZERO;
     }
-    double totalScore = dotProduct * predScore;
+    double totalScore = dotProduct * baseScore;
     // adjust scaling based on user's past interaction with event
     Entity interactionEntity = Interactions.hasInteraction(userId, eventId);
     if (interactionEntity == null) {
