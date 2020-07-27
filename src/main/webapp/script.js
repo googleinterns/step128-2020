@@ -916,7 +916,7 @@ function confirmUser() {
     getUserIDToken().then((userToken) => {
       const key = document.getElementById('key').value;
       fetch('/confirm-user?Event=' + key + '&userToken=' + userToken)
-          .then(response => response.json())
+          .then((response) => response.json())
           .then((access) => {
             if (access == true) {
               updateTagBox();
@@ -924,7 +924,7 @@ function confirmUser() {
             } else {
               window.location.href = '/access-denied.html';
             }
-            });
+          });
     });
   } else {
     window.location.href = '/login.html';
