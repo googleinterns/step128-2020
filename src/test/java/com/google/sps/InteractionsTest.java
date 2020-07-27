@@ -62,7 +62,7 @@ public final class InteractionsTest {
       new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
 
   private static final SurveyServlet testSurveyServlet = new SurveyServlet();
-  private static final double FLOAT_THRESHOLD = 0;
+  private static final double FLOAT_THRESHOLD = 0.0000001;
 
   private void takeSurvey(String email) throws IOException {
     HttpServletRequest request = mock(HttpServletRequest.class);
@@ -78,7 +78,7 @@ public final class InteractionsTest {
     testSurveyServlet.doPost(request, response);
   }
 
-  /** Sets up the datastore helper and authentication utility for each test. */
+  /** Sets up the datastore helper for each test. */
   @Before
   public void setUp() throws IOException {
     helper.setUp();
@@ -126,12 +126,14 @@ public final class InteractionsTest {
     Map<String, Float> v1 = new HashMap<>();
     v1.put("1", 1.0f);
     v1.put("2", 2.0f);
-    v1.put("3", 3.0f);
+    v1.put("3", 1.0f);
 
     Map<String, Integer> v2 = new HashMap<>();
+    v2.put("1", 1);
     v2.put("2", 2);
+    v2.put("3", 1);
 
-    assertEquals(4.0f, Interactions.dotProduct(v1, v2), FLOAT_THRESHOLD);
+    assertEquals(1.0, Interactions.dotProduct(v1, v2), FLOAT_THRESHOLD);
   }
 
   @Test
