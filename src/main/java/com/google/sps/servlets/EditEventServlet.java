@@ -69,15 +69,20 @@ public class EditEventServlet extends HttpServlet {
     try {
       keyRequested = getEventKey(request, "Event");
     } catch (IllegalArgumentException | IOException e) {
-      LOGGER.info("Could not retrieve event " + e);
+      LOGGER.info("Could not retrieve event key " + e);
       request.getRequestDispatcher("/WEB-INF/jsp/event-not-found.jsp").forward(request, response);
       return;
     }
 
     Query query = new Query("Event", keyRequested);
-
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     Entity eventRequested = datastore.prepare(query).asSingleEntity();
+
+    if (eventRequested == null) {
+      LOGGER.warning("Could not retrieve event ");
+      request.getRequestDispatcher("/WEB-INF/jsp/event-not-found.jsp").forward(request, response);
+      return;
+    }
 
     String userToken = request.getParameter("userToken");
     if (userToken == null) {
