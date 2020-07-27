@@ -992,7 +992,7 @@ function formatTags(tags) {
  * Deletes event from datastore if confimration is True.
  */
 function deleteEvent() {
-  let confirmation = confirm("Are you sure you want to delete this event?");
+  const confirmation = confirm('Are you sure you want to delete this event?');
   if (confirmation) {
     getUserIDToken().then((userToken) => {
       const key = document.getElementById('key').value;
@@ -1001,8 +1001,8 @@ function deleteEvent() {
       params.append('userToken', userToken);
 
       fetch('/delete-event', {method: 'POST', body: params}).then(() => {
-            window.location.href = '/my-events.html';
-          });
+        window.location.href = '/my-events.html';
+      });
     });
   }
 }
