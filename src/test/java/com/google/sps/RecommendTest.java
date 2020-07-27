@@ -143,6 +143,35 @@ public final class RecommendTest {
     }
   }
 
+  @Test
+  public void rankWithoutInteractions() throws IOException {
+    // test that ranks are calculated correctly when interactions and locations are held constant
+    String users = "src/test/data/users-3.csv";
+    String ratings = "src/test/data/ratings-2.csv";
+    String events = "src/test/data/events-3.csv";
+    addInfoToDatastore(events, users, ratings);
+    Recommend.calculateRecommend();
+
+    DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
+    try {
+      Key key1 = KeyFactory.createKey("Recommendation", "test@example.com");
+      Entity user1 = ds.get(key1);
+      List<Long> userRecs1 = (List<Long>) user1.getProperty("recs");
+      for (int i = 0; i < userRecs1.size() - 1; i++) {
+        assertTrue(userRecs1.get(i) < userRecs1.get(i + 1));
+      }
+
+      Key key2 = KeyFactory.createKey("Recommendation", "another@example.com");
+      Entity user2 = ds.get(key2);
+      List<Long> userRecs2 = (List<Long>) user2.getProperty("recs");
+      for (int i = 0; i < userRecs2.size() - 1; i++) {
+        assertTrue(userRecs2.get(i) > userRecs2.get(i + 1));
+      }
+    } catch (EntityNotFoundException e) {
+      fail();
+    }
+  }
+
   /** Adds all info from ratings CSV, users CSV, events CSV to datastore. */
   private void addInfoToDatastore(String eventsFile, String usersFile, String ratingsFile)
       throws FileNotFoundException, IOException {
