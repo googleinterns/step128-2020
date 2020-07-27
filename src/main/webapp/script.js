@@ -912,17 +912,21 @@ function openEditForm(key) {
  * Confirms if event belongs to user.
  */
 function confirmUser() {
-  getUserIDToken().then((userToken) => {
-        const key = document.getElementById('key').value;
-        fetch('/confirm-user?Event=' + key + '&userToken=' + userToken).then(response => response.json()).then((access) => {
-                if (access == true) {
-                  updateTagBox();
-                  loadFields();
-                } else {
-                  window.location.href = '/my-events.html';
-                }
-              });
-  });
+  if (loggedIn) {
+    getUserIDToken().then((userToken) => {
+          const key = document.getElementById('key').value;
+          fetch('/confirm-user?Event=' + key + '&userToken=' + userToken).then(response => response.json()).then((access) => {
+                  if (access == true) {
+                    updateTagBox();
+                    loadFields();
+                  } else {
+                    window.location.href = '/access-denied.html';
+                  }
+                });
+    });
+  } else {
+    window.location.href = '/login.html';
+  }
 }
 
 /**
