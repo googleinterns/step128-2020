@@ -18,6 +18,7 @@ import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.EntityNotFoundException;
+import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.PreparedQuery;
@@ -109,15 +110,14 @@ public class UserServlet extends HttpServlet {
   // returns a list of all events created by a user (identified by firebaseID)
   private List<Entity> getHandleCreated(String userID) {
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    List<Entity> results = new ArrayList<>();
 
     Query query =
         new Query("Event")
             .setFilter(new Query.FilterPredicate("creator", Query.FilterOperator.EQUAL, userID));
     PreparedQuery queried = datastore.prepare(query);
-    for (Entity e : queried.asIterable()) {
-      results.add(e);
-    }
+    List<Entity> results =
+        new ArrayList<Entity>(queried.asList(FetchOptions.Builder.withDefaults()));
+
     return results;
   }
 
