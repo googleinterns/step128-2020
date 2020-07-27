@@ -271,21 +271,10 @@ public class SearchServlet extends HttpServlet {
    * @return int comparison result
    */
   public static int compareUsingKeywords(Entity o1, Entity o2) {
-    List<String> o1List = null;
-    List<String> o2List = null;
-    List<Long> o1Values = null;
-    List<Long> o2Values = null;
-    if (o1 == null || o2 == null) {
-      o1List = new ArrayList<String>();
-      o2List = new ArrayList<String>();
-      o1Values = new ArrayList<Long>();
-      o2Values = new ArrayList<Long>();
-    } else {
-      o1List = (List<String>) o1.getProperty("keywords");
-      o2List = (List<String>) o2.getProperty("keywords");
-      o1Values = (List<Long>) o1.getProperty("keywordsValues");
-      o2Values = (List<Long>) o2.getProperty("keywordsValues");
-    }
+    List<String> o1List = (List<String>) o1.getProperty("keywords");
+    List<String> o2List = (List<String>) o2.getProperty("keywords");
+    List<Long> o1Values = (List<Long>) o1.getProperty("keywordsValues");
+    List<Long> o2Values = (List<Long>) o2.getProperty("keywordsValues");
     double intersectionRatioO1 = SearchServlet.intersection(o1List, searchKeywords);
     double intersectionRatioO2 = SearchServlet.intersection(o2List, searchKeywords);
     // Sort by which event has more keywords in common with the search keywords
