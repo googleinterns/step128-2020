@@ -102,8 +102,8 @@ public class Utils {
     } catch (IOException e) {
       LOGGER.warning(e.getMessage());
     }
-    if(results == null) {
-        return null;
+    if (results == null) {
+      return null;
     }
     return new LatLng(results[0].geometry.location.lat, results[0].geometry.location.lng);
   }
@@ -147,11 +147,11 @@ public class Utils {
    * @return the distance in km between the two locations.
    */
   public static int getDistance(String from, String to) {
-      LatLng start = getLatLng(from);
-      LatLng end = getLatLng(to);
-      if(start == null || end == null) {
-          return -1;
-      }
+    LatLng start = getLatLng(from);
+    LatLng end = getLatLng(to);
+    if (start == null || end == null) {
+      return -1;
+    }
     return getDistance(start, end);
   }
 
