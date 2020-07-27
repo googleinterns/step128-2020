@@ -82,7 +82,7 @@ public class EditEventServlet extends HttpServlet {
     String userToken = request.getParameter("userToken");
     if (userToken == null) {
       LOGGER.warning("No user token.");
-      request.getRequestDispatcher("/WEB-INF/jsp/access-denied.jsp").forward(request, response);
+      request.getRequestDispatcher("/WEB-INF/jsp/access-denied.html").forward(request, response);
       return;
     }
 
@@ -97,7 +97,7 @@ public class EditEventServlet extends HttpServlet {
       }
     } catch (IllegalArgumentException | IOException e) {
       LOGGER.info("Login error: " + e);
-      request.getRequestDispatcher("/WEB-INF/jsp/access-denied.jsp").forward(request, response);
+      request.getRequestDispatcher("/WEB-INF/jsp/access-denied.html").forward(request, response);
       return;
     }
 
@@ -108,7 +108,7 @@ public class EditEventServlet extends HttpServlet {
       Entity entity = new Entity(userKey);
       entity.setProperty("firebaseID", userID);
       datastore.put(entity);
-      request.getRequestDispatcher("/WEB-INF/jsp/access-denied.jsp").forward(request, response);
+      request.getRequestDispatcher("/WEB-INF/jsp/access-denied.html").forward(request, response);
       return;
     }
 
@@ -117,7 +117,7 @@ public class EditEventServlet extends HttpServlet {
       request = populateRequest(request, eventRequested);
       request.getRequestDispatcher("/WEB-INF/jsp/edit-event-form.jsp").forward(request, response);
     } else {
-      request.getRequestDispatcher("/WEB-INF/jsp/access-denied.jsp").forward(request, response);
+      request.getRequestDispatcher("/WEB-INF/jsp/access-denied.html").forward(request, response);
     }
   }
 
