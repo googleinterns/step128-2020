@@ -1077,10 +1077,11 @@ function searchLoadActions() {
     // when the user presses the enter key
     var searchBarElement = document.getElementsByClassName('search-bar')[0];
     searchBarElement.addEventListener("keyup", function(event) {
-    if (event.keyCode === 13) {
-     event.preventDefault();
-     document.getElementById("go-button").click();
-    }
+      if (event.keyCode === 13) {
+      event.preventDefault();
+      document.getElementById("go-button").click();
+      }
+    });
   });
 }
 

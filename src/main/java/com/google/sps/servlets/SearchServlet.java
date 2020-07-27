@@ -113,7 +113,7 @@ public class SearchServlet extends HttpServlet {
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    long startTime = System.nanoTime();
+    final long startTime = System.nanoTime();
     // String search query input
     String searchQueryKeywords = request.getParameter("searchKeywords");
     // List of all the tags we are searching for
@@ -181,7 +181,7 @@ public class SearchServlet extends HttpServlet {
 
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     PreparedQuery results = datastore.prepare(query);
-    long entityCount = results.countEntities(FetchOptions.Builder.withDefaults());
+    final long entityCount = results.countEntities(FetchOptions.Builder.withDefaults());
     List<Entity> events =
         new ArrayList<Entity>(results.asList(FetchOptions.Builder.withDefaults()));
 
