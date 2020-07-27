@@ -38,19 +38,17 @@ public class ConfirmUserServlet extends HttpServlet {
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response)
       throws IOException, ServletException {
-    String userToken = request.getParameter("userToken");
-    String userID = Firebase.authenticateUser(userToken);
-
-
     // Get the event key string from the request.
     String keyString = request.getParameter("Event");
     Key key = KeyFactory.stringToKey(keyString);
-    Query query = new Query("Event", key);
 
+    Query query = new Query("Event", key);
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     Entity eventRequested = datastore.prepare(query).asSingleEntity();
 
     String creator = eventRequested.getProperty("creator").toString();
+    String userToken = request.getParameter("userToken");
+    String userID = Firebase.authenticateUser(userToken);
 
     boolean belongs = false;
     if (creator.equals(userID)) {
