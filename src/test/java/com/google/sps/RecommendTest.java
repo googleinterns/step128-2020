@@ -60,7 +60,8 @@ public final class RecommendTest {
   }
 
   @Test
-  public void doTests() throws IOException {
+  public void checkOutput() throws IOException {
+    // a test to make sure everything is in an expected format and runs without hiccups
     String users = "src/test/data/users-1.csv";
     String ratings = "src/test/data/ratings-1.csv";
     String events = "src/test/data/events-1.csv";
@@ -99,9 +100,12 @@ public final class RecommendTest {
     scan.close();
     // scan users and user data
     scan = new Scanner(new File(usersFile));
-    scan.nextLine(); // flush the header line
+    String[] fieldNames = scan.nextLine().split(",");
+    if (fieldNames.length < 2) {
+      throw new IOException("Please check format of input file.");
+    }
     while (scan.hasNext()) {
-      Entity userEntity = parseUserEntity(scan.nextLine());
+      Entity userEntity = parseUserEntity(scan.nextLine(), fieldNames);
       if (userEntity != null) {
         String userId = userEntity.getKey().getName();
         users.put(userId, userEntity);
@@ -176,9 +180,9 @@ public final class RecommendTest {
   }
 
   /** Parses one line from user CSV and returns as an entity. */
-  private Entity parseUserEntity(String input) {
+  private Entity parseUserEntity(String input, String[] fieldNames) {
     String[] fields = input.split(",");
-    if (fields.length != 2) {
+    if (fields.length < 2) {
       return null;
     }
     Entity userEntity = null;
@@ -188,7 +192,9 @@ public final class RecommendTest {
       Key userKey = KeyFactory.createKey("User", userId);
       userEntity = new Entity(userKey);
       userEntity.setProperty("location", userLocation);
-      // save tag info for easier access later
+      for (int i = 2; i < fields.length && i < fieldNames.length; i++) {
+        userEntity.setProperty(fieldNames[i], Float.parseFloat(fields[i]));
+      }
     } catch (NumberFormatException e) {
       userEntity = null;
     }
