@@ -73,6 +73,11 @@ public final class InteractionsTest {
     when(request.getParameter("volunteer")).thenReturn("3");
     when(request.getParameter("education")).thenReturn("2");
     when(request.getParameter("LGBTQ+")).thenReturn("4");
+    when(request.getParameter("healthcare")).thenReturn("4");
+    when(request.getParameter("civics")).thenReturn("4");
+    when(request.getParameter("fundraiser")).thenReturn("4");
+    when(request.getParameter("activism")).thenReturn("4");
+    when(request.getParameter("item donation")).thenReturn("4");
 
     HttpServletResponse response = mock(HttpServletResponse.class);
     testSurveyServlet.doPost(request, response);
@@ -101,6 +106,11 @@ public final class InteractionsTest {
     expectedSurvey.put("volunteer", 3.0f);
     expectedSurvey.put("education", 2.0f);
     expectedSurvey.put("LGBTQ+", 4.0f);
+    expectedSurvey.put("healthcare", 4.0f);
+    expectedSurvey.put("civics", 4.0f);
+    expectedSurvey.put("fundraiser", 4.0f);
+    expectedSurvey.put("activism", 4.0f);
+    expectedSurvey.put("item donation", 4.0f);
 
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     Entity userEntity = datastore.prepare(new Query("User")).asSingleEntity();
@@ -116,6 +126,11 @@ public final class InteractionsTest {
     expectedVector.put("volunteer", 0);
     expectedVector.put("education", 0);
     expectedVector.put("LGBTQ+", 0);
+    expectedVector.put("healthcare", 0);
+    expectedVector.put("civics", 0);
+    expectedVector.put("fundraiser", 0);
+    expectedVector.put("activism", 0);
+    expectedVector.put("item donation", 0);
 
     Entity entity = UserServletTest.createBlmProtestEvent();
     assertEquals(expectedVector, Interactions.buildVectorForEvent(entity));
