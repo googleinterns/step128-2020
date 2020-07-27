@@ -16,10 +16,13 @@ package com.google.sps;
 
 import static com.google.appengine.api.datastore.FetchOptions.Builder.withLimit;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.PreparedQuery;
@@ -38,21 +41,21 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
-/** A class to make sure that Spark works as intended. */
-@RunWith(JUnit4.class)
+/** Tests to make sure that the Recommendation class works as intended. */
+@PowerMockIgnore({"okhttp3.*", "org.apache.hadoop.*", "javax.*", "org.apache.xerces.*"})
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(Utils.class)
 public final class RecommendTest {
-  // file paths
-  private static final String RATINGS = "src/test/data/ratings.csv";
-  private static final String EVENTS = "src/test/data/events.csv";
-  private static final String MODEL_PATH = "src/test/data/eventsmodel";
-
   private static final Map<Long, Event> EVENT_INFO = new HashMap<>();
   private static final LocalServiceTestHelper helper =
       new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
 
-  /** Initializes the spark session and reads in data from CSV files. */
+  /** Sets up the datastore helper. */
   @Before
   public void setUp() throws IOException {
     helper.setUp();
@@ -64,17 +67,28 @@ public final class RecommendTest {
   }
 
   @Test
-  public void doTests() throws IOException {
-    addInfoToDatastore(RATINGS, EVENTS);
-    DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
+  public void checkOutput() throws IOException {
+    PowerMockito.mockStatic(Utils.class);
+    PowerMockito.when(Utils.getDistance("90001", "90001")).thenReturn(0);
+
+    // a test to make sure everything is in an expected format and runs without hiccups
+    String users = "src/test/data/users-1.csv";
+    String ratings = "src/test/data/ratings-1.csv";
+    String events = "src/test/data/events-1.csv";
+    addInfoToDatastore(events, users, ratings);
     Recommend.calculateRecommend();
+
+    DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
     PreparedQuery completedRecs = ds.prepare(new Query("Recommendation"));
-    int userCount = ds.prepare(new Query("User")).countEntities(withLimit(250));
     int recsCount = completedRecs.countEntities(withLimit(250));
+    int userCount = ds.prepare(new Query("User")).countEntities(withLimit(250));
     assertEquals(userCount, recsCount);
+
+    int eventsCount = ds.prepare(new Query("Event")).countEntities(withLimit(250));
     for (Entity entity : completedRecs.asIterable()) {
       System.out.println(entity.getKey().getName());
       List<Long> userRecs = (List<Long>) entity.getProperty("recs");
+      assertEquals(eventsCount, userRecs.size());
       for (int i = 0; i < userRecs.size() && i < 10; i++) {
         System.out.println("  " + EVENT_INFO.get(userRecs.get(i)));
       }
@@ -82,9 +96,91 @@ public final class RecommendTest {
     }
   }
 
-  /** Adds all info from ratings CSV and events CSV file to datastore. */
-  private void addInfoToDatastore(String ratingsFile, String eventsFile)
-      throws FileNotFoundException {
+  @Test
+  public void rankFromDistance() throws IOException, Exception {
+    // set up distance mocking
+    PowerMockito.mockStatic(Utils.class);
+    PowerMockito.when(Utils.getDistance("90045", "90045")).thenReturn(0);
+    PowerMockito.when(Utils.getDistance("90045", "90301")).thenReturn(10);
+    PowerMockito.when(Utils.getDistance("90045", "90305")).thenReturn(20);
+    PowerMockito.when(Utils.getDistance("90045", "90047")).thenReturn(30);
+    PowerMockito.when(Utils.getDistance("90045", "90003")).thenReturn(40);
+    PowerMockito.when(Utils.getDistance("90003", "90003")).thenReturn(0);
+    PowerMockito.when(Utils.getDistance("90003", "90047")).thenReturn(10);
+    PowerMockito.when(Utils.getDistance("90003", "90305")).thenReturn(20);
+    PowerMockito.when(Utils.getDistance("90003", "90301")).thenReturn(30);
+    PowerMockito.when(Utils.getDistance("90003", "90045")).thenReturn(40);
+
+    // check that recommendation ranks distances correctly
+    String users = "src/test/data/users-2.csv";
+    String ratings = "src/test/data/ratings-2.csv";
+    String events = "src/test/data/events-2.csv";
+    addInfoToDatastore(events, users, ratings);
+    Recommend.calculateRecommend();
+
+    DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
+    PreparedQuery completedRecs = ds.prepare(new Query("Recommendation"));
+    int recsCount = completedRecs.countEntities(withLimit(250));
+    int userCount = ds.prepare(new Query("User")).countEntities(withLimit(250));
+    assertEquals(userCount, recsCount);
+
+    int eventsCount = ds.prepare(new Query("Event")).countEntities(withLimit(250));
+    try {
+      Key key1 = KeyFactory.createKey("Recommendation", "test@example.com");
+      Entity user1 = ds.get(key1);
+      List<Long> userRecs1 = (List<Long>) user1.getProperty("recs");
+      assertEquals(eventsCount, userRecs1.size());
+      for (int i = 0; i < userRecs1.size() - 1; i++) {
+        assertTrue(userRecs1.get(i) < userRecs1.get(i + 1));
+      }
+
+      Key key2 = KeyFactory.createKey("Recommendation", "another@example.com");
+      Entity user2 = ds.get(key2);
+      List<Long> userRecs2 = (List<Long>) user2.getProperty("recs");
+      assertEquals(eventsCount, userRecs2.size());
+      for (int i = 0; i < userRecs2.size() - 1; i++) {
+        assertTrue(userRecs2.get(i) > userRecs2.get(i + 1));
+      }
+    } catch (EntityNotFoundException e) {
+      fail();
+    }
+  }
+
+  @Test
+  public void rankWithoutInteractions() throws IOException {
+    PowerMockito.mockStatic(Utils.class);
+    PowerMockito.when(Utils.getDistance("90045", "90045")).thenReturn(0);
+
+    // test that ranks are calculated correctly when interactions and locations are held constant
+    String users = "src/test/data/users-3.csv";
+    String ratings = "src/test/data/ratings-2.csv";
+    String events = "src/test/data/events-3.csv";
+    addInfoToDatastore(events, users, ratings);
+    Recommend.calculateRecommend();
+
+    DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
+    try {
+      Key key1 = KeyFactory.createKey("Recommendation", "test@example.com");
+      Entity user1 = ds.get(key1);
+      List<Long> userRecs1 = (List<Long>) user1.getProperty("recs");
+      for (int i = 0; i < userRecs1.size() - 1; i++) {
+        assertTrue(userRecs1.get(i) < userRecs1.get(i + 1));
+      }
+
+      Key key2 = KeyFactory.createKey("Recommendation", "another@example.com");
+      Entity user2 = ds.get(key2);
+      List<Long> userRecs2 = (List<Long>) user2.getProperty("recs");
+      for (int i = 0; i < userRecs2.size() - 1; i++) {
+        assertTrue(userRecs2.get(i) > userRecs2.get(i + 1));
+      }
+    } catch (EntityNotFoundException e) {
+      fail();
+    }
+  }
+
+  /** Adds all info from ratings CSV, users CSV, events CSV to datastore. */
+  private void addInfoToDatastore(String eventsFile, String usersFile, String ratingsFile)
+      throws FileNotFoundException, IOException {
     final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     final Map<String, Entity> users = new HashMap<>();
     // scan events and event data
@@ -96,7 +192,21 @@ public final class RecommendTest {
       }
     }
     scan.close();
-    // scan ratings and save users
+    // scan users and user data
+    scan = new Scanner(new File(usersFile));
+    String[] fieldNames = scan.nextLine().split(",");
+    if (fieldNames.length < 2) {
+      throw new IOException("Please check format of input file.");
+    }
+    while (scan.hasNext()) {
+      Entity userEntity = parseUserEntity(scan.nextLine(), fieldNames);
+      if (userEntity != null) {
+        String userId = userEntity.getKey().getName();
+        users.put(userId, userEntity);
+      }
+    }
+    scan.close();
+    // scan ratings
     scan = new Scanner(new File(ratingsFile));
     while (scan.hasNext()) {
       Interaction interaction = Interaction.parseInteraction(scan.nextLine());
@@ -109,9 +219,7 @@ public final class RecommendTest {
 
           Entity userEntity = users.get(interaction.userId);
           if (userEntity == null) {
-            Key userKey = KeyFactory.createKey("User", interaction.userId);
-            userEntity = new Entity(userKey);
-            users.put(interaction.userId, userEntity);
+            throw new IOException("user entity not found");
           }
           Interactions.updatePrefs(userEntity, tags, delta);
         } else {
@@ -125,10 +233,10 @@ public final class RecommendTest {
     }
   }
 
-  /** Parses one line from events.csv and returns as an entity. */
+  /** Parses one line from event CSV and returns as an entity. */
   private Entity parseEventEntity(String input) {
     String[] fields = input.split(",");
-    if (fields.length < 4) {
+    if (fields.length < 5) {
       return null;
     }
     Entity eventEntity = null;
@@ -137,12 +245,12 @@ public final class RecommendTest {
       String eventName = fields[1];
       String eventDesc = fields[2];
       List<String> tagsList = new ArrayList<>();
-      String[] tags = fields[3].split("-");
+      String[] tags = fields[4].split("-");
       for (String t : tags) {
         tagsList.add(t);
       }
-      if (fields.length > 4) {
-        String[] tags2 = fields[4].split("-");
+      if (fields.length > 5) {
+        String[] tags2 = fields[5].split("-");
         for (String t : tags2) {
           tagsList.add(t);
         }
@@ -155,13 +263,35 @@ public final class RecommendTest {
       eventEntity = new Entity(eventKey);
       eventEntity.setProperty("eventName", eventName);
       eventEntity.setProperty("eventDescription", eventDesc);
-      eventEntity.setProperty("address", "location"); // TODO
+      eventEntity.setProperty("address", fields[3]);
       eventEntity.setIndexedProperty("tags", tagsList);
       // save tag info for easier access later
     } catch (NumberFormatException e) {
       eventEntity = null;
     }
     return eventEntity;
+  }
+
+  /** Parses one line from user CSV and returns as an entity. */
+  private Entity parseUserEntity(String input, String[] fieldNames) {
+    String[] fields = input.split(",");
+    if (fields.length < 2) {
+      return null;
+    }
+    Entity userEntity = null;
+    try {
+      String userId = fields[0];
+      String userLocation = fields[1];
+      Key userKey = KeyFactory.createKey("User", userId);
+      userEntity = new Entity(userKey);
+      userEntity.setProperty("location", userLocation);
+      for (int i = 2; i < fields.length && i < fieldNames.length; i++) {
+        userEntity.setProperty(fieldNames[i], Float.parseFloat(fields[i]));
+      }
+    } catch (NumberFormatException e) {
+      userEntity = null;
+    }
+    return userEntity;
   }
 
   private static class Interaction {
@@ -192,7 +322,7 @@ public final class RecommendTest {
     }
   }
 
-  /** Utility class used for CSV parsing. */
+  /** Utility class used for CSV parsing and data storage. */
   public static class Event {
     private long eventId;
     private String eventName;

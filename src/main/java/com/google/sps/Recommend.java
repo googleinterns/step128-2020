@@ -31,7 +31,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.logging.Logger;
-import org.apache.spark.ml.evaluation.RegressionEvaluator;
 import org.apache.spark.ml.recommendation.ALS;
 import org.apache.spark.ml.recommendation.ALSModel;
 import org.apache.spark.sql.Dataset;
@@ -42,10 +41,14 @@ public class Recommend {
 
   // keep and use up to this many Interaction entities
   private static final int UPPER_LIMIT = 5_000_000;
+
   // multipliers for score calculation
+  private static final float ZERO = 0.1f;
   private static final double NO_INTERACTION = 1.5;
-  private static final double ALREADY_VIEWED = 1.2;
   private static final double ALREADY_SAVED = 0.6;
+  // for distance score calculation
+  private static final double DISTANCE_BASE = 1.04;
+  private static final int INVALID_DISTANCE = 1000;
 
   // comparator to sort doubles in descending order
   private static final Comparator<Double> SCORE_DESCENDING =
@@ -61,7 +64,17 @@ public class Recommend {
   private static SparkSession spark;
   private static DatastoreService datastore;
 
-  /** Initializes the SparkSession. */
+  // keep track of ids and hashcodes -- spark requires numeric entries
+  private static Map<Integer, String> userIdHash = new HashMap<>();
+  private static Map<Integer, Long> eventIdHash = new HashMap<>();
+
+  // keep track of metrics and location for each user and event
+  private static Map<String, Map<String, Float>> userPrefs = new HashMap<>();
+  private static Map<Long, Map<String, Integer>> eventInfo = new HashMap<>();
+  private static Map<String, String> userLocations = new HashMap<>();
+  private static Map<Long, String> eventLocations = new HashMap<>();
+
+  /** Initializes the SparkSession, datastore, and other necessary items. */
   private static void init() {
     if (spark == null) {
       spark =
@@ -75,22 +88,80 @@ public class Recommend {
     if (datastore == null) {
       datastore = DatastoreServiceFactory.getDatastoreService();
     }
+
+    userIdHash = new HashMap<>();
+    eventIdHash = new HashMap<>();
+    userPrefs = new HashMap<>();
+    eventInfo = new HashMap<>();
+    userLocations = new HashMap<>();
+    eventLocations = new HashMap<>();
   }
 
   /** Rebuilds recommendation model and calculates recommendations for users. */
   public static void calculateRecommend() throws IOException {
     init();
+    getInfoFromDatastore();
 
-    // keep track of ids and hashcodes -- spark requires numeric entries
-    final Map<Integer, String> userIdHash = new HashMap<>();
-    final Map<Integer, Long> eventIdHash = new HashMap<>();
+    List<Key> toDelete = new ArrayList<>();
+    Dataset<Row> ratings =
+        makeDataframeAndPreprocess(userIdHash.keySet(), eventIdHash.keySet(), toDelete);
 
-    // keep track of metrics and location for each user and event
-    final Map<String, Map<String, Float>> userPrefs = new HashMap<>();
-    final Map<Long, Map<String, Integer>> eventInfo = new HashMap<>();
-    final Map<String, String> userLocations = new HashMap<>();
-    final Map<Long, String> eventLocations = new HashMap<>();
+    // skip Spark step if no interactions to work with
+    if (ratings != null) {
+      // compute recommendations from matrix factorization
+      ALSModel model = trainModel(ratings);
+      Dataset<Row> userRecs = model.recommendForAllUsers(150);
+      List<Row> userRecsList = userRecs.collectAsList();
+      // build rankings for each user
+      for (Row recRow : userRecsList) {
+        String userId = userIdHash.get(recRow.getInt(0));
+        List<Row> predScores = recRow.getList(1);
 
+        Map<Double, Long> userTopRecs = new TreeMap<>(SCORE_DESCENDING);
+        for (Row itemRow : predScores) {
+          long eventId = eventIdHash.get(itemRow.getInt(0));
+          float predScore = itemRow.getFloat(1);
+          if (predScore < ZERO) {
+            predScore = ZERO;
+          }
+          double totalScore = computeScore(userId, eventId, predScore);
+          addToRanking(eventId, totalScore, userTopRecs);
+        }
+
+        saveRecsToDatastore(userId, userTopRecs);
+        userPrefs.remove(userId);
+      }
+    }
+
+    // ALSModel will ignore users that have insufficient interaction data
+    for (String userId : userPrefs.keySet()) {
+      Map<Double, Long> userTopRecs = new TreeMap<>(SCORE_DESCENDING);
+      for (Long eventId : eventInfo.keySet()) {
+        double totalScore = computeScore(userId, eventId, 1.0f);
+        addToRanking(eventId, totalScore, userTopRecs);
+      }
+      saveRecsToDatastore(userId, userTopRecs);
+    }
+
+    datastore.delete(toDelete);
+  }
+
+  /**
+   * Trains an ALSModel on the provided training dataset.
+   *
+   * @param path If specified, will save the model parameters at this path
+   * @param training Will fit the model to this training dataset
+   */
+  public static ALSModel trainModel(Dataset<Row> training) throws IOException {
+    ALS als =
+        new ALS().setMaxIter(5).setUserCol("userId").setItemCol("eventId").setRatingCol("rating");
+    ALSModel model = als.fit(training);
+    model.setColdStartStrategy("drop");
+    return model;
+  }
+
+  /** Queries datastore and populates data maps. */
+  private static void getInfoFromDatastore() {
     // get user entities with their preferences
     Iterable<Entity> queriedUsers = datastore.prepare(new Query("User")).asIterable();
     for (Entity e : queriedUsers) {
@@ -113,89 +184,6 @@ public class Recommend {
       eventIdHash.put((Long.toString(id)).hashCode(), id);
       eventLocations.put(id, e.getProperty("address").toString());
     }
-
-    List<Key> toDelete = new ArrayList<>();
-    Dataset<Row> ratings =
-        makeDataframeAndPreprocess(userIdHash.keySet(), eventIdHash.keySet(), toDelete);
-
-    // compute recommendations from matrix factorization
-    ALSModel model = trainModel(null, ratings);
-    Dataset<Row> userRecs = model.recommendForAllUsers(150);
-    List<Row> userRecsList = userRecs.collectAsList();
-    for (Row recRow : userRecsList) {
-      String userId = userIdHash.get(recRow.getInt(0));
-      List<Row> predScores = recRow.getList(1);
-      Map<String, Float> userVector = userPrefs.get(userId);
-      String userLocation = userLocations.get(userId);
-
-      Map<Double, List<Long>> userTopRecs = new TreeMap<>(SCORE_DESCENDING);
-
-      for (Row itemRow : predScores) {
-        long eventId = eventIdHash.get(itemRow.getInt(0));
-        float predScore = itemRow.getFloat(1);
-
-        // calculate score for this item
-        float dotProduct = Interactions.dotProduct(userVector, eventInfo.get(eventId));
-        double totalScore = dotProduct * predScore; // todo: calculate
-
-        // adjust scaling based on user's past interaction with event
-        Entity interactionEntity = Interactions.hasInteraction(userId, eventId);
-        if (interactionEntity == null) {
-          totalScore *= NO_INTERACTION;
-        } else {
-          float interactionScore =
-              Float.parseFloat(interactionEntity.getProperty("rating").toString());
-          if (interactionScore >= Interactions.SAVE_SCORE) {
-            totalScore *= ALREADY_SAVED;
-          } else if (interactionScore == Interactions.VIEW_SCORE) {
-            totalScore *= ALREADY_VIEWED;
-          }
-        }
-
-        // TODO: adjust scaling based on user's location, if location is saved
-
-        // add item to ranking
-        List<Long> eventsWithScore = userTopRecs.get(totalScore);
-        if (eventsWithScore == null) {
-          eventsWithScore = new ArrayList<>();
-          userTopRecs.put(totalScore, eventsWithScore);
-        }
-        eventsWithScore.add(eventId);
-      }
-
-      saveRecsToDatastore(userId, userTopRecs);
-      userPrefs.remove(userId);
-    }
-
-    datastore.delete(toDelete);
-  }
-
-  /**
-   * Trains an ALSModel on the provided training dataset.
-   *
-   * @param path If specified, will save the model parameters at this path
-   * @param training Will fit the model to this training dataset
-   */
-  public static ALSModel trainModel(String path, Dataset<Row> training) throws IOException {
-    ALS als =
-        new ALS().setMaxIter(5).setUserCol("userId").setItemCol("eventId").setRatingCol("rating");
-    ALSModel model = als.fit(training);
-    model.setColdStartStrategy("drop");
-    if (path != null) {
-      model.write().overwrite().save(path);
-      LOGGER.info("model saved at " + path);
-    }
-    return model;
-  }
-
-  /** Uses RMSE to evaluate a set of predicted data. */
-  public static double evaluatePredictions(Dataset<Row> predictions) {
-    RegressionEvaluator evaluator =
-        new RegressionEvaluator()
-            .setMetricName("rmse")
-            .setLabelCol("rating")
-            .setPredictionCol("prediction");
-    return evaluator.evaluate(predictions);
   }
 
   /**
@@ -235,16 +223,64 @@ public class Recommend {
     while (itr.hasNext()) {
       toDelete.add(itr.next().getKey());
     }
+    if (ratings.size() == 0) {
+      return null;
+    }
     return spark.createDataFrame(ratings, EventRating.class);
   }
 
+  /**
+   * Computes cumulative total score for given user and event.
+   *
+   * @param predScore Base score to apply multipliers to.
+   */
+  private static double computeScore(String userId, long eventId, float predScore) {
+    double dotProduct = Interactions.dotProduct(userPrefs.get(userId), eventInfo.get(eventId));
+    if (Math.abs(dotProduct) < ZERO) {
+      dotProduct = ZERO;
+    }
+    double totalScore = dotProduct * predScore;
+    // adjust scaling based on user's past interaction with event
+    Entity interactionEntity = Interactions.hasInteraction(userId, eventId);
+    if (interactionEntity == null) {
+      totalScore *= NO_INTERACTION;
+    } else {
+      float interactionScore = Float.parseFloat(interactionEntity.getProperty("rating").toString());
+      if (interactionScore >= Interactions.SAVE_SCORE) {
+        totalScore *= ALREADY_SAVED;
+      }
+    }
+
+    String userLocation = userLocations.get(userId);
+    String eventLocation = eventLocations.get(eventId);
+    if (userLocation != null && eventLocations != null) {
+      int distance = Utils.getDistance(userLocation, eventLocation);
+      if (distance < 0) {
+        distance = INVALID_DISTANCE;
+      }
+      totalScore /= Math.pow(DISTANCE_BASE, distance);
+    }
+
+    totalScore = Math.round(totalScore * 1000.0) / 1000.0;
+    return totalScore;
+  }
+
+  /** Adds event and its calculated score to rankings map. */
+  private static void addToRanking(long eventId, double score, Map<Double, Long> userTopRecs) {
+    while (userTopRecs.containsKey(score)) {
+      Long otherWithScore = userTopRecs.get(score);
+      userTopRecs.put(score, eventId);
+      eventId = otherWithScore;
+      score -= 0.001;
+    }
+    userTopRecs.put(score, eventId);
+  }
+
   /** Stores a recommendation datastore entry for the given user ID. */
-  private static void saveRecsToDatastore(String userId, Map<Double, List<Long>> recs) {
+  private static void saveRecsToDatastore(String userId, Map<Double, Long> recs) {
     List<Long> recsList = new ArrayList<>();
     for (Double score : recs.keySet()) {
-      for (Long l : recs.get(score)) {
-        recsList.add(l);
-      }
+      recsList.add(recs.get(score));
     }
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     Key recKey = KeyFactory.createKey("Recommendation", userId);
