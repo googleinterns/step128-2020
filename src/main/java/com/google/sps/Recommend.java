@@ -240,7 +240,6 @@ public class Recommend {
       dotProduct = ZERO;
     }
     double totalScore = dotProduct * predScore;
-
     // adjust scaling based on user's past interaction with event
     Entity interactionEntity = Interactions.hasInteraction(userId, eventId);
     if (interactionEntity == null) {
