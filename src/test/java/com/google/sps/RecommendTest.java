@@ -16,6 +16,7 @@ package com.google.sps;
 
 import static com.google.appengine.api.datastore.FetchOptions.Builder.withLimit;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
 
 import com.google.appengine.api.datastore.DatastoreService;
@@ -66,12 +67,14 @@ public final class RecommendTest {
     String ratings = "src/test/data/ratings-1.csv";
     String events = "src/test/data/events-1.csv";
     addInfoToDatastore(events, users, ratings);
-    DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
     Recommend.calculateRecommend();
+
+    DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
     PreparedQuery completedRecs = ds.prepare(new Query("Recommendation"));
     int recsCount = completedRecs.countEntities(withLimit(250));
     int userCount = ds.prepare(new Query("User")).countEntities(withLimit(250));
     assertEquals(userCount, recsCount);
+
     int eventsCount = ds.prepare(new Query("Event")).countEntities(withLimit(250));
     for (Entity entity : completedRecs.asIterable()) {
       System.out.println(entity.getKey().getName());
@@ -81,6 +84,35 @@ public final class RecommendTest {
         System.out.println("  " + EVENT_INFO.get(userRecs.get(i)));
       }
       System.out.println();
+    }
+  }
+
+  @Test
+  public void rankFromDistance() throws IOException {
+    // check that recommendation ranks distances reasonably
+    // (may have rounding errors, or distance calculated weirdly)
+    String users = "src/test/data/users-2.csv";
+    String ratings = "src/test/data/ratings-2.csv";
+    String events = "src/test/data/events-2.csv";
+    addInfoToDatastore(events, users, ratings);
+    Recommend.calculateRecommend();
+
+    DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
+    PreparedQuery completedRecs = ds.prepare(new Query("Recommendation"));
+    int recsCount = completedRecs.countEntities(withLimit(250));
+    int userCount = ds.prepare(new Query("User")).countEntities(withLimit(250));
+    assertEquals(userCount, recsCount);
+
+    int eventsCount = ds.prepare(new Query("Event")).countEntities(withLimit(250));
+    for (Entity entity : completedRecs.asIterable()) {
+      String userId = entity.getKey().getName();
+      List<Long> userRecs = (List<Long>) entity.getProperty("recs");
+      assertEquals(eventsCount, userRecs.size());
+      if (userId.equals("test@example.com")) {
+        assertTrue(userRecs.get(0) < userRecs.get(userRecs.size() - 1));
+      } else {
+        assertTrue(userRecs.get(0) > userRecs.get(userRecs.size() - 1));
+      }
     }
   }
 
@@ -109,6 +141,7 @@ public final class RecommendTest {
       if (userEntity != null) {
         String userId = userEntity.getKey().getName();
         users.put(userId, userEntity);
+        System.out.println(userEntity);
       }
     }
     scan.close();
