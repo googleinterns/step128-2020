@@ -68,6 +68,9 @@ public final class RecommendTest {
 
   @Test
   public void checkOutput() throws IOException {
+    PowerMockito.mockStatic(Utils.class);
+    PowerMockito.when(Utils.getDistance("90001", "90001")).thenReturn(0);
+
     // a test to make sure everything is in an expected format and runs without hiccups
     String users = "src/test/data/users-1.csv";
     String ratings = "src/test/data/ratings-1.csv";
@@ -145,6 +148,9 @@ public final class RecommendTest {
 
   @Test
   public void rankWithoutInteractions() throws IOException {
+    PowerMockito.mockStatic(Utils.class);
+    PowerMockito.when(Utils.getDistance("90045", "90045")).thenReturn(0);
+
     // test that ranks are calculated correctly when interactions and locations are held constant
     String users = "src/test/data/users-3.csv";
     String ratings = "src/test/data/ratings-2.csv";
