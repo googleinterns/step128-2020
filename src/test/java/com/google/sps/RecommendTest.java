@@ -238,7 +238,6 @@ public final class RecommendTest {
       long eventId = Long.parseLong(fields[0]);
       String eventName = fields[1];
       String eventDesc = fields[2];
-      String eventLocation = fields[3];
       List<String> tagsList = new ArrayList<>();
       String[] tags = fields[4].split("-");
       for (String t : tags) {
@@ -258,7 +257,7 @@ public final class RecommendTest {
       eventEntity = new Entity(eventKey);
       eventEntity.setProperty("eventName", eventName);
       eventEntity.setProperty("eventDescription", eventDesc);
-      eventEntity.setProperty("address", eventLocation);
+      eventEntity.setProperty("address", fields[3]);
       eventEntity.setIndexedProperty("tags", tagsList);
       // save tag info for easier access later
     } catch (NumberFormatException e) {
