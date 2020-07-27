@@ -17,11 +17,12 @@ package com.google.sps;
 import static com.google.appengine.api.datastore.FetchOptions.Builder.withLimit;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.fail;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.PreparedQuery;
@@ -40,16 +41,21 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
-/** A class to make sure that Spark works as intended. */
-@RunWith(JUnit4.class)
+/** Tests to make sure that the Recommendation class works as intended. */
+@PowerMockIgnore({"okhttp3.*", "org.apache.hadoop.*", "javax.*", "org.apache.xerces.*"})
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(Utils.class)
 public final class RecommendTest {
   private static final Map<Long, Event> EVENT_INFO = new HashMap<>();
   private static final LocalServiceTestHelper helper =
       new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
 
-  /** Initializes the spark session and reads in data from CSV files. */
+  /** Sets up the datastore helper. */
   @Before
   public void setUp() throws IOException {
     helper.setUp();
@@ -88,9 +94,21 @@ public final class RecommendTest {
   }
 
   @Test
-  public void rankFromDistance() throws IOException {
-    // check that recommendation ranks distances reasonably
-    // (may have rounding errors, or distance calculated weirdly)
+  public void rankFromDistance() throws IOException, Exception {
+    // set up distance mocking
+    PowerMockito.mockStatic(Utils.class);
+    PowerMockito.when(Utils.getDistance("90045", "90045")).thenReturn(0);
+    PowerMockito.when(Utils.getDistance("90045", "90301")).thenReturn(10);
+    PowerMockito.when(Utils.getDistance("90045", "90305")).thenReturn(20);
+    PowerMockito.when(Utils.getDistance("90045", "90047")).thenReturn(30);
+    PowerMockito.when(Utils.getDistance("90045", "90003")).thenReturn(40);
+    PowerMockito.when(Utils.getDistance("90003", "90003")).thenReturn(0);
+    PowerMockito.when(Utils.getDistance("90003", "90047")).thenReturn(10);
+    PowerMockito.when(Utils.getDistance("90003", "90305")).thenReturn(20);
+    PowerMockito.when(Utils.getDistance("90003", "90301")).thenReturn(30);
+    PowerMockito.when(Utils.getDistance("90003", "90045")).thenReturn(40);
+
+    // check that recommendation ranks distances correctly
     String users = "src/test/data/users-2.csv";
     String ratings = "src/test/data/ratings-2.csv";
     String events = "src/test/data/events-2.csv";
@@ -104,15 +122,24 @@ public final class RecommendTest {
     assertEquals(userCount, recsCount);
 
     int eventsCount = ds.prepare(new Query("Event")).countEntities(withLimit(250));
-    for (Entity entity : completedRecs.asIterable()) {
-      String userId = entity.getKey().getName();
-      List<Long> userRecs = (List<Long>) entity.getProperty("recs");
-      assertEquals(eventsCount, userRecs.size());
-      if (userId.equals("test@example.com")) {
-        assertTrue(userRecs.get(0) < userRecs.get(userRecs.size() - 1));
-      } else {
-        assertTrue(userRecs.get(0) > userRecs.get(userRecs.size() - 1));
+    try {
+      Key key1 = KeyFactory.createKey("Recommendation", "test@example.com");
+      Entity user1 = ds.get(key1);
+      List<Long> userRecs1 = (List<Long>) user1.getProperty("recs");
+      assertEquals(eventsCount, userRecs1.size());
+      for (int i = 0; i < userRecs1.size() - 1; i++) {
+        assertTrue(userRecs1.get(i) < userRecs1.get(i + 1));
       }
+
+      Key key2 = KeyFactory.createKey("Recommendation", "another@example.com");
+      Entity user2 = ds.get(key2);
+      List<Long> userRecs2 = (List<Long>) user2.getProperty("recs");
+      assertEquals(eventsCount, userRecs2.size());
+      for (int i = 0; i < userRecs2.size() - 1; i++) {
+        assertTrue(userRecs2.get(i) > userRecs2.get(i + 1));
+      }
+    } catch (EntityNotFoundException e) {
+      fail();
     }
   }
 
@@ -141,7 +168,6 @@ public final class RecommendTest {
       if (userEntity != null) {
         String userId = userEntity.getKey().getName();
         users.put(userId, userEntity);
-        System.out.println(userEntity);
       }
     }
     scan.close();
