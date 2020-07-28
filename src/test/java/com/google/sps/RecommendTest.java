@@ -261,6 +261,32 @@ public final class RecommendTest {
   }
 
   @Test
+  public void problematicEntity() throws IOException {
+    PowerMockito.mockStatic(Utils.class);
+    PowerMockito.when(Utils.getDistance("90045", "90045")).thenReturn(0);
+    PowerMockito.when(Utils.getDistance("90045", "90301")).thenReturn(10);
+    PowerMockito.when(Utils.getDistance("90045", "90305")).thenReturn(20);
+    PowerMockito.when(Utils.getDistance("90045", "90047")).thenReturn(30);
+    PowerMockito.when(Utils.getDistance("90045", "90003")).thenReturn(40);
+
+    String users = "src/test/data/users-2.csv";
+    String ratings = "src/test/data/ratings-none.csv";
+    String events = "src/test/data/events-2.csv";
+    addInfoToDatastore(events, users, ratings);
+
+    // make sure servlet handles the problematic Recommendation entity correctly
+    DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
+    Entity recEntity = new Entity("Recommendation", "test@example.com");
+    ds.put(recEntity);
+
+    List<Entity> results = callGet("test@example.com");
+    assertEquals(5, results.size());
+    for (int i = 0; i < results.size() - 1; i++) {
+      assertTrue(results.get(i).getKey().getId() < results.get(i + 1).getKey().getId());
+    }
+  }
+
+  @Test
   public void noResults() throws IOException {
     String users = "src/test/data/users-none.csv";
     String ratings = "src/test/data/ratings-none.csv";
