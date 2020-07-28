@@ -512,12 +512,9 @@ async function getEvents(events, index, option) {
     } else if (option == createdEvents) {
       // edit an event
       attendeeCountContainerElement.className = 'edit-unsave-event';
-      const editEventLink = document.createElement('div');
-      editEventLink.innerText = 'Edit this event';
-      editEventLink.setAttribute('onclick', 'openEditForm("' +
+      attendeeCountContainerElement.innerText = 'Edit this event';
+      attendeeCountContainerElement.setAttribute('onclick', 'openEditForm("' +
         event.eventKey + '")');
-
-      attendeeCountContainerElement.appendChild(editEventLink);
     } else {
       // default: show attendee count
       if (event.attendeeCount == null) {
@@ -800,6 +797,33 @@ function changeLocation() {
  * **********************************************************************/
 
 /**
+ * Ensures users cannot access the create page without being logged in.
+ */
+function createVerification() {
+  if (loggedIn) {
+    window.location.href = "/create-event-form.html";  
+  } else {
+    alert("Please login before creating an event.")
+    window.location.href = '/login.html';
+  }
+}
+
+/**
+ * Populates the user token on page load to prevent NullPointerException.
+ */
+function populateToken() {
+  getUserIDToken().then((token) => {
+        const userToken = createHiddenInput(token);
+        userToken.name = 'userToken';
+
+        // Add userToken to form for submission
+        document.getElementById('eventform').appendChild(userToken);
+
+        updateTagBox();
+      });
+}
+
+/**
  * Inverts the apperance of a selected tag and adds it to the list
  * of selected tags
  * @param {String} tag the name of the tag to be toggled
@@ -826,17 +850,12 @@ function verifyTags() {
     // Convert tags selected array into string
     const jsonArray = JSON.stringify(tagsSelected);
     const tags = createHiddenInput(jsonArray);
-    getUserIDToken().then((preToken) => {
-      const userToken = createHiddenInput(preToken);
-      userToken.name = 'userToken';
 
-      // Add string of tags and userToken to form for submission
-      document.getElementById('eventform').appendChild(tags);
-      document.getElementById('eventform').appendChild(userToken);
+    // Add string of tags and userToken to form for submission
+    document.getElementById('eventform').appendChild(tags);
 
-      document.eventform.submit();
-      tagsSelected.splice(0, tagsSelected.length);
-    });
+    document.eventform.submit();
+    tagsSelected.splice(0, tagsSelected.length);
   } else {
     // Display error and prevent from sumbission
     const tagBoxError = document.getElementById('tags-label');
@@ -921,6 +940,7 @@ function confirmUser() {
             if (access == true) {
               updateTagBox();
               loadFields();
+              populateToken();
             } else {
               window.location.href = '/access-denied.html';
             }
