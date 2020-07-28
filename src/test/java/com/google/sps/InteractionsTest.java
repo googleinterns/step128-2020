@@ -121,16 +121,7 @@ public final class InteractionsTest {
   @Test
   public void buildVector() throws IOException {
     Map<String, Integer> expectedVector = new HashMap<>();
-    expectedVector.put("environment", 0);
     expectedVector.put("blm", 1);
-    expectedVector.put("volunteer", 0);
-    expectedVector.put("education", 0);
-    expectedVector.put("LGBTQ+", 0);
-    expectedVector.put("healthcare", 0);
-    expectedVector.put("civics", 0);
-    expectedVector.put("fundraiser", 0);
-    expectedVector.put("activism", 0);
-    expectedVector.put("item donation", 0);
 
     Entity entity = UserServletTest.createBlmProtestEvent();
     assertEquals(expectedVector, Interactions.buildVectorForEvent(entity));

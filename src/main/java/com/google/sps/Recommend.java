@@ -39,27 +39,10 @@ import org.apache.spark.sql.SparkSession;
 
 public class Recommend {
 
+  private static final Logger LOGGER = Logger.getLogger(Recommend.class.getName());
+
   // keep and use up to this many Interaction entities
   private static final int UPPER_LIMIT = 5_000_000;
-
-  // multipliers for score calculation
-  private static final float ZERO = 0.1f;
-  private static final double NO_INTERACTION = 1.5;
-  private static final double ALREADY_SAVED = 0.6;
-  // for distance score calculation
-  private static final double DISTANCE_BASE = 1.04;
-  private static final int INVALID_DISTANCE = 1000;
-
-  // comparator to sort doubles in descending order
-  private static final Comparator<Double> SCORE_DESCENDING =
-      new Comparator<Double>() {
-        @Override
-        public int compare(Double a, Double b) {
-          return Double.compare(b, a);
-        }
-      };
-
-  private static final Logger LOGGER = Logger.getLogger(Recommend.class.getName());
 
   private static SparkSession spark;
   private static DatastoreService datastore;
@@ -73,6 +56,23 @@ public class Recommend {
   private static Map<Long, Map<String, Integer>> eventInfo = new HashMap<>();
   private static Map<String, String> userLocations = new HashMap<>();
   private static Map<Long, String> eventLocations = new HashMap<>();
+
+  // multipliers for score calculation
+  public static final float ZERO = 0.1f;
+  public static final double NO_INTERACTION = 1.5;
+  public static final double ALREADY_SAVED = 0.6;
+  // for distance score calculation
+  public static final double DISTANCE_BASE = 1.04;
+  public static final int INVALID_DISTANCE = 1000;
+
+  // comparator to sort doubles in descending order
+  public static final Comparator<Double> SCORE_DESCENDING =
+      new Comparator<Double>() {
+        @Override
+        public int compare(Double a, Double b) {
+          return Double.compare(b, a);
+        }
+      };
 
   /** Initializes the SparkSession, datastore, and other necessary items. */
   private static void init() {
@@ -232,14 +232,14 @@ public class Recommend {
   /**
    * Computes cumulative total score for given user and event.
    *
-   * @param predScore Base score to apply multipliers to.
+   * @param baseScore Base score to apply multipliers to.
    */
-  private static double computeScore(String userId, long eventId, float predScore) {
+  public static double computeScore(String userId, long eventId, float baseScore) {
     double dotProduct = Interactions.dotProduct(userPrefs.get(userId), eventInfo.get(eventId));
     if (Math.abs(dotProduct) < ZERO) {
       dotProduct = ZERO;
     }
-    double totalScore = dotProduct * predScore;
+    double totalScore = dotProduct * baseScore;
     // adjust scaling based on user's past interaction with event
     Entity interactionEntity = Interactions.hasInteraction(userId, eventId);
     if (interactionEntity == null) {
@@ -266,14 +266,14 @@ public class Recommend {
   }
 
   /** Adds event and its calculated score to rankings map. */
-  private static void addToRanking(long eventId, double score, Map<Double, Long> userTopRecs) {
-    while (userTopRecs.containsKey(score)) {
-      Long otherWithScore = userTopRecs.get(score);
-      userTopRecs.put(score, eventId);
+  public static void addToRanking(long eventId, double score, Map<Double, Long> ranking) {
+    while (ranking.containsKey(score)) {
+      Long otherWithScore = ranking.get(score);
+      ranking.put(score, eventId);
       eventId = otherWithScore;
       score -= 0.001;
     }
-    userTopRecs.put(score, eventId);
+    ranking.put(score, eventId);
   }
 
   /** Stores a recommendation datastore entry for the given user ID. */
