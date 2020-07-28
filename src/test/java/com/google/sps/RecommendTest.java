@@ -32,7 +32,6 @@ import com.google.appengine.api.datastore.Query;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import com.google.sps.servlets.RecommendServlet;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -214,7 +213,9 @@ public final class RecommendTest {
       // recommendations should not exist yet
     }
 
-    List<Entity> results = callGet("test@example.com");
+    HomePageObject resultObj = callPost("test@example.com");
+    List<Entity> results = resultObj.recommendations;
+    assertEquals("false", resultObj.surveyStatus);
     assertEquals(5, results.size());
     for (int i = 0; i < results.size() - 1; i++) {
       assertTrue(results.get(i).getKey().getId() < results.get(i + 1).getKey().getId());
@@ -253,7 +254,9 @@ public final class RecommendTest {
     String events = "src/test/data/events-2.csv";
     addInfoToDatastore(events, users, ratings);
     Recommend.calculateRecommend();
-    List<Entity> results = callGet("test@example.com");
+    HomePageObject resultObj = callPost("test@example.com");
+    List<Entity> results = resultObj.recommendations;
+    assertEquals("false", resultObj.surveyStatus);
     assertEquals(5, results.size());
     for (int i = 0; i < results.size() - 1; i++) {
       assertTrue(results.get(i).getKey().getId() < results.get(i + 1).getKey().getId());
@@ -279,7 +282,9 @@ public final class RecommendTest {
     Entity recEntity = new Entity("Recommendation", "test@example.com");
     ds.put(recEntity);
 
-    List<Entity> results = callGet("test@example.com");
+    HomePageObject resultObj = callPost("test@example.com");
+    List<Entity> results = resultObj.recommendations;
+    assertEquals("false", resultObj.surveyStatus);
     assertEquals(5, results.size());
     for (int i = 0; i < results.size() - 1; i++) {
       assertTrue(results.get(i).getKey().getId() < results.get(i + 1).getKey().getId());
@@ -293,21 +298,48 @@ public final class RecommendTest {
     String events = "src/test/data/events-2.csv";
     addInfoToDatastore(events, users, ratings);
 
-    List<Entity> results = callGet("");
+    HomePageObject resultObj = callPost("");
+    List<Entity> results = resultObj.recommendations;
     assertEquals(0, results.size());
+    assertEquals("false", resultObj.surveyStatus);
 
     DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
     assertEquals(0, ds.prepare(new Query("User")).countEntities(withLimit(250)));
-    results = callGet("test@example.com");
+    resultObj = callPost("test@example.com");
+    results = resultObj.recommendations;
     assertEquals(0, results.size());
+    assertEquals("false", resultObj.surveyStatus);
 
     assertEquals(1, ds.prepare(new Query("User")).countEntities(withLimit(250)));
-    results = callGet("test@example.com");
+    resultObj = callPost("test@example.com");
+    results = resultObj.recommendations;
     assertEquals(0, results.size());
+    assertEquals("false", resultObj.surveyStatus);
+  }
+
+  @Test
+  public void completedSurvey() throws IOException {
+    PowerMockito.mockStatic(Utils.class);
+    PowerMockito.when(Utils.getDistance("90045", "90045")).thenReturn(0);
+    PowerMockito.when(Utils.getDistance("90045", "90301")).thenReturn(10);
+    PowerMockito.when(Utils.getDistance("90045", "90305")).thenReturn(20);
+    PowerMockito.when(Utils.getDistance("90045", "90047")).thenReturn(30);
+    PowerMockito.when(Utils.getDistance("90045", "90003")).thenReturn(40);
+
+    String users = "src/test/data/users-2.csv";
+    String ratings = "src/test/data/ratings-none.csv";
+    String events = "src/test/data/events-2.csv";
+    addInfoToDatastore(events, users, ratings);
+    InteractionsTest.takeSurvey("test@example.com");
+
+    HomePageObject resultObj = callPost("test@example.com");
+    List<Entity> results = resultObj.recommendations;
+    assertEquals("true", resultObj.surveyStatus);
+    assertEquals(5, results.size());
   }
 
   /** Performs the GET request to retrieve event recommendations. */
-  private static List<Entity> callGet(String dummyToken) throws IOException {
+  private static HomePageObject callPost(String dummyToken) throws IOException {
     HttpServletRequest request = mock(HttpServletRequest.class);
     TestingUtil.mockFirebase(request, dummyToken);
 
@@ -317,9 +349,13 @@ public final class RecommendTest {
     when(response.getWriter()).thenReturn(writer);
 
     RecommendServlet recServlet = new RecommendServlet();
-    recServlet.doGet(request, response);
+    recServlet.doPost(request, response);
     out.flush();
-    return gson.fromJson(out.toString(), new TypeToken<ArrayList<Entity>>() {}.getType());
+    return gson.fromJson(out.toString(), HomePageObject.class);
+    // HomePageObject obj = gson.fromJson(out.toString(), HomePageObject.class);
+
+    // return obj.recommendations;
+    // return gson.fromJson(obj.recommendations, new TypeToken<ArrayList<Entity>>() {}.getType());
   }
 
   /** Adds all info from ratings CSV, users CSV, events CSV to datastore. */
@@ -436,6 +472,12 @@ public final class RecommendTest {
       userEntity = null;
     }
     return userEntity;
+  }
+
+  /** The HomePageObject used by the recommend servlet. */
+  private static class HomePageObject {
+    private List<Entity> recommendations;
+    private String surveyStatus;
   }
 
   private static class Interaction {
