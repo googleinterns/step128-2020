@@ -512,7 +512,7 @@ async function getEvents(events, index, option) {
     } else if (option == createdEvents) {
       // edit an event
       attendeeCountContainerElement.className = 'edit-unsave-event';
-      const editEventLink = document.createElement('a');
+      const editEventLink = document.createElement('div');
       editEventLink.innerText = 'Edit this event';
       editEventLink.setAttribute('onclick', 'openEditForm("' +
         event.eventKey + '")');
