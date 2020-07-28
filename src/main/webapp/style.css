@@ -435,10 +435,6 @@ input[type=time] {
   color: #6e9eeb;
 }
 
-.edit-unsave-event div {
-  height: 25px;
-}
-
 .attendee-count {
   font-weight: bold;
 }
@@ -480,7 +476,7 @@ input[type=time] {
 }
 
 .event-display-image {
-  background-color: #93c47d;
+  background-color: whitesmoke;
   flex: 0 0 auto;
   height: 400px;
   width: 100%;
