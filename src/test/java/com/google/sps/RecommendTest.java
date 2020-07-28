@@ -18,6 +18,8 @@ import static com.google.appengine.api.datastore.FetchOptions.Builder.withLimit;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
@@ -29,14 +31,21 @@ import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import com.google.sps.servlets.RecommendServlet;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -44,16 +53,19 @@ import org.junit.runner.RunWith;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 /** Tests to make sure that the Recommendation class works as intended. */
 @PowerMockIgnore({"okhttp3.*", "org.apache.hadoop.*", "javax.*", "org.apache.xerces.*"})
+@SuppressStaticInitializationFor({"com.google.sps.Firebase"})
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(Utils.class)
+@PrepareForTest({Utils.class, Firebase.class})
 public final class RecommendTest {
   private static final Map<Long, Event> EVENT_INFO = new HashMap<>();
   private static final LocalServiceTestHelper helper =
       new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
+  private static final Gson gson = new Gson();
 
   /** Sets up the datastore helper. */
   @Before
@@ -113,7 +125,7 @@ public final class RecommendTest {
 
     // check that recommendation ranks distances correctly
     String users = "src/test/data/users-2.csv";
-    String ratings = "src/test/data/ratings-2.csv";
+    String ratings = "src/test/data/ratings-none.csv";
     String events = "src/test/data/events-2.csv";
     addInfoToDatastore(events, users, ratings);
     Recommend.calculateRecommend();
@@ -153,7 +165,7 @@ public final class RecommendTest {
 
     // test that ranks are calculated correctly when interactions and locations are held constant
     String users = "src/test/data/users-3.csv";
-    String ratings = "src/test/data/ratings-2.csv";
+    String ratings = "src/test/data/ratings-none.csv";
     String events = "src/test/data/events-3.csv";
     addInfoToDatastore(events, users, ratings);
     Recommend.calculateRecommend();
@@ -176,6 +188,112 @@ public final class RecommendTest {
     } catch (EntityNotFoundException e) {
       fail();
     }
+  }
+
+  @Test
+  public void noRecommendationsServlet() throws IOException {
+    // similar to rankFromDistance(), but performed through the servlet instead
+    PowerMockito.mockStatic(Utils.class);
+    PowerMockito.when(Utils.getDistance("90045", "90045")).thenReturn(0);
+    PowerMockito.when(Utils.getDistance("90045", "90301")).thenReturn(10);
+    PowerMockito.when(Utils.getDistance("90045", "90305")).thenReturn(20);
+    PowerMockito.when(Utils.getDistance("90045", "90047")).thenReturn(30);
+    PowerMockito.when(Utils.getDistance("90045", "90003")).thenReturn(40);
+
+    String users = "src/test/data/users-2.csv";
+    String ratings = "src/test/data/ratings-none.csv";
+    String events = "src/test/data/events-2.csv";
+    addInfoToDatastore(events, users, ratings);
+    Key recKey = KeyFactory.createKey("Recommendation", "test@example.com");
+    DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
+
+    try {
+      Entity user = ds.get(recKey);
+      fail();
+    } catch (EntityNotFoundException e) {
+      // recommendations should not exist yet
+    }
+
+    List<Entity> results = callGet("test@example.com");
+    assertEquals(5, results.size());
+    for (int i = 0; i < results.size() - 1; i++) {
+      assertTrue(results.get(i).getKey().getId() < results.get(i + 1).getKey().getId());
+    }
+
+    // check that new recommendation item has been created correctly
+    try {
+      Entity user = ds.get(recKey);
+      List<Long> userRecs = (List<Long>) user.getProperty("recs");
+      for (int i = 0; i < userRecs.size() - 1; i++) {
+        assertTrue(userRecs.get(i) < userRecs.get(i + 1));
+      }
+    } catch (EntityNotFoundException e) {
+      fail();
+    }
+  }
+
+  @Test
+  public void returnRecommendations() throws IOException {
+    // similar to rankFromDistance(), but performed through the servlet instead
+    PowerMockito.mockStatic(Utils.class);
+    PowerMockito.when(Utils.getDistance("90045", "90045")).thenReturn(0);
+    PowerMockito.when(Utils.getDistance("90045", "90301")).thenReturn(10);
+    PowerMockito.when(Utils.getDistance("90045", "90305")).thenReturn(20);
+    PowerMockito.when(Utils.getDistance("90045", "90047")).thenReturn(30);
+    PowerMockito.when(Utils.getDistance("90045", "90003")).thenReturn(40);
+    PowerMockito.when(Utils.getDistance("90003", "90003")).thenReturn(0);
+    PowerMockito.when(Utils.getDistance("90003", "90047")).thenReturn(10);
+    PowerMockito.when(Utils.getDistance("90003", "90305")).thenReturn(20);
+    PowerMockito.when(Utils.getDistance("90003", "90301")).thenReturn(30);
+    PowerMockito.when(Utils.getDistance("90003", "90045")).thenReturn(40);
+
+    // check that recommendation ranks distances correctly
+    String users = "src/test/data/users-2.csv";
+    String ratings = "src/test/data/ratings-none.csv";
+    String events = "src/test/data/events-2.csv";
+    addInfoToDatastore(events, users, ratings);
+    Recommend.calculateRecommend();
+    List<Entity> results = callGet("test@example.com");
+    assertEquals(5, results.size());
+    for (int i = 0; i < results.size() - 1; i++) {
+      assertTrue(results.get(i).getKey().getId() < results.get(i + 1).getKey().getId());
+    }
+  }
+
+  @Test
+  public void noResults() throws IOException {
+    String users = "src/test/data/users-none.csv";
+    String ratings = "src/test/data/ratings-none.csv";
+    String events = "src/test/data/events-2.csv";
+    addInfoToDatastore(events, users, ratings);
+
+    List<Entity> results = callGet("");
+    assertEquals(0, results.size());
+
+    DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
+    assertEquals(0, ds.prepare(new Query("User")).countEntities(withLimit(250)));
+    results = callGet("test@example.com");
+    assertEquals(0, results.size());
+
+    assertEquals(1, ds.prepare(new Query("User")).countEntities(withLimit(250)));
+    results = callGet("test@example.com");
+    assertEquals(0, results.size());
+  }
+
+  /** Performs the GET request to retrieve event recommendations. */
+  private static List<Entity> callGet(String dummyToken) throws IOException {
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    TestingUtil.mockFirebase(request, dummyToken);
+
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    StringWriter out = new StringWriter();
+    PrintWriter writer = new PrintWriter(out);
+    when(response.getWriter()).thenReturn(writer);
+
+    RecommendServlet recServlet = new RecommendServlet();
+    recServlet.doGet(request, response);
+    out.flush();
+    return gson.fromJson(out.toString(), new TypeToken<ArrayList<Entity>>() {}.getType());
   }
 
   /** Adds all info from ratings CSV, users CSV, events CSV to datastore. */
