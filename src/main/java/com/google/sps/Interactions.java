@@ -70,9 +70,6 @@ public class Interactions {
       if (userEntity.hasProperty(param)) {
         float score = Float.parseFloat(userEntity.getProperty(param).toString());
         result.put(param, score);
-      } else {
-        // default val is 0
-        result.put(param, 0.0f);
       }
     }
     return result;
@@ -91,8 +88,6 @@ public class Interactions {
     for (String field : metrics) {
       if (tags.contains(field)) {
         eventMetrics.put(field, 1);
-      } else {
-        eventMetrics.put(field, 0);
       }
     }
     return eventMetrics;

@@ -18,6 +18,7 @@ import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.EntityNotFoundException;
+import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.PreparedQuery;
@@ -48,7 +49,7 @@ public class UserServlet extends HttpServlet {
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
     Gson gson = new Gson();
-    List<Entity> events = new ArrayList<>();
+    List<Entity> events;
     response.setContentType("application/json");
 
     String userToken = request.getParameter("userToken");
@@ -78,12 +79,9 @@ public class UserServlet extends HttpServlet {
       // return a list with all created events
       PreparedQuery results =
           datastore.prepare(new Query("Event").addSort("eventName", SortDirection.ASCENDING));
-      for (Entity e : results.asIterable()) {
-        events.add(e);
-      }
+      events = new ArrayList<Entity>(results.asList(FetchOptions.Builder.withLimit(50)));
     }
     // TODO: apply any sort params
-    Collections.sort(events, Utils.ORDER_BY_NAME);
     response.getWriter().println(gson.toJson(events));
   }
 
@@ -103,21 +101,21 @@ public class UserServlet extends HttpServlet {
         }
       }
     }
+    Collections.sort(results, Utils.ORDER_BY_NAME);
     return results;
   }
 
   // returns a list of all events created by a user (identified by firebaseID)
   private List<Entity> getHandleCreated(String userID) {
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    List<Entity> results = new ArrayList<>();
-
     Query query =
         new Query("Event")
+            .addSort("eventName", SortDirection.ASCENDING)
             .setFilter(new Query.FilterPredicate("creator", Query.FilterOperator.EQUAL, userID));
     PreparedQuery queried = datastore.prepare(query);
-    for (Entity e : queried.asIterable()) {
-      results.add(e);
-    }
+    List<Entity> results =
+        new ArrayList<Entity>(queried.asList(FetchOptions.Builder.withDefaults()));
+
     return results;
   }
 

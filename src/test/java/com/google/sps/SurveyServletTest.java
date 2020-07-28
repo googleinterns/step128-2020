@@ -26,6 +26,8 @@ import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestC
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.sps.servlets.SurveyServlet;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.junit.After;
@@ -56,6 +58,38 @@ public final class SurveyServletTest {
   @After
   public void tearDown() {
     helper.tearDown();
+  }
+
+  @Test
+  public void noSurvey() throws IOException {
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    String email = "test@example.com";
+    TestingUtil.mockFirebase(request, email);
+
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    StringWriter out = new StringWriter();
+    PrintWriter writer = new PrintWriter(out);
+    when(response.getWriter()).thenReturn(writer);
+
+    testSurveyServlet.doGet(request, response);
+    out.flush();
+    assertEquals("false", out.toString());
+  }
+
+  @Test
+  public void checkSurveyNotLoggedIn() throws IOException {
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpServletResponse response = mock(HttpServletResponse.class);
+
+    String email = "";
+    TestingUtil.mockFirebase(request, email);
+    StringWriter out = new StringWriter();
+    PrintWriter writer = new PrintWriter(out);
+    when(response.getWriter()).thenReturn(writer);
+
+    testSurveyServlet.doGet(request, response);
+    out.flush();
+    assertEquals("false", out.toString());
   }
 
   @Test
@@ -93,6 +127,15 @@ public final class SurveyServletTest {
     assertEquals("4", userEntity.getProperty("fundraiser"));
     assertEquals("4", userEntity.getProperty("activism"));
     assertEquals("4", userEntity.getProperty("item donation"));
+    assertEquals("true", userEntity.getProperty("surveyCompleted"));
+
+    StringWriter out = new StringWriter();
+    PrintWriter writer = new PrintWriter(out);
+    when(response.getWriter()).thenReturn(writer);
+
+    testSurveyServlet.doGet(request, response);
+    out.flush();
+    assertEquals("true", out.toString());
   }
 
   @Test
@@ -112,17 +155,24 @@ public final class SurveyServletTest {
 
     try {
       testSurveyServlet.doPost(request, response);
-
       fail();
     } catch (IOException expected) {
 
       // make sure nothing has been posted
       DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
       Entity userEntity = ds.prepare(new Query("User")).asSingleEntity();
-
+      assertEquals(null, userEntity.getProperty("surveyCompleted"));
       for (String param : Interactions.metrics) {
         assertEquals(false, userEntity.hasProperty(param));
       }
+
+      StringWriter out = new StringWriter();
+      PrintWriter writer = new PrintWriter(out);
+      when(response.getWriter()).thenReturn(writer);
+
+      testSurveyServlet.doGet(request, response);
+      out.flush();
+      assertEquals("false", out.toString());
     }
   }
 
