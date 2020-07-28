@@ -46,6 +46,7 @@ function initializeFirebase() {
  * @param {function} doAfter used to specify actions during checkLogin()
  */
 function loadActions(doAfter) {
+  console.log('OP begun loading');
   const styleSheetElement = document.getElementById('style');
   if (window.innerWidth >= window.innerHeight) {
     styleSheetElement.href = '/style.css';
@@ -54,6 +55,7 @@ function loadActions(doAfter) {
   }
 
   initializeFirebase();
+  console.log('OP firebase initialized');
 
   firebase.auth().onAuthStateChanged(function(user) {
     if (user) {
@@ -65,6 +67,7 @@ function loadActions(doAfter) {
       doAfter();
     }
     generateNavBar();
+    console.log('OP navbar generated');
   }, function(error) {
     console.log(error);
   });
