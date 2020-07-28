@@ -32,7 +32,6 @@ public class DeleteEventServlet extends HttpServlet {
 
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    String userToken = request.getParameter("userToken");
     String eventKeyString = request.getParameter("event");
     Key keyRequested = KeyFactory.stringToKey(eventKeyString);
 
