@@ -664,6 +664,57 @@ input[type=time] {
   margin-top: 0;
 }
 
+/* modal */
+.modal {
+  background-color: rgb(0,0,0);
+  background-color: rgba(0,0,0,0.4);
+  display: none;
+  height: 100%;
+  left: 0;
+  overflow: auto;
+  padding-top: 20vh;
+  position: fixed;
+  text-align: center;
+  top: 0;
+  width: 100%;
+  z-index: 1;
+}
+
+.modal-content {
+  background-color: #fefefe;
+  border: 1px solid #888;
+  margin: auto;
+  padding: 20px;
+  width: 80%;
+}
+
+.modal-content input[type=text] {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  height: 2em;
+  padding: 10px;
+  width: 20em;
+}
+
+.modal-content input[type=submit] {
+  height: 2em;
+  margin: 5px;
+}
+
+.close {
+  color: #aaaaaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: #000;
+  cursor: pointer;
+  text-decoration: none;
+}
+
 /* tag colors */
 .blm {
   background-color: black;

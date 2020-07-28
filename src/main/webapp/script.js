@@ -671,7 +671,7 @@ async function getSearchDistanceSettings() {
         document.createTextNode(' '));
 
     const changeLinkElement = document.createElement('a');
-    changeLinkElement.setAttribute('href', 'javascript:changeLocation()');
+    changeLinkElement.setAttribute('href', 'javascript:displayChangeLocationPrompt()');
     changeLinkElement.innerText = 'Change Location';
     locationSettingsElement.appendChild(changeLinkElement);
 
@@ -812,8 +812,41 @@ async function checkLocation() {
 /**
  * Prompts the user to enter their zipcode to change their location
  */
-function changeLocation() {
-  const location = prompt('Please enter your zipcode:', '');
+function displayChangeLocationPrompt() {
+  const modal = document.getElementById('changeLocationModal');
+  const xButton = document.getElementsByClassName('close')[0];
+  const content = document.getElementsByClassName('modal-content')[0];
+
+  modal.style.display = 'block';
+
+  const text = document.getElementById('modal-text');
+  const submit = document.getElementById('modal-submit');
+
+  submit.onclick = function() {
+    changeLocation(text.value);
+    modal.style.display = 'none';
+    text.value = '';
+  }
+
+  // When the user clicks on <span> (x), close the modal
+  xButton.onclick = function() {
+    modal.style.display = 'none';
+  }
+
+  // When the user clicks anywhere outside of the modal, close it
+  window.onclick = function(event) {
+    if (event.target == modal) {
+      modal.style.display = 'none';
+    }
+  }
+}
+
+/**
+ * Changes a user's location to a given value
+ *
+ * @param {String} location location user's location will be set to
+ */
+function changeLocation(location) {
   if (location == null || location == '') {
     console.log('incomplete');
   } else {
@@ -1206,7 +1239,7 @@ function submitSurvey() {
     for (let i = 0; i < surveyResponses.length; i++) {
       const score = surveyResponses[i];
       if (score < 0) {
-        alert('Please finish the survey first!');
+        displayPrompt();
         return;
       } else {
         params.append(tagsAll[i], score);
@@ -1218,6 +1251,29 @@ function submitSurvey() {
           window.location.href = '/index.html';
         });
   });
+}
+
+/**
+ * Generic function to display a modal.
+ */
+function displayPrompt() {
+  const modal = document.getElementById('modal');
+  const xButton = document.getElementsByClassName('close')[0];
+  const content = document.getElementsByClassName('modal-content')[0];
+
+  modal.style.display = 'block';
+
+  // When the user clicks on <span> (x), close the modal
+  xButton.onclick = function() {
+    modal.style.display = 'none';
+  }
+
+  // When the user clicks anywhere outside of the modal, close it
+  window.onclick = function(event) {
+    if (event.target == modal) {
+      modal.style.display = 'none';
+    }
+  }
 }
 
 /* **********************************************************************
