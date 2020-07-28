@@ -801,9 +801,9 @@ function changeLocation() {
  */
 function createVerification() {
   if (loggedIn) {
-    window.location.href = "/create-event-form.html";  
+    window.location.href = '/create-event-form.html';
   } else {
-    alert("Please login before creating an event.");
+    alert('Please login before creating an event.');
     window.location.href = '/login.html';
   }
 }
