@@ -131,9 +131,9 @@ public class EventServlet extends HttpServlet {
     List<String> tagsList = gson.fromJson(tagsStr, new TypeToken<ArrayList<String>>() {}.getType());
     eventEntity.setIndexedProperty("tags", tagsList);
 
-    Map<String, Integer> keywords = KeywordSearchServlet.getKeywords(eventName, eventDescription);
-    eventEntity.setProperty("keywords", KeywordSearchServlet.getKeywordMapKeys(keywords));
-    eventEntity.setProperty("keywordsValues", KeywordSearchServlet.getKeywordMapValues(keywords));
+    Map<String, Integer> keywords = SearchServlet.getKeywords(eventName, eventDescription);
+    eventEntity.setProperty("keywords", SearchServlet.getKeywordMapKeys(keywords));
+    eventEntity.setProperty("keywordsValues", SearchServlet.getKeywordMapValues(keywords));
 
     return eventEntity;
   }
