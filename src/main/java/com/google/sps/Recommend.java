@@ -277,7 +277,7 @@ public class Recommend {
   }
 
   /** Stores a recommendation datastore entry for the given user ID. */
-  public static void saveRecsToDatastore(String userId, Map<Double, Long> recs) {
+  private static void saveRecsToDatastore(String userId, Map<Double, Long> recs) {
     List<Long> recsList = new ArrayList<>();
     for (Double score : recs.keySet()) {
       recsList.add(recs.get(score));
