@@ -44,14 +44,6 @@ public class Recommend {
   // keep and use up to this many Interaction entities
   private static final int UPPER_LIMIT = 5_000_000;
 
-  // multipliers for score calculation
-  private static final float ZERO = 0.1f;
-  private static final double NO_INTERACTION = 1.5;
-  private static final double ALREADY_SAVED = 0.6;
-  // for distance score calculation
-  private static final double DISTANCE_BASE = 1.04;
-  private static final int INVALID_DISTANCE = 1000;
-
   private static SparkSession spark;
   private static DatastoreService datastore;
 
@@ -64,6 +56,14 @@ public class Recommend {
   private static Map<Long, Map<String, Integer>> eventInfo = new HashMap<>();
   private static Map<String, String> userLocations = new HashMap<>();
   private static Map<Long, String> eventLocations = new HashMap<>();
+
+  // multipliers for score calculation
+  public static final float ZERO = 0.1f;
+  public static final double NO_INTERACTION = 1.5;
+  public static final double ALREADY_SAVED = 0.6;
+  // for distance score calculation
+  public static final double DISTANCE_BASE = 1.04;
+  public static final int INVALID_DISTANCE = 1000;
 
   // comparator to sort doubles in descending order
   public static final Comparator<Double> SCORE_DESCENDING =
