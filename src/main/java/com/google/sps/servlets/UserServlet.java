@@ -49,7 +49,7 @@ public class UserServlet extends HttpServlet {
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
     Gson gson = new Gson();
-    List<Entity> events = new ArrayList<>();
+    List<Entity> events;
     response.setContentType("application/json");
 
     String userToken = request.getParameter("userToken");
@@ -79,12 +79,9 @@ public class UserServlet extends HttpServlet {
       // return a list with all created events
       PreparedQuery results =
           datastore.prepare(new Query("Event").addSort("eventName", SortDirection.ASCENDING));
-      for (Entity e : results.asIterable()) {
-        events.add(e);
-      }
+      events = new ArrayList<Entity>(results.asList(FetchOptions.Builder.withLimit(50)));
     }
     // TODO: apply any sort params
-    Collections.sort(events, Utils.ORDER_BY_NAME);
     response.getWriter().println(gson.toJson(events));
   }
 
@@ -104,15 +101,16 @@ public class UserServlet extends HttpServlet {
         }
       }
     }
+    Collections.sort(results, Utils.ORDER_BY_NAME);
     return results;
   }
 
   // returns a list of all events created by a user (identified by firebaseID)
   private List<Entity> getHandleCreated(String userID) {
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-
     Query query =
         new Query("Event")
+            .addSort("eventName", SortDirection.ASCENDING)
             .setFilter(new Query.FilterPredicate("creator", Query.FilterOperator.EQUAL, userID));
     PreparedQuery queried = datastore.prepare(query);
     List<Entity> results =
