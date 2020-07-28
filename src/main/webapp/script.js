@@ -377,31 +377,7 @@ async function getEvents(events, index, option) {
   eventListElement.innerHTML = '';
 
   if (events.length == 0) {
-    const noElementsBox = document.createElement('div');
-    noElementsBox.className = 'no-events';
-    const noElementsText = document.createElement('div');
-    noElementsText.className = 'no-events-text';
-    if (option == recommendedForYou) {
-      noElementsText.innerText = 'No events to recommend yet! Click the ' +
-          '‘Find’ tab to find some events that interest you.';
-    } else if (option == recommendNotLoggedIn) {
-      noElementsText.innerText = 'Please login first to get event ' +
-          'recommendations!';
-    } else if (option == savedEvents) {
-      noElementsText.innerText = 'You have not saved any events yet! ' +
-          'Click the ‘Find’ tab to to find an event you would like to save.';
-    } else if (option == createdEvents) {
-      noElementsText.innerText = 'You have not created an event yet! ' +
-          'Click the ‘Create’ tab to create your first event.';
-    } else if (option == searchResults) {
-      noElementsText.innerText = 'No events found matching your desired tags.';
-    } else {
-      noElementsText.innerText = 'No events to see! Create one now.';
-    }
-
-    noElementsBox.appendChild(noElementsText);
-    eventListElement.appendChild(noElementsBox);
-    return;
+    displayEmptyEventList(index, option);
   }
 
   events.forEach(function(event) {
@@ -592,6 +568,41 @@ async function getEvents(events, index, option) {
   //       </div>
   //     </div>
   //   </div>
+}
+
+function displayEmptyEventList(index, option) {
+  const eventListElements =
+      document.getElementsByClassName('event-list-container');
+  if (index == null || index >= eventListElements.length) {
+    index = 0;
+  }
+  const eventListElement = eventListElements[index];
+  eventListElement.innerHTML = '';
+
+  const noElementsBox = document.createElement('div');
+  noElementsBox.className = 'no-events';
+  const noElementsText = document.createElement('div');
+  noElementsText.className = 'no-events-text';
+  if (option == recommendedForYou) {
+    noElementsText.innerText = 'No events to recommend yet! Click the ' +
+        '‘Find’ tab to find some events that interest you.';
+  } else if (option == recommendNotLoggedIn) {
+    noElementsText.innerText = 'Please login first to get event ' +
+        'recommendations!';
+  } else if (option == savedEvents) {
+    noElementsText.innerText = 'You have not saved any events yet! ' +
+        'Click the ‘Find’ tab to to find an event you would like to save.';
+  } else if (option == createdEvents) {
+    noElementsText.innerText = 'You have not created an event yet! ' +
+        'Click the ‘Create’ tab to create your first event.';
+  } else if (option == searchResults) {
+    noElementsText.innerText = 'No events found matching your desired tags.';
+  } else {
+    noElementsText.innerText = 'No events to see! Create one now.';
+  }
+
+  noElementsBox.appendChild(noElementsText);
+  eventListElement.appendChild(noElementsBox);
 }
 
 /**
@@ -1028,11 +1039,11 @@ function getRecommendedEvents() {
   } else {
     getEvents([], 0, recommendNotLoggedIn);
   }
-  getSearchDistanceSettings();
+  // getSearchDistanceSettings();
 }
 
 function displayHomePage(surveyStatus, recommendations) {
-  if(recommendations.length ==0 && surveyStatus == 'false') {
+  if(recommendations.length == 0 && surveyStatus == 'false') {
     // display big survey prompt
     getEvents([], 0, recommendNotLoggedIn);
   } else if (recommendations.length == 0 && surveyStatus == 'true') {
