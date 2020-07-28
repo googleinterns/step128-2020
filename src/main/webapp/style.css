@@ -435,6 +435,10 @@ input[type=time] {
   color: #6e9eeb;
 }
 
+.edit-unsave-event div {
+  height: 25px;
+}
+
 .attendee-count {
   font-weight: bold;
 }
