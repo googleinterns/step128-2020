@@ -628,8 +628,9 @@ input[type=time] {
 }
 
 #firebaseui-auth-container {
-    text-align: center;
-    padding-top: 10%;
+  height: 70vh;
+  padding-top: 10%;
+  text-align: center;
 }
 
 .firebaseui-idp-list>.firebaseui-list-item {
