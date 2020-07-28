@@ -111,9 +111,9 @@ public class RecommendServlet extends HttpServlet {
             events.add(eventsWithId.get(eventId));
             eventIds.add(eventId);
           }
-          Entity recEntity = new Entity("Recommendation", userID);
-          recEntity.setProperty("recs", eventIds);
-          datastore.put(recEntity);
+          recommendations = new Entity("Recommendation", userID);
+          recommendations.setProperty("recs", eventIds);
+          datastore.put(recommendations);
         }
       } catch (EntityNotFoundException userNotFound) {
         // user does not exist (no data)
