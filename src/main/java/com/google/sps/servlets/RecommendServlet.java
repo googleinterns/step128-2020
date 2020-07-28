@@ -123,7 +123,59 @@ public class RecommendServlet extends HttpServlet {
     response.getWriter().println(gson.toJson(events));
   }
 
-  /** Computes the correlation between a user and an event. */
+  private List<Long> computeRecommendations(String userId) {
+      Entity userEntity = null;
+    try {
+        userEntity = datastore.get(KeyFactory.createKey("User", userId));
+    } catch (EntityNotFoundException exception) {
+        // user does not exist (no data)
+        userEntity = Utils.makeUserEntity(userID, true);
+        return new ArrayList<>();
+    }
+    Map<String, Float> userParams = Interactions.buildVectorForUser(userEntity);
+    if(userParams.size() == 0) {
+        // no data
+        return new ArrayList<>();
+    }
+    String userLocation = null;
+    if (userEntity.hasProperty("location")) {
+        userLocation = userEntity.getProperty("location").toString();
+    }
+    Map<Double, Long> bestEvents = new TreeMap<>(Recommend.SCORE_DESCENDING);
+    Map<Long, Entity> eventsWithId = new HashMap<>();
+    for (Entity event : datastore.prepare(new Query("Event")).asIterable()) {
+    long eventId = event.getKey().getId();
+    eventsWithId.put(eventId, event);
+    Map<String, Integer> eventParams = Interactions.buildVectorForEvent(event);
+    String eventLocation = event.getProperty("address").toString();
+    double eventScore =
+        computeScore(userID, userParams, userLocation, eventId, eventParams, eventLocation);
+    Recommend.addToRanking(eventId, eventScore, bestEvents);
+    }
+    List<Long> eventIds = new ArrayList<>();
+    Iterator<Double> itr = bestEvents.keySet().iterator();
+    int count = 0;
+    while (itr.hasNext() && count < EVENTS_LIMIT) {
+    count++;
+    long eventId = bestEvents.get(itr.next());
+    events.add(eventsWithId.get(eventId));
+    eventIds.add(eventId);
+    }
+    recommendations = new Entity("Recommendation", userID);
+    recommendations.setProperty("recs", eventIds);
+    datastore.put(recommendations);
+  }
+
+  /** 
+   * Computes the correlation between a user and an event.
+   *
+   * @param userId Identifier for the user as used in datastore.
+   * @param userParams User interest for various metrics according to interaction history.
+   * @param userLocation Recorded location for the user
+   * @param eventId Identifier for the event as used in datastore.
+   * @param eventParams Map containing event tag information.
+   * @param eventLocation Address of the event.
+   */
   private static double computeScore(
       String userId,
       Map<String, Float> userParams,
@@ -131,6 +183,8 @@ public class RecommendServlet extends HttpServlet {
       long eventId,
       Map<String, Integer> eventParams,
       String eventLocation) {
+
+    // evaluate correlation between event tags and user interaction history
     double totalScore = Interactions.dotProduct(userParams, eventParams);
     if (Math.abs(totalScore) < Recommend.ZERO) {
       totalScore = Recommend.ZERO;
@@ -145,6 +199,7 @@ public class RecommendServlet extends HttpServlet {
         totalScore *= Recommend.ALREADY_SAVED;
       }
     }
+    // adjust scaling based on event distance to user
     if (userLocation != null && eventLocation != null) {
       int distance = Utils.getDistance(userLocation, eventLocation);
       if (distance < 0) {
