@@ -29,7 +29,7 @@ import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.google.sps.servlets.EventServlet;
-import com.google.sps.servlets.KeywordSearchServlet;
+import com.google.sps.servlets.SearchServlet;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -250,9 +250,9 @@ public final class EventServletTest {
 
     // Retrieve keywords and set keyword properties.
     Map<String, Integer> keywords =
-        KeywordSearchServlet.getKeywords("Lake Clean Up", "We're cleaning up the lake");
-    entity.setProperty("keywords", KeywordSearchServlet.getKeywordMapKeys(keywords));
-    entity.setProperty("keywordsValues", KeywordSearchServlet.getKeywordMapValues(keywords));
+        SearchServlet.getKeywords("Lake Clean Up", "We're cleaning up the lake");
+    entity.setProperty("keywords", SearchServlet.getKeywordMapKeys(keywords));
+    entity.setProperty("keywordsValues", SearchServlet.getKeywordMapValues(keywords));
 
     return entity;
   }

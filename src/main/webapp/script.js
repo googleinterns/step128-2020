@@ -1095,6 +1095,17 @@ function searchLoadActions() {
   checkLocation().then(() => {
     updateTagBox();
     getSearchDistanceSettings();
+
+    // Add a listener to make the search query submit
+    // when the user presses the enter key
+    const enterKeyCode = 13;
+    const searchBarElement = document.getElementsByClassName('search-bar')[0];
+    searchBarElement.addEventListener('keyup', function(event) {
+      if (event.keyCode === enterKeyCode) {
+        event.preventDefault();
+        document.getElementById('go-button').click();
+      }
+    });
   });
 }
 
@@ -1120,10 +1131,7 @@ function search() {
   getLocation().then((location) => {
     url += '&searchDistance=' + searchDistance + '&location=' + location;
 
-    let servlet = 'ksearch';
-    if (searchBarElement.value == '') {
-      servlet = 'search';
-    }
+    const servlet = 'search';
 
     fetch('/' + servlet + url).then((response) => response.json())
         .then(function(responseJson) {

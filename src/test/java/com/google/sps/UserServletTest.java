@@ -33,7 +33,7 @@ import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.google.sps.servlets.EventServlet;
-import com.google.sps.servlets.KeywordSearchServlet;
+import com.google.sps.servlets.SearchServlet;
 import com.google.sps.servlets.UserServlet;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -577,8 +577,8 @@ public final class UserServletTest {
     entity.setIndexedProperty("tags", tagsList);
 
     Map<String, Integer> keywords =
-        KeywordSearchServlet.getKeywords("Lake Clean Up", "We're cleaning up the lake");
-    entity.setProperty("keywords", KeywordSearchServlet.getKeywordMapKeys(keywords));
+        SearchServlet.getKeywords("Lake Clean Up", "We're cleaning up the lake");
+    entity.setProperty("keywords", SearchServlet.getKeywordMapKeys(keywords));
     entity.setProperty("keywordsValues", new ArrayList<Double>(Arrays.asList(3.0, 3.0, 2.0)));
 
     return entity;
@@ -608,8 +608,8 @@ public final class UserServletTest {
     entity.setIndexedProperty("tags", tagsList);
 
     Map<String, Integer> keywords =
-        KeywordSearchServlet.getKeywords("BLM Protest", "Fight for racial justice!");
-    entity.setProperty("keywords", KeywordSearchServlet.getKeywordMapKeys(keywords));
+        SearchServlet.getKeywords("BLM Protest", "Fight for racial justice!");
+    entity.setProperty("keywords", SearchServlet.getKeywordMapKeys(keywords));
     entity.setProperty("keywordsValues", new ArrayList<Double>(Arrays.asList(2.0, 2.0)));
 
     return entity;
@@ -639,8 +639,8 @@ public final class UserServletTest {
     entity.setIndexedProperty("tags", tagsList);
 
     Map<String, Integer> keywords =
-        KeywordSearchServlet.getKeywords("Book Drive", "Let's donate books for kids");
-    entity.setProperty("keywords", KeywordSearchServlet.getKeywordMapKeys(keywords));
+        SearchServlet.getKeywords("Book Drive", "Let's donate books for kids");
+    entity.setProperty("keywords", SearchServlet.getKeywordMapKeys(keywords));
     entity.setProperty("keywordsValues", new ArrayList<Double>(Arrays.asList(2.0, 2.0)));
 
     return entity;

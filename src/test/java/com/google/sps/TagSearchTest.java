@@ -20,12 +20,6 @@ import static org.mockito.Mockito.*;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.FetchOptions;
-import com.google.appengine.api.datastore.PreparedQuery;
-import com.google.appengine.api.datastore.Query;
-import com.google.appengine.api.datastore.Query.Filter;
-import com.google.appengine.api.datastore.Query.FilterOperator;
-import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.maps.model.LatLng;
@@ -50,7 +44,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @PowerMockIgnore("okhttp3.*")
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({Utils.class})
-public final class SearchTagsServletTest {
+public final class TagSearchTest {
   private final LocalServiceTestHelper helper =
       new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
   private SearchServlet testSearchServlet;
@@ -88,7 +82,7 @@ public final class SearchTagsServletTest {
     // Single tag events
     for (int i = 0; i < 5; i++) {
       Entity e = new Entity("Event");
-      e.setProperty("eventName", i);
+      e.setProperty("eventName", "" + i);
       e.setIndexedProperty("tags", new ArrayList<String>(Arrays.asList(possibleTags.get(i))));
       e.setProperty("address", possibleLocations.get(i));
       e.setProperty("distance", possibleDistances.get(i));
@@ -97,7 +91,7 @@ public final class SearchTagsServletTest {
     // Double tag events
     for (int i = 5; i < 9; i++) {
       Entity e = new Entity("Event");
-      e.setProperty("eventName", i);
+      e.setProperty("eventName", "" + i);
       e.setIndexedProperty(
           "tags",
           new ArrayList<String>(Arrays.asList(possibleTags.get(i - 5), possibleTags.get(i - 4))));
@@ -108,7 +102,7 @@ public final class SearchTagsServletTest {
     // Triple tag events
     for (int i = 9; i < 11; i++) {
       Entity e = new Entity("Event");
-      e.setProperty("eventName", i);
+      e.setProperty("eventName", "" + i);
       e.setIndexedProperty(
           "tags",
           new ArrayList<String>(
@@ -154,8 +148,8 @@ public final class SearchTagsServletTest {
 
     // Get the events we were expecting the search to return
     // from the datastore
-    List<Integer> ids = new ArrayList<Integer>(Arrays.asList(0, 5, 9));
-    List<Entity> events = fetchIDsFromDataStore(ids);
+    List<String> ids = new ArrayList<String>(Arrays.asList("0", "5", "9"));
+    List<Entity> events = TestingUtil.fetchIDsFromDataStore(ids);
 
     // Convert expected events to JSON for comparison
     String expected = Utils.convertToJson(events);
@@ -186,13 +180,14 @@ public final class SearchTagsServletTest {
 
     // Get the events we were expecting the search to return
     // from the datastore and assemble our expected
-    List<Integer> ids = new ArrayList<Integer>(Arrays.asList(0, 1, 2, 5, 6, 7, 9, 10));
-    List<Entity> events = fetchIDsFromDataStore(ids);
+    List<String> ids =
+        new ArrayList<String>(Arrays.asList("0", "1", "2", "5", "6", "7", "9", "10"));
+    List<Entity> events = TestingUtil.fetchIDsFromDataStore(ids);
 
     // Order results like sorting algorithm will
     List<String> desiredOrder =
         new ArrayList<String>(Arrays.asList("9", "5", "6", "10", "0", "1", "2", "7"));
-    List<Entity> orderedEvents = orderEvents(desiredOrder, events);
+    List<Entity> orderedEvents = TestingUtil.orderEvents(desiredOrder, events);
 
     // Convert expected events to JSON for comparison
     String expected = Utils.convertToJson(orderedEvents);
@@ -223,12 +218,12 @@ public final class SearchTagsServletTest {
 
     // Get the events we were expecting the search to return
     // from the datastore and assemble our expected
-    List<Integer> ids = new ArrayList<Integer>(Arrays.asList(9));
-    List<Entity> events = fetchIDsFromDataStore(ids);
+    List<String> ids = new ArrayList<String>(Arrays.asList("9"));
+    List<Entity> events = TestingUtil.fetchIDsFromDataStore(ids);
 
     // Order results like sorting algorithm will
     List<String> desiredOrder = new ArrayList<String>(Arrays.asList("9"));
-    List<Entity> orderedEvents = orderEvents(desiredOrder, events);
+    List<Entity> orderedEvents = TestingUtil.orderEvents(desiredOrder, events);
 
     // Convert expected events to JSON for comparison
     String expected = Utils.convertToJson(orderedEvents);
@@ -259,12 +254,12 @@ public final class SearchTagsServletTest {
 
     // Get the events we were expecting the search to return
     // from the datastore and assemble our expected
-    List<Integer> ids = new ArrayList<Integer>(Arrays.asList(2, 6, 7, 9, 10));
-    List<Entity> events = fetchIDsFromDataStore(ids);
+    List<String> ids = new ArrayList<String>(Arrays.asList("2", "6", "7", "9", "10"));
+    List<Entity> events = TestingUtil.fetchIDsFromDataStore(ids);
 
     // Order results like sorting algorithm will
     List<String> desiredOrder = new ArrayList<String>(Arrays.asList("2", "6", "7", "9", "10"));
-    List<Entity> orderedEvents = orderEvents(desiredOrder, events);
+    List<Entity> orderedEvents = TestingUtil.orderEvents(desiredOrder, events);
 
     // Convert expected events to JSON for comparison
     String expected = Utils.convertToJson(orderedEvents);
@@ -295,21 +290,20 @@ public final class SearchTagsServletTest {
 
     // Get the events we were expecting the search to return
     // from the datastore and assemble our expected
-    List<Integer> ids = new ArrayList<Integer>(Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11));
-    List<Entity> events = fetchIDsFromDataStore(ids);
+    List<String> ids =
+        new ArrayList<String>(
+            Arrays.asList("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11"));
+    List<Entity> events = TestingUtil.fetchIDsFromDataStore(ids);
 
     // Order results like sorting algorithm will
     List<String> desiredOrder =
         new ArrayList<String>(
             Arrays.asList("0", "5", "9", "1", "6", "10", "2", "7", "11", "3", "8", "4"));
-    List<Entity> orderedEvents = orderEvents(desiredOrder, events);
+    List<Entity> orderedEvents = TestingUtil.orderEvents(desiredOrder, events);
 
     // Convert expected events to JSON for comparison
     String expected = Utils.convertToJson(orderedEvents);
-    System.out.println("Expected:");
-    for (Entity e : orderedEvents) {
-      System.out.println(e.getProperty("eventName"));
-    }
+
     assertEquals(expected, result);
   }
 
@@ -336,41 +330,6 @@ public final class SearchTagsServletTest {
     List<String> tagListB = new ArrayList<String>(Arrays.asList("environment", "blm", "volunteer"));
     double result = testSearchServlet.intersection(tagListA, tagListB);
     assertEquals(0.0, result, 0.0002);
-  }
-
-  /**
-   * Orders a list of events by a given order.
-   *
-   * @param desiredOrder List containing the eventNames in the order they should be in
-   * @param events List of events to be ordered
-   * @return List containing the events ordered
-   */
-  public static List<Entity> orderEvents(List<String> desiredOrder, List<Entity> events) {
-    List<Entity> orderedEvents = new ArrayList<Entity>();
-    for (int o = 0; o < desiredOrder.size(); o++) {
-      for (int i = 0; i < events.size(); i++) {
-        if (events.get(i).getProperty("eventName").toString().equals(desiredOrder.get(o))) {
-          orderedEvents.add(events.get(i));
-        }
-      }
-    }
-    return orderedEvents;
-  }
-
-  /**
-   * Fetches entities from the datastore according to ids.
-   *
-   * @param ids List containing the ids of the entities to fetch from the Datastore
-   * @return List containing the requested entities
-   */
-  public static List<Entity> fetchIDsFromDataStore(List<Integer> ids) {
-    Filter idFilter = new FilterPredicate("eventName", FilterOperator.IN, ids);
-    Query query = new Query("Event").setFilter(idFilter);
-    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    PreparedQuery results = datastore.prepare(query);
-    List<Entity> events =
-        new ArrayList<Entity>(results.asList(FetchOptions.Builder.withDefaults()));
-    return events;
   }
 
   /** Sets up and executes mocking for the Utils class. */
