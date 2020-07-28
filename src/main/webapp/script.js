@@ -846,22 +846,27 @@ function toggleTagEvent(tag) {
  * and display error.
  */
 function verifyTags() {
-  if (tagsSelected.length > 0) {
-    // Convert tags selected array into string
-    const jsonArray = JSON.stringify(tagsSelected);
-    const tags = createHiddenInput(jsonArray);
+  if (loggedIn) {
+    if (tagsSelected.length > 0) {
+      // Convert tags selected array into string
+      const jsonArray = JSON.stringify(tagsSelected);
+      const tags = createHiddenInput(jsonArray);
 
-    // Add string of tags and userToken to form for submission
-    document.getElementById('eventform').appendChild(tags);
+      // Add string of tags and userToken to form for submission
+      document.getElementById('eventform').appendChild(tags);
 
-    document.eventform.submit();
-    tagsSelected.splice(0, tagsSelected.length);
+      document.eventform.submit();
+      tagsSelected.splice(0, tagsSelected.length);
+    } else {
+      // Display error and prevent from sumbission
+      const tagBoxError = document.getElementById('tags-label');
+      tagBoxError.style.borderStyle = 'solid';
+      tagBoxError.style.borderColor = 'red';
+      event.preventDefault();
+    }
   } else {
-    // Display error and prevent from sumbission
-    const tagBoxError = document.getElementById('tags-label');
-    tagBoxError.style.borderStyle = 'solid';
-    tagBoxError.style.borderColor = 'red';
-    event.preventDefault();
+    alert('Please login before creating an event.');
+    window.location.href = '/login.html';
   }
 }
 
