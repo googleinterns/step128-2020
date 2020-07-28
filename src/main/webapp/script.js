@@ -938,9 +938,8 @@ function confirmUser() {
           .then((response) => response.json())
           .then((access) => {
             if (access == true) {
-              updateTagBox();
-              loadFields();
               populateToken();
+              loadFields();
             } else {
               window.location.href = '/access-denied.html';
             }
