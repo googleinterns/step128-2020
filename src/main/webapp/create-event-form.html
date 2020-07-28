@@ -10,11 +10,11 @@
     <script src="https://www.gstatic.com/firebasejs/7.15.1/firebase-analytics.js"></script>
     <script src="script.js"></script>
   </head>
-  <body onload="loadActions(updateTagBox)">
+  <body onload="loadActions(populateToken)">
     <div class="header"></div>
     <div class="form-container">
       <h1>Let's create an event.</h1>
-      <form action="/event" method="POST" id="eventform" name="eventform">
+      <form action="/event" method="POST" id="eventform" name="eventform" onsubmit="verifyTags();">
         <div class="form-section">
           <div class="form-label">
             <label for="event-name">*Event name:</label>
@@ -91,17 +91,13 @@
           </div>
         </div>
         <div class="form-section">
-          <div class="form-label">
-            <label for="cover-photo">Cover photo:</label>
-          </div>
+          <div class="form-label"></div>
           <div class="form-input">
-            <input type="file" id="cover-photo" name="cover-photo"><br>
+            <input type="hidden" id="cover-photo" name="cover-photo"><br>
           </div>
         </div>
         <div class="form-buttons">
-          <a href="javascript:verifyTags()">
-            <img src="images/submit-button.svg" alt="Submit button.">
-          </a>
+          <input type=image src="images/submit-button.svg" alt="Submit button.">
           <div class="divider"></div>
           <a href="/index.html">
             <img src="images/cancel-button.svg" alt="Cancel button.">
