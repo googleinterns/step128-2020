@@ -1,0 +1,6 @@
+eventId,eventName,eventDescription,location,tags,additional tags
+1,park clean up,We're going to be picking up trash at [park name] to reduce the littering in the area.,90045,environment-volunteer,
+2,environment conference,Volunteer at the annual environment conference! Helpers are needed to set up and facilitate the event.,90301,environment-volunteer,
+3,environment march,Climate change must be addressed! Come and let your voice be heard.,90305,environment,activism
+4,book drive,Do you have any used books? Please donate them to [library name]! A box will be set up in the lobby for drop-off.,90047,education,donations
+5,school fundraiser event,We're students from [school name] and will be selling [stuff]. Please drop by and support our school.,90003,education,fundraiser

@@ -99,14 +99,27 @@ public class Interactions {
   }
 
   /** utility method that computes the dot product between two vectors. */
-  public static float dotProduct(Map<String, Float> v1, Map<String, Integer> v2) {
-    float result = 0;
+  public static double dotProduct(Map<String, Float> v1, Map<String, Integer> v2) {
+    double result = 0;
+    double v1Magnitude = 0f;
     for (String field : v1.keySet()) {
+      float v1Val = v1.get(field);
       if (v2.containsKey(field)) {
-        result += v2.get(field) * v1.get(field);
+        result += v2.get(field) * v1Val;
       }
+      v1Magnitude += v1Val * v1Val;
     }
-    return result;
+    double v2Magnitude = 0;
+    for (String field : v2.keySet()) {
+      int v2Val = v2.get(field);
+      v2Magnitude += v2Val * v2Val;
+    }
+    v1Magnitude = Math.pow(v1Magnitude, .5);
+    v2Magnitude = Math.pow(v2Magnitude, .5);
+    if (v1Magnitude == 0.0 || v2Magnitude == 0.0) {
+      return 0.0;
+    }
+    return result / (v1Magnitude * v2Magnitude);
   }
 
   /**
