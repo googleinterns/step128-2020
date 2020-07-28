@@ -336,7 +336,7 @@ h1 {
   max-width: 700px;
   text-align: center;
   top: 50vh;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, -35%);
   width: 70%;
 }
 
@@ -450,7 +450,6 @@ h1 {
 .event-item {
   align-items: center;
   cursor: pointer;
-  height: 60vw;
   display: flex;
   flex-flow: column nowrap;
   font-size: 3.3vw;
@@ -513,26 +512,25 @@ h1 {
 
 .event-item-footer {
   /* bottom part of item info with attendee count and tags */
-  align-items: center;
+  align-items: left;
   display: flex;
-  flex-flow: row nowrap;
+  flex-flow: column wrap;
   font-size: 3vw;
   justify-content: space-between;
   min-height: 15vw;
+  margin-top: 2.5vh;
 }
 
 .edit-unsave-event {
   color: #6e9eeb;
   cursor: pointer;
+  font-size: 1.25em;
   font-weight: bold;
+  line-height: 3;
 }
 
 .edit-unsave-event a:link, .edit-unsave-event a:visited {
   color: #6e9eeb;
-}
-
-.edit-unsave-event div {
-  font-size: 1.25em;
 }
 
 .attendee-count {
@@ -541,8 +539,7 @@ h1 {
 
 .event-item .tags-container {
   display: flex;
-  flex-flow: column nowrap;
-  justify-content: space-around;
+  flex-flow: row wrap;
 }
 
 /* individual event display */
