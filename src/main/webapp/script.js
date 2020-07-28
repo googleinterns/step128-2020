@@ -803,7 +803,7 @@ function createVerification() {
   if (loggedIn) {
     window.location.href = "/create-event-form.html";  
   } else {
-    alert("Please login before creating an event.")
+    alert("Please login before creating an event.");
     window.location.href = '/login.html';
   }
 }
@@ -813,14 +813,14 @@ function createVerification() {
  */
 function populateToken() {
   getUserIDToken().then((token) => {
-        const userToken = createHiddenInput(token);
-        userToken.name = 'userToken';
+    const userToken = createHiddenInput(token);
+    userToken.name = 'userToken';
 
-        // Add userToken to form for submission
-        document.getElementById('eventform').appendChild(userToken);
+    // Add userToken to form for submission
+    document.getElementById('eventform').appendChild(userToken);
 
-        updateTagBox();
-      });
+    updateTagBox();
+  });
 }
 
 /**
