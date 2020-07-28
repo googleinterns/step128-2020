@@ -1075,9 +1075,10 @@ function searchLoadActions() {
 
     // Add a listener to make the search query submit
     // when the user presses the enter key
+    const enterKeyCode = 13;
     const searchBarElement = document.getElementsByClassName('search-bar')[0];
     searchBarElement.addEventListener('keyup', function(event) {
-      if (event.keyCode === 13) {
+      if (event.keyCode === enterKeyCode) {
         event.preventDefault();
         document.getElementById('go-button').click();
       }

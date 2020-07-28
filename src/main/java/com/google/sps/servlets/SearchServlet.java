@@ -126,32 +126,18 @@ public class SearchServlet extends HttpServlet {
       }
     }
 
-    // 0 = neither tag nor keyword
-    // 1 = tag
-    // 2 = keyword
-    // 3 = tag and keyword
-    int searchType = 0;
+    boolean hasTags = true;
+    boolean hasKeywords = true;
     if (searchQueryTags == null || searchTags.get(0).equals("")) {
-      if (searchQueryKeywords == null || searchQueryKeywords.equals("")) {
-        // no tags, no keywords
-        searchType = 0;
-      } else {
-        // no tags, yes keywords
-        searchType = 2;
-      }
-    } else {
-      if (searchQueryKeywords == null || searchQueryKeywords.equals("")) {
-        // yes tags, no keywords
-        searchType = 1;
-      } else {
-        // yes tags, yes keywords
-        searchType = 3;
-      }
+      hasTags = false;
+    }
+    if (searchQueryKeywords == null || searchQueryKeywords.equals("")) {
+      hasKeywords = false;
     }
 
     Query query = null;
     int keywordCount = 0;
-    if (searchType == 2 || searchType == 3) {
+    if (hasKeywords) {
       // List of keywords we're using to search
       searchKeywords = new ArrayList<String>(getSeparateWords(searchQueryKeywords));
       for (int i = 0; i < searchKeywords.size(); i++) {
@@ -162,21 +148,16 @@ public class SearchServlet extends HttpServlet {
     } else {
       searchKeywords = new ArrayList<String>();
     }
-    switch (searchType) {
-      case 1:
-      case 3:
-        Filter tagsFilter = new FilterPredicate("tags", FilterOperator.IN, searchTags);
-        query = new Query("Event").setFilter(tagsFilter);
-        break;
-      case 2:
-        // Filter to check if the event has any of the keywords we're searching for
-        Filter keywordsFilter = new FilterPredicate("keywords", FilterOperator.IN, searchKeywords);
-        query = new Query("Event").setFilter(keywordsFilter);
-        break;
-      case 0:
-      default:
-        query = new Query("Event");
-        break;
+
+    if (!hasTags && hasKeywords) {
+      // Filter to check if the event has any of the keywords we're searching for
+      Filter keywordsFilter = new FilterPredicate("keywords", FilterOperator.IN, searchKeywords);
+      query = new Query("Event").setFilter(keywordsFilter);
+    } else if (hasTags) {
+      Filter tagsFilter = new FilterPredicate("tags", FilterOperator.IN, searchTags);
+      query = new Query("Event").setFilter(tagsFilter);
+    } else {
+      query = new Query("Event");
     }
 
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
@@ -207,20 +188,12 @@ public class SearchServlet extends HttpServlet {
         e -> ((int) e.getProperty("distance")) > cutoff || ((int) e.getProperty("distance")) < 0);
 
     // Sort list depending on the search type
-    switch (searchType) {
-      case 1:
-        Collections.sort(events, TAGS_SEARCH_RELEVANCE);
-        break;
-      case 2:
-        Collections.sort(events, KEYWORD_SEARCH_RELEVANCE);
-        break;
-      case 3:
-        Collections.sort(events, COMBINE_SEARCH_RELEVANCE);
-        break;
-      case 0:
-      default:
-        Collections.sort(events, TAGS_SEARCH_RELEVANCE);
-        break;
+    if (hasTags && hasKeywords) {
+      Collections.sort(events, COMBINE_SEARCH_RELEVANCE);
+    } else if (!hasTags && hasKeywords) {
+      Collections.sort(events, KEYWORD_SEARCH_RELEVANCE);
+    } else {
+      Collections.sort(events, TAGS_SEARCH_RELEVANCE);
     }
 
     // Convert events list to json
