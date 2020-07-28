@@ -28,7 +28,6 @@ import com.google.sps.Recommend;
 import com.google.sps.Utils;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -57,7 +56,7 @@ public class RecommendServlet extends HttpServlet {
       return;
     }
 
-    List<Entity> events = new ArrayList<>();
+    List<Entity> events = null;
     String userID = Firebase.authenticateUser(userToken);
     Key recKey = KeyFactory.createKey("Recommendation", userID);
     Entity recommendations = null;
@@ -66,6 +65,7 @@ public class RecommendServlet extends HttpServlet {
       recommendations = datastore.get(recKey);
       List<Long> recIds = (List<Long>) recommendations.getProperty("recs");
       int limit = EVENTS_LIMIT;
+      events = new ArrayList<>();
       for (int i = 0; i < recIds.size() && i < limit; i++) {
         long eventId = recIds.get(i);
         Key eventKey = KeyFactory.createKey("Event", eventId);
@@ -79,95 +79,77 @@ public class RecommendServlet extends HttpServlet {
     } catch (EntityNotFoundException | NullPointerException exception) {
       // no prev recommendations, compute simple recommendations based on tags and distance only
       LOGGER.info("No recommendations found for " + userID + ". Computing now.");
-      recommendations = new Entity("Recommendation", userID);
-      Key userKey = KeyFactory.createKey("User", userID);
-      Entity userEntity = null;
-      try {
-        userEntity = datastore.get(userKey);
-        Map<String, Float> userParams = Interactions.buildVectorForUser(userEntity);
-        if (userParams.size() > 0) {
-          // compute recommendation if user has data
-          String userLocation = null;
-          if (userEntity.hasProperty("location")) {
-            userLocation = userEntity.getProperty("location").toString();
-          }
-          Map<Double, Long> bestEvents = new TreeMap<>(Recommend.SCORE_DESCENDING);
-          Map<Long, Entity> eventsWithId = new HashMap<>();
-          for (Entity event : datastore.prepare(new Query("Event")).asIterable()) {
-            long eventId = event.getKey().getId();
-            eventsWithId.put(eventId, event);
-            Map<String, Integer> eventParams = Interactions.buildVectorForEvent(event);
-            String eventLocation = event.getProperty("address").toString();
-            double eventScore =
-                computeScore(userID, userParams, userLocation, eventId, eventParams, eventLocation);
-            Recommend.addToRanking(eventId, eventScore, bestEvents);
-          }
-          List<Long> eventIds = new ArrayList<>();
-          Iterator<Double> itr = bestEvents.keySet().iterator();
-          int count = 0;
-          while (itr.hasNext() && count < EVENTS_LIMIT) {
-            count++;
-            long eventId = bestEvents.get(itr.next());
-            events.add(eventsWithId.get(eventId));
-            eventIds.add(eventId);
-          }
-          recommendations = new Entity("Recommendation", userID);
-          recommendations.setProperty("recs", eventIds);
-          datastore.put(recommendations);
-        }
-      } catch (EntityNotFoundException userNotFound) {
-        // user does not exist (no data)
-        userEntity = Utils.makeUserEntity(userID, true);
-      }
+      events = computeRecommendations(userID);
     }
     response.getWriter().println(gson.toJson(events));
   }
 
-  private List<Long> computeRecommendations(String userId) {
-      Entity userEntity = null;
+  /**
+   * Queries events from datastore and evaluates their match against a given user. Returns a list of
+   * highest-scoring event entities after storing their ids to datastore as a Recommendation object
+   * for the user. If there is no user data, returns an empty list.
+   */
+  private List<Entity> computeRecommendations(String userId) {
+    final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    Entity userEntity = null;
+    List<Entity> events = new ArrayList<>();
     try {
-        userEntity = datastore.get(KeyFactory.createKey("User", userId));
+      userEntity = datastore.get(KeyFactory.createKey("User", userId));
     } catch (EntityNotFoundException exception) {
-        // user does not exist (no data)
-        userEntity = Utils.makeUserEntity(userID, true);
-        return new ArrayList<>();
+      // user does not exist (no data)
+      userEntity = Utils.makeUserEntity(userId, true);
+      return events;
     }
     Map<String, Float> userParams = Interactions.buildVectorForUser(userEntity);
-    if(userParams.size() == 0) {
-        // no data
-        return new ArrayList<>();
+    if (userParams.size() == 0) {
+      // no data for this user yet
+      return events;
     }
     String userLocation = null;
     if (userEntity.hasProperty("location")) {
-        userLocation = userEntity.getProperty("location").toString();
+      userLocation = userEntity.getProperty("location").toString();
     }
-    Map<Double, Long> bestEvents = new TreeMap<>(Recommend.SCORE_DESCENDING);
-    Map<Long, Entity> eventsWithId = new HashMap<>();
+    Map<Double, Entity> bestEvents = new TreeMap<>(Recommend.SCORE_DESCENDING);
+    // score and rank events
     for (Entity event : datastore.prepare(new Query("Event")).asIterable()) {
-    long eventId = event.getKey().getId();
-    eventsWithId.put(eventId, event);
-    Map<String, Integer> eventParams = Interactions.buildVectorForEvent(event);
-    String eventLocation = event.getProperty("address").toString();
-    double eventScore =
-        computeScore(userID, userParams, userLocation, eventId, eventParams, eventLocation);
-    Recommend.addToRanking(eventId, eventScore, bestEvents);
+      long eventId = event.getKey().getId();
+      Map<String, Integer> eventParams = Interactions.buildVectorForEvent(event);
+      String eventLocation = event.getProperty("address").toString();
+      double eventScore =
+          computeScore(userId, userParams, userLocation, eventId, eventParams, eventLocation);
+
+      // add item to ranking
+      while (bestEvents.containsKey(eventScore)) {
+        Entity otherWithScore = bestEvents.get(eventScore);
+        bestEvents.put(eventScore, event);
+        event = otherWithScore;
+        eventScore -= 0.001;
+      }
+      bestEvents.put(eventScore, event);
     }
+    // get info from ranking map and return for user
     List<Long> eventIds = new ArrayList<>();
     Iterator<Double> itr = bestEvents.keySet().iterator();
     int count = 0;
     while (itr.hasNext() && count < EVENTS_LIMIT) {
-    count++;
-    long eventId = bestEvents.get(itr.next());
-    events.add(eventsWithId.get(eventId));
-    eventIds.add(eventId);
+      count++;
+      Entity entity = bestEvents.get(itr.next());
+      events.add(entity);
+      eventIds.add(entity.getKey().getId());
     }
-    recommendations = new Entity("Recommendation", userID);
+    // save Recommendation entity for this user in datastore
+    Entity recommendations = new Entity("Recommendation", userId);
     recommendations.setProperty("recs", eventIds);
     datastore.put(recommendations);
+
+    return events;
   }
 
-  /** 
-   * Computes the correlation between a user and an event.
+  /**
+   * Computes the correlation between a user and an event. A dot product is first computed as a
+   * measure of similarity between the user's interests and the event, and then additional
+   * multiplers are added based on the event's proximity to the user and the user's interaction
+   * history with the event.
    *
    * @param userId Identifier for the user as used in datastore.
    * @param userParams User interest for various metrics according to interaction history.
