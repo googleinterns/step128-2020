@@ -70,7 +70,6 @@ function loadActions(doAfter) {
   });
 
   // makes sure tasks are initialized in queue properly
-  fetch('/worker');
 }
 
 let url = '';
@@ -331,7 +330,7 @@ const test = {eventName: 'Beach clean up',
   state: 'CA',
   attendeeCount: 12,
   tags: ['environment'],
-  key: 'aglub19hcHBfaWRyEgsSBUV2ZW50GICAgICAgIAKDA'};
+  eventKey: 'aglub19hcHBfaWRyEgsSBUV2ZW50GICAgICAgIAKDA'};
 const test2 = {eventName: 'Book Drive',
   eventDescription: 'Lorem ipsum dolor sit amet, consectetur elit. ' +
       'Nam efficitur enim quis est mollis blandit. Integer vitae augue. ' +
@@ -345,7 +344,7 @@ const test2 = {eventName: 'Book Drive',
   state: 'CA',
   attendeeCount: 12,
   tags: ['education'],
-  key: 'aglub19hcHBfaWRyEgsSBUV2ZW50GICAgICAgIAKDA'};
+  eventKey: 'aglub19hcHBfaWRyEgsSBUV2ZW50GICAgICAgIAKDA'};
 const dummyEvents = [test, test2];
 const dummyText = 'Suggested for you'; // TODO: come up with variety
 
@@ -1010,33 +1009,43 @@ function deleteEvent() {
 /* **********************************************************************
  * Methods for index.html
  * **********************************************************************/
-
 /**
  * Onload actions for index.html
  * Fetches events from server, calls getEvents with correct options and loads
  * Search distance options
  */
-async function getRecommendedEvents() {
+function getRecommendedEvents() {
   if (loggedIn) {
     getUserIDToken().then((userToken) => {
-      fetch('/user?get=saved&userToken=' + userToken)
+      const params = new URLSearchParams();
+      params.append('userToken', userToken);
+      fetch(new Request('/recommend', {method: 'POST', body: params}))
           .then((response) => response.json())
           .then(function(js) {
-            // TODO: change this fetch call to get recommendations instead
-            getEvents(dummyEvents, 0, recommendedForYou);
+              displayHomePage(js.surveyStatus, js.recommendations);
           });
     });
   } else {
-    fetch('/user')
-        .then((response) => response.json())
-        .then(function(js) {
-          // TODO: change this fetch call to get recommendations instead
-          getEvents(js, 0, recommendNotLoggedIn);
-        });
+    getEvents([], 0, recommendNotLoggedIn);
   }
   getSearchDistanceSettings();
 }
 
+function displayHomePage(surveyStatus, recommendations) {
+  if(recommendations.length ==0 && surveyStatus == 'false') {
+    // display big survey prompt
+    getEvents([], 0, recommendNotLoggedIn);
+  } else if (recommendations.length == 0 && surveyStatus == 'true') {
+    // (no events)
+    getEvents(recommendations, 0, recommendedForYou);
+  } else if (surveyStatus == 'false') {
+    // display small survey prompt
+    getEvents(recommendations, 0, recommendedForYou);
+  } else {
+    // don't show survey prompt
+    getEvents(recommendations, 0, recommendedForYou);
+  }
+}
 
 /* **********************************************************************
  *  Methods for my-events.html
