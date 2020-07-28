@@ -46,9 +46,8 @@ public class RecommendServlet extends HttpServlet {
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    final Gson gson = new Gson();
     response.setContentType("application/json");
+    Gson gson = new Gson();
 
     String userToken = request.getParameter("userToken");
     if (userToken == null || !Firebase.isUserLoggedIn(userToken)) {
@@ -59,29 +58,36 @@ public class RecommendServlet extends HttpServlet {
     List<Entity> events = null;
     String userID = Firebase.authenticateUser(userToken);
     Key recKey = KeyFactory.createKey("Recommendation", userID);
-    Entity recommendations = null;
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     try {
       // find previously computed recommendations
-      recommendations = datastore.get(recKey);
+      Entity recommendations = datastore.get(recKey);
       List<Long> recIds = (List<Long>) recommendations.getProperty("recs");
-      int limit = EVENTS_LIMIT;
-      events = new ArrayList<>();
-      for (int i = 0; i < recIds.size() && i < limit; i++) {
-        long eventId = recIds.get(i);
-        Key eventKey = KeyFactory.createKey("Event", eventId);
-        try {
-          events.add(datastore.get(eventKey));
-        } catch (EntityNotFoundException eventNotFound) {
-          LOGGER.info("event " + eventId + " not found.");
-          limit++;
-        }
-      }
+      events = getFromStoredRecs(recIds);
     } catch (EntityNotFoundException | NullPointerException exception) {
       // no prev recommendations, compute simple recommendations based on tags and distance only
       LOGGER.info("No recommendations found for " + userID + ". Computing now.");
       events = computeRecommendations(userID);
     }
+
     response.getWriter().println(gson.toJson(events));
+  }
+
+  private List<Entity> getFromStoredRecs(List<Long> recIds) {
+    final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    int limit = EVENTS_LIMIT;
+    List<Entity> events = new ArrayList<>();
+    for (int i = 0; i < recIds.size() && i < limit; i++) {
+      long eventId = recIds.get(i);
+      Key eventKey = KeyFactory.createKey("Event", eventId);
+      try {
+        events.add(datastore.get(eventKey));
+      } catch (EntityNotFoundException eventNotFound) {
+        LOGGER.info("event " + eventId + " not found.");
+        limit++;
+      }
+    }
+    return events;
   }
 
   /**
