@@ -844,7 +844,7 @@ function displayChangeLocationPrompt() {
  * @param {String} location location user's location will be set to
  */
 function changeLocation(location) {
-  if (location == null || location == '' || !/^\d+$/.test(location)) {
+  if (location == null || location == '' || !/[\d-]+$/.test(location)) {
     console.log('incomplete');
   } else {
     setCookie('location', location);
