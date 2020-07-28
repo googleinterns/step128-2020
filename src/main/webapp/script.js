@@ -599,6 +599,38 @@ async function getEvents(events, index, option) {
 }
 
 /**
+ * Displays a temporary loading message.
+ *
+ * @param {number} index To identify which event list container
+ *                           on the page to generate the text in.
+ */
+function displayLoading(index) {
+  const eventListElements =
+      document.getElementsByClassName('event-list-container');
+
+  if (index == null || index >= eventListElements.length) {
+    index = 0;
+  }
+
+  // check which stylesheet we are currently using
+  const styleLink = document.getElementById('style').href;
+  const styleName = styleLink.substring(styleLink.lastIndexOf('/') + 1);
+  const onMobile = (styleName.indexOf('mobile') >= 0);
+
+  const eventListElement = eventListElements[index];
+  eventListElement.innerHTML = '';
+
+  const noElementsBox = document.createElement('div');
+  noElementsBox.className = 'no-events';
+  const noElementsText = document.createElement('div');
+  noElementsText.className = 'no-events-text';
+  noElementsText.innerText = 'Loading...';
+  
+  noElementsBox.appendChild(noElementsText);
+  eventListElement.appendChild(noElementsBox);
+}
+
+/**
  * Opens an event via its key name.
  * @param {string} key web safe key string.
  */
@@ -1001,6 +1033,7 @@ function formatTags(tags) {
  * Search distance options
  */
 async function getRecommendedEvents() {
+  displayLoading(0);
   if (loggedIn) {
     getUserIDToken().then((userToken) => {
       fetch('/user?get=saved&userToken=' + userToken)
@@ -1031,6 +1064,8 @@ async function getRecommendedEvents() {
  * with correct options.
  */
 async function getMyEvents() {
+  displayLoading(0);
+  displayLoading(1);
   if (loggedIn) {
     getUserIDToken().then((userToken) => {
       fetch('/user?get=saved&userToken=' + userToken)
@@ -1128,6 +1163,7 @@ function search() {
       servlet = 'search';
     }
 
+    displayLoading(0);
     fetch('/' + servlet + url).then((response) => response.json())
         .then(function(responseJson) {
           getEvents(responseJson, 0, 3);
