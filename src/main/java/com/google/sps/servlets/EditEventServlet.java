@@ -28,6 +28,7 @@ import com.google.sps.Firebase;
 import com.google.sps.Utils;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -168,6 +169,10 @@ public class EditEventServlet extends HttpServlet {
     Gson gson = new Gson();
     String[] tags = gson.fromJson(tagsStr, String[].class);
     event.setIndexedProperty("tags", Arrays.asList(tags));
+
+    Map<String, Integer> keywords = SearchServlet.getKeywords(eventName, eventDescription);
+    event.setProperty("keywords", SearchServlet.getKeywordMapKeys(keywords));
+    event.setProperty("keywordsValues", SearchServlet.getKeywordMapValues(keywords));
 
     return event;
   }
