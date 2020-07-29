@@ -17,6 +17,7 @@ package com.google.sps;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.GeoPt;
 import com.google.gson.Gson;
 import com.google.maps.DistanceMatrixApi;
 import com.google.maps.DistanceMatrixApiRequest;
@@ -106,6 +107,13 @@ public class Utils {
       return null;
     }
     return new LatLng(results[0].geometry.location.lat, results[0].geometry.location.lng);
+  }
+
+  public static GeoPt getGeopt(LatLng location) {
+    if (location == null) {
+      return null;
+    }
+    return new GeoPt((float) location.lat, (float) location.lng);
   }
 
   /**
