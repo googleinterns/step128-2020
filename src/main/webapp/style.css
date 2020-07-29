@@ -262,6 +262,7 @@ h1 {
   font-size: 2em;
   height: 2em;
   padding: 0.5em 1em;
+  width: 200px;
 }
 
 .form-container {
@@ -614,11 +615,16 @@ input[type=time] {
 }
 
 #survey-save {
-  margin-bottom: 10px;
-  align-self: center;
+  background: rgb(245, 245, 245);
+  border: none;
+  border-radius: 10px;
   cursor: pointer;
+  font-family: Google;
+  font-size: 2em;
+  height: 2em;
   margin: 30px;
   object-fit: contain;
+  padding: 0.5em 1em;
   width: 200px;
 }
 
