@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8">
     <title>Unite by STEP</title>
-    <link id="style" rel="stylesheet" href="style.css">
+    <link id="style" rel="stylesheet" href="style-mobile.css">
     <link rel="icon" href="images/step-favicon.svg" type="image/svg" sizes="16x16">
     <script src="https://www.gstatic.com/firebasejs/7.15.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/7.15.1/firebase-auth.js"></script>
@@ -19,12 +19,10 @@
     </div>
     <div class="home-page-content">
       <div class="page-header">
-        <div class="page-header-left">
+        <div class="page-header-left recommend-section">
           <h2>Events Recommended For You</h2>
-          <div id="survey-link">
-            <a href="survey.html">
-                Click here to take our survey for more relevant recommendations.
-            </a>
+          <div id="survey-link-container">
+            <a id="survey-link" href="survey.html"></a>
           </div>
         </div>
       </div>
