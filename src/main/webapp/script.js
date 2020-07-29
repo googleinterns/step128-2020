@@ -1326,16 +1326,16 @@ function loadOptionalFields() {
  * Generates share links for Facebook, Twitter, and mail.
  */
 function loadLinks() {
-  const eventKey = document.getElementById('event-key').value;
   const twitter = document.getElementById('twitter-link');
   const facebook = document.getElementById('fb-link');
   const mail = document.getElementById('mail-link');
   const copy = document.getElementById('copy-link');
+  const key = document.getElementById('event-key').value;
   const name = document.getElementById('name').value;
   const desc = document.getElementById('desc').value;
   const date = document.getElementById('date').value;
   const time = document.getElementById('start').value;
-  const url = 'http://unitebystep.appspot.com/load-event?Event=' + eventKey;
+  const url = 'http://unitebystep.appspot.com/load-event?Event=' + key;
   const br = '%0D%0A';
 
   twitter.href = 'https://twitter.com/share?url=' + url;
@@ -1346,17 +1346,37 @@ function loadLinks() {
    'Description:%20' + desc + br + 'Date:%20' + date + br + 'Time:%20' + time +
     br + br + 'Follow this link to see more details' + br + url;
 
-  copy.onclick = function() {
-    const hiddenText = document.createElement('input');
-    hiddenText.style = 'position: absolute; left: -1000px; top: -1000px';
-    hiddenText.value = url;
+  copy.setAttribute('onclick', 'copyLink("' + url + '")');
+}
 
-    document.body.appendChild(hidden);
-    hiddenText.select();
-    hiddenText.setSelectionRange(0, 99999);
-    document.execCommand("copy");
-    document.body.removeChild(hiddenText);
-  };
+function copyLink(url) {
+  const hiddenText = document.createElement('input');
+  hiddenText.style = 'position: absolute; left: -1000px; top: -1000px';
+  hiddenText.value = url;
+
+  document.body.appendChild(hiddenText);
+  hiddenText.select();
+  hiddenText.setSelectionRange(0, 99999);
+  document.execCommand("copy");
+  document.body.removeChild(hiddenText);
+  displayCopied();
+}
+
+function displayCopied() {
+  const message = document.getElementById('copy-msg');
+  const links = document.getElementById('share-container');
+  if ((message.style.display == 'none') || (message.style.display == '')) {
+    message.style.display = 'block';
+    message.style.height = 'auto';
+    message.style.opacity = 1;
+    links.style.display = 'none';
+    setTimeout(displayCopied, 2000);
+  } else {
+    message.style.display = 'none';
+    message.style.height = 0;
+    message.style.opacity = 0;
+    links.style.display = 'inherit';
+  }
 }
 
 /**

@@ -560,6 +560,20 @@ input[type=time] {
   height: 70px;
 }
 
+.copy-wrapper {
+  height: 10px;
+}
+
+.copy-msg {
+  background-color: #ddd;
+	display: none;
+	height: 10px;
+  opacity: 0;
+	overflow: hidden;
+  position: relative;
+	transition: opacity 0.2, visibility 0.2s;
+}
+
 /* Footer */
 .footer {
   color: #aaa;
