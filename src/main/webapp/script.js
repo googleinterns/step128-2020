@@ -609,11 +609,6 @@ function displayLoading(index) {
     index = 0;
   }
 
-  // check which stylesheet we are currently using
-  const styleLink = document.getElementById('style').href;
-  const styleName = styleLink.substring(styleLink.lastIndexOf('/') + 1);
-  const onMobile = (styleName.indexOf('mobile') >= 0);
-
   const eventListElement = eventListElements[index];
   eventListElement.innerHTML = '';
 
@@ -622,7 +617,7 @@ function displayLoading(index) {
   const noElementsText = document.createElement('div');
   noElementsText.className = 'no-events-text';
   noElementsText.innerText = 'Loading...';
-  
+
   noElementsBox.appendChild(noElementsText);
   eventListElement.appendChild(noElementsBox);
 }
@@ -668,7 +663,8 @@ async function getSearchDistanceSettings() {
         document.createTextNode(' '));
 
     const changeLinkElement = document.createElement('a');
-    changeLinkElement.setAttribute('href', 'javascript:displayChangeLocationPrompt()');
+    changeLinkElement.setAttribute('href',
+        'javascript:displayChangeLocationPrompt()');
     changeLinkElement.innerText = 'Change Location';
     locationSettingsElement.appendChild(changeLinkElement);
 
@@ -812,7 +808,6 @@ async function checkLocation() {
 function displayChangeLocationPrompt() {
   const modal = document.getElementById('changeLocationModal');
   const xButton = document.getElementsByClassName('close')[0];
-  const content = document.getElementsByClassName('modal-content')[0];
 
   modal.style.display = 'block';
 
@@ -823,19 +818,19 @@ function displayChangeLocationPrompt() {
     changeLocation(text.value);
     modal.style.display = 'none';
     text.value = '';
-  }
+  };
 
   // When the user clicks on <span> (x), close the modal
   xButton.onclick = function() {
     modal.style.display = 'none';
-  }
+  };
 
   // When the user clicks anywhere outside of the modal, close it
   window.onclick = function(event) {
     if (event.target == modal) {
       modal.style.display = 'none';
     }
-  }
+  };
 }
 
 /**
@@ -1256,21 +1251,20 @@ function submitSurvey() {
 function displayPrompt() {
   const modal = document.getElementById('modal');
   const xButton = document.getElementsByClassName('close')[0];
-  const content = document.getElementsByClassName('modal-content')[0];
 
   modal.style.display = 'block';
 
   // When the user clicks on <span> (x), close the modal
   xButton.onclick = function() {
     modal.style.display = 'none';
-  }
+  };
 
   // When the user clicks anywhere outside of the modal, close it
   window.onclick = function(event) {
     if (event.target == modal) {
       modal.style.display = 'none';
     }
-  }
+  };
 }
 
 /* **********************************************************************
