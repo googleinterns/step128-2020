@@ -74,6 +74,9 @@
               <a id="mail-link" target="_blank">
                   <img src="images/gmail.svg" alt="Email"/>
               </a>
+              <a id="copy-link" target="_blank">
+                  <img src="images/copy-link.svg" alt="Copy Link"/>
+              </a>
             </div>
           </div>
         </div>
