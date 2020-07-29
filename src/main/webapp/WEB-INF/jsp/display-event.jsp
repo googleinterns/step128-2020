@@ -17,20 +17,16 @@
         <div class="event-display-image"></div>
         <div class = "event-left-text">
           <div class="event-display-header">
-            <input type="hidden" id="name" value='${name}'>
             <div class = "event-display-title">${name}</div>
             <div class="attendee-count-container">
               <span class="attendee-count">${attendees}</span> 
               already attending
             </div>
           </div>
-          <input type="hidden" id="desc" value='${description}'>
           <div id="event-display-description" class="event-display-description">
             ${description}
           </div>
-          <div class="tags-container">Tags:
-            <input type="hidden" id="tags-value" value='${tags}'>
-          </div>
+          <div class="tags-container">Tags: </div>
         </div>
         <div class="footer">
           <p>
@@ -46,9 +42,6 @@
       </div>
       <div class="event-right-details">
         <div class="event-time-location">
-          <input type="hidden" id="date" value='${date}'>
-          <input type="hidden" id="start" value='${start}'>
-          <input type="hidden" id="end-value" value='${end}'>
           <div class="date">
             <p>Date: ${date}</p>
           </div>
@@ -63,23 +56,34 @@
             <br>
           <div class="share-wrapper">
             <h3>Share</h3>
-            <div class="share-container">
-              <input type="hidden" id="event-key" value='${key}'>
-              <a id="twitter-link" target="_blank">
+            <div class="copy-wrapper">
+              <span class="copy-msg" id="copy-msg">Link copied to clipboard</span>
+            </div>
+            <div class="share-container" id="share-container">
+              <a id="twitter-link" class="link" target="_blank">
                   <img src="images/twitter.svg" alt="Twitter"/>
               </a>
-              <a id="fb-link" target="_blank">
+              <a id="fb-link" class="link" target="_blank">
                   <img src="images/facebook.svg" alt="Facebook"/>
               </a>
-              <a id="mail-link" target="_blank">
+              <a id="mail-link" class="link" target="_blank">
                   <img src="images/gmail.svg" alt="Email"/>
               </a>
-              <a id="copy-link" target="_blank">
+              <a id="copy-link" class="link" target="_blank">
                   <img src="images/copy-link.svg" alt="Copy Link"/>
               </a>
             </div>
           </div>
         </div>
+      </div>
+      <div>
+        <input type="hidden" id="name" value='${name}'>
+        <input type="hidden" id="desc" value='${description}'>
+        <input type="hidden" id="date" value='${date}'>
+        <input type="hidden" id="start" value='${start}'>
+        <input type="hidden" id="end-value" value='${end}'>
+        <input type="hidden" id="tags-value" value='${tags}'>
+        <input type="hidden" id="event-key" value='${key}'>
       </div>
     </div>
     <footer>
