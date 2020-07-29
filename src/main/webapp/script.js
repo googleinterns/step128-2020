@@ -568,7 +568,7 @@ async function getEvents(events, index, option) {
 }
 
 /**
- * Method to display an empty event list. 
+ * Method to display an empty event list.
  *
  * @param {number} index To identify which event list container
  *                           on the page to generate.
@@ -1141,6 +1141,11 @@ async function getRecommendedEvents() {
 /**
  * Displays recommendation/survey area on home page based on
  * size of recommenations list and completion status of survey.
+ *
+ * @param {number} surveyStatus Completion status of the survey,
+ *                                  either 'true' or 'false'.
+ * @param {array} recommendations The list of recommended events
+ *                                  returned by the servlet.
  */
 function displayHomePage(surveyStatus, recommendations) {
   if (recommendations.length == 0 && surveyStatus == 'false') {
