@@ -147,6 +147,9 @@ public class Utils {
    * @return the distance in km between the two locations.
    */
   public static int getDistance(String from, String to) {
+    if (from.length() == 0 || to.length() == 0) {
+      return -1;
+    }
     LatLng start = getLatLng(from);
     LatLng end = getLatLng(to);
     if (start == null || end == null) {
