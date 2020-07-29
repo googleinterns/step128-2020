@@ -567,6 +567,13 @@ async function getEvents(events, index, option) {
   //   </div>
 }
 
+/**
+ * Method to display an empty event list. 
+ *
+ * @param {number} index To identify which event list container
+ *                           on the page to generate.
+ * @param {number} option To identify which message to generate.
+ */
 function displayEmptyEventList(index, option) {
   const eventListElements =
       document.getElementsByClassName('event-list-container');
@@ -1123,7 +1130,7 @@ async function getRecommendedEvents() {
       fetch(new Request('/recommend', {method: 'POST', body: params}))
           .then((response) => response.json())
           .then(function(js) {
-              displayHomePage(js.surveyStatus, js.recommendations);
+            displayHomePage(js.surveyStatus, js.recommendations);
           });
     });
   } else {
@@ -1131,18 +1138,22 @@ async function getRecommendedEvents() {
   }
 }
 
+/**
+ * Displays recommendation/survey area on home page based on
+ * size of recommenations list and completion status of survey.
+ */
 function displayHomePage(surveyStatus, recommendations) {
-  if(recommendations.length == 0 && surveyStatus == 'false') {
+  if (recommendations.length == 0 && surveyStatus == 'false') {
     // show big prompt
     const surveyBox = document.getElementById('survey-link-container');
     surveyBox.className = 'no-events big-survey';
     const surveyLink = document.getElementById('survey-link');
     surveyLink.innerText = 'Click here to take our survey for more ' +
         'relevant recommendations, or visit the ‘Find’ tab to look ' +
-        'for events that interest you.'
+        'for events that interest you.';
     // hide event container
-    const container 
-        = document.getElementsByClassName('event-section')[0];
+    const container =
+        document.getElementsByClassName('event-section')[0];
     container.style.display = 'none';
   } else if (recommendations.length == 0 && surveyStatus == 'true') {
     // (no events to show)
@@ -1155,7 +1166,7 @@ function displayHomePage(surveyStatus, recommendations) {
     surveyBox.className = 'small-survey';
     const surveyLink = document.getElementById('survey-link');
     surveyLink.innerText = 'Click here to take our survey for more ' +
-        'relevant recommendations.'
+        'relevant recommendations.';
     getEvents(recommendations, 0, recommendedForYou);
   } else {
     // don't show survey prompt
