@@ -352,10 +352,6 @@ public final class RecommendTest {
     recServlet.doPost(request, response);
     out.flush();
     return gson.fromJson(out.toString(), HomePageObject.class);
-    // HomePageObject obj = gson.fromJson(out.toString(), HomePageObject.class);
-
-    // return obj.recommendations;
-    // return gson.fromJson(obj.recommendations, new TypeToken<ArrayList<Entity>>() {}.getType());
   }
 
   /** Adds all info from ratings CSV, users CSV, events CSV to datastore. */
