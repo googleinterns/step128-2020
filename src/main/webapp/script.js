@@ -1330,13 +1330,20 @@ function loadLinks() {
   const twitter = document.getElementById('twitter-link');
   const facebook = document.getElementById('fb-link');
   const mail = document.getElementById('mail-link');
+  const name = document.getElementById('name').value;
+  const desc = document.getElementById('desc').value;
+  const date = document.getElementById('date').value;
+  const time = document.getElementById('start').value;
   const url = 'http://unitebystep.appspot.com/load-event?Event=' + eventKey;
-  const br = '%0D%0A%0D%0A';
+  const br = '%0D%0A';
 
   twitter.href = 'https://twitter.com/share?url=' + url;
   facebook.href = 'http://www.facebook.com/sharer.php?u=' + url;
   mail.href =
-   'mailto:?subject=Unite by STEP Event&body=Check out this event!' + br + url;
+   'mailto:?subject=Unite by STEP Event:%20' + name +
+   '&body=Check out this event!' + br + br + name + br +
+   'Description:%20' + desc + br + 'Date:%20' + date + br + 'Time:%20' + time +
+    br + br + 'Follow this link to see more details' + br + url;
 }
 
 /**
