@@ -162,8 +162,19 @@ a:link, a:visited {
   padding: 30px;
 }
 
-#survey-link a {
+.small-survey a {
   color: #6e9eeb;
+}
+
+.big-survey {
+  font-weight: bold;
+  height: 15vh;
+}
+
+.big-survey a {
+  color: white;
+  margin: 4vh 5vh;
+  text-align: center;
 }
 
 .page-header {
@@ -182,6 +193,10 @@ a:link, a:visited {
 
 .page-header-left a {
   font-size: 0.79em;
+}
+
+.page-header-left.recommend-section a {
+  font-size: 1em;
 }
 
 .page-header-right {
@@ -437,6 +452,7 @@ h1 {
   background-color: #6e9eeb;
   color: white;
   display: flex;
+  flex-flow: column nowrap;
   font-size: 3vw;
   justify-content: center;
   min-height: 7vw;
