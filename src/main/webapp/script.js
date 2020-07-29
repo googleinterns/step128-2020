@@ -593,6 +593,33 @@ async function getEvents(events, index, option) {
 }
 
 /**
+ * Displays a temporary loading message.
+ *
+ * @param {number} index To identify which event list container
+ *                           on the page to generate the text in.
+ */
+function displayLoading(index) {
+  const eventListElements =
+      document.getElementsByClassName('event-list-container');
+
+  if (index == null || index >= eventListElements.length) {
+    index = 0;
+  }
+
+  const eventListElement = eventListElements[index];
+  eventListElement.innerHTML = '';
+
+  const noElementsBox = document.createElement('div');
+  noElementsBox.className = 'no-events';
+  const noElementsText = document.createElement('div');
+  noElementsText.className = 'no-events-text';
+  noElementsText.innerText = 'Loading...';
+
+  noElementsBox.appendChild(noElementsText);
+  eventListElement.appendChild(noElementsBox);
+}
+
+/**
  * Opens an event via its key name.
  * @param {string} key web safe key string.
  */
@@ -633,7 +660,8 @@ async function getSearchDistanceSettings() {
         document.createTextNode(' '));
 
     const changeLinkElement = document.createElement('a');
-    changeLinkElement.setAttribute('href', 'javascript:changeLocation()');
+    changeLinkElement.setAttribute('href',
+        'javascript:displayChangeLocationPrompt()');
     changeLinkElement.innerText = 'Change Location';
     locationSettingsElement.appendChild(changeLinkElement);
 
@@ -774,9 +802,41 @@ async function checkLocation() {
 /**
  * Prompts the user to enter their zipcode to change their location
  */
-function changeLocation() {
-  const location = prompt('Please enter your zipcode:', '');
-  if (location == null || location == '') {
+function displayChangeLocationPrompt() {
+  const modal = document.getElementById('changeLocationModal');
+  const xButton = document.getElementsByClassName('close')[0];
+
+  modal.style.display = 'block';
+
+  const text = document.getElementById('modal-text');
+  const submit = document.getElementById('modal-submit');
+
+  submit.onclick = function() {
+    changeLocation(text.value);
+    modal.style.display = 'none';
+    text.value = '';
+  };
+
+  // When the user clicks on <span> (x), close the modal
+  xButton.onclick = function() {
+    modal.style.display = 'none';
+  };
+
+  // When the user clicks anywhere outside of the modal, close it
+  window.onclick = function(event) {
+    if (event.target == modal) {
+      modal.style.display = 'none';
+    }
+  };
+}
+
+/**
+ * Changes a user's location to a given value
+ *
+ * @param {String} location location user's location will be set to
+ */
+function changeLocation(location) {
+  if (location == null || location == '' || !/[\d-]+$/.test(location)) {
     console.log('incomplete');
   } else {
     setCookie('location', location);
@@ -1046,6 +1106,7 @@ function deleteEvent() {
  * Search distance options
  */
 async function getRecommendedEvents() {
+  displayLoading(0);
   if (loggedIn) {
     getUserIDToken().then((userToken) => {
       fetch('/user?get=saved&userToken=' + userToken)
@@ -1076,6 +1137,8 @@ async function getRecommendedEvents() {
  * with correct options.
  */
 async function getMyEvents() {
+  displayLoading(0);
+  displayLoading(1);
   if (loggedIn) {
     getUserIDToken().then((userToken) => {
       fetch('/user?get=saved&userToken=' + userToken)
@@ -1181,6 +1244,7 @@ function search() {
 
     const servlet = 'search';
 
+    displayLoading(0);
     fetch('/' + servlet + url).then((response) => response.json())
         .then(function(responseJson) {
           getEvents(responseJson, 0, 3);
@@ -1223,7 +1287,7 @@ function submitSurvey() {
     for (let i = 0; i < surveyResponses.length; i++) {
       const score = surveyResponses[i];
       if (score < 0) {
-        alert('Please finish the survey first!');
+        displayPrompt();
         return;
       } else {
         params.append(tagsAll[i], score);
@@ -1235,6 +1299,28 @@ function submitSurvey() {
           window.location.href = '/index.html';
         });
   });
+}
+
+/**
+ * Generic function to display a modal.
+ */
+function displayPrompt() {
+  const modal = document.getElementById('modal');
+  const xButton = document.getElementsByClassName('close')[0];
+
+  modal.style.display = 'block';
+
+  // When the user clicks on <span> (x), close the modal
+  xButton.onclick = function() {
+    modal.style.display = 'none';
+  };
+
+  // When the user clicks anywhere outside of the modal, close it
+  window.onclick = function(event) {
+    if (event.target == modal) {
+      modal.style.display = 'none';
+    }
+  };
 }
 
 /* **********************************************************************
