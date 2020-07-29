@@ -799,11 +799,21 @@ function changeLocation() {
 /**
  * Ensures users cannot access the create page without being logged in.
  */
-function createVerification() {
+function createButtonVerification() {
   if (loggedIn) {
     window.location.href = '/create-event-form.html';
   } else {
-    alert('Please login before creating an event.');
+    window.location.href = '/login.html';
+  }
+}
+
+/**
+ * Ensures users cannot load the event page without being logged in.
+ */
+function createLoadVerification() {
+  if (loggedIn) {
+    populateToken();
+  } else {
     window.location.href = '/login.html';
   }
 }
@@ -846,27 +856,22 @@ function toggleTagEvent(tag) {
  * and display error.
  */
 function verifyTags() {
-  if (loggedIn) {
-    if (tagsSelected.length > 0) {
-      // Convert tags selected array into string
-      const jsonArray = JSON.stringify(tagsSelected);
-      const tags = createHiddenInput(jsonArray);
+  if (tagsSelected.length > 0) {
+    // Convert tags selected array into string
+    const jsonArray = JSON.stringify(tagsSelected);
+    const tags = createHiddenInput(jsonArray);
 
-      // Add string of tags and userToken to form for submission
-      document.getElementById('eventform').appendChild(tags);
+    // Add string of tags and userToken to form for submission
+    document.getElementById('eventform').appendChild(tags);
 
-      document.eventform.submit();
-      tagsSelected.splice(0, tagsSelected.length);
-    } else {
-      // Display error and prevent from sumbission
-      const tagBoxError = document.getElementById('tags-label');
-      tagBoxError.style.borderStyle = 'solid';
-      tagBoxError.style.borderColor = 'red';
-      event.preventDefault();
-    }
+    document.eventform.submit();
+    tagsSelected.splice(0, tagsSelected.length);
   } else {
-    alert('Please login before creating an event.');
-    window.location.href = '/login.html';
+    // Display error and prevent from sumbission
+    const tagBoxError = document.getElementById('tags-label');
+    tagBoxError.style.borderStyle = 'solid';
+    tagBoxError.style.borderColor = 'red';
+    event.preventDefault();
   }
 }
 
