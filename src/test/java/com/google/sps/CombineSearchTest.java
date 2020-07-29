@@ -265,6 +265,94 @@ public final class CombineSearchTest {
     assertEquals(expected, result);
   }
 
+  @Test
+  public void distanceCutoff50Mi() throws Exception {
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpServletResponse response = mock(HttpServletResponse.class);
+
+    StringWriter sw = new StringWriter();
+    PrintWriter pw = new PrintWriter(sw);
+
+    when(response.getWriter()).thenReturn(pw);
+
+    // Send the request to the servlet with param
+    when(request.getParameter("searchKeywords")).thenReturn("Protest");
+    when(request.getParameter("tags")).thenReturn("environment,blm");
+    when(request.getParameter("location")).thenReturn("Los Angeles, CA");
+    when(request.getParameter("searchDistance")).thenReturn("50");
+
+    mockUtils();
+
+    testSearchServlet.doGet(request, response);
+
+    // Get the JSON response from the server
+    String result = sw.getBuffer().toString().trim();
+
+    // Get the events we were expecting the search to return
+    // from the datastore and assemble our expected
+    List<Integer> ids = new ArrayList<Integer>(Arrays.asList(0, 1, 2, 3));
+    List<Entity> events =
+        TestingUtil.fetchIDsFromDataStore(
+            new ArrayList<String>(
+                Arrays.asList(
+                    "BLM Protest")));
+
+    // Order results like sorting algorithm will
+    List<String> desiredOrder =
+        new ArrayList<String>(
+            Arrays.asList(
+                "BLM Protest"));
+    List<Entity> orderedEvents = TestingUtil.orderEvents(desiredOrder, events);
+
+    // Convert expected events to JSON for comparison
+    String expected = Utils.convertToJson(orderedEvents);
+    assertEquals(expected, result);
+  }
+
+  @Test
+  public void distanceCutoff500mi() throws Exception {
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpServletResponse response = mock(HttpServletResponse.class);
+
+    StringWriter sw = new StringWriter();
+    PrintWriter pw = new PrintWriter(sw);
+
+    when(response.getWriter()).thenReturn(pw);
+
+    // Send the request to the servlet with param
+    when(request.getParameter("searchKeywords")).thenReturn("Protest");
+    when(request.getParameter("tags")).thenReturn("environment,blm");
+    when(request.getParameter("location")).thenReturn("Los Angeles, CA");
+    when(request.getParameter("searchDistance")).thenReturn("500");
+
+    mockUtils();
+
+    testSearchServlet.doGet(request, response);
+
+    // Get the JSON response from the server
+    String result = sw.getBuffer().toString().trim();
+
+    // Get the events we were expecting the search to return
+    // from the datastore and assemble our expected
+    List<Integer> ids = new ArrayList<Integer>(Arrays.asList(0, 1, 2, 3));
+    List<Entity> events =
+        TestingUtil.fetchIDsFromDataStore(
+            new ArrayList<String>(
+                Arrays.asList(
+                    "BLM Protest", "Climate Change Protest", "Beach clean up")));
+
+    // Order results like sorting algorithm will
+    List<String> desiredOrder =
+        new ArrayList<String>(
+            Arrays.asList(
+                "BLM Protest", "Climate Change Protest", "Beach clean up"));
+    List<Entity> orderedEvents = TestingUtil.orderEvents(desiredOrder, events);
+
+    // Convert expected events to JSON for comparison
+    String expected = Utils.convertToJson(orderedEvents);
+    assertEquals(expected, result);
+  }
+
   /** Sets up and executes mocking for the Utils class. */
   private void mockUtils() throws Exception {
     // Mock the functionality of the methods in Utils that require the Google Maps API
