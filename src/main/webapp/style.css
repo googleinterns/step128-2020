@@ -547,6 +547,10 @@ input[type=time] {
   background-color: white;
 }
 
+.share-wrapper {
+  text-align: center;
+}
+
 .share-container {
   margin-top: 5px;
 }
