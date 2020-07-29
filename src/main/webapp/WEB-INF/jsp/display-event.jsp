@@ -17,12 +17,14 @@
         <div class="event-display-image"></div>
         <div class = "event-left-text">
           <div class="event-display-header">
+            <input type="hidden" id="name" value='${name}'>
             <div class = "event-display-title">${name}</div>
             <div class="attendee-count-container">
               <span class="attendee-count">${attendees}</span> 
               already attending
             </div>
           </div>
+          <input type="hidden" id="desc" value='${description}'>
           <div id="event-display-description" class="event-display-description">
             ${description}
           </div>
@@ -44,6 +46,8 @@
       </div>
       <div class="event-right-details">
         <div class="event-time-location">
+          <input type="hidden" id="date" value='${date}'>
+          <input type="hidden" id="start" value='${start}'>
           <input type="hidden" id="end-value" value='${end}'>
           <div class="date">
             <p>Date: ${date}</p>
