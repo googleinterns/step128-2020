@@ -487,12 +487,9 @@ async function getEvents(events, index, option) {
     } else if (option == createdEvents) {
       // edit an event
       attendeeCountContainerElement.className = 'edit-unsave-event';
-      const editEventLink = document.createElement('a');
-      editEventLink.innerText = 'Edit this event';
-      editEventLink.setAttribute('onclick', 'openEditForm("' +
+      attendeeCountContainerElement.innerText = 'Edit this event';
+      attendeeCountContainerElement.setAttribute('onclick', 'openEditForm("' +
         event.eventKey + '")');
-
-      attendeeCountContainerElement.appendChild(editEventLink);
     } else {
       // default: show attendee count
       if (event.attendeeCount == null) {
@@ -606,6 +603,33 @@ function displayEmptyEventList(index, option) {
 }
 
 /**
+ * Displays a temporary loading message.
+ *
+ * @param {number} index To identify which event list container
+ *                           on the page to generate the text in.
+ */
+function displayLoading(index) {
+  const eventListElements =
+      document.getElementsByClassName('event-list-container');
+
+  if (index == null || index >= eventListElements.length) {
+    index = 0;
+  }
+
+  const eventListElement = eventListElements[index];
+  eventListElement.innerHTML = '';
+
+  const noElementsBox = document.createElement('div');
+  noElementsBox.className = 'no-events';
+  const noElementsText = document.createElement('div');
+  noElementsText.className = 'no-events-text';
+  noElementsText.innerText = 'Loading...';
+
+  noElementsBox.appendChild(noElementsText);
+  eventListElement.appendChild(noElementsBox);
+}
+
+/**
  * Opens an event via its key name.
  * @param {string} key web safe key string.
  */
@@ -646,7 +670,8 @@ async function getSearchDistanceSettings() {
         document.createTextNode(' '));
 
     const changeLinkElement = document.createElement('a');
-    changeLinkElement.setAttribute('href', 'javascript:changeLocation()');
+    changeLinkElement.setAttribute('href',
+        'javascript:displayChangeLocationPrompt()');
     changeLinkElement.innerText = 'Change Location';
     locationSettingsElement.appendChild(changeLinkElement);
 
@@ -787,9 +812,41 @@ async function checkLocation() {
 /**
  * Prompts the user to enter their zipcode to change their location
  */
-function changeLocation() {
-  const location = prompt('Please enter your zipcode:', '');
-  if (location == null || location == '') {
+function displayChangeLocationPrompt() {
+  const modal = document.getElementById('changeLocationModal');
+  const xButton = document.getElementsByClassName('close')[0];
+
+  modal.style.display = 'block';
+
+  const text = document.getElementById('modal-text');
+  const submit = document.getElementById('modal-submit');
+
+  submit.onclick = function() {
+    changeLocation(text.value);
+    modal.style.display = 'none';
+    text.value = '';
+  };
+
+  // When the user clicks on <span> (x), close the modal
+  xButton.onclick = function() {
+    modal.style.display = 'none';
+  };
+
+  // When the user clicks anywhere outside of the modal, close it
+  window.onclick = function(event) {
+    if (event.target == modal) {
+      modal.style.display = 'none';
+    }
+  };
+}
+
+/**
+ * Changes a user's location to a given value
+ *
+ * @param {String} location location user's location will be set to
+ */
+function changeLocation(location) {
+  if (location == null || location == '' || !/[\d-]+$/.test(location)) {
     console.log('incomplete');
   } else {
     setCookie('location', location);
@@ -808,6 +865,43 @@ function changeLocation() {
 /* **********************************************************************
  * Methods for create-event-form and edit-event form
  * **********************************************************************/
+
+/**
+ * Ensures users cannot access the create page without being logged in.
+ */
+function createButtonVerification() {
+  if (loggedIn) {
+    window.location.href = '/create-event-form.html';
+  } else {
+    window.location.href = '/login.html';
+  }
+}
+
+/**
+ * Ensures users cannot load the event page without being logged in.
+ */
+function createLoadVerification() {
+  if (loggedIn) {
+    populateToken();
+  } else {
+    window.location.href = '/login.html';
+  }
+}
+
+/**
+ * Populates the user token on page load to prevent NullPointerException.
+ */
+function populateToken() {
+  getUserIDToken().then((token) => {
+    const userToken = createHiddenInput(token);
+    userToken.name = 'userToken';
+
+    // Add userToken to form for submission
+    document.getElementById('eventform').appendChild(userToken);
+
+    updateTagBox();
+  });
+}
 
 /**
  * Inverts the apperance of a selected tag and adds it to the list
@@ -836,17 +930,12 @@ function verifyTags() {
     // Convert tags selected array into string
     const jsonArray = JSON.stringify(tagsSelected);
     const tags = createHiddenInput(jsonArray);
-    getUserIDToken().then((preToken) => {
-      const userToken = createHiddenInput(preToken);
-      userToken.name = 'userToken';
 
-      // Add string of tags and userToken to form for submission
-      document.getElementById('eventform').appendChild(tags);
-      document.getElementById('eventform').appendChild(userToken);
+    // Add string of tags and userToken to form for submission
+    document.getElementById('eventform').appendChild(tags);
 
-      document.eventform.submit();
-      tagsSelected.splice(0, tagsSelected.length);
-    });
+    document.eventform.submit();
+    tagsSelected.splice(0, tagsSelected.length);
   } else {
     // Display error and prevent from sumbission
     const tagBoxError = document.getElementById('tags-label');
@@ -929,7 +1018,7 @@ function confirmUser() {
           .then((response) => response.json())
           .then((access) => {
             if (access == true) {
-              updateTagBox();
+              populateToken();
               loadFields();
             } else {
               window.location.href = '/access-denied.html';
@@ -1025,7 +1114,8 @@ function deleteEvent() {
  * Fetches events from server, calls getEvents with correct options and loads
  * Search distance options
  */
-function getRecommendedEvents() {
+async function getRecommendedEvents() {
+  displayLoading(0);
   if (loggedIn) {
     getUserIDToken().then((userToken) => {
       const params = new URLSearchParams();
@@ -1084,6 +1174,8 @@ function displayHomePage(surveyStatus, recommendations) {
  * with correct options.
  */
 async function getMyEvents() {
+  displayLoading(0);
+  displayLoading(1);
   if (loggedIn) {
     getUserIDToken().then((userToken) => {
       fetch('/user?get=saved&userToken=' + userToken)
@@ -1189,6 +1281,7 @@ function search() {
 
     const servlet = 'search';
 
+    displayLoading(0);
     fetch('/' + servlet + url).then((response) => response.json())
         .then(function(responseJson) {
           getEvents(responseJson, 0, 3);
@@ -1231,7 +1324,7 @@ function submitSurvey() {
     for (let i = 0; i < surveyResponses.length; i++) {
       const score = surveyResponses[i];
       if (score < 0) {
-        alert('Please finish the survey first!');
+        displayPrompt();
         return;
       } else {
         params.append(tagsAll[i], score);
@@ -1243,6 +1336,28 @@ function submitSurvey() {
           window.location.href = '/index.html';
         });
   });
+}
+
+/**
+ * Generic function to display a modal.
+ */
+function displayPrompt() {
+  const modal = document.getElementById('modal');
+  const xButton = document.getElementsByClassName('close')[0];
+
+  modal.style.display = 'block';
+
+  // When the user clicks on <span> (x), close the modal
+  xButton.onclick = function() {
+    modal.style.display = 'none';
+  };
+
+  // When the user clicks anywhere outside of the modal, close it
+  window.onclick = function(event) {
+    if (event.target == modal) {
+      modal.style.display = 'none';
+    }
+  };
 }
 
 /* **********************************************************************

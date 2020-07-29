@@ -14,7 +14,7 @@
     <div class="header"></div>
     <div class="form-container">
       <h1>Edit event</h1>
-      <form action="/edit-event" method="POST" id="eventform" name="eventform">
+      <form action="/edit-event" method="POST" id="eventform" name="eventform" onsubmit="verifyTags();">
         <input type="hidden" id="key" name="key" value="${key}">
         <div class="form-section">
           <div class="form-label">
@@ -107,9 +107,7 @@
           </div>
         </div>
         <div class="form-buttons">
-          <a href="javascript:verifyTags()">
-            <img src="images/submit-button.svg" alt="Submit button.">
-          </a>
+          <input type=image src="images/submit-button.svg" alt="Submit button.">
           <div class="divider"></div>
           <a href="/my-events.html">
             <img src="images/cancel-button.svg" alt="Cancel button.">
