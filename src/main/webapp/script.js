@@ -1307,38 +1307,6 @@ function loadAttendingColor(color) {
   countContainer.className = 'attendee-count ' + color + '-text';
 }
 
-/* **********************************************************************
- * Methods for login.html
- * **********************************************************************/
-
-// FirebaseUI config.
-const uiConfig = {
-  // TODO: replace with URL user came from each time?
-  signInSuccessUrl: '/index.html',
-  signInOptions: [
-    firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-    firebase.auth.EmailAuthProvider.PROVIDER_ID,
-    firebase.auth.FacebookAuthProvider.PROVIDER_ID,
-  ],
-  // tosUrl and privacyPolicyUrl accept either url string or a callback
-  // function.
-  // Terms of service url/callback.
-  tosUrl: '<your-tos-url>',
-  // Privacy policy url/callback.
-  privacyPolicyUrl: function() {
-    // TODO: change privacy policy url
-    window.location.assign('<your-privacy-policy-url>');
-  },
-};
-
-/**
- * Displays the Firebase login ui on the login page
- */
-function initializeFirebaseLogin() {
-  const ui = new firebaseui.auth.AuthUI(firebase.auth());
-  ui.start('#firebaseui-auth-container', uiConfig);
-}
-
 /**
  * Loads optional field end time.
  */
@@ -1406,4 +1374,36 @@ function saveEvent(eventId) {
       window.location.href = '/my-events.html';
     });
   });
+}
+
+/* **********************************************************************
+ * Methods for login.html
+ * **********************************************************************/
+
+// FirebaseUI config.
+const uiConfig = {
+  // TODO: replace with URL user came from each time?
+  signInSuccessUrl: '/index.html',
+  signInOptions: [
+    firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+    firebase.auth.EmailAuthProvider.PROVIDER_ID,
+    firebase.auth.FacebookAuthProvider.PROVIDER_ID,
+  ],
+  // tosUrl and privacyPolicyUrl accept either url string or a callback
+  // function.
+  // Terms of service url/callback.
+  tosUrl: '<your-tos-url>',
+  // Privacy policy url/callback.
+  privacyPolicyUrl: function() {
+    // TODO: change privacy policy url
+    window.location.assign('<your-privacy-policy-url>');
+  },
+};
+
+/**
+ * Displays the Firebase login ui on the login page
+ */
+function initializeFirebaseLogin() {
+  const ui = new firebaseui.auth.AuthUI(firebase.auth());
+  ui.start('#firebaseui-auth-container', uiConfig);
 }
