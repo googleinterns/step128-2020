@@ -1039,21 +1039,38 @@ function getRecommendedEvents() {
   } else {
     getEvents([], 0, recommendNotLoggedIn);
   }
-  // getSearchDistanceSettings();
 }
 
 function displayHomePage(surveyStatus, recommendations) {
   if(recommendations.length == 0 && surveyStatus == 'false') {
-    // display big survey prompt
-    getEvents([], 0, recommendNotLoggedIn);
+    // show big prompt
+    const surveyBox = document.getElementById('survey-link-container');
+    surveyBox.className = 'no-events big-survey';
+    const surveyLink = document.getElementById('survey-link');
+    surveyLink.innerText = 'Click here to take our survey for more ' +
+        'relevant recommendations, or visit the ‘Find’ tab to look ' +
+        'for events that interest you.'
+    // hide event container
+    const container 
+        = document.getElementsByClassName('event-section')[0];
+    container.style.display = 'none';
   } else if (recommendations.length == 0 && surveyStatus == 'true') {
-    // (no events)
+    // (no events to show)
+    const surveyBox = document.getElementById('survey-link-container');
+    surveyBox.style.dispay = 'none';
     getEvents(recommendations, 0, recommendedForYou);
   } else if (surveyStatus == 'false') {
     // display small survey prompt
+    const surveyBox = document.getElementById('survey-link-container');
+    surveyBox.className = 'small-survey';
+    const surveyLink = document.getElementById('survey-link');
+    surveyLink.innerText = 'Click here to take our survey for more ' +
+        'relevant recommendations.'
     getEvents(recommendations, 0, recommendedForYou);
   } else {
     // don't show survey prompt
+    const surveyBox = document.getElementById('survey-link-container');
+    surveyBox.style.dispay = 'none';
     getEvents(recommendations, 0, recommendedForYou);
   }
 }
