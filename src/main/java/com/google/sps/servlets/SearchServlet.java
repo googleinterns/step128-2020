@@ -38,6 +38,9 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import com.google.appengine.api.datastore.Query.GeoRegion.Circle;
+import com.google.appengine.api.datastore.GeoPt;
+import com.google.appengine.api.datastore.Query.StContainsFilter;
 
 @WebServlet("/search")
 public class SearchServlet extends HttpServlet {
@@ -149,26 +152,26 @@ public class SearchServlet extends HttpServlet {
       searchKeywords = new ArrayList<String>();
     }
 
-    if (!hasTags && hasKeywords) {
-      // Filter to check if the event has any of the keywords we're searching for
-      Filter keywordsFilter = new FilterPredicate("keywords", FilterOperator.IN, searchKeywords);
-      query = new Query("Event").setFilter(keywordsFilter);
-    } else if (hasTags) {
-      Filter tagsFilter = new FilterPredicate("tags", FilterOperator.IN, searchTags);
-      query = new Query("Event").setFilter(tagsFilter);
-    } else {
-      query = new Query("Event");
-    }
+    // Get location of user
+    String location = request.getParameter("location");
+    LatLng userLocation = Utils.getLatLng(location);
+
+    // Get location cutoff converted from mi to km
+    int cutoff =
+        Math.toIntExact(
+            Math.round(
+                Integer.parseInt(Utils.getParameter(request, "searchDistance", "")) * MI_TO_KM));
+
+    GeoPt userPt = new GeoPt(userLocation.lat(), userLocation.lng());
+    Circle region = new Circle(userPt, cutoff * 1000);
+    Filter distanceFilter = new StContainsFilter("geoPt", region);
+    query = new Query("Event").setFilter(distanceFilter);
 
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     PreparedQuery results = datastore.prepare(query);
     final long entityCount = results.countEntities(FetchOptions.Builder.withDefaults());
     List<Entity> events =
         new ArrayList<Entity>(results.asList(FetchOptions.Builder.withDefaults()));
-
-    // Get location of user
-    String location = request.getParameter("location");
-    LatLng userLocation = Utils.getLatLng(location);
 
     // Get distance between user and the location of all the events
     for (Entity event : events) {
@@ -178,12 +181,8 @@ public class SearchServlet extends HttpServlet {
       event.setProperty("distance", distance);
     }
 
-    // Get location cutoff converted from mi to km
-    int cutoff =
-        Math.toIntExact(
-            Math.round(
-                Integer.parseInt(Utils.getParameter(request, "searchDistance", "")) * MI_TO_KM));
     // Remove from the list any events outside the cutoff or that aren't drivable
+    // Should be deprecated and unneeded now
     events.removeIf(
         e -> ((int) e.getProperty("distance")) > cutoff || ((int) e.getProperty("distance")) < 0);
 
