@@ -624,11 +624,12 @@ h1 {
 }
 
 .event-right-details.expand {
-  height: 40vw;
+  height: 50vw;
 }
 
 .event-time-location {
   margin: 3% 5%;
+  width: 50%;
 }
 
 .event-display-options {
@@ -637,7 +638,7 @@ h1 {
   flex-flow: column nowrap;
   height: 100%;
   justify-content: space-around;
-  width: 40%;
+  width: 55%;
 }
 
 .event-display-options br {
@@ -648,7 +649,7 @@ h1 {
   align-items: center;
   cursor: pointer;
   display: flex;
-  height: 30%;
+  height: 25%;
   justify-content: center;
   width: 80%;
 }
@@ -673,9 +674,7 @@ h1 {
 }
 
 .share-wrapper h3 {
-  display: inline;
-  font-size: 3vw;
-  margin: 0 5%;
+  display: none;
 }
 
 .share-container {
@@ -689,13 +688,27 @@ h1 {
 
 .share-container a {
   cursor: pointer;
-  height: 4vw;
-  width: 4.5vw;
+  height: 9vw;
+  width: 10vw;
 }
 
 .share-container img {
   height: 100%;
   object-fit: contain;
+}
+
+.copy-wrapper {
+  height: 1vh;
+}
+
+.copy-msg {
+  background-color: #ddd;
+  display: none;
+  height: 10px;
+  opacity: 0;
+  overflow: hidden;
+  position: relative;
+  transition: opacity 0.2, visibility 0.2s;
 }
 
 /* Footer */
