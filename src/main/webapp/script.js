@@ -879,10 +879,12 @@ function createLoadVerification() {
 }
 
 /**
- * Redirects the user to the index page.
+ * Redirects the user to the specified page.
+ *
+ * @param {String} page url to be redirected to
  */
-function redirectToIndex() {
-  window.location.href = '/index.html';
+function redirectTo(page) {
+  window.location.href = '/' + page;
 }
 
 /**

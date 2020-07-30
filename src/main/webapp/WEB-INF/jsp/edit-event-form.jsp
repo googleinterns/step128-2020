@@ -107,15 +107,11 @@
           </div>
         </div>
         <div class="form-buttons">
-          <input type=image src="images/submit-button.svg" alt="Submit button.">
+          <input type="submit">
           <div class="divider"></div>
-          <a href="/my-events.html">
-            <img src="images/cancel-button.svg" alt="Cancel button.">
-          </a>
+          <button onclick="redirectTo('my-events.html')">Cancel</button>
           <div class="edit-divider"></div>
-          <a href="javascript:deleteEvent()">
-            <img src="images/delete-button.svg" alt="Delete button.">
-          </a>
+          <button id="delete" onclick="deleteEvent()">Delete</button>
         </div>
       </form>
     </div>
