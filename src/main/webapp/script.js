@@ -1349,6 +1349,10 @@ function loadLinks() {
   copy.setAttribute('onclick', 'copyLink("' + url + '")');
 }
 
+/**
+ * Copies URL link to clipboard.
+ * @param {String} url event url.
+ */
 function copyLink(url) {
   const hiddenText = document.createElement('input');
   hiddenText.style = 'position: absolute; left: -1000px; top: -1000px';
@@ -1357,11 +1361,14 @@ function copyLink(url) {
   document.body.appendChild(hiddenText);
   hiddenText.select();
   hiddenText.setSelectionRange(0, 99999);
-  document.execCommand("copy");
+  document.execCommand('copy');
   document.body.removeChild(hiddenText);
   displayCopied();
 }
 
+/**
+ * Displays copy confirmation message
+ */
 function displayCopied() {
   const message = document.getElementById('copy-msg');
   const links = document.getElementById('share-container');
@@ -1420,7 +1427,9 @@ function saveEvent(eventId) {
  * Methods for login.html
  * **********************************************************************/
 
-// FirebaseUI config.
+/**
+ * FirebaseUI config.
+ */
 const uiConfig = {
   // TODO: replace with URL user came from each time?
   signInSuccessUrl: '/index.html',
