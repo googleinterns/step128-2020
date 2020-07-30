@@ -1335,7 +1335,7 @@ function loadLinks() {
   const desc = document.getElementById('desc').value;
   const date = document.getElementById('date').value;
   const time = document.getElementById('start').value;
-  const url = 'http://unitebystep.appspot.com/load-event?Event=' + key;
+  const url = 'https://unitebystep.appspot.com/load-event?Event=' + key;
   const br = '%0D%0A';
 
   twitter.href = 'https://twitter.com/share?url=' + url;
