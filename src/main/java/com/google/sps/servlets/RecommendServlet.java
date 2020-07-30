@@ -92,7 +92,7 @@ public class RecommendServlet extends HttpServlet {
       Entity userEntity = datastore.get(KeyFactory.createKey("User", userId));
       obj.surveyStatus = userEntity.getProperty("surveyCompleted").toString();
     } catch (EntityNotFoundException | NullPointerException exception) {
-      Utils.makeUserEntity(userId, true);
+      Interactions.makeUserEntity(userId, true);
       obj.surveyStatus = "false";
     }
     return obj;
@@ -110,7 +110,7 @@ public class RecommendServlet extends HttpServlet {
       userEntity = datastore.get(KeyFactory.createKey("User", userId));
     } catch (EntityNotFoundException exception) {
       // user does not exist (no data)
-      userEntity = Utils.makeUserEntity(userId, true);
+      userEntity = Interactions.makeUserEntity(userId, true);
       return new HomePageObject(new ArrayList<Entity>(), "false");
     }
     Map<String, Float> userParams = Interactions.buildVectorForUser(userEntity);

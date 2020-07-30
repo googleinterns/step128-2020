@@ -21,6 +21,7 @@ import static org.mockito.Mockito.*;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.GeoPt;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
@@ -37,6 +38,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
@@ -45,7 +47,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 /** Tests for the SurveyServlet.java class */
 @RunWith(PowerMockRunner.class)
 @SuppressStaticInitializationFor({"com.google.sps.Firebase"})
-@PrepareForTest({Firebase.class})
+@PrepareForTest({Utils.class, Firebase.class})
 @PowerMockIgnore("okhttp3.*")
 public final class EditEventServletTest {
   private final LocalServiceTestHelper helper =
@@ -59,6 +61,12 @@ public final class EditEventServletTest {
   public void setUp() {
     helper.setUp();
     testServlet = new EditEventServlet();
+
+    TestingUtil.mockUtilsForLocation();
+    PowerMockito.when(Utils.getGeopt("13364 Lakeview Way, Lakeside, California"))
+        .thenReturn(new GeoPt(32.858758f, -116.904991f));
+    PowerMockito.when(Utils.getGeopt("11852 S Main Street, Los Angeles, California"))
+        .thenReturn(new GeoPt(33.925076f, -118.27369f));
 
     createGoalEntity();
     createUser("test");
@@ -83,15 +91,16 @@ public final class EditEventServletTest {
     when(request.getParameter("userToken")).thenReturn(email);
     when(request.getParameter("event-name")).thenReturn("UPDATED: Lake Clean Up");
     when(request.getParameter("event-description")).thenReturn("We're cleaning up the lake");
-    when(request.getParameter("street-address")).thenReturn("678 Lakeview Way");
+    when(request.getParameter("street-address")).thenReturn("13364 Lakeview Way");
     when(request.getParameter("city")).thenReturn("Lakeside");
-    when(request.getParameter("state")).thenReturn("Michigan");
+    when(request.getParameter("state")).thenReturn("California");
     when(request.getParameter("date")).thenReturn("2020-05-17");
     when(request.getParameter("start-time")).thenReturn("14:00");
     when(request.getParameter("end-time")).thenReturn("15:00");
     when(request.getParameter("cover-photo")).thenReturn("/img-2030121");
-    String[] tags = {"environment"};
-    when(request.getParameter("all-tags")).thenReturn(Utils.convertToJson(tags));
+    String[] tagsArr = {"environment"};
+    String tagsStr = Utils.convertToJson(tagsArr);
+    when(request.getParameter("all-tags")).thenReturn(tagsStr);
 
     testServlet.doPost(request, response);
 
@@ -117,15 +126,16 @@ public final class EditEventServletTest {
     when(request.getParameter("userToken")).thenReturn(email);
     when(request.getParameter("event-name")).thenReturn("UPDATED: Lake Clean Up");
     when(request.getParameter("event-description")).thenReturn("We're cleaning up the lake");
-    when(request.getParameter("street-address")).thenReturn("678 Lakeview Way");
-    when(request.getParameter("city")).thenReturn("Lakeside");
-    when(request.getParameter("state")).thenReturn("Michigan");
+    when(request.getParameter("street-address")).thenReturn("11852 S Main Street");
+    when(request.getParameter("city")).thenReturn("Los Angeles");
+    when(request.getParameter("state")).thenReturn("California");
     when(request.getParameter("date")).thenReturn("2020-05-17");
     when(request.getParameter("start-time")).thenReturn("14:00");
     when(request.getParameter("end-time")).thenReturn("");
     when(request.getParameter("cover-photo")).thenReturn("/img-2030121");
-    String[] tags = {"environment, volunteer"};
-    when(request.getParameter("all-tags")).thenReturn(Utils.convertToJson(tags));
+    String[] tagsArr = {"environment, volunteer"};
+    String tagsStr = Utils.convertToJson(tagsArr);
+    when(request.getParameter("all-tags")).thenReturn(tagsStr);
 
     testServlet.doPost(request, response);
 
@@ -136,8 +146,9 @@ public final class EditEventServletTest {
     Entity postedEntity = datastore.prepare(query).asSingleEntity();
 
     // Assert multiple fields have been updated.
-    assertEquals(Arrays.asList(tags), postedEntity.getProperty("tags"));
+    assertEquals(Arrays.asList(tagsArr), postedEntity.getProperty("tags"));
     assertEquals("", postedEntity.getProperty("endTime"));
+    assertEquals(new GeoPt(33.925076f, -118.27369f), postedEntity.getProperty("latlng"));
   }
 
   @Test(expected = IOException.class)
@@ -374,10 +385,10 @@ public final class EditEventServletTest {
     goalEntity = new Entity("Event");
     goalEntity.setProperty("eventName", "Lake Clean Up");
     goalEntity.setProperty("eventDescription", "We're cleaning up the lake");
-    goalEntity.setProperty("address", "678 Lakeview Way, Lakeside, Michigan");
-    goalEntity.setProperty("streetAddress", "678 Lakeview Way");
+    goalEntity.setProperty("address", "13364 Lakeview Way, Lakeside, California");
+    goalEntity.setProperty("streetAddress", "13364 Lakeview Way");
     goalEntity.setProperty("city", "Lakeside");
-    goalEntity.setProperty("state", "Michigan");
+    goalEntity.setProperty("state", "California");
     goalEntity.setProperty("date", "May 17, 2020");
     goalEntity.setProperty("startTime", "2:00 PM");
     goalEntity.setProperty("endTime", "3:00 PM");
@@ -388,6 +399,7 @@ public final class EditEventServletTest {
     goalEntity.setProperty("unformattedStart", "14:00");
     goalEntity.setProperty("unformattedEnd", "15:00");
     goalEntity.setProperty("unformattedDate", "2020-05-17");
+    goalEntity.setProperty("latlng", Utils.getGeopt("13364 Lakeview Way, Lakeside, California"));
 
     DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
     ds.put(goalEntity);

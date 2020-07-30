@@ -165,6 +165,7 @@ public class EditEventServlet extends HttpServlet {
     event.setProperty("unformattedStart", startTime);
     event.setProperty("unformattedEnd", endTime);
     event.setProperty("unformattedDate", date);
+    event.setProperty("latlng", Utils.getGeopt(fullAddress));
 
     Gson gson = new Gson();
     String[] tags = gson.fromJson(tagsStr, String[].class);

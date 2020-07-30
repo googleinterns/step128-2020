@@ -22,7 +22,6 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.sps.Firebase;
 import com.google.sps.Interactions;
-import com.google.sps.Utils;
 import java.io.IOException;
 import java.util.logging.Logger;
 import javax.servlet.annotation.WebServlet;
@@ -50,7 +49,7 @@ public class SurveyServlet extends HttpServlet {
     try {
       userEntity = datastore.get(userKey);
     } catch (EntityNotFoundException e) {
-      userEntity = Utils.makeUserEntity(userID, true);
+      userEntity = Interactions.makeUserEntity(userID, true);
       LOGGER.info("No entity found for " + userID + ", creating one now.");
       response.getWriter().print("false");
       return;
@@ -79,7 +78,7 @@ public class SurveyServlet extends HttpServlet {
       try {
         userEntity = datastore.get(userKey);
       } catch (EntityNotFoundException e) {
-        userEntity = Utils.makeUserEntity(userID, true);
+        userEntity = Interactions.makeUserEntity(userID, true);
         LOGGER.info("No entity found for " + userID + ", creating one now.");
       }
 
