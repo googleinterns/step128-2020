@@ -208,4 +208,32 @@ public class Interactions {
       }
     }
   }
+
+  /**
+   * Creates and returns a new Entity for a given userId.
+   *
+   * @param userId to identify this user in datastore
+   * @param location user's location
+   * @param addToDatastore if true, will add this entity to datastore as well
+   */
+  public static Entity makeUserEntity(String userId, String location, boolean addToDatastore) {
+    Entity userEntity = new Entity("User", userId);
+    userEntity.setProperty("firebaseID", userId);
+    userEntity.setProperty("location", location);
+    if (addToDatastore) {
+      DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+      datastore.put(userEntity);
+    }
+    return userEntity;
+  }
+
+  /**
+   * Creates and returns a new Entity for a given userId, no location given.
+   *
+   * @param userId to identify this user in datastore
+   * @param addToDatastore if true, will add this entity to datastore as well
+   */
+  public static Entity makeUserEntity(String userId, boolean addToDatastore) {
+    return makeUserEntity(userId, "", addToDatastore);
+  }
 }

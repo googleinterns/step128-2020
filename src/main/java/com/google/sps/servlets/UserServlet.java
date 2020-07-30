@@ -61,7 +61,7 @@ public class UserServlet extends HttpServlet {
       try {
         userEntity = datastore.get(userKey);
       } catch (EntityNotFoundException exception) {
-        userEntity = Utils.makeUserEntity(userID, true);
+        userEntity = Interactions.makeUserEntity(userID, true);
         LOGGER.info("No entity found for " + userID + ", creating one now.");
       }
       switch (request.getParameter("get")) {
@@ -145,7 +145,7 @@ public class UserServlet extends HttpServlet {
     try {
       userEntity = datastore.get(userKey);
     } catch (EntityNotFoundException exception) {
-      userEntity = Utils.makeUserEntity(userID, false);
+      userEntity = Interactions.makeUserEntity(userID, false);
       LOGGER.info("No entity found for " + userID + ", creating one now.");
     }
     switch (request.getParameter("action")) {

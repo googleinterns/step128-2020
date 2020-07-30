@@ -66,7 +66,7 @@ public class EventServlet extends HttpServlet {
     try {
       userEntity = datastore.get(userKey);
     } catch (EntityNotFoundException exception) {
-      userEntity = Utils.makeUserEntity(userID, false);
+      userEntity = Interactions.makeUserEntity(userID, false);
       LOGGER.info("No entity found for " + userID + ", creating one now.");
     }
     float delta = Interactions.recordInteraction(userID, keyId, Interactions.CREATE_SCORE, false);
@@ -126,6 +126,7 @@ public class EventServlet extends HttpServlet {
     eventEntity.setProperty("unformattedStart", startTime);
     eventEntity.setProperty("unformattedEnd", endTime);
     eventEntity.setProperty("unformattedDate", date);
+    eventEntity.setProperty("latlng", Utils.getGeopt(fullAddress));
 
     Gson gson = new Gson();
     List<String> tagsList = gson.fromJson(tagsStr, new TypeToken<ArrayList<String>>() {}.getType());

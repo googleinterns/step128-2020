@@ -21,6 +21,7 @@ import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.sps.Firebase;
+import com.google.sps.Interactions;
 import com.google.sps.Utils;
 import java.io.IOException;
 import java.util.logging.Logger;
@@ -49,7 +50,7 @@ public class LocationServlet extends HttpServlet {
       try {
         userEntity = datastore.get(userKey);
       } catch (EntityNotFoundException exception) {
-        userEntity = Utils.makeUserEntity(userID, "", true);
+        userEntity = Interactions.makeUserEntity(userID, "", true);
         LOGGER.info("No entity found for " + userID + ", creating one now.");
       }
       location = userEntity.getProperty("location").toString();

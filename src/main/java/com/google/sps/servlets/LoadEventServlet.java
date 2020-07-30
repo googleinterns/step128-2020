@@ -83,7 +83,7 @@ public class LoadEventServlet extends HttpServlet {
     try {
       userEntity = datastore.get(userKey);
     } catch (EntityNotFoundException exception) {
-      userEntity = Utils.makeUserEntity(userID, false);
+      userEntity = Interactions.makeUserEntity(userID, false);
       LOGGER.info("No entity found for " + userID + ", creating one now.");
     }
 

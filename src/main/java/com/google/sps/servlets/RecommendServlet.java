@@ -103,7 +103,7 @@ public class RecommendServlet extends HttpServlet {
       userEntity = datastore.get(KeyFactory.createKey("User", userId));
     } catch (EntityNotFoundException exception) {
       // user does not exist (no data)
-      userEntity = Utils.makeUserEntity(userId, true);
+      userEntity = Interactions.makeUserEntity(userId, true);
       return events;
     }
     Map<String, Float> userParams = Interactions.buildVectorForUser(userEntity);
