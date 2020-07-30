@@ -345,7 +345,6 @@ public final class RecommendTest {
     String events = "src/test/data/events-2.csv";
     addInfoToDatastore(events, null, null);
 
-    DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
     // create userEntity that has high affinity with events in events-2.csv
     Entity userEntity = new Entity("User", "test@example.com");
     userEntity.setProperty("environment", 10);
@@ -353,6 +352,8 @@ public final class RecommendTest {
     userEntity.setProperty("activism", 10);
     userEntity.setProperty("fundraiser", 10);
     userEntity.setProperty("education", 10);
+
+    DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
     ds.put(userEntity);
 
     for (int i = 6; i <= 306; i++) {
