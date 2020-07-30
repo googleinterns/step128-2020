@@ -107,6 +107,7 @@ public class Utils {
     return new LatLng(results[0].geometry.location.lat, results[0].geometry.location.lng);
   }
 
+  /** Converts a LatLng to a Geopt. */
   public static GeoPt getGeopt(LatLng location) {
     if (location == null) {
       return null;
@@ -114,6 +115,7 @@ public class Utils {
     return new GeoPt((float) location.lat, (float) location.lng);
   }
 
+  /** Returns a location as a GeoPt. */
   public static GeoPt getGeopt(String location) {
     if (location == null) {
       return null;

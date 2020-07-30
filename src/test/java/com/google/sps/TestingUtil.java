@@ -122,6 +122,7 @@ public final class TestingUtil {
     return events;
   }
 
+  /** Sets up Utils for location mocking. */
   public static void mockUtilsForLocation() {
     PowerMockito.mockStatic(Utils.class);
     PowerMockito.when(Utils.convertToJson(any())).thenCallRealMethod();
