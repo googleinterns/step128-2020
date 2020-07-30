@@ -60,16 +60,16 @@
               <span class="copy-msg" id="copy-msg">Link copied to clipboard</span>
             </div>
             <div class="share-container" id="share-container">
-              <a id="twitter-link" class="link" target="_blank">
+              <a id="twitter-link" target="_blank">
                   <img src="images/twitter.svg" alt="Twitter"/>
               </a>
-              <a id="fb-link" class="link" target="_blank">
+              <a id="fb-link" target="_blank">
                   <img src="images/facebook.svg" alt="Facebook"/>
               </a>
-              <a id="mail-link" class="link" target="_blank">
+              <a id="mail-link" target="_blank">
                   <img src="images/gmail.svg" alt="Email"/>
               </a>
-              <a id="copy-link" class="link" target="_blank">
+              <a id="copy-link" target="_blank">
                   <img src="images/copy-link.svg" alt="Copy Link"/>
               </a>
             </div>
