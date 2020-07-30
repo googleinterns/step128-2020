@@ -23,6 +23,7 @@ import static org.mockito.Mockito.*;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.GeoPt;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
@@ -41,6 +42,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
@@ -49,7 +51,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @PowerMockIgnore("okhttp3.*")
 @RunWith(PowerMockRunner.class)
 @SuppressStaticInitializationFor({"com.google.sps.Firebase"})
-@PrepareForTest({Firebase.class})
+@PrepareForTest({Utils.class, Firebase.class})
 public final class EventServletTest {
   private final LocalServiceTestHelper helper =
       new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
@@ -59,6 +61,10 @@ public final class EventServletTest {
   public void setUp() throws IOException {
     helper.setUp();
     testEventServlet = new EventServlet();
+
+    TestingUtil.mockUtilsForLocation();
+    PowerMockito.when(Utils.getGeopt("13364 Lakeview Way, Lakeside, California"))
+        .thenReturn(new GeoPt(32.858758f, -116.904991f));
   }
 
   @After
@@ -75,15 +81,16 @@ public final class EventServletTest {
     // Add a mock request to pass as a parameter to doPost.
     when(request.getParameter("event-name")).thenReturn("Lake Clean Up");
     when(request.getParameter("event-description")).thenReturn("We're cleaning up the lake");
-    when(request.getParameter("street-address")).thenReturn("678 Lakeview Way");
+    when(request.getParameter("street-address")).thenReturn("13364 Lakeview Way");
     when(request.getParameter("city")).thenReturn("Lakeside");
-    when(request.getParameter("state")).thenReturn("Michigan");
+    when(request.getParameter("state")).thenReturn("California");
     when(request.getParameter("date")).thenReturn("2020-05-17");
     when(request.getParameter("start-time")).thenReturn("14:00");
     when(request.getParameter("end-time")).thenReturn("15:00");
     when(request.getParameter("cover-photo")).thenReturn("/img-2030121");
-    String[] tags = {"environment"};
-    when(request.getParameter("all-tags")).thenReturn(Utils.convertToJson(tags));
+    String[] tagsArr = {"environment"};
+    String tagsStr = Utils.convertToJson(tagsArr);
+    when(request.getParameter("all-tags")).thenReturn(tagsStr);
 
     // Post event to Datastore.
     testEventServlet.doPost(request, response);
@@ -103,15 +110,17 @@ public final class EventServletTest {
     // Add a mock request to pass as a parameter to doPost.
     when(request.getParameter("event-name")).thenReturn("Lake Clean Up");
     when(request.getParameter("event-description")).thenReturn("We're cleaning up the lake");
-    when(request.getParameter("street-address")).thenReturn("678 Lakeview Way");
+    when(request.getParameter("street-address")).thenReturn("13364 Lakeview Way");
     when(request.getParameter("city")).thenReturn("Lakeside");
-    when(request.getParameter("state")).thenReturn("Michigan");
+    when(request.getParameter("state")).thenReturn("California");
     when(request.getParameter("date")).thenReturn("2020-05-17");
     when(request.getParameter("start-time")).thenReturn("14:00");
     when(request.getParameter("end-time")).thenReturn("15:00");
     when(request.getParameter("cover-photo")).thenReturn("/img-2030121");
     String[] tags = {"environment"};
-    when(request.getParameter("all-tags")).thenReturn(Utils.convertToJson(tags));
+    String tagsStr = Utils.convertToJson(tags);
+
+    when(request.getParameter("all-tags")).thenReturn(tagsStr);
 
     // Post three events to Datastore.
     testEventServlet.doPost(request, response);
@@ -142,9 +151,9 @@ public final class EventServletTest {
     // Add a mock request to pass as a parameter to doPost.
     when(request.getParameter("event-name")).thenReturn("Lake Clean Up");
     when(request.getParameter("event-description")).thenReturn("We're cleaning up the lake");
-    when(request.getParameter("street-address")).thenReturn("678 Lakeview Way");
+    when(request.getParameter("street-address")).thenReturn("13364 Lakeview Way");
     when(request.getParameter("city")).thenReturn("Lakeside");
-    when(request.getParameter("state")).thenReturn("Michigan");
+    when(request.getParameter("state")).thenReturn("California");
     when(request.getParameter("date")).thenReturn("2020-05-17");
     when(request.getParameter("start-time")).thenReturn("14:00");
     when(request.getParameter("end-time")).thenReturn("15:00");
@@ -176,13 +185,14 @@ public final class EventServletTest {
     // This mock request does not include optional fields end-time and cover-photo.
     when(request.getParameter("event-name")).thenReturn("Lake Clean Up");
     when(request.getParameter("event-description")).thenReturn("We're cleaning up the lake");
-    when(request.getParameter("street-address")).thenReturn("678 Lakeview Way");
+    when(request.getParameter("street-address")).thenReturn("13364 Lakeview Way");
     when(request.getParameter("city")).thenReturn("Lakeside");
-    when(request.getParameter("state")).thenReturn("Michigan");
+    when(request.getParameter("state")).thenReturn("California");
     when(request.getParameter("date")).thenReturn("2020-05-17");
     when(request.getParameter("start-time")).thenReturn("14:00");
-    String[] tags = {"environment"};
-    when(request.getParameter("all-tags")).thenReturn(Utils.convertToJson(tags));
+    String[] tagsArr = {"environment"};
+    String tagsStr = Utils.convertToJson(tagsArr);
+    when(request.getParameter("all-tags")).thenReturn(tagsStr);
 
     // Post event to Datastore.
     testEventServlet.doPost(request, response);
@@ -205,13 +215,14 @@ public final class EventServletTest {
 
     when(request.getParameter("event-name")).thenReturn("Lake Clean Up");
     when(request.getParameter("event-description")).thenReturn("We're cleaning up the lake");
-    when(request.getParameter("street-address")).thenReturn("678 Lakeview Way");
+    when(request.getParameter("street-address")).thenReturn("13364 Lakeview Way");
     when(request.getParameter("city")).thenReturn("Lakeside");
-    when(request.getParameter("state")).thenReturn("Michigan");
+    when(request.getParameter("state")).thenReturn("California");
     when(request.getParameter("date")).thenReturn("2020-05-17");
     when(request.getParameter("start-time")).thenReturn("14:00");
-    String[] tags = {"environment"};
-    when(request.getParameter("all-tags")).thenReturn(Utils.convertToJson(tags));
+    String[] tagsArr = {"environment"};
+    String tagsStr = Utils.convertToJson(tagsArr);
+    when(request.getParameter("all-tags")).thenReturn(tagsStr);
 
     try {
       testEventServlet.doPost(request, response);
@@ -231,7 +242,7 @@ public final class EventServletTest {
     Entity entity = new Entity("Event");
     entity.setProperty("eventName", "Lake Clean Up");
     entity.setProperty("eventDescription", "We're cleaning up the lake");
-    entity.setProperty("address", "678 Lakeview Way, Lakeside, Michigan");
+    entity.setProperty("address", "13364 Lakeview Way, Lakeside, California");
     entity.setProperty("date", "Sunday, May 17, 2020");
     entity.setProperty("startTime", "2:00 PM");
     entity.setProperty("endTime", "3:00 PM");
@@ -242,6 +253,7 @@ public final class EventServletTest {
     entity.setProperty("unformattedStart", "14:00");
     entity.setProperty("unformattedEnd", "15:00");
     entity.setProperty("unformattedDate", "2020-05-17");
+    entity.setProperty("latlng", Utils.getGeopt("13364 Lakeview Way, Lakeside, California"));
 
     // Convert tags and set tag property.
     Gson gson = new Gson();
