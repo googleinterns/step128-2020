@@ -47,7 +47,7 @@ import javax.servlet.http.HttpServletResponse;
 public class RecommendServlet extends HttpServlet {
 
   private static final Logger LOGGER = Logger.getLogger(RecommendServlet.class.getName());
-  private static final int EVENTS_LIMIT = 10;
+  public static final int EVENTS_LIMIT = 15;
   private static final double RADIUS = 300_000;
   private static final int QUERY_LIMIT = 300;
 
@@ -125,13 +125,17 @@ public class RecommendServlet extends HttpServlet {
       // no data for this user yet
       return new HomePageObject(new ArrayList<Entity>(), "false");
     }
+
     String userLocation = null;
     Iterable<Entity> eventQuery = null;
     // limit the number of entities returned: by location (if user has specified)
     // else by attendee count
+    GeoPt latlng = null;
     if (userEntity.hasProperty("location")) {
       userLocation = userEntity.getProperty("location").toString();
-      GeoPt latlng = Utils.getGeopt(userLocation);
+      latlng = Utils.getGeopt(userLocation);
+    }
+    if (latlng != null) {
       eventQuery =
           datastore
               .prepare(
@@ -144,7 +148,7 @@ public class RecommendServlet extends HttpServlet {
               .prepare(new Query("Event").addSort("attendeeCount", SortDirection.DESCENDING))
               .asIterable(FetchOptions.Builder.withLimit(QUERY_LIMIT));
     }
-    List<Entity> events = new ArrayList<>();
+
     Map<Double, Entity> bestEvents = new TreeMap<>(Recommend.SCORE_DESCENDING);
     // score and rank events
     for (Entity event : eventQuery) {
@@ -163,7 +167,9 @@ public class RecommendServlet extends HttpServlet {
       }
       bestEvents.put(eventScore, event);
     }
+
     // get info from ranking map and return for user
+    List<Entity> events = new ArrayList<>();
     List<Long> eventIds = new ArrayList<>();
     Iterator<Double> itr = bestEvents.keySet().iterator();
     int count = 0;
@@ -218,7 +224,7 @@ public class RecommendServlet extends HttpServlet {
       }
     }
     // adjust scaling based on event distance to user
-    if (userLocation != null && eventLocation != null) {
+    if (userLocation != null && eventLocation != null && userLocation.length() > 0) {
       int distance = Utils.getDistance(userLocation, eventLocation);
       if (distance < 0) {
         distance = Recommend.INVALID_DISTANCE;
