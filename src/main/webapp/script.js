@@ -879,6 +879,13 @@ function createLoadVerification() {
 }
 
 /**
+ * Redirects the user to the index page.
+ */
+function redirectToIndex() {
+  window.location.href = '/index.html';
+}
+
+/**
  * Populates the user token on page load to prevent NullPointerException.
  */
 function populateToken() {
