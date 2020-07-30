@@ -33,6 +33,7 @@ import com.google.appengine.api.datastore.Query;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.google.sps.servlets.RecommendServlet;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -72,7 +73,7 @@ public final class RecommendTest {
   public void setUp() throws IOException {
     helper.setUp();
 
-    PowerMockito.mockStatic(Utils.class);
+    TestingUtil.mockUtilsForLocation();
     PowerMockito.when(Utils.getDistance("90045", "90045")).thenReturn(0);
     PowerMockito.when(Utils.getDistance("90045", "90301")).thenReturn(10);
     PowerMockito.when(Utils.getDistance("90045", "90305")).thenReturn(20);
@@ -297,6 +298,57 @@ public final class RecommendTest {
     assertEquals(5, results.size());
   }
 
+  @Test
+  public void distanceCutoff() throws IOException {
+    String tooFarLocation = "97229";
+    PowerMockito.when(Utils.getGeopt(tooFarLocation))
+        .thenReturn(new GeoPt(45.558676f, -122.820836f));
+
+    String users = "src/test/data/users-2.csv";
+    String ratings = "src/test/data/ratings-none.csv";
+    String events = "src/test/data/events-2.csv";
+    addInfoToDatastore(events, users, ratings);
+
+    // now create an entity that should fall outside the distance cutoff
+    long tooFarId = 10;
+    Entity eventEntity = new Entity("Event", tooFarId);
+    eventEntity.setProperty("eventName", "too far event");
+    eventEntity.setProperty("eventDescription", "This event is too far away.");
+    eventEntity.setProperty("address", tooFarLocation);
+    eventEntity.setProperty("latlng", Utils.getGeopt(tooFarLocation));
+    eventEntity.setProperty("attendeeCount", 0);
+    String[] tags = {"blm"};
+    String tagsStr = Utils.convertToJson(tags);
+    List<String> tagsList = gson.fromJson(tagsStr, new TypeToken<ArrayList<String>>() {}.getType());
+    eventEntity.setIndexedProperty("tags", tagsList);
+
+    DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
+    ds.put(eventEntity);
+
+    HomePageObject resultObj = callPost("test@example.com");
+    List<Entity> results = resultObj.recommendations;
+    assertEquals("false", resultObj.surveyStatus);
+    assertEquals(6, ds.prepare(new Query("Event")).countEntities(withLimit(250)));
+    assertEquals(5, results.size());
+    for (int i = 0; i < results.size() - 1; i++) {
+      assertTrue(results.get(i).getKey().getId() < results.get(i + 1).getKey().getId());
+    }
+    for (int i = 0; i < results.size(); i++) {
+      if (results.get(i).getKey().getId() == tooFarId) {
+        fail();
+      }
+    }
+  }
+
+  @Test
+  public void noLocation() throws IOException {
+    String events = "src/test/data/events-2.csv";
+    addInfoToDatastore(events, null, null);
+
+
+    DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
+  }
+
   /** Performs the GET request to retrieve event recommendations. */
   private static HomePageObject callPost(String dummyToken) throws IOException {
     HttpServletRequest request = mock(HttpServletRequest.class);
@@ -327,6 +379,9 @@ public final class RecommendTest {
       }
     }
     scan.close();
+    if(usersFile == null) {
+        return;
+    }
     // scan users and user data
     scan = new Scanner(new File(usersFile));
     String[] fieldNames = scan.nextLine().split(",");
@@ -400,6 +455,8 @@ public final class RecommendTest {
       eventEntity.setProperty("eventDescription", eventDesc);
       eventEntity.setProperty("address", fields[3]);
       eventEntity.setIndexedProperty("tags", tagsList);
+      eventEntity.setProperty("latlng", Utils.getGeopt(fields[3]));
+      eventEntity.setProperty("attendeeCount", 0);
       // save tag info for easier access later
     } catch (NumberFormatException e) {
       eventEntity = null;
