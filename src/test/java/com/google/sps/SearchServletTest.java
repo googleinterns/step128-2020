@@ -161,6 +161,13 @@ public final class SearchServletTest {
 
   @Test
   public void emptyStrings() throws Exception {
+    String nullString = null;
+
+    assertEquals(null, Utils.getLatLng(nullString));
+    assertEquals(null, Utils.getLatLng(""));
+    assertEquals(null, Utils.getGeopt(nullString));
+    assertEquals(null, Utils.getGeopt(""));
+
     assertEquals(-1, Utils.getDistance("", null));
     assertEquals(-1, Utils.getDistance("", ""));
   }

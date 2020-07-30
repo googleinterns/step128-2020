@@ -89,6 +89,9 @@ public class Utils {
    * @return the latitude and longitude of the location
    */
   public static LatLng getLatLng(String location) {
+    if (location == null || location.length() == 0) {
+      return null;
+    }
     GeocodingResult[] results = null;
     try {
       GeocodingApiRequest request = GeocodingApi.newRequest(context);
@@ -117,9 +120,6 @@ public class Utils {
 
   /** Returns a location as a GeoPt. */
   public static GeoPt getGeopt(String location) {
-    if (location == null || location.length() == 0) {
-      return null;
-    }
     return getGeopt(getLatLng(location));
   }
 
@@ -132,6 +132,9 @@ public class Utils {
    * @return the distance in km between the two locations
    */
   public static int getDistance(LatLng from, LatLng to) {
+    if (from == null || to == null) {
+      return -1;
+    }
     DistanceMatrix result = null;
     try {
       DistanceMatrixApiRequest request = DistanceMatrixApi.newRequest(context);
@@ -162,14 +165,8 @@ public class Utils {
    * @return the distance in km between the two locations.
    */
   public static int getDistance(String from, String to) {
-    if (from.length() == 0 || to.length() == 0) {
-      return -1;
-    }
     LatLng start = getLatLng(from);
     LatLng end = getLatLng(to);
-    if (start == null || end == null) {
-      return -1;
-    }
     return getDistance(start, end);
   }
 
