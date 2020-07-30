@@ -25,6 +25,7 @@ import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.EntityNotFoundException;
+import com.google.appengine.api.datastore.GeoPt;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.PreparedQuery;
@@ -70,6 +71,18 @@ public final class RecommendTest {
   @Before
   public void setUp() throws IOException {
     helper.setUp();
+
+    PowerMockito.mockStatic(Utils.class);
+    PowerMockito.when(Utils.getDistance("90045", "90045")).thenReturn(0);
+    PowerMockito.when(Utils.getDistance("90045", "90301")).thenReturn(10);
+    PowerMockito.when(Utils.getDistance("90045", "90305")).thenReturn(20);
+    PowerMockito.when(Utils.getDistance("90045", "90047")).thenReturn(30);
+    PowerMockito.when(Utils.getDistance("90045", "90003")).thenReturn(40);
+    PowerMockito.when(Utils.getGeopt("90045")).thenReturn(new GeoPt(33.959670f, -118.424991f));
+    PowerMockito.when(Utils.getGeopt("90301")).thenReturn(new GeoPt(33.954740f, -118.360363f));
+    PowerMockito.when(Utils.getGeopt("90305")).thenReturn(new GeoPt(33.955859f, -118.321683f));
+    PowerMockito.when(Utils.getGeopt("90047")).thenReturn(new GeoPt(33.956506f, -118.305864f));
+    PowerMockito.when(Utils.getGeopt("90003")).thenReturn(new GeoPt(33.960939f, -118.272003f));
   }
 
   @After
@@ -79,9 +92,6 @@ public final class RecommendTest {
 
   @Test
   public void checkOutput() throws IOException {
-    PowerMockito.mockStatic(Utils.class);
-    PowerMockito.when(Utils.getDistance("90001", "90001")).thenReturn(0);
-
     // a test to make sure everything is in an expected format and runs without hiccups
     String users = "src/test/data/users-1.csv";
     String ratings = "src/test/data/ratings-1.csv";
@@ -109,19 +119,6 @@ public final class RecommendTest {
 
   @Test
   public void rankFromDistance() throws IOException, Exception {
-    // set up distance mocking
-    PowerMockito.mockStatic(Utils.class);
-    PowerMockito.when(Utils.getDistance("90045", "90045")).thenReturn(0);
-    PowerMockito.when(Utils.getDistance("90045", "90301")).thenReturn(10);
-    PowerMockito.when(Utils.getDistance("90045", "90305")).thenReturn(20);
-    PowerMockito.when(Utils.getDistance("90045", "90047")).thenReturn(30);
-    PowerMockito.when(Utils.getDistance("90045", "90003")).thenReturn(40);
-    PowerMockito.when(Utils.getDistance("90003", "90003")).thenReturn(0);
-    PowerMockito.when(Utils.getDistance("90003", "90047")).thenReturn(10);
-    PowerMockito.when(Utils.getDistance("90003", "90305")).thenReturn(20);
-    PowerMockito.when(Utils.getDistance("90003", "90301")).thenReturn(30);
-    PowerMockito.when(Utils.getDistance("90003", "90045")).thenReturn(40);
-
     // check that recommendation ranks distances correctly
     String users = "src/test/data/users-2.csv";
     String ratings = "src/test/data/ratings-none.csv";
@@ -159,9 +156,6 @@ public final class RecommendTest {
 
   @Test
   public void rankWithoutInteractions() throws IOException {
-    PowerMockito.mockStatic(Utils.class);
-    PowerMockito.when(Utils.getDistance("90045", "90045")).thenReturn(0);
-
     // test that ranks are calculated correctly when interactions and locations are held constant
     String users = "src/test/data/users-3.csv";
     String ratings = "src/test/data/ratings-none.csv";
@@ -191,14 +185,6 @@ public final class RecommendTest {
 
   @Test
   public void noRecommendationsServlet() throws IOException {
-    // similar to rankFromDistance(), but performed through the servlet instead
-    PowerMockito.mockStatic(Utils.class);
-    PowerMockito.when(Utils.getDistance("90045", "90045")).thenReturn(0);
-    PowerMockito.when(Utils.getDistance("90045", "90301")).thenReturn(10);
-    PowerMockito.when(Utils.getDistance("90045", "90305")).thenReturn(20);
-    PowerMockito.when(Utils.getDistance("90045", "90047")).thenReturn(30);
-    PowerMockito.when(Utils.getDistance("90045", "90003")).thenReturn(40);
-
     String users = "src/test/data/users-2.csv";
     String ratings = "src/test/data/ratings-none.csv";
     String events = "src/test/data/events-2.csv";
@@ -235,19 +221,6 @@ public final class RecommendTest {
 
   @Test
   public void returnRecommendations() throws IOException {
-    // similar to rankFromDistance(), but performed through the servlet instead
-    PowerMockito.mockStatic(Utils.class);
-    PowerMockito.when(Utils.getDistance("90045", "90045")).thenReturn(0);
-    PowerMockito.when(Utils.getDistance("90045", "90301")).thenReturn(10);
-    PowerMockito.when(Utils.getDistance("90045", "90305")).thenReturn(20);
-    PowerMockito.when(Utils.getDistance("90045", "90047")).thenReturn(30);
-    PowerMockito.when(Utils.getDistance("90045", "90003")).thenReturn(40);
-    PowerMockito.when(Utils.getDistance("90003", "90003")).thenReturn(0);
-    PowerMockito.when(Utils.getDistance("90003", "90047")).thenReturn(10);
-    PowerMockito.when(Utils.getDistance("90003", "90305")).thenReturn(20);
-    PowerMockito.when(Utils.getDistance("90003", "90301")).thenReturn(30);
-    PowerMockito.when(Utils.getDistance("90003", "90045")).thenReturn(40);
-
     // check that recommendation ranks distances correctly
     String users = "src/test/data/users-2.csv";
     String ratings = "src/test/data/ratings-none.csv";
@@ -265,13 +238,6 @@ public final class RecommendTest {
 
   @Test
   public void problematicEntity() throws IOException {
-    PowerMockito.mockStatic(Utils.class);
-    PowerMockito.when(Utils.getDistance("90045", "90045")).thenReturn(0);
-    PowerMockito.when(Utils.getDistance("90045", "90301")).thenReturn(10);
-    PowerMockito.when(Utils.getDistance("90045", "90305")).thenReturn(20);
-    PowerMockito.when(Utils.getDistance("90045", "90047")).thenReturn(30);
-    PowerMockito.when(Utils.getDistance("90045", "90003")).thenReturn(40);
-
     String users = "src/test/data/users-2.csv";
     String ratings = "src/test/data/ratings-none.csv";
     String events = "src/test/data/events-2.csv";
@@ -319,13 +285,6 @@ public final class RecommendTest {
 
   @Test
   public void completedSurvey() throws IOException {
-    PowerMockito.mockStatic(Utils.class);
-    PowerMockito.when(Utils.getDistance("90045", "90045")).thenReturn(0);
-    PowerMockito.when(Utils.getDistance("90045", "90301")).thenReturn(10);
-    PowerMockito.when(Utils.getDistance("90045", "90305")).thenReturn(20);
-    PowerMockito.when(Utils.getDistance("90045", "90047")).thenReturn(30);
-    PowerMockito.when(Utils.getDistance("90045", "90003")).thenReturn(40);
-
     String users = "src/test/data/users-2.csv";
     String ratings = "src/test/data/ratings-none.csv";
     String events = "src/test/data/events-2.csv";
