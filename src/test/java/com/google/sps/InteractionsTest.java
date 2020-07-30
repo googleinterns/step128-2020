@@ -23,6 +23,7 @@ import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.EntityNotFoundException;
+import com.google.appengine.api.datastore.GeoPt;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.PreparedQuery;
@@ -47,6 +48,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
@@ -56,7 +58,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @PowerMockIgnore("okhttp3.*")
 @RunWith(PowerMockRunner.class)
 @SuppressStaticInitializationFor({"com.google.sps.Firebase"})
-@PrepareForTest({Firebase.class})
+@PrepareForTest({Utils.class, Firebase.class})
 public final class InteractionsTest {
   private final LocalServiceTestHelper helper =
       new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
@@ -64,7 +66,8 @@ public final class InteractionsTest {
   private static final SurveyServlet testSurveyServlet = new SurveyServlet();
   private static final double FLOAT_THRESHOLD = 0.0000001;
 
-  private void takeSurvey(String email) throws IOException {
+  /** Logs in as a user and submits a survey. */
+  public static void takeSurvey(String email) throws IOException {
     HttpServletRequest request = mock(HttpServletRequest.class);
     TestingUtil.mockFirebase(request, email);
 
@@ -87,6 +90,14 @@ public final class InteractionsTest {
   @Before
   public void setUp() throws IOException {
     helper.setUp();
+
+    TestingUtil.mockUtilsForLocation();
+    PowerMockito.when(Utils.getGeopt("13364 Lakeview Way, Lakeside, California"))
+        .thenReturn(new GeoPt(32.858758f, -116.904991f));
+    PowerMockito.when(Utils.getGeopt("11852 S Main Street, Los Angeles, California"))
+        .thenReturn(new GeoPt(33.925076f, -118.27369f));
+    PowerMockito.when(Utils.getGeopt("9800 Regent Street, Los Angeles, California"))
+        .thenReturn(new GeoPt(34.025995f, -118.399908f));
   }
 
   @After

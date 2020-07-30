@@ -70,7 +70,6 @@ function loadActions(doAfter) {
   });
 
   // makes sure tasks are initialized in queue properly
-  fetch('/worker');
 }
 
 let url = '';
@@ -331,7 +330,7 @@ const test = {eventName: 'Beach clean up',
   state: 'CA',
   attendeeCount: 12,
   tags: ['environment'],
-  key: 'aglub19hcHBfaWRyEgsSBUV2ZW50GICAgICAgIAKDA'};
+  eventKey: 'aglub19hcHBfaWRyEgsSBUV2ZW50GICAgICAgIAKDA'};
 const test2 = {eventName: 'Book Drive',
   eventDescription: 'Lorem ipsum dolor sit amet, consectetur elit. ' +
       'Nam efficitur enim quis est mollis blandit. Integer vitae augue. ' +
@@ -345,7 +344,7 @@ const test2 = {eventName: 'Book Drive',
   state: 'CA',
   attendeeCount: 12,
   tags: ['education'],
-  key: 'aglub19hcHBfaWRyEgsSBUV2ZW50GICAgICAgIAKDA'};
+  eventKey: 'aglub19hcHBfaWRyEgsSBUV2ZW50GICAgICAgIAKDA'};
 const dummyEvents = [test, test2];
 const dummyText = 'Suggested for you'; // TODO: come up with variety
 
@@ -378,31 +377,7 @@ async function getEvents(events, index, option) {
   eventListElement.innerHTML = '';
 
   if (events.length == 0) {
-    const noElementsBox = document.createElement('div');
-    noElementsBox.className = 'no-events';
-    const noElementsText = document.createElement('div');
-    noElementsText.className = 'no-events-text';
-    if (option == recommendedForYou) {
-      noElementsText.innerText = 'No events to recommend yet! Click the ' +
-          '‘Find’ tab to find some events that interest you.';
-    } else if (option == recommendNotLoggedIn) {
-      noElementsText.innerText = 'Please login first to get event ' +
-          'recommendations!';
-    } else if (option == savedEvents) {
-      noElementsText.innerText = 'You have not saved any events yet! ' +
-          'Click the ‘Find’ tab to to find an event you would like to save.';
-    } else if (option == createdEvents) {
-      noElementsText.innerText = 'You have not created an event yet! ' +
-          'Click the ‘Create’ tab to create your first event.';
-    } else if (option == searchResults) {
-      noElementsText.innerText = 'No events found matching your desired tags.';
-    } else {
-      noElementsText.innerText = 'No events to see! Create one now.';
-    }
-
-    noElementsBox.appendChild(noElementsText);
-    eventListElement.appendChild(noElementsBox);
-    return;
+    displayEmptyEventList(index, option);
   }
 
   events.forEach(function(event) {
@@ -590,6 +565,48 @@ async function getEvents(events, index, option) {
   //       </div>
   //     </div>
   //   </div>
+}
+
+/**
+ * Method to display an empty event list.
+ *
+ * @param {number} index To identify which event list container
+ *                           on the page to generate.
+ * @param {number} option To identify which message to generate.
+ */
+function displayEmptyEventList(index, option) {
+  const eventListElements =
+      document.getElementsByClassName('event-list-container');
+  if (index == null || index >= eventListElements.length) {
+    index = 0;
+  }
+  const eventListElement = eventListElements[index];
+  eventListElement.innerHTML = '';
+
+  const noElementsBox = document.createElement('div');
+  noElementsBox.className = 'no-events';
+  const noElementsText = document.createElement('div');
+  noElementsText.className = 'no-events-text';
+  if (option == recommendedForYou) {
+    noElementsText.innerText = 'No events to recommend yet! Click the ' +
+        '‘Find’ tab to find some events that interest you.';
+  } else if (option == recommendNotLoggedIn) {
+    noElementsText.innerText = 'Please login first to get event ' +
+        'recommendations!';
+  } else if (option == savedEvents) {
+    noElementsText.innerText = 'You have not saved any events yet! ' +
+        'Click the ‘Find’ tab to to find an event you would like to save.';
+  } else if (option == createdEvents) {
+    noElementsText.innerText = 'You have not created an event yet! ' +
+        'Click the ‘Create’ tab to create your first event.';
+  } else if (option == searchResults) {
+    noElementsText.innerText = 'No events found matching your desired tags.';
+  } else {
+    noElementsText.innerText = 'No events to see! Create one now.';
+  }
+
+  noElementsBox.appendChild(noElementsText);
+  eventListElement.appendChild(noElementsBox);
 }
 
 /**
@@ -1099,7 +1116,6 @@ function deleteEvent() {
 /* **********************************************************************
  * Methods for index.html
  * **********************************************************************/
-
 /**
  * Onload actions for index.html
  * Fetches events from server, calls getEvents with correct options and loads
@@ -1109,24 +1125,61 @@ async function getRecommendedEvents() {
   displayLoading(0);
   if (loggedIn) {
     getUserIDToken().then((userToken) => {
-      fetch('/user?get=saved&userToken=' + userToken)
+      const params = new URLSearchParams();
+      params.append('userToken', userToken);
+      fetch(new Request('/recommend', {method: 'POST', body: params}))
           .then((response) => response.json())
           .then(function(js) {
-            // TODO: change this fetch call to get recommendations instead
-            getEvents(dummyEvents, 0, recommendedForYou);
+            displayHomePage(js.surveyStatus, js.recommendations);
           });
     });
   } else {
-    fetch('/user')
-        .then((response) => response.json())
-        .then(function(js) {
-          // TODO: change this fetch call to get recommendations instead
-          getEvents(js, 0, recommendNotLoggedIn);
-        });
+    getEvents([], 0, recommendNotLoggedIn);
   }
-  getSearchDistanceSettings();
 }
 
+/**
+ * Displays recommendation/survey area on home page based on
+ * size of recommenations list and completion status of survey.
+ *
+ * @param {number} surveyStatus Completion status of the survey,
+ *                                  either 'true' or 'false'.
+ * @param {array} recommendations The list of recommended events
+ *                                  returned by the servlet.
+ */
+function displayHomePage(surveyStatus, recommendations) {
+  if (recommendations.length == 0 && surveyStatus == 'false') {
+    // show big prompt
+    const surveyBox = document.getElementById('survey-link-container');
+    surveyBox.className = 'no-events big-survey';
+    const surveyLink = document.getElementById('survey-link');
+    surveyLink.innerText = 'Click here to take our survey for more ' +
+        'relevant recommendations, or visit the ‘Find’ tab to look ' +
+        'for events that interest you.';
+    // hide event container
+    const container =
+        document.getElementsByClassName('event-section')[0];
+    container.style.display = 'none';
+  } else if (recommendations.length == 0 && surveyStatus == 'true') {
+    // (no events to show)
+    const surveyBox = document.getElementById('survey-link-container');
+    surveyBox.style.dispay = 'none';
+    getEvents(recommendations, 0, recommendedForYou);
+  } else if (surveyStatus == 'false') {
+    // display small survey prompt
+    const surveyBox = document.getElementById('survey-link-container');
+    surveyBox.className = 'small-survey';
+    const surveyLink = document.getElementById('survey-link');
+    surveyLink.innerText = 'Click here to take our survey for more ' +
+        'relevant recommendations.';
+    getEvents(recommendations, 0, recommendedForYou);
+  } else {
+    // don't show survey prompt
+    const surveyBox = document.getElementById('survey-link-container');
+    surveyBox.style.dispay = 'none';
+    getEvents(recommendations, 0, recommendedForYou);
+  }
+}
 
 /* **********************************************************************
  *  Methods for my-events.html
@@ -1393,38 +1446,6 @@ function loadAttendingColor(color) {
   countContainer.className = 'attendee-count ' + color + '-text';
 }
 
-/* **********************************************************************
- * Methods for login.html
- * **********************************************************************/
-
-// FirebaseUI config.
-const uiConfig = {
-  // TODO: replace with URL user came from each time?
-  signInSuccessUrl: '/index.html',
-  signInOptions: [
-    firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-    firebase.auth.EmailAuthProvider.PROVIDER_ID,
-    firebase.auth.FacebookAuthProvider.PROVIDER_ID,
-  ],
-  // tosUrl and privacyPolicyUrl accept either url string or a callback
-  // function.
-  // Terms of service url/callback.
-  tosUrl: '<your-tos-url>',
-  // Privacy policy url/callback.
-  privacyPolicyUrl: function() {
-    // TODO: change privacy policy url
-    window.location.assign('<your-privacy-policy-url>');
-  },
-};
-
-/**
- * Displays the Firebase login ui on the login page
- */
-function initializeFirebaseLogin() {
-  const ui = new firebaseui.auth.AuthUI(firebase.auth());
-  ui.start('#firebaseui-auth-container', uiConfig);
-}
-
 /**
  * Loads optional field end time.
  */
@@ -1444,17 +1465,64 @@ function loadOptionalFields() {
  * Generates share links for Facebook, Twitter, and mail.
  */
 function loadLinks() {
-  const eventKey = document.getElementById('event-key').value;
   const twitter = document.getElementById('twitter-link');
   const facebook = document.getElementById('fb-link');
   const mail = document.getElementById('mail-link');
-  const url = 'http://unitebystep.appspot.com/load-event?Event=' + eventKey;
-  const br = '%0D%0A%0D%0A';
+  const copy = document.getElementById('copy-link');
+  const key = document.getElementById('event-key').value;
+  const name = document.getElementById('name').value;
+  const desc = document.getElementById('desc').value;
+  const date = document.getElementById('date').value;
+  const time = document.getElementById('start').value;
+  const url = 'https://unitebystep.appspot.com/load-event?Event=' + key;
+  const br = '%0D%0A';
 
   twitter.href = 'https://twitter.com/share?url=' + url;
   facebook.href = 'http://www.facebook.com/sharer.php?u=' + url;
   mail.href =
-   'mailto:?subject=Unite by STEP Event&body=Check out this event!' + br + url;
+   'mailto:?subject=Unite by STEP Event:%20' + name +
+   '&body=Check out this event!' + br + br + name + br +
+   'Description:%20' + desc + br + 'Date:%20' + date + br + 'Time:%20' + time +
+    br + br + 'Follow this link to see more details' + br + url;
+
+  copy.setAttribute('onclick', 'copyLink("' + url + '")');
+}
+
+/**
+ * Copies URL link to clipboard.
+ * @param {String} url event url.
+ */
+function copyLink(url) {
+  const hiddenText = document.createElement('input');
+  hiddenText.style = 'position: absolute; left: -1000px; top: -1000px';
+  hiddenText.value = url;
+
+  document.body.appendChild(hiddenText);
+  hiddenText.select();
+  hiddenText.setSelectionRange(0, 99999);
+  document.execCommand('copy');
+  document.body.removeChild(hiddenText);
+  displayCopied();
+}
+
+/**
+ * Displays copy confirmation message
+ */
+function displayCopied() {
+  const message = document.getElementById('copy-msg');
+  const links = document.getElementById('share-container');
+  if ((message.style.display == 'none') || (message.style.display == '')) {
+    message.style.display = 'block';
+    message.style.height = 'auto';
+    message.style.opacity = 1;
+    links.style.display = 'none';
+    setTimeout(displayCopied, 2000);
+  } else {
+    message.style.display = 'none';
+    message.style.height = 0;
+    message.style.opacity = 0;
+    links.style.display = 'inherit';
+  }
 }
 
 /**
@@ -1492,4 +1560,38 @@ function saveEvent(eventId) {
       window.location.href = '/my-events.html';
     });
   });
+}
+
+/* **********************************************************************
+ * Methods for login.html
+ * **********************************************************************/
+
+/**
+ * FirebaseUI config.
+ */
+const uiConfig = {
+  // TODO: replace with URL user came from each time?
+  signInSuccessUrl: '/index.html',
+  signInOptions: [
+    firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+    firebase.auth.EmailAuthProvider.PROVIDER_ID,
+    firebase.auth.FacebookAuthProvider.PROVIDER_ID,
+  ],
+  // tosUrl and privacyPolicyUrl accept either url string or a callback
+  // function.
+  // Terms of service url/callback.
+  tosUrl: '<your-tos-url>',
+  // Privacy policy url/callback.
+  privacyPolicyUrl: function() {
+    // TODO: change privacy policy url
+    window.location.assign('<your-privacy-policy-url>');
+  },
+};
+
+/**
+ * Displays the Firebase login ui on the login page
+ */
+function initializeFirebaseLogin() {
+  const ui = new firebaseui.auth.AuthUI(firebase.auth());
+  ui.start('#firebaseui-auth-container', uiConfig);
 }

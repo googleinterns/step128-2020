@@ -60,7 +60,7 @@ public class Recommend {
   // multipliers for score calculation
   public static final float ZERO = 0.1f;
   public static final double NO_INTERACTION = 1.5;
-  public static final double ALREADY_SAVED = 0.6;
+  public static final double ALREADY_SAVED = 0.3;
   // for distance score calculation
   public static final double DISTANCE_BASE = 1.04;
   public static final int INVALID_DISTANCE = 1000;

@@ -17,6 +17,7 @@ package com.google.sps;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
 
+import com.google.appengine.api.datastore.GeoPt;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.maps.DistanceMatrixApi;
@@ -116,6 +117,52 @@ public final class SearchServletTest {
 
     LatLng location = Utils.getLatLng(locStr);
     assertEquals(new LatLng(-31.95220010, 115.85884740), location);
+  }
+
+  @Test
+  public void getGeoPtWorks() throws Exception {
+    LatLng loc = new LatLng(-31.95220010, 115.85884740);
+    GeoPt geopt = Utils.getGeopt(loc);
+    assertEquals(-31.95220010, geopt.getLatitude(), 0.0001);
+    assertEquals(115.85884740, geopt.getLongitude(), 0.0001);
+  }
+
+  @Test
+  public void getGeoPtStringWorks() throws Exception {
+    LatLng loc = new LatLng(-31.95220010, 115.85884740);
+    String locStr = "3 Forrest Pl, Perth WA 6000, Australia";
+
+    GeocodingResult[] gr = createGeocodingResult(loc);
+    mockGeocodingApiSetup(locStr, gr);
+
+    GeoPt geopt = Utils.getGeopt(locStr);
+    assertEquals(-31.95220010, geopt.getLatitude(), 0.0001);
+    assertEquals(115.85884740, geopt.getLongitude(), 0.0001);
+  }
+  
+  @Test
+  public void getDistanceStrings() throws Exception {
+    LatLng loc = new LatLng(-31.95220010, 115.85884740);
+    String locStr = "3 Forrest Pl, Perth WA 6000, Australia";
+    GeocodingResult[] gr = createGeocodingResult(loc);
+    mockGeocodingApiSetup(locStr, gr);
+
+    LatLng loc2 = new LatLng(-25.344677, 131.036692);
+    String locStr2 = "Uluru, Petermann NT 0872, Australia";
+    GeocodingResult[] gr2 = createGeocodingResult(loc2);
+    mockGeocodingApiSetup(locStr2, gr2);
+
+    DistanceMatrix dm = createDistanceMatrix(2059000, DistanceMatrixElementStatus.OK);
+    mockDistanceMatrixApiSetup(loc, loc2, dm);
+
+    int distance = Utils.getDistance(locStr, locStr2);
+    assertEquals(2059, distance);
+  }
+
+  @Test
+  public void emptyStrings() throws Exception {
+    assertEquals(-1, Utils.getDistance("", null));
+    assertEquals(-1, Utils.getDistance("", ""));
   }
 
   /**

@@ -45,17 +45,18 @@ public class RecommendServlet extends HttpServlet {
   private static final int EVENTS_LIMIT = 10;
 
   @Override
-  public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+  public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
     response.setContentType("application/json");
     Gson gson = new Gson();
 
     String userToken = request.getParameter("userToken");
     if (userToken == null || !Firebase.isUserLoggedIn(userToken)) {
-      response.getWriter().println(gson.toJson(new ArrayList<Entity>()));
+      HomePageObject result = new HomePageObject(new ArrayList<Entity>(), "false");
+      response.getWriter().println(gson.toJson(result));
       return;
     }
 
-    List<Entity> events = null;
+    HomePageObject events = null;
     String userID = Firebase.authenticateUser(userToken);
     Key recKey = KeyFactory.createKey("Recommendation", userID);
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
@@ -63,17 +64,16 @@ public class RecommendServlet extends HttpServlet {
       // find previously computed recommendations
       Entity recommendations = datastore.get(recKey);
       List<Long> recIds = (List<Long>) recommendations.getProperty("recs");
-      events = getFromStoredRecs(recIds);
+      events = getFromStoredRecs(recIds, userID);
     } catch (EntityNotFoundException | NullPointerException exception) {
       // no prev recommendations, compute simple recommendations based on tags and distance only
       LOGGER.info("No recommendations found for " + userID + ". Computing now.");
       events = computeRecommendations(userID);
     }
-
     response.getWriter().println(gson.toJson(events));
   }
 
-  private List<Entity> getFromStoredRecs(List<Long> recIds) {
+  private HomePageObject getFromStoredRecs(List<Long> recIds, String userId) {
     final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     int limit = EVENTS_LIMIT;
     List<Entity> events = new ArrayList<>();
@@ -87,7 +87,15 @@ public class RecommendServlet extends HttpServlet {
         limit++;
       }
     }
-    return events;
+    HomePageObject obj = new HomePageObject(events, "true");
+    try {
+      Entity userEntity = datastore.get(KeyFactory.createKey("User", userId));
+      obj.surveyStatus = userEntity.getProperty("surveyCompleted").toString();
+    } catch (EntityNotFoundException | NullPointerException exception) {
+      Interactions.makeUserEntity(userId, true);
+      obj.surveyStatus = "false";
+    }
+    return obj;
   }
 
   /**
@@ -95,26 +103,26 @@ public class RecommendServlet extends HttpServlet {
    * highest-scoring event entities after storing their ids to datastore as a Recommendation object
    * for the user. If there is no user data, returns an empty list.
    */
-  private List<Entity> computeRecommendations(String userId) {
+  private HomePageObject computeRecommendations(String userId) {
     final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     Entity userEntity = null;
-    List<Entity> events = new ArrayList<>();
     try {
       userEntity = datastore.get(KeyFactory.createKey("User", userId));
     } catch (EntityNotFoundException exception) {
       // user does not exist (no data)
-      userEntity = Utils.makeUserEntity(userId, true);
-      return events;
+      userEntity = Interactions.makeUserEntity(userId, true);
+      return new HomePageObject(new ArrayList<Entity>(), "false");
     }
     Map<String, Float> userParams = Interactions.buildVectorForUser(userEntity);
     if (userParams.size() == 0) {
       // no data for this user yet
-      return events;
+      return new HomePageObject(new ArrayList<Entity>(), "false");
     }
     String userLocation = null;
     if (userEntity.hasProperty("location")) {
       userLocation = userEntity.getProperty("location").toString();
     }
+    List<Entity> events = new ArrayList<>();
     Map<Double, Entity> bestEvents = new TreeMap<>(Recommend.SCORE_DESCENDING);
     // score and rank events
     for (Entity event : datastore.prepare(new Query("Event")).asIterable()) {
@@ -148,7 +156,7 @@ public class RecommendServlet extends HttpServlet {
     recommendations.setProperty("recs", eventIds);
     datastore.put(recommendations);
 
-    return events;
+    return new HomePageObject(events, userEntity.getProperty("surveyCompleted"));
   }
 
   /**
@@ -198,5 +206,19 @@ public class RecommendServlet extends HttpServlet {
 
     totalScore = Math.round(totalScore * 1000.0) / 1000.0;
     return totalScore;
+  }
+
+  private static class HomePageObject {
+    private List<Entity> recommendations;
+    private String surveyStatus;
+
+    public HomePageObject(List<Entity> recommendations, Object surveyStatus) {
+      this.recommendations = recommendations;
+      if (surveyStatus == null) {
+        this.surveyStatus = "false";
+      } else {
+        this.surveyStatus = surveyStatus.toString();
+      }
+    }
   }
 }
