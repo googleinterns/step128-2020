@@ -14,6 +14,7 @@
 
 package com.google.sps;
 
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -119,6 +120,14 @@ public final class TestingUtil {
     List<Entity> events =
         new ArrayList<Entity>(results.asList(FetchOptions.Builder.withDefaults()));
     return events;
+  }
+
+  public static void mockUtilsForLocation() {
+    PowerMockito.mockStatic(Utils.class);
+    PowerMockito.when(Utils.convertToJson(any())).thenCallRealMethod();
+    PowerMockito.when(Utils.formatTime(anyString())).thenCallRealMethod();
+    PowerMockito.when(Utils.formatDate(anyString())).thenCallRealMethod();
+    PowerMockito.when(Utils.getParameter(any(), anyString(), anyString())).thenCallRealMethod();
   }
 
   /**
