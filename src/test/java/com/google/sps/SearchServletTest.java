@@ -121,10 +121,21 @@ public final class SearchServletTest {
 
   @Test
   public void getGeoPtWorks() throws Exception {
-    assertEquals(null, Utils.getGeopt(null));
-
     LatLng loc = new LatLng(-31.95220010, 115.85884740);
     GeoPt geopt = Utils.getGeopt(loc);
+    assertEquals(-31.95220010, geopt.getLatitude(), 0.0001);
+    assertEquals(115.85884740, geopt.getLongitude(), 0.0001);
+  }
+
+  @Test
+  public void getGeoPtStringWorks() throws Exception {
+    LatLng loc = new LatLng(-31.95220010, 115.85884740);
+    String locStr = "3 Forrest Pl, Perth WA 6000, Australia";
+
+    GeocodingResult[] gr = createGeocodingResult(loc);
+    mockGeocodingApiSetup(locStr, gr);
+
+    GeoPt geopt = Utils.getGeopt(locStr);
     assertEquals(-31.95220010, geopt.getLatitude(), 0.0001);
     assertEquals(115.85884740, geopt.getLongitude(), 0.0001);
   }
