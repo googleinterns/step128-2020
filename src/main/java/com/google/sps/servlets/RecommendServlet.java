@@ -18,9 +18,12 @@ import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.EntityNotFoundException;
+import com.google.appengine.api.datastore.GeoPt;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Query.GeoRegion.Circle;
+import com.google.appengine.api.datastore.Query.StContainsFilter;
 import com.google.gson.Gson;
 import com.google.sps.Firebase;
 import com.google.sps.Interactions;
@@ -43,6 +46,7 @@ public class RecommendServlet extends HttpServlet {
 
   private static final Logger LOGGER = Logger.getLogger(RecommendServlet.class.getName());
   private static final int EVENTS_LIMIT = 10;
+  private static final double RADIUS = 300_000;
 
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -121,6 +125,9 @@ public class RecommendServlet extends HttpServlet {
     String userLocation = null;
     if (userEntity.hasProperty("location")) {
       userLocation = userEntity.getProperty("location").toString();
+      GeoPt latlng = Utils.getGeopt(userLocation);
+      datastore.prepare(
+          new Query("Event").setFilter(new StContainsFilter("latlng", new Circle(latlng, RADIUS))));
     }
     List<Entity> events = new ArrayList<>();
     Map<Double, Entity> bestEvents = new TreeMap<>(Recommend.SCORE_DESCENDING);
