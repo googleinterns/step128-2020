@@ -50,10 +50,10 @@
           </div>
           <p>Location: ${address}</p>
         </div>
-        <div class = "event-display-options">
+        <div class="event-display-options">
           <a class="save-event">Save Event</a>
           <a href="index.html" class="go-back">Go Back</a>
-            <br>
+          <br>
           <div class="share-wrapper">
             <h3>Share</h3>
             <div class="copy-wrapper">

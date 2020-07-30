@@ -705,6 +705,7 @@ h1 {
   background-color: #ddd;
   display: none;
   height: 10px;
+  margin-left: 2vh;
   opacity: 0;
   overflow: hidden;
   position: relative;
