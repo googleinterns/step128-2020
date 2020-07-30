@@ -92,7 +92,7 @@ public class RecommendServlet extends HttpServlet {
       Entity userEntity = datastore.get(KeyFactory.createKey("User", userId));
       obj.surveyStatus = userEntity.getProperty("surveyCompleted").toString();
     } catch (EntityNotFoundException | NullPointerException exception) {
-      Utils.makeUserEntity(userId, true);
+      Interactions.makeUserEntity(userId, true);
       obj.surveyStatus = "false";
     }
     return obj;
