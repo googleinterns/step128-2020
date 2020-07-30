@@ -101,7 +101,7 @@ public class Utils {
     } catch (IOException e) {
       LOGGER.warning(e.getMessage());
     }
-    if (results == null) {
+    if (results == null || results.length == 0) {
       return null;
     }
     return new LatLng(results[0].geometry.location.lat, results[0].geometry.location.lng);

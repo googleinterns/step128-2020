@@ -301,6 +301,22 @@ input {
   overflow: hidden;  
 }
 
+.form-buttons button, input[type=submit] {
+  background: rgb(245, 245, 245);
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: Google;
+  font-size: 4em;
+  height: 3em;
+  padding: 0.5em 1em;
+}
+
+.form-buttons #delete {
+  background: #cd1313;
+  color: white;
+}
+
 .divider {
   display: inline-block;
   height: auto;

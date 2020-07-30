@@ -234,6 +234,7 @@ h1 {
   margin-top: 8px;
   margin-right: 10px;
   padding: 6px 10px;
+  min-width: 4em;
 }
 
 .search-bar-container button:hover {
@@ -265,13 +266,16 @@ h1 {
 /* end of search page */
 
 /* Create Page */
-.start-bttn img {
-  height: 60px;
-  transition-duration: 0.4s;
-}
-
-.start-bttn img:hover {
-  box-shadow: 13px 13px 33px -13px rgba(92,92,92,1);
+.start-bttn button {
+  background: rgb(245, 245, 245);
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: Google;
+  font-size: 2em;
+  height: 2em;
+  padding: 0.5em 1em;
+  width: 200px;
 }
 
 .form-container {
@@ -333,8 +337,21 @@ input[type=time] {
   text-align: center;
 }
 
-.form-buttons img, input {
-  height: 50px;
+.form-buttons button, input[type=submit] {
+  background: rgb(245, 245, 245);
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: Google;
+  font-size: 2em;
+  height: 2em;
+  padding: 0.5em 1em;
+  min-width: 200px;
+}
+
+.form-buttons #delete {
+  background: #9e0000;
+  color: white;
 }
 
 .divider, 
@@ -342,15 +359,6 @@ input[type=time] {
   display: inline-block;
   height: auto;
   margin: 25px;
-}
-
-.edit-form-buttons img {
-  height: 50px;
-}
-
-.edit-form-buttons a {
-  display: inline-block;
-  overflow: hidden;  
 }
 
 /* event lists */
@@ -644,11 +652,16 @@ input[type=time] {
 }
 
 #survey-save {
-  margin-bottom: 10px;
-  align-self: center;
+  background: rgb(245, 245, 245);
+  border: none;
+  border-radius: 10px;
   cursor: pointer;
+  font-family: Google;
+  font-size: 2em;
+  height: 2em;
   margin: 30px;
   object-fit: contain;
+  padding: 0.5em 1em;
   width: 200px;
 }
 
@@ -730,8 +743,9 @@ input[type=time] {
 }
 
 .modal-content input[type=submit] {
+  display: block;
   height: 2em;
-  margin: 5px;
+  margin: auto;
 }
 
 .close {

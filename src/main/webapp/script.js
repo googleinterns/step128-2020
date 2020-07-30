@@ -896,6 +896,15 @@ function createLoadVerification() {
 }
 
 /**
+ * Redirects the user to the specified page.
+ *
+ * @param {String} page url to be redirected to
+ */
+function redirectTo(page) {
+  window.location.href = '/' + page;
+}
+
+/**
  * Populates the user token on page load to prevent NullPointerException.
  */
 function populateToken() {
