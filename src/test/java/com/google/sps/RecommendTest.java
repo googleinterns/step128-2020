@@ -345,8 +345,40 @@ public final class RecommendTest {
     String events = "src/test/data/events-2.csv";
     addInfoToDatastore(events, null, null);
 
-
     DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
+    // create userEntity that has high affinity with events in events-2.csv
+    Entity userEntity = new Entity("User", "test@example.com");
+    userEntity.setProperty("environment", 10);
+    userEntity.setProperty("volunteer", 10);
+    userEntity.setProperty("activism", 10);
+    userEntity.setProperty("fundraiser", 10);
+    userEntity.setProperty("education", 10);
+    ds.put(userEntity);
+
+    for (int i = 6; i <= 306; i++) {
+      Entity eventEntity = new Entity("Event", i);
+      eventEntity.setProperty("eventName", "AttendeeCount not 0");
+      eventEntity.setProperty("eventDescription", "This event has a non-zero attendee count.");
+      eventEntity.setProperty("address", "90045");
+      eventEntity.setProperty("latlng", Utils.getGeopt("90045"));
+      eventEntity.setProperty("attendeeCount", 1);
+      String[] tags = {"blm"};
+      String tagsStr = Utils.convertToJson(tags);
+      List<String> tagsList =
+          gson.fromJson(tagsStr, new TypeToken<ArrayList<String>>() {}.getType());
+      eventEntity.setIndexedProperty("tags", tagsList);
+      ds.put(eventEntity);
+    }
+
+    // all events in events-2.csv should be cut off from query
+    HomePageObject resultObj = callPost("test@example.com");
+    List<Entity> results = resultObj.recommendations;
+    assertEquals(15, results.size());
+    for (int i = 0; i < results.size(); i++) {
+      if (results.get(i).getKey().getId() < 6) {
+        fail();
+      }
+    }
   }
 
   /** Performs the GET request to retrieve event recommendations. */
@@ -379,8 +411,8 @@ public final class RecommendTest {
       }
     }
     scan.close();
-    if(usersFile == null) {
-        return;
+    if (usersFile == null) {
+      return;
     }
     // scan users and user data
     scan = new Scanner(new File(usersFile));
