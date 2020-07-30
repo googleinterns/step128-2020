@@ -580,12 +580,12 @@ input[type=time] {
 
 .copy-msg {
   background-color: #ddd;
-	display: none;
-	height: 10px;
+  display: none;
+  height: 10px;
   opacity: 0;
-	overflow: hidden;
+  overflow: hidden;
   position: relative;
-	transition: opacity 0.2, visibility 0.2s;
+  transition: opacity 0.2, visibility 0.2s;
 }
 
 /* Footer */
