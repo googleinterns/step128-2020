@@ -66,7 +66,8 @@ public final class InteractionsTest {
   private static final SurveyServlet testSurveyServlet = new SurveyServlet();
   private static final double FLOAT_THRESHOLD = 0.0000001;
 
-  private void takeSurvey(String email) throws IOException {
+  /** Logs in as a user and submits a survey. */
+  public static void takeSurvey(String email) throws IOException {
     HttpServletRequest request = mock(HttpServletRequest.class);
     TestingUtil.mockFirebase(request, email);
 

@@ -127,8 +127,20 @@ footer {
   padding: 30px;
 }
 
-.survey-link a {
+.small-survey a {
   color: #6e9eeb;
+}
+
+.big-survey {
+  font-size: 22px;
+  font-weight: bold;
+  height: 150px;
+}
+
+.big-survey a {
+  color: white;
+  margin: 5px 50px;
+  text-align: center;
 }
 
 .page-header {
@@ -355,6 +367,7 @@ input[type=time] {
   background-color: #6e9eeb;
   color: white;
   display: flex;
+  flex-flow: column nowrap;
   justify-content: center;
   min-height: 60px;
   padding: 20px;
@@ -536,6 +549,7 @@ input[type=time] {
   height: 75px;
   justify-content: center;
   margin: 15px;
+  margin-left: 50px;
   width: 200px;
 }
 
@@ -547,6 +561,10 @@ input[type=time] {
   background-color: white;
 }
 
+.share-wrapper {
+  text-align: center;
+}
+
 .share-container {
   margin-top: 5px;
 }
@@ -554,6 +572,20 @@ input[type=time] {
 .share-container img {
   cursor: pointer;
   height: 70px;
+}
+
+.copy-wrapper {
+  height: 10px;
+}
+
+.copy-msg {
+  background-color: #ddd;
+  display: none;
+  height: 10px;
+  opacity: 0;
+  overflow: hidden;
+  position: relative;
+  transition: opacity 0.2, visibility 0.2s;
 }
 
 /* Footer */

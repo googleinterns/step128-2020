@@ -26,9 +26,7 @@
           <div id="event-display-description" class="event-display-description">
             ${description}
           </div>
-          <div class="tags-container">Tags:
-            <input type="hidden" id="tags-value" value='${tags}'>
-          </div>
+          <div class="tags-container">Tags: </div>
         </div>
         <div class="footer">
           <p>
@@ -44,7 +42,6 @@
       </div>
       <div class="event-right-details">
         <div class="event-time-location">
-          <input type="hidden" id="end-value" value='${end}'>
           <div class="date">
             <p>Date: ${date}</p>
           </div>
@@ -53,14 +50,16 @@
           </div>
           <p>Location: ${address}</p>
         </div>
-        <div class = "event-display-options">
+        <div class="event-display-options">
           <a class="save-event">Save Event</a>
           <a href="index.html" class="go-back">Go Back</a>
-            <br>
+          <br>
           <div class="share-wrapper">
             <h3>Share</h3>
-            <div class="share-container">
-              <input type="hidden" id="event-key" value='${key}'>
+            <div class="copy-wrapper">
+              <span class="copy-msg" id="copy-msg">Link copied to clipboard</span>
+            </div>
+            <div class="share-container" id="share-container">
               <a id="twitter-link" target="_blank">
                   <img src="images/twitter.svg" alt="Twitter"/>
               </a>
@@ -70,9 +69,21 @@
               <a id="mail-link" target="_blank">
                   <img src="images/gmail.svg" alt="Email"/>
               </a>
+              <a id="copy-link" target="_blank">
+                  <img src="images/copy-link.svg" alt="Copy Link"/>
+              </a>
             </div>
           </div>
         </div>
+      </div>
+      <div>
+        <input type="hidden" id="name" value='${name}'>
+        <input type="hidden" id="desc" value='${description}'>
+        <input type="hidden" id="date" value='${date}'>
+        <input type="hidden" id="start" value='${start}'>
+        <input type="hidden" id="end-value" value='${end}'>
+        <input type="hidden" id="tags-value" value='${tags}'>
+        <input type="hidden" id="event-key" value='${key}'>
       </div>
     </div>
     <footer>

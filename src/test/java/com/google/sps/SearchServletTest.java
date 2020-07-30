@@ -139,6 +139,31 @@ public final class SearchServletTest {
     assertEquals(-31.95220010, geopt.getLatitude(), 0.0001);
     assertEquals(115.85884740, geopt.getLongitude(), 0.0001);
   }
+  
+  @Test
+  public void getDistanceStrings() throws Exception {
+    LatLng loc = new LatLng(-31.95220010, 115.85884740);
+    String locStr = "3 Forrest Pl, Perth WA 6000, Australia";
+    GeocodingResult[] gr = createGeocodingResult(loc);
+    mockGeocodingApiSetup(locStr, gr);
+
+    LatLng loc2 = new LatLng(-25.344677, 131.036692);
+    String locStr2 = "Uluru, Petermann NT 0872, Australia";
+    GeocodingResult[] gr2 = createGeocodingResult(loc2);
+    mockGeocodingApiSetup(locStr2, gr2);
+
+    DistanceMatrix dm = createDistanceMatrix(2059000, DistanceMatrixElementStatus.OK);
+    mockDistanceMatrixApiSetup(loc, loc2, dm);
+
+    int distance = Utils.getDistance(locStr, locStr2);
+    assertEquals(2059, distance);
+  }
+
+  @Test
+  public void emptyStrings() throws Exception {
+    assertEquals(-1, Utils.getDistance("", null));
+    assertEquals(-1, Utils.getDistance("", ""));
+  }
 
   /**
    * Returns a DistanceMatrix with the desired parameters.
