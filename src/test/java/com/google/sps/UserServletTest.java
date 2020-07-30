@@ -25,12 +25,14 @@ import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.EntityNotFoundException;
+import com.google.appengine.api.datastore.GeoPt;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.gson.Gson;
+import com.google.gson.internal.LinkedTreeMap;
 import com.google.gson.reflect.TypeToken;
 import com.google.sps.servlets.EventServlet;
 import com.google.sps.servlets.SearchServlet;
@@ -59,7 +61,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @PowerMockIgnore("okhttp3.*")
 @RunWith(PowerMockRunner.class)
 @SuppressStaticInitializationFor({"com.google.sps.Firebase"})
-@PrepareForTest({Firebase.class})
+@PrepareForTest({Utils.class, Firebase.class})
 public final class UserServletTest {
   private final LocalServiceTestHelper helper =
       new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
@@ -72,8 +74,18 @@ public final class UserServletTest {
     Set<String> resultProperties = resultEntity.getProperties().keySet();
     assertEquals(goalProperties.size(), resultProperties.size());
     for (String s : goalProperties) {
-      // ignore attendeeCount, which is checked elsewhere
-      if (!(s.equals("attendeeCount"))) {
+      if (s.equals("attendeeCount")) {
+        // ignore attendeeCount, which is checked elsewhere
+      } else if (s.equals("latlng")) {
+        if (!goal.getProperty(s).equals(resultEntity.getProperty(s))) {
+          // GeoPt casting is sometimes weird
+          GeoPt goalPoint = (GeoPt) goal.getProperty(s);
+          LinkedTreeMap<String, Double> resultPoint =
+              (LinkedTreeMap<String, Double>) resultEntity.getProperty(s);
+          assertEquals(goalPoint.getLatitude(), resultPoint.get("latitude"), 0.001);
+          assertEquals(goalPoint.getLongitude(), resultPoint.get("longitude"), 0.001);
+        }
+      } else {
         assertEquals(goal.getProperty(s), resultEntity.getProperty(s));
       }
     }
@@ -114,6 +126,14 @@ public final class UserServletTest {
   @Before
   public void setUp() throws IOException {
     helper.setUp();
+
+    TestingUtil.mockUtilsForLocation();
+    PowerMockito.when(Utils.getGeopt("13364 Lakeview Way, Lakeside, California"))
+        .thenReturn(new GeoPt(32.858758f, -116.904991f));
+    PowerMockito.when(Utils.getGeopt("11852 S Main Street, Los Angeles, California"))
+        .thenReturn(new GeoPt(33.925076f, -118.27369f));
+    PowerMockito.when(Utils.getGeopt("9800 Regent Street, Los Angeles, California"))
+        .thenReturn(new GeoPt(34.025995f, -118.399908f));
   }
 
   @After
@@ -504,9 +524,9 @@ public final class UserServletTest {
     HttpServletResponse response = mock(HttpServletResponse.class);
     when(request.getParameter("event-name")).thenReturn("Lake Clean Up");
     when(request.getParameter("event-description")).thenReturn("We're cleaning up the lake");
-    when(request.getParameter("street-address")).thenReturn("678 Lakeview Way");
+    when(request.getParameter("street-address")).thenReturn("13364 Lakeview Way");
     when(request.getParameter("city")).thenReturn("Lakeside");
-    when(request.getParameter("state")).thenReturn("Michigan");
+    when(request.getParameter("state")).thenReturn("California");
     when(request.getParameter("date")).thenReturn("2020-05-17");
     when(request.getParameter("start-time")).thenReturn("14:00");
     when(request.getParameter("all-tags")).thenReturn("['environment']");
@@ -522,7 +542,7 @@ public final class UserServletTest {
     response = mock(HttpServletResponse.class);
     when(request.getParameter("event-name")).thenReturn("BLM Protest");
     when(request.getParameter("event-description")).thenReturn("Fight for racial justice!");
-    when(request.getParameter("street-address")).thenReturn("Main Street");
+    when(request.getParameter("street-address")).thenReturn("11852 S Main Street");
     when(request.getParameter("city")).thenReturn("Los Angeles");
     when(request.getParameter("state")).thenReturn("California");
     when(request.getParameter("date")).thenReturn("2020-05-17");
@@ -539,7 +559,7 @@ public final class UserServletTest {
     dummyToken = "another@example.com";
     when(request.getParameter("event-name")).thenReturn("Book Drive");
     when(request.getParameter("event-description")).thenReturn("Let's donate books for kids");
-    when(request.getParameter("street-address")).thenReturn("School Drive");
+    when(request.getParameter("street-address")).thenReturn("9800 Regent Street");
     when(request.getParameter("city")).thenReturn("Los Angeles");
     when(request.getParameter("state")).thenReturn("California");
     when(request.getParameter("date")).thenReturn("2020-05-17");
@@ -558,7 +578,7 @@ public final class UserServletTest {
     Entity entity = new Entity("Event");
     entity.setProperty("eventName", "Lake Clean Up");
     entity.setProperty("eventDescription", "We're cleaning up the lake");
-    entity.setProperty("address", "678 Lakeview Way, Lakeside, Michigan");
+    entity.setProperty("address", "13364 Lakeview Way, Lakeside, California");
     entity.setProperty("date", "Sunday, May 17, 2020");
     entity.setProperty("startTime", "2:00 PM");
     entity.setProperty("endTime", "");
@@ -569,6 +589,7 @@ public final class UserServletTest {
     entity.setProperty("unformattedStart", "14:00");
     entity.setProperty("unformattedEnd", "");
     entity.setProperty("unformattedDate", "2020-05-17");
+    entity.setProperty("latlng", Utils.getGeopt("13364 Lakeview Way, Lakeside, California"));
 
     String[] tags = {"environment"};
     String tagsStr = Utils.convertToJson(tags);
@@ -589,7 +610,7 @@ public final class UserServletTest {
     Entity entity = new Entity("Event");
     entity.setProperty("eventName", "BLM Protest");
     entity.setProperty("eventDescription", "Fight for racial justice!");
-    entity.setProperty("address", "Main Street, Los Angeles, California");
+    entity.setProperty("address", "11852 S Main Street, Los Angeles, California");
     entity.setProperty("date", "Sunday, May 17, 2020");
     entity.setProperty("startTime", "1:00 PM");
     entity.setProperty("endTime", "");
@@ -600,6 +621,7 @@ public final class UserServletTest {
     entity.setProperty("unformattedStart", "13:00");
     entity.setProperty("unformattedEnd", "");
     entity.setProperty("unformattedDate", "2020-05-17");
+    entity.setProperty("latlng", Utils.getGeopt("11852 S Main Street, Los Angeles, California"));
 
     String[] tags = {"blm"};
     String tagsStr = Utils.convertToJson(tags);
@@ -620,7 +642,7 @@ public final class UserServletTest {
     Entity entity = new Entity("Event");
     entity.setProperty("eventName", "Book Drive");
     entity.setProperty("eventDescription", "Let's donate books for kids");
-    entity.setProperty("address", "School Drive, Los Angeles, California");
+    entity.setProperty("address", "9800 Regent Street, Los Angeles, California");
     entity.setProperty("date", "Sunday, May 17, 2020");
     entity.setProperty("startTime", "10:00 AM");
     entity.setProperty("endTime", "");
@@ -631,6 +653,7 @@ public final class UserServletTest {
     entity.setProperty("unformattedStart", "10:00");
     entity.setProperty("unformattedEnd", "");
     entity.setProperty("unformattedDate", "2020-05-17");
+    entity.setProperty("latlng", Utils.getGeopt("9800 Regent Street, Los Angeles, California"));
 
     String[] tags = {"education"};
     String tagsStr = Utils.convertToJson(tags);
