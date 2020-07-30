@@ -222,7 +222,7 @@ h1 {
   margin-top: 8px;
   margin-right: 10px;
   padding: 6px 10px;
-  min-width: 3em;
+  min-width: 4em;
 }
 
 .search-bar-container button:hover {
@@ -711,8 +711,9 @@ input[type=time] {
 }
 
 .modal-content input[type=submit] {
+  display: block;
   height: 2em;
-  margin: 5px;
+  margin: auto;
 }
 
 .close {

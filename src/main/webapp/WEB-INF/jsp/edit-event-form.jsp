@@ -107,7 +107,7 @@
           </div>
         </div>
         <div class="form-buttons">
-          <input type="submit">
+          <input type="submit" value="Submit">
           <div class="divider"></div>
           <button onclick="redirectTo('my-events.html')">Cancel</button>
           <div class="edit-divider"></div>
