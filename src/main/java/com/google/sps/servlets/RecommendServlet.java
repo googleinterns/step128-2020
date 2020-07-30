@@ -98,8 +98,10 @@ public class RecommendServlet extends HttpServlet {
     try {
       Entity userEntity = datastore.get(KeyFactory.createKey("User", userId));
       obj.surveyStatus = userEntity.getProperty("surveyCompleted").toString();
+      LOGGER.info("user " + userId + " has already completed the survey.");
     } catch (EntityNotFoundException | NullPointerException exception) {
       Interactions.makeUserEntity(userId, true);
+      LOGGER.info("no entity found for " + userId + ", creating one now");
       obj.surveyStatus = "false";
     }
     return obj;
@@ -118,11 +120,13 @@ public class RecommendServlet extends HttpServlet {
     } catch (EntityNotFoundException exception) {
       // user does not exist (no data)
       userEntity = Interactions.makeUserEntity(userId, true);
+      LOGGER.info("no entity found for " + userId + ", creating one now");
       return new HomePageObject(new ArrayList<Entity>(), "false");
     }
     Map<String, Float> userParams = Interactions.buildVectorForUser(userEntity);
     if (userParams.size() == 0) {
       // no data for this user yet
+      LOGGER.info("no data for " + userId + ", no recommendations to compute");
       return new HomePageObject(new ArrayList<Entity>(), "false");
     }
 
@@ -136,6 +140,8 @@ public class RecommendServlet extends HttpServlet {
       latlng = Utils.getGeopt(userLocation);
     }
     if (latlng != null) {
+      LOGGER.info(
+          "computing recommendations for " + userId + " using location cutoff @ " + userLocation);
       eventQuery =
           datastore
               .prepare(
@@ -143,6 +149,7 @@ public class RecommendServlet extends HttpServlet {
                       .setFilter(new StContainsFilter("latlng", new Circle(latlng, RADIUS))))
               .asIterable(FetchOptions.Builder.withDefaults());
     } else {
+      LOGGER.info("computing recommendations for " + userId + " using attendee count cutoff");
       eventQuery =
           datastore
               .prepare(new Query("Event").addSort("attendeeCount", SortDirection.DESCENDING))
