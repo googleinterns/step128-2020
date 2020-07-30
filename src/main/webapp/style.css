@@ -549,6 +549,7 @@ input[type=time] {
   height: 75px;
   justify-content: center;
   margin: 15px;
+  margin-left: 50px;
   width: 200px;
 }
 
