@@ -18,11 +18,13 @@ import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.EntityNotFoundException;
+import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.GeoPt;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.GeoRegion.Circle;
+import com.google.appengine.api.datastore.Query.SortDirection;
 import com.google.appengine.api.datastore.Query.StContainsFilter;
 import com.google.gson.Gson;
 import com.google.sps.Firebase;
@@ -47,6 +49,7 @@ public class RecommendServlet extends HttpServlet {
   private static final Logger LOGGER = Logger.getLogger(RecommendServlet.class.getName());
   private static final int EVENTS_LIMIT = 10;
   private static final double RADIUS = 300_000;
+  private static final int QUERY_LIMIT = 300;
 
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -123,16 +126,28 @@ public class RecommendServlet extends HttpServlet {
       return new HomePageObject(new ArrayList<Entity>(), "false");
     }
     String userLocation = null;
+    Iterable<Entity> eventQuery = null;
+    // limit the number of entities returned: by location (if user has specified)
+    // else by attendee count
     if (userEntity.hasProperty("location")) {
       userLocation = userEntity.getProperty("location").toString();
       GeoPt latlng = Utils.getGeopt(userLocation);
-      datastore.prepare(
-          new Query("Event").setFilter(new StContainsFilter("latlng", new Circle(latlng, RADIUS))));
+      eventQuery =
+          datastore
+              .prepare(
+                  new Query("Event")
+                      .setFilter(new StContainsFilter("latlng", new Circle(latlng, RADIUS))))
+              .asIterable(FetchOptions.Builder.withDefaults());
+    } else {
+      eventQuery =
+          datastore
+              .prepare(new Query("Event").addSort("attendeeCount", SortDirection.DESCENDING))
+              .asIterable(FetchOptions.Builder.withLimit(QUERY_LIMIT));
     }
     List<Entity> events = new ArrayList<>();
     Map<Double, Entity> bestEvents = new TreeMap<>(Recommend.SCORE_DESCENDING);
     // score and rank events
-    for (Entity event : datastore.prepare(new Query("Event")).asIterable()) {
+    for (Entity event : eventQuery) {
       long eventId = event.getKey().getId();
       Map<String, Integer> eventParams = Interactions.buildVectorForEvent(event);
       String eventLocation = event.getProperty("address").toString();
