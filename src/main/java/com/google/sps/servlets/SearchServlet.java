@@ -21,8 +21,8 @@ import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.Filter;
-import com.google.appengine.api.datastore.Query.FilterOperator;
-import com.google.appengine.api.datastore.Query.FilterPredicate;
+import com.google.appengine.api.datastore.Query.GeoRegion.Circle;
+import com.google.appengine.api.datastore.Query.StContainsFilter;
 import com.google.maps.model.LatLng;
 import com.google.sps.Utils;
 import java.io.IOException;
@@ -38,9 +38,6 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import com.google.appengine.api.datastore.Query.GeoRegion.Circle;
-import com.google.appengine.api.datastore.GeoPt;
-import com.google.appengine.api.datastore.Query.StContainsFilter;
 
 @WebServlet("/search")
 public class SearchServlet extends HttpServlet {
@@ -162,9 +159,9 @@ public class SearchServlet extends HttpServlet {
             Math.round(
                 Integer.parseInt(Utils.getParameter(request, "searchDistance", "")) * MI_TO_KM));
 
-    GeoPt userPt = new GeoPt(userLocation.lat(), userLocation.lng());
-    Circle region = new Circle(userPt, cutoff * 1000);
-    Filter distanceFilter = new StContainsFilter("geoPt", region);
+    // Create filter for Datastore query of events within the cutoff radius around the user's location
+    Circle region = new Circle(Utils.getGeopt(userLocation), cutoff * 1000);
+    Filter distanceFilter = new StContainsFilter("latlng", region);
     query = new Query("Event").setFilter(distanceFilter);
 
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
@@ -181,16 +178,16 @@ public class SearchServlet extends HttpServlet {
       event.setProperty("distance", distance);
     }
 
-    // Remove from the list any events outside the cutoff or that aren't drivable
-    // Should be deprecated and unneeded now
-    events.removeIf(
-        e -> ((int) e.getProperty("distance")) > cutoff || ((int) e.getProperty("distance")) < 0);
-
-    // Sort list depending on the search type
+    // Filter and sort list depending on the search type
     if (hasTags && hasKeywords) {
+      events = retainInCommon("tags", searchTags, events);
       Collections.sort(events, COMBINE_SEARCH_RELEVANCE);
     } else if (!hasTags && hasKeywords) {
+      events = retainInCommon("keywords", searchKeywords, events);
       Collections.sort(events, KEYWORD_SEARCH_RELEVANCE);
+    } else if (hasTags) {
+      events = retainInCommon("tags", searchTags, events);
+      Collections.sort(events, TAGS_SEARCH_RELEVANCE);
     } else {
       Collections.sort(events, TAGS_SEARCH_RELEVANCE);
     }
@@ -208,6 +205,32 @@ public class SearchServlet extends HttpServlet {
         String.format(
             "Got %1$s results with %2$s tags and %3$s keywords in %4$s ms",
             entityCount, tagCount, keywordCount, totalTime));
+  }
+
+  /**
+   * Creates a list of events that have at least one tag/keyword that is part of the search
+   * tags/keywords.
+   *
+   * @param property String property to be compared (tags or keywords)
+   * @param searchTags List of tags that are being used to search
+   * @param events List of entity to be retained from
+   * @return List containing only those events with at least one tag in common
+   */
+  public static List<Entity> retainInCommon(
+      String property, List<String> searchTags, List<Entity> events) {
+    List<Entity> retained = new ArrayList<Entity>();
+    if (property.equals("tags") || property.equals("keywords")) {
+      for (Entity e : events) {
+        List<String> tags = (List<String>) e.getProperty(property);
+        for (String tag : tags) {
+          if (searchTags.contains(tag)) {
+            retained.add(e);
+            break;
+          }
+        }
+      }
+    }
+    return retained;
   }
 
   /**

@@ -24,10 +24,12 @@ import static org.mockito.Mockito.when;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.GeoPt;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.maps.model.LatLng;
 import com.google.sps.servlets.SearchServlet;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -121,6 +123,8 @@ public final class CombineSearchTest {
       Map<String, Integer> keywordsMap = SearchServlet.getKeywords(name, desc);
       e.setProperty("keywords", SearchServlet.getKeywordMapKeys(keywordsMap));
       e.setProperty("keywordsValues", SearchServlet.getKeywordMapValues(keywordsMap));
+      LatLng location = possibleLatLngs.get(i);
+      e.setProperty("latlng", new GeoPt((float) location.lat, (float) location.lng));
       testEntities.add(e);
     }
 
@@ -292,16 +296,10 @@ public final class CombineSearchTest {
     // from the datastore and assemble our expected
     List<Integer> ids = new ArrayList<Integer>(Arrays.asList(0, 1, 2, 3));
     List<Entity> events =
-        TestingUtil.fetchIDsFromDataStore(
-            new ArrayList<String>(
-                Arrays.asList(
-                    "BLM Protest")));
+        TestingUtil.fetchIDsFromDataStore(new ArrayList<String>(Arrays.asList("BLM Protest")));
 
     // Order results like sorting algorithm will
-    List<String> desiredOrder =
-        new ArrayList<String>(
-            Arrays.asList(
-                "BLM Protest"));
+    List<String> desiredOrder = new ArrayList<String>(Arrays.asList("BLM Protest"));
     List<Entity> orderedEvents = TestingUtil.orderEvents(desiredOrder, events);
 
     // Convert expected events to JSON for comparison
@@ -338,19 +336,69 @@ public final class CombineSearchTest {
     List<Entity> events =
         TestingUtil.fetchIDsFromDataStore(
             new ArrayList<String>(
-                Arrays.asList(
-                    "BLM Protest", "Climate Change Protest", "Beach clean up")));
+                Arrays.asList("BLM Protest", "Climate Change Protest", "Beach clean up")));
 
     // Order results like sorting algorithm will
     List<String> desiredOrder =
         new ArrayList<String>(
-            Arrays.asList(
-                "BLM Protest", "Climate Change Protest", "Beach clean up"));
+            Arrays.asList("BLM Protest", "Climate Change Protest", "Beach clean up"));
     List<Entity> orderedEvents = TestingUtil.orderEvents(desiredOrder, events);
 
     // Convert expected events to JSON for comparison
     String expected = Utils.convertToJson(orderedEvents);
     assertEquals(expected, result);
+  }
+
+  @Test
+  public void retainsTagsInCommonCorrectly() throws IOException {
+    List<Entity> events =
+        TestingUtil.fetchIDsFromDataStore(
+            new ArrayList<String>(
+                Arrays.asList("BLM Protest", "Climate Change Protest", "Beach clean up")));
+    List<String> tags = new ArrayList<String>(Arrays.asList("environment"));
+    List<Entity> retained = SearchServlet.retainInCommon("tags", tags, events);
+    List<Entity> expected =
+        TestingUtil.fetchIDsFromDataStore(
+            new ArrayList<String>(Arrays.asList("Climate Change Protest", "Beach clean up")));
+    assertEquals(expected, retained);
+  }
+
+  @Test
+  public void retainsNoTagsInCommonCorrectly() throws IOException {
+    List<Entity> events =
+        TestingUtil.fetchIDsFromDataStore(
+            new ArrayList<String>(
+                Arrays.asList("BLM Protest", "Climate Change Protest", "Beach clean up")));
+    List<String> tags = new ArrayList<String>(Arrays.asList("fundraiser"));
+    List<Entity> retained = SearchServlet.retainInCommon("tags", tags, events);
+    List<Entity> expected = new ArrayList<Entity>();
+    assertEquals(expected, retained);
+  }
+
+  @Test
+  public void retainsKeywordsInCommonCorrectly() throws IOException {
+    List<Entity> events =
+        TestingUtil.fetchIDsFromDataStore(
+            new ArrayList<String>(
+                Arrays.asList("BLM Protest", "Climate Change Protest", "Beach clean up")));
+    List<String> keywords = new ArrayList<String>(Arrays.asList("protest"));
+    List<Entity> retained = SearchServlet.retainInCommon("keywords", keywords, events);
+    List<Entity> expected =
+        TestingUtil.fetchIDsFromDataStore(
+            new ArrayList<String>(Arrays.asList("BLM Protest", "Climate Change Protest")));
+    assertEquals(expected, retained);
+  }
+
+  @Test
+  public void retainsNoKeywordsInCommonCorrectly() throws IOException {
+    List<Entity> events =
+        TestingUtil.fetchIDsFromDataStore(
+            new ArrayList<String>(
+                Arrays.asList("BLM Protest", "Climate Change Protest", "Beach clean up")));
+    List<String> keywords = new ArrayList<String>(Arrays.asList("bake"));
+    List<Entity> retained = SearchServlet.retainInCommon("keywords", keywords, events);
+    List<Entity> expected = new ArrayList<Entity>();
+    assertEquals(expected, retained);
   }
 
   /** Sets up and executes mocking for the Utils class. */
@@ -370,9 +418,11 @@ public final class CombineSearchTest {
               Utils.getDistance(new LatLng(34.0522342, -118.2436849), possibleLatLngs.get(i)))
           .thenReturn(possibleDistances.get(i));
     }
-    // Call the actual getParameter and convertToJson methods
+    // Call the actual methods
     PowerMockito.when(Utils.getParameter(anyObject(), anyString(), anyString()))
         .thenCallRealMethod();
     PowerMockito.when(Utils.convertToJson(any())).thenCallRealMethod();
+    PowerMockito.when(Utils.getGeopt(anyString())).thenCallRealMethod();
+    PowerMockito.when(Utils.getGeopt(any(LatLng.class))).thenCallRealMethod();
   }
 }
