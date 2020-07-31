@@ -139,7 +139,7 @@ public final class SearchServletTest {
     assertEquals(-31.95220010, geopt.getLatitude(), 0.0001);
     assertEquals(115.85884740, geopt.getLongitude(), 0.0001);
   }
-  
+
   @Test
   public void getDistanceStrings() throws Exception {
     LatLng loc = new LatLng(-31.95220010, 115.85884740);
@@ -161,6 +161,13 @@ public final class SearchServletTest {
 
   @Test
   public void emptyStrings() throws Exception {
+    String nullString = null;
+
+    assertEquals(null, Utils.getLatLng(nullString));
+    assertEquals(null, Utils.getLatLng(""));
+    assertEquals(null, Utils.getGeopt(nullString));
+    assertEquals(null, Utils.getGeopt(""));
+
     assertEquals(-1, Utils.getDistance("", null));
     assertEquals(-1, Utils.getDistance("", ""));
   }

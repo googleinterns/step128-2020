@@ -18,9 +18,14 @@ import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.EntityNotFoundException;
+import com.google.appengine.api.datastore.FetchOptions;
+import com.google.appengine.api.datastore.GeoPt;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Query.GeoRegion.Circle;
+import com.google.appengine.api.datastore.Query.SortDirection;
+import com.google.appengine.api.datastore.Query.StContainsFilter;
 import com.google.gson.Gson;
 import com.google.sps.Firebase;
 import com.google.sps.Interactions;
@@ -42,7 +47,9 @@ import javax.servlet.http.HttpServletResponse;
 public class RecommendServlet extends HttpServlet {
 
   private static final Logger LOGGER = Logger.getLogger(RecommendServlet.class.getName());
-  private static final int EVENTS_LIMIT = 10;
+  public static final int EVENTS_LIMIT = 15;
+  private static final double RADIUS = 300_000;
+  private static final int QUERY_LIMIT = 300;
 
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -91,8 +98,10 @@ public class RecommendServlet extends HttpServlet {
     try {
       Entity userEntity = datastore.get(KeyFactory.createKey("User", userId));
       obj.surveyStatus = userEntity.getProperty("surveyCompleted").toString();
+      LOGGER.info("user " + userId + " has already completed the survey.");
     } catch (EntityNotFoundException | NullPointerException exception) {
       Interactions.makeUserEntity(userId, true);
+      LOGGER.info("no entity found for " + userId + ", creating one now");
       obj.surveyStatus = "false";
     }
     return obj;
@@ -111,21 +120,45 @@ public class RecommendServlet extends HttpServlet {
     } catch (EntityNotFoundException exception) {
       // user does not exist (no data)
       userEntity = Interactions.makeUserEntity(userId, true);
+      LOGGER.info("no entity found for " + userId + ", creating one now");
       return new HomePageObject(new ArrayList<Entity>(), "false");
     }
     Map<String, Float> userParams = Interactions.buildVectorForUser(userEntity);
     if (userParams.size() == 0) {
       // no data for this user yet
+      LOGGER.info("no data for " + userId + ", no recommendations to compute");
       return new HomePageObject(new ArrayList<Entity>(), "false");
     }
+
     String userLocation = null;
+    Iterable<Entity> eventQuery = null;
+    // limit the number of entities returned: by location (if user has specified)
+    // else by attendee count
+    GeoPt latlng = null;
     if (userEntity.hasProperty("location")) {
       userLocation = userEntity.getProperty("location").toString();
+      latlng = Utils.getGeopt(userLocation);
     }
-    List<Entity> events = new ArrayList<>();
+    if (latlng != null) {
+      LOGGER.info(
+          "computing recommendations for " + userId + " using location cutoff @ " + userLocation);
+      eventQuery =
+          datastore
+              .prepare(
+                  new Query("Event")
+                      .setFilter(new StContainsFilter("latlng", new Circle(latlng, RADIUS))))
+              .asIterable(FetchOptions.Builder.withDefaults());
+    } else {
+      LOGGER.info("computing recommendations for " + userId + " using attendee count cutoff");
+      eventQuery =
+          datastore
+              .prepare(new Query("Event").addSort("attendeeCount", SortDirection.DESCENDING))
+              .asIterable(FetchOptions.Builder.withLimit(QUERY_LIMIT));
+    }
+
     Map<Double, Entity> bestEvents = new TreeMap<>(Recommend.SCORE_DESCENDING);
     // score and rank events
-    for (Entity event : datastore.prepare(new Query("Event")).asIterable()) {
+    for (Entity event : eventQuery) {
       long eventId = event.getKey().getId();
       Map<String, Integer> eventParams = Interactions.buildVectorForEvent(event);
       String eventLocation = event.getProperty("address").toString();
@@ -141,7 +174,9 @@ public class RecommendServlet extends HttpServlet {
       }
       bestEvents.put(eventScore, event);
     }
+
     // get info from ranking map and return for user
+    List<Entity> events = new ArrayList<>();
     List<Long> eventIds = new ArrayList<>();
     Iterator<Double> itr = bestEvents.keySet().iterator();
     int count = 0;
@@ -196,7 +231,7 @@ public class RecommendServlet extends HttpServlet {
       }
     }
     // adjust scaling based on event distance to user
-    if (userLocation != null && eventLocation != null) {
+    if (userLocation != null && eventLocation != null && userLocation.length() > 0) {
       int distance = Utils.getDistance(userLocation, eventLocation);
       if (distance < 0) {
         distance = Recommend.INVALID_DISTANCE;

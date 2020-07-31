@@ -25,6 +25,7 @@ import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.EntityNotFoundException;
+import com.google.appengine.api.datastore.GeoPt;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.PreparedQuery;
@@ -32,6 +33,7 @@ import com.google.appengine.api.datastore.Query;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.google.sps.servlets.RecommendServlet;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -70,6 +72,18 @@ public final class RecommendTest {
   @Before
   public void setUp() throws IOException {
     helper.setUp();
+
+    TestingUtil.mockUtilsForLocation();
+    PowerMockito.when(Utils.getDistance("90045", "90045")).thenReturn(0);
+    PowerMockito.when(Utils.getDistance("90045", "90301")).thenReturn(10);
+    PowerMockito.when(Utils.getDistance("90045", "90305")).thenReturn(20);
+    PowerMockito.when(Utils.getDistance("90045", "90047")).thenReturn(30);
+    PowerMockito.when(Utils.getDistance("90045", "90003")).thenReturn(40);
+    PowerMockito.when(Utils.getGeopt("90045")).thenReturn(new GeoPt(33.959670f, -118.424991f));
+    PowerMockito.when(Utils.getGeopt("90301")).thenReturn(new GeoPt(33.954740f, -118.360363f));
+    PowerMockito.when(Utils.getGeopt("90305")).thenReturn(new GeoPt(33.955859f, -118.321683f));
+    PowerMockito.when(Utils.getGeopt("90047")).thenReturn(new GeoPt(33.956506f, -118.305864f));
+    PowerMockito.when(Utils.getGeopt("90003")).thenReturn(new GeoPt(33.960939f, -118.272003f));
   }
 
   @After
@@ -79,9 +93,6 @@ public final class RecommendTest {
 
   @Test
   public void checkOutput() throws IOException {
-    PowerMockito.mockStatic(Utils.class);
-    PowerMockito.when(Utils.getDistance("90001", "90001")).thenReturn(0);
-
     // a test to make sure everything is in an expected format and runs without hiccups
     String users = "src/test/data/users-1.csv";
     String ratings = "src/test/data/ratings-1.csv";
@@ -109,19 +120,6 @@ public final class RecommendTest {
 
   @Test
   public void rankFromDistance() throws IOException, Exception {
-    // set up distance mocking
-    PowerMockito.mockStatic(Utils.class);
-    PowerMockito.when(Utils.getDistance("90045", "90045")).thenReturn(0);
-    PowerMockito.when(Utils.getDistance("90045", "90301")).thenReturn(10);
-    PowerMockito.when(Utils.getDistance("90045", "90305")).thenReturn(20);
-    PowerMockito.when(Utils.getDistance("90045", "90047")).thenReturn(30);
-    PowerMockito.when(Utils.getDistance("90045", "90003")).thenReturn(40);
-    PowerMockito.when(Utils.getDistance("90003", "90003")).thenReturn(0);
-    PowerMockito.when(Utils.getDistance("90003", "90047")).thenReturn(10);
-    PowerMockito.when(Utils.getDistance("90003", "90305")).thenReturn(20);
-    PowerMockito.when(Utils.getDistance("90003", "90301")).thenReturn(30);
-    PowerMockito.when(Utils.getDistance("90003", "90045")).thenReturn(40);
-
     // check that recommendation ranks distances correctly
     String users = "src/test/data/users-2.csv";
     String ratings = "src/test/data/ratings-none.csv";
@@ -159,9 +157,6 @@ public final class RecommendTest {
 
   @Test
   public void rankWithoutInteractions() throws IOException {
-    PowerMockito.mockStatic(Utils.class);
-    PowerMockito.when(Utils.getDistance("90045", "90045")).thenReturn(0);
-
     // test that ranks are calculated correctly when interactions and locations are held constant
     String users = "src/test/data/users-3.csv";
     String ratings = "src/test/data/ratings-none.csv";
@@ -191,14 +186,6 @@ public final class RecommendTest {
 
   @Test
   public void noRecommendationsServlet() throws IOException {
-    // similar to rankFromDistance(), but performed through the servlet instead
-    PowerMockito.mockStatic(Utils.class);
-    PowerMockito.when(Utils.getDistance("90045", "90045")).thenReturn(0);
-    PowerMockito.when(Utils.getDistance("90045", "90301")).thenReturn(10);
-    PowerMockito.when(Utils.getDistance("90045", "90305")).thenReturn(20);
-    PowerMockito.when(Utils.getDistance("90045", "90047")).thenReturn(30);
-    PowerMockito.when(Utils.getDistance("90045", "90003")).thenReturn(40);
-
     String users = "src/test/data/users-2.csv";
     String ratings = "src/test/data/ratings-none.csv";
     String events = "src/test/data/events-2.csv";
@@ -235,19 +222,6 @@ public final class RecommendTest {
 
   @Test
   public void returnRecommendations() throws IOException {
-    // similar to rankFromDistance(), but performed through the servlet instead
-    PowerMockito.mockStatic(Utils.class);
-    PowerMockito.when(Utils.getDistance("90045", "90045")).thenReturn(0);
-    PowerMockito.when(Utils.getDistance("90045", "90301")).thenReturn(10);
-    PowerMockito.when(Utils.getDistance("90045", "90305")).thenReturn(20);
-    PowerMockito.when(Utils.getDistance("90045", "90047")).thenReturn(30);
-    PowerMockito.when(Utils.getDistance("90045", "90003")).thenReturn(40);
-    PowerMockito.when(Utils.getDistance("90003", "90003")).thenReturn(0);
-    PowerMockito.when(Utils.getDistance("90003", "90047")).thenReturn(10);
-    PowerMockito.when(Utils.getDistance("90003", "90305")).thenReturn(20);
-    PowerMockito.when(Utils.getDistance("90003", "90301")).thenReturn(30);
-    PowerMockito.when(Utils.getDistance("90003", "90045")).thenReturn(40);
-
     // check that recommendation ranks distances correctly
     String users = "src/test/data/users-2.csv";
     String ratings = "src/test/data/ratings-none.csv";
@@ -265,13 +239,6 @@ public final class RecommendTest {
 
   @Test
   public void problematicEntity() throws IOException {
-    PowerMockito.mockStatic(Utils.class);
-    PowerMockito.when(Utils.getDistance("90045", "90045")).thenReturn(0);
-    PowerMockito.when(Utils.getDistance("90045", "90301")).thenReturn(10);
-    PowerMockito.when(Utils.getDistance("90045", "90305")).thenReturn(20);
-    PowerMockito.when(Utils.getDistance("90045", "90047")).thenReturn(30);
-    PowerMockito.when(Utils.getDistance("90045", "90003")).thenReturn(40);
-
     String users = "src/test/data/users-2.csv";
     String ratings = "src/test/data/ratings-none.csv";
     String events = "src/test/data/events-2.csv";
@@ -319,13 +286,6 @@ public final class RecommendTest {
 
   @Test
   public void completedSurvey() throws IOException {
-    PowerMockito.mockStatic(Utils.class);
-    PowerMockito.when(Utils.getDistance("90045", "90045")).thenReturn(0);
-    PowerMockito.when(Utils.getDistance("90045", "90301")).thenReturn(10);
-    PowerMockito.when(Utils.getDistance("90045", "90305")).thenReturn(20);
-    PowerMockito.when(Utils.getDistance("90045", "90047")).thenReturn(30);
-    PowerMockito.when(Utils.getDistance("90045", "90003")).thenReturn(40);
-
     String users = "src/test/data/users-2.csv";
     String ratings = "src/test/data/ratings-none.csv";
     String events = "src/test/data/events-2.csv";
@@ -336,6 +296,90 @@ public final class RecommendTest {
     List<Entity> results = resultObj.recommendations;
     assertEquals("true", resultObj.surveyStatus);
     assertEquals(5, results.size());
+  }
+
+  @Test
+  public void distanceCutoff() throws IOException {
+    String tooFarLocation = "97229";
+    PowerMockito.when(Utils.getGeopt(tooFarLocation))
+        .thenReturn(new GeoPt(45.558676f, -122.820836f));
+
+    String users = "src/test/data/users-2.csv";
+    String ratings = "src/test/data/ratings-none.csv";
+    String events = "src/test/data/events-2.csv";
+    addInfoToDatastore(events, users, ratings);
+
+    // now create an entity that should fall outside the distance cutoff
+    long tooFarId = 10;
+    Entity eventEntity = new Entity("Event", tooFarId);
+    eventEntity.setProperty("eventName", "too far event");
+    eventEntity.setProperty("eventDescription", "This event is too far away.");
+    eventEntity.setProperty("address", tooFarLocation);
+    eventEntity.setProperty("latlng", Utils.getGeopt(tooFarLocation));
+    eventEntity.setProperty("attendeeCount", 0);
+    String[] tags = {"blm"};
+    String tagsStr = Utils.convertToJson(tags);
+    List<String> tagsList = gson.fromJson(tagsStr, new TypeToken<ArrayList<String>>() {}.getType());
+    eventEntity.setIndexedProperty("tags", tagsList);
+
+    DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
+    ds.put(eventEntity);
+
+    HomePageObject resultObj = callPost("test@example.com");
+    List<Entity> results = resultObj.recommendations;
+    assertEquals("false", resultObj.surveyStatus);
+    assertEquals(6, ds.prepare(new Query("Event")).countEntities(withLimit(250)));
+    assertEquals(5, results.size());
+    for (int i = 0; i < results.size() - 1; i++) {
+      assertTrue(results.get(i).getKey().getId() < results.get(i + 1).getKey().getId());
+    }
+    for (int i = 0; i < results.size(); i++) {
+      if (results.get(i).getKey().getId() == tooFarId) {
+        fail();
+      }
+    }
+  }
+
+  @Test
+  public void noLocation() throws IOException {
+    String events = "src/test/data/events-2.csv";
+    addInfoToDatastore(events, null, null);
+
+    // create userEntity that has high affinity with events in events-2.csv
+    Entity userEntity = new Entity("User", "test@example.com");
+    userEntity.setProperty("environment", 10);
+    userEntity.setProperty("volunteer", 10);
+    userEntity.setProperty("activism", 10);
+    userEntity.setProperty("fundraiser", 10);
+    userEntity.setProperty("education", 10);
+
+    DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
+    ds.put(userEntity);
+
+    for (int i = 6; i <= 306; i++) {
+      Entity eventEntity = new Entity("Event", i);
+      eventEntity.setProperty("eventName", "AttendeeCount not 0");
+      eventEntity.setProperty("eventDescription", "This event has a non-zero attendee count.");
+      eventEntity.setProperty("address", "90045");
+      eventEntity.setProperty("latlng", Utils.getGeopt("90045"));
+      eventEntity.setProperty("attendeeCount", 1);
+      String[] tags = {"blm"};
+      String tagsStr = Utils.convertToJson(tags);
+      List<String> tagsList =
+          gson.fromJson(tagsStr, new TypeToken<ArrayList<String>>() {}.getType());
+      eventEntity.setIndexedProperty("tags", tagsList);
+      ds.put(eventEntity);
+    }
+
+    // all events in events-2.csv should be cut off from query
+    HomePageObject resultObj = callPost("test@example.com");
+    List<Entity> results = resultObj.recommendations;
+    assertEquals(15, results.size());
+    for (int i = 0; i < results.size(); i++) {
+      if (results.get(i).getKey().getId() < 6) {
+        fail();
+      }
+    }
   }
 
   /** Performs the GET request to retrieve event recommendations. */
@@ -368,6 +412,9 @@ public final class RecommendTest {
       }
     }
     scan.close();
+    if (usersFile == null) {
+      return;
+    }
     // scan users and user data
     scan = new Scanner(new File(usersFile));
     String[] fieldNames = scan.nextLine().split(",");
@@ -441,6 +488,8 @@ public final class RecommendTest {
       eventEntity.setProperty("eventDescription", eventDesc);
       eventEntity.setProperty("address", fields[3]);
       eventEntity.setIndexedProperty("tags", tagsList);
+      eventEntity.setProperty("latlng", Utils.getGeopt(fields[3]));
+      eventEntity.setProperty("attendeeCount", 0);
       // save tag info for easier access later
     } catch (NumberFormatException e) {
       eventEntity = null;
