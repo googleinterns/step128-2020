@@ -159,7 +159,8 @@ public class SearchServlet extends HttpServlet {
             Math.round(
                 Integer.parseInt(Utils.getParameter(request, "searchDistance", "")) * MI_TO_KM));
 
-    // Create filter for Datastore query of events within the cutoff radius around the user's location
+    // Create filter for Datastore query of events within the cutoff radius around the user's
+    // location
     Circle region = new Circle(Utils.getGeopt(userLocation), cutoff * 1000);
     Filter distanceFilter = new StContainsFilter("latlng", region);
     query = new Query("Event").setFilter(distanceFilter);
@@ -214,7 +215,7 @@ public class SearchServlet extends HttpServlet {
    * @param property String property to be compared (tags or keywords)
    * @param searchTags List of tags that are being used to search
    * @param events List of entity to be retained from
-   * @return List containing only those events with at least one tag in common
+   * @return List containing only those events with at least one tag/keyword in common
    */
   public static List<Entity> retainInCommon(
       String property, List<String> searchTags, List<Entity> events) {
