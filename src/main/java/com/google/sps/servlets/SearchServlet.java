@@ -103,13 +103,6 @@ public class SearchServlet extends HttpServlet {
           }
 
           int keywordResult = compareUsingKeywords(o1, o2);
-          System.out.println(
-              ""
-                  + o1.getProperty("eventName")
-                  + ", "
-                  + o2.getProperty("eventName")
-                  + "\n"
-                  + keywordResult);
           if (keywordResult != 0) {
             return keywordResult;
           }
@@ -456,7 +449,6 @@ public class SearchServlet extends HttpServlet {
       List<String> eventKeywords, List<String> searchKeywords, List<Long> eventKeywordValues) {
     List<String> mutualKeywords = new ArrayList<String>(eventKeywords);
     mutualKeywords.retainAll(searchKeywords);
-    System.out.println(mutualKeywords);
     double total = 0;
     for (String key : mutualKeywords) {
       int index = eventKeywords.indexOf(key);
