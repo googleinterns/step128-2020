@@ -20,7 +20,6 @@ import static org.mockito.Mockito.*;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.GeoPt;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.maps.model.LatLng;
@@ -87,8 +86,6 @@ public final class TagSearchTest {
       e.setIndexedProperty("tags", new ArrayList<String>(Arrays.asList(possibleTags.get(i))));
       e.setProperty("address", possibleLocations.get(i));
       e.setProperty("distance", possibleDistances.get(i));
-      LatLng location = possibleLatLngs.get(i);
-      e.setProperty("latlng", new GeoPt((float) location.lat, (float) location.lng));
       testEntities.add(e);
     }
     // Double tag events
@@ -100,8 +97,6 @@ public final class TagSearchTest {
           new ArrayList<String>(Arrays.asList(possibleTags.get(i - 5), possibleTags.get(i - 4))));
       e.setProperty("address", possibleLocations.get(i - 5));
       e.setProperty("distance", possibleDistances.get(i - 5));
-      LatLng location = possibleLatLngs.get(i - 5);
-      e.setProperty("latlng", new GeoPt((float) location.lat, (float) location.lng));
       testEntities.add(e);
     }
     // Triple tag events
@@ -115,8 +110,6 @@ public final class TagSearchTest {
                   possibleTags.get(i - 9), possibleTags.get(i - 8), possibleTags.get(i - 7))));
       e.setProperty("address", possibleLocations.get(i - 9));
       e.setProperty("distance", possibleDistances.get(i - 9));
-      LatLng location = possibleLatLngs.get(i - 9);
-      e.setProperty("latlng", new GeoPt((float) location.lat, (float) location.lng));
       testEntities.add(e);
     }
     // Add all the events to the mock Datastore
@@ -356,11 +349,9 @@ public final class TagSearchTest {
               Utils.getDistance(new LatLng(34.0522342, -118.2436849), possibleLatLngs.get(i)))
           .thenReturn(possibleDistances.get(i));
     }
-    // Call the actual methods
+    // Call the actual getParameter and convertToJson methods
     PowerMockito.when(Utils.getParameter(anyObject(), anyString(), anyString()))
         .thenCallRealMethod();
     PowerMockito.when(Utils.convertToJson(any())).thenCallRealMethod();
-    PowerMockito.when(Utils.getGeopt(anyString())).thenCallRealMethod();
-    PowerMockito.when(Utils.getGeopt(any(LatLng.class))).thenCallRealMethod();
   }
 }
