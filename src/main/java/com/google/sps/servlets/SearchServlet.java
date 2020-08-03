@@ -284,13 +284,7 @@ public class SearchServlet extends HttpServlet {
         Double.compare(
             occurrenceScore(o2List, searchKeywords, o2Values),
             occurrenceScore(o1List, searchKeywords, o1Values));
-    if (compareOccurrence != 0) {
-      return compareOccurrence;
-    }
-
-    // Sort by which event has less keywords
-    int compareSize = Integer.compare(o1List.size(), o2List.size());
-    return compareSize;
+    return compareOccurrence;
   }
 
   /**
