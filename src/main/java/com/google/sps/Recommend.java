@@ -74,19 +74,13 @@ public class Recommend {
         }
       };
 
-  /** Initializes the SparkSession, datastore, and other necessary items. */
+  /** Initializes datastore and other necessary items. */
   private static void init() {
-    if (spark == null) {
-      spark =
-          SparkSession.builder()
-              .appName("Java Spark SQL basic example")
-              .config("spark.master", "local[*]")
-              .getOrCreate();
-      spark.sparkContext().setLogLevel("ERROR");
-    }
-
     if (datastore == null) {
+      LOGGER.info("initializing datastore");
       datastore = DatastoreServiceFactory.getDatastoreService();
+    } else {
+      LOGGER.info("datastore has already been set up");
     }
 
     userIdHash = new HashMap<>();
@@ -97,19 +91,35 @@ public class Recommend {
     eventLocations = new HashMap<>();
   }
 
+  /** Initializes the sparkSession. */
+  private static void sparkInit() {
+    if (spark == null) {
+      LOGGER.info("initializing sparksession");
+      spark =
+          SparkSession.builder()
+              .appName("UniteByStep Recommendations")
+              .config("spark.master", "local[*]")
+              .getOrCreate();
+    } else {
+      LOGGER.info("sparksession has already been set up");
+    }
+  }
+
   /** Rebuilds recommendation model and calculates recommendations for users. */
   public static void calculateRecommend() throws IOException {
     init();
     getInfoFromDatastore();
-
     List<Key> toDelete = new ArrayList<>();
-    Dataset<Row> ratings =
-        makeDataframeAndPreprocess(userIdHash.keySet(), eventIdHash.keySet(), toDelete);
 
-    // skip Spark step if no interactions to work with
-    if (ratings != null) {
-      // compute recommendations from matrix factorization
+    try {
+      sparkInit();
+
+      Dataset<Row> ratings =
+          makeDataframeAndPreprocess(userIdHash.keySet(), eventIdHash.keySet(), toDelete);
+      LOGGER.info("completed preprocessing dataframe");
+
       ALSModel model = trainModel(ratings);
+      LOGGER.info("trained ALSModel for interactions");
       Dataset<Row> userRecs = model.recommendForAllUsers(150);
       List<Row> userRecsList = userRecs.collectAsList();
       // build rankings for each user
@@ -129,8 +139,13 @@ public class Recommend {
         }
 
         saveRecsToDatastore(userId, userTopRecs);
+        LOGGER.info("saved recommendations for " + userId);
         userPrefs.remove(userId);
       }
+
+    } catch (OutOfMemoryError | NullPointerException e) {
+      Logger.info(e.printStackTrace());
+      // do nothing and skip the rest of spark steps if error occurs
     }
 
     // ALSModel will ignore users that have insufficient interaction data
@@ -141,6 +156,7 @@ public class Recommend {
         addToRanking(eventId, totalScore, userTopRecs);
       }
       saveRecsToDatastore(userId, userTopRecs);
+      LOGGER.info("saved recommendations for " + userId);
     }
 
     datastore.delete(toDelete);
@@ -163,6 +179,7 @@ public class Recommend {
   /** Queries datastore and populates data maps. */
   private static void getInfoFromDatastore() {
     // get user entities with their preferences
+    LOGGER.info("querying user and event information from datastore");
     Iterable<Entity> queriedUsers = datastore.prepare(new Query("User")).asIterable();
     for (Entity e : queriedUsers) {
       String id = e.getKey().getName();
@@ -175,6 +192,7 @@ public class Recommend {
         }
       }
     }
+    LOGGER.info("completed query of users from datastore");
 
     // get event entities
     Iterable<Entity> queriedEvents = datastore.prepare(new Query("Event")).asIterable();
@@ -184,6 +202,7 @@ public class Recommend {
       eventIdHash.put((Long.toString(id)).hashCode(), id);
       eventLocations.put(id, e.getProperty("address").toString());
     }
+    LOGGER.info("completed query of events from datastore");
   }
 
   /**
@@ -195,10 +214,12 @@ public class Recommend {
    */
   private static Dataset<Row> makeDataframeAndPreprocess(
       Set<Integer> users, Set<Integer> events, List<Key> toDelete) {
+    LOGGER.info("querying interactions from datastore and initializng dataframe.");
     Iterable<Entity> queriedInteractions =
         datastore
             .prepare(new Query("Interaction").addSort("timestamp", Query.SortDirection.DESCENDING))
             .asIterable();
+    LOGGER.info("queried interactions from datastore");
     Iterator<Entity> itr = queriedInteractions.iterator();
     int count = 0;
     List<EventRating> ratings = new ArrayList<>();
