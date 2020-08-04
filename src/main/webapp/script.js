@@ -928,7 +928,7 @@ function toggleTagEvent(tag) {
   const boxIndex = tagsBox.indexOf(tag);
   if (boxIndex > -1) {
     if (tagsSelected.includes(tag)) {
-      tagsSelected.splice(tagsSelected.indexOf(tag));
+      tagsSelected.splice(tagsSelected.indexOf(tag), 1);
     } else {
       tagsSelected.push(tag);
     }
