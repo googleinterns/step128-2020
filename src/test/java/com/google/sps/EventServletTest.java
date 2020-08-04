@@ -23,12 +23,12 @@ import static org.mockito.Mockito.*;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.GeoPt;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.google.maps.model.LatLng;
 import com.google.sps.servlets.EventServlet;
 import com.google.sps.servlets.SearchServlet;
 import java.io.IOException;
@@ -63,8 +63,8 @@ public final class EventServletTest {
     testEventServlet = new EventServlet();
 
     TestingUtil.mockUtilsForLocation();
-    PowerMockito.when(Utils.getGeopt("13364 Lakeview Way, Lakeside, California"))
-        .thenReturn(new GeoPt(32.858758f, -116.904991f));
+    PowerMockito.when(Utils.getLatLng("13364 Lakeview Way, Lakeside, California"))
+        .thenReturn(new LatLng(32.858758, -116.904991));
   }
 
   @After
@@ -253,7 +253,9 @@ public final class EventServletTest {
     entity.setProperty("unformattedStart", "14:00");
     entity.setProperty("unformattedEnd", "15:00");
     entity.setProperty("unformattedDate", "2020-05-17");
-    entity.setProperty("latlng", Utils.getGeopt("13364 Lakeview Way, Lakeside, California"));
+    LatLng location = Utils.getLatLng("13364 Lakeview Way, Lakeside, California");
+    entity.setProperty("lat", location.lat);
+    entity.setProperty("lng", location.lng);
 
     // Convert tags and set tag property.
     Gson gson = new Gson();

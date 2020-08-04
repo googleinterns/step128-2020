@@ -33,40 +33,24 @@ public class TaskHandler extends HttpServlet {
   private static final Logger LOGGER = Logger.getLogger(TaskHandler.class.getName());
 
   private static final int TWELVE_HOURS = 43_200_000;
-  private Queue queue;
-
-  @Override
-  public void init() {
-    LOGGER.info("initialized queue");
-    queue = QueueFactory.getQueue("recommend-queue");
-  }
 
   /** Makes sure there is a recommend job queued. */
   public void doGet(HttpServletRequest request, HttpServletResponse response)
       throws ServletException, IOException {
-    if (queue == null) {
-      init();
-    }
-    if (queue.fetchStatistics().getNumTasks() == 0) {
-      LOGGER.info("empty queue, adding worker POST call now");
-      queue.add(TaskOptions.Builder.withUrl("/worker"));
-    } else {
-      LOGGER.info("queue already setup, no actions needed");
-    }
+    LOGGER.info("called GET. redirecting to POST");
+    doPost(request, response);
   }
 
   /** Calculates recommendations and re-schedules the next calculation. */
   protected void doPost(HttpServletRequest request, HttpServletResponse response)
       throws ServletException, IOException {
-    if (queue == null) {
-      init();
-    }
-
     // recalculates the recommendation model
+    LOGGER.info("initializing recalculation of model.");
     Recommend.calculateRecommend();
     LOGGER.info("completed recalculation of model");
 
     // queues new task for next recalculation
+    Queue queue = QueueFactory.getQueue("recommend-queue");
     queue.add(TaskOptions.Builder.withUrl("/worker").countdownMillis(TWELVE_HOURS));
     LOGGER.info("scheduled next task for 12 hours later");
   }

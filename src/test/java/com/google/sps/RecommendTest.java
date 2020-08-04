@@ -25,7 +25,6 @@ import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.EntityNotFoundException;
-import com.google.appengine.api.datastore.GeoPt;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.PreparedQuery;
@@ -34,6 +33,7 @@ import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestC
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.google.maps.model.LatLng;
 import com.google.sps.servlets.RecommendServlet;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -79,11 +79,12 @@ public final class RecommendTest {
     PowerMockito.when(Utils.getDistance("90045", "90305")).thenReturn(20);
     PowerMockito.when(Utils.getDistance("90045", "90047")).thenReturn(30);
     PowerMockito.when(Utils.getDistance("90045", "90003")).thenReturn(40);
-    PowerMockito.when(Utils.getGeopt("90045")).thenReturn(new GeoPt(33.959670f, -118.424991f));
-    PowerMockito.when(Utils.getGeopt("90301")).thenReturn(new GeoPt(33.954740f, -118.360363f));
-    PowerMockito.when(Utils.getGeopt("90305")).thenReturn(new GeoPt(33.955859f, -118.321683f));
-    PowerMockito.when(Utils.getGeopt("90047")).thenReturn(new GeoPt(33.956506f, -118.305864f));
-    PowerMockito.when(Utils.getGeopt("90003")).thenReturn(new GeoPt(33.960939f, -118.272003f));
+    PowerMockito.when(Utils.getLatLng("90045")).thenReturn(new LatLng(33.959670, -118.424991));
+    PowerMockito.when(Utils.getLatLng("90301")).thenReturn(new LatLng(33.954740, -118.360363));
+    PowerMockito.when(Utils.getLatLng("90305")).thenReturn(new LatLng(33.955859, -118.321683));
+    PowerMockito.when(Utils.getLatLng("90047")).thenReturn(new LatLng(33.956506, -118.305864));
+    PowerMockito.when(Utils.getLatLng("90003")).thenReturn(new LatLng(33.960939, -118.272003));
+    PowerMockito.when(Utils.getLatLng("90001")).thenReturn(new LatLng(33.960939, -118.272003));
   }
 
   @After
@@ -301,8 +302,8 @@ public final class RecommendTest {
   @Test
   public void distanceCutoff() throws IOException {
     String tooFarLocation = "97229";
-    PowerMockito.when(Utils.getGeopt(tooFarLocation))
-        .thenReturn(new GeoPt(45.558676f, -122.820836f));
+    PowerMockito.when(Utils.getLatLng(tooFarLocation))
+        .thenReturn(new LatLng(45.558676, -125.820836));
 
     String users = "src/test/data/users-2.csv";
     String ratings = "src/test/data/ratings-none.csv";
@@ -315,7 +316,9 @@ public final class RecommendTest {
     eventEntity.setProperty("eventName", "too far event");
     eventEntity.setProperty("eventDescription", "This event is too far away.");
     eventEntity.setProperty("address", tooFarLocation);
-    eventEntity.setProperty("latlng", Utils.getGeopt(tooFarLocation));
+    LatLng farLatLng = Utils.getLatLng(tooFarLocation);
+    eventEntity.setProperty("lat", farLatLng.lat);
+    eventEntity.setProperty("lng", farLatLng.lng);
     eventEntity.setProperty("attendeeCount", 0);
     String[] tags = {"blm"};
     String tagsStr = Utils.convertToJson(tags);
@@ -361,7 +364,9 @@ public final class RecommendTest {
       eventEntity.setProperty("eventName", "AttendeeCount not 0");
       eventEntity.setProperty("eventDescription", "This event has a non-zero attendee count.");
       eventEntity.setProperty("address", "90045");
-      eventEntity.setProperty("latlng", Utils.getGeopt("90045"));
+      LatLng latlng = Utils.getLatLng("90045");
+      eventEntity.setProperty("lat", latlng.lat);
+      eventEntity.setProperty("lng", latlng.lng);
       eventEntity.setProperty("attendeeCount", 1);
       String[] tags = {"blm"};
       String tagsStr = Utils.convertToJson(tags);
@@ -488,7 +493,9 @@ public final class RecommendTest {
       eventEntity.setProperty("eventDescription", eventDesc);
       eventEntity.setProperty("address", fields[3]);
       eventEntity.setIndexedProperty("tags", tagsList);
-      eventEntity.setProperty("latlng", Utils.getGeopt(fields[3]));
+      LatLng latlng = Utils.getLatLng(fields[3]);
+      eventEntity.setProperty("lat", latlng.lat);
+      eventEntity.setProperty("lng", latlng.lng);
       eventEntity.setProperty("attendeeCount", 0);
       // save tag info for easier access later
     } catch (NumberFormatException e) {
