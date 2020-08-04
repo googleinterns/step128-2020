@@ -146,7 +146,7 @@ public class Recommend {
     } catch (OutOfMemoryError outOfMemory) {
       LOGGER.info(outOfMemory.getMessage());
       // do nothing and skip the rest of spark steps if out of memory
-    } catch (NullPointerException nullPinter) {
+    } catch (NullPointerException nullPointer) {
       // do nothing and skip the rest of spark steps
     }
 
