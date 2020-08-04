@@ -35,9 +35,11 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.google.maps.model.LatLng;
 import com.google.sps.servlets.RecommendServlet;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -341,6 +343,25 @@ public final class RecommendTest {
         fail();
       }
     }
+  }
+
+  @Test
+  public void skipSpark() throws IOException {
+    PrintStream original = System.out;
+
+    ByteArrayOutputStream bout = new ByteArrayOutputStream();
+    PrintStream out = new PrintStream(bout);
+    System.setOut(out);
+
+    String users = "src/test/data/users-2.csv";
+    String ratings = "src/test/data/ratings-none.csv";
+    String events = "src/test/data/events-2.csv";
+    addInfoToDatastore(events, users, ratings);
+    Recommend.calculateRecommend(true);
+
+    String output = bout.toString();
+    assertTrue(output.contains("skipping spark"));
+    System.setOut(original);
   }
 
   @Test
