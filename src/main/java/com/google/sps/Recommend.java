@@ -143,9 +143,11 @@ public class Recommend {
         userPrefs.remove(userId);
       }
 
-    } catch (OutOfMemoryError | NullPointerException e) {
-      Logger.info(e.printStackTrace());
-      // do nothing and skip the rest of spark steps if error occurs
+    } catch (OutOfMemoryError outOfMemory) {
+      LOGGER.info(outOfMemory.getMessage());
+      // do nothing and skip the rest of spark steps if out of memory
+    } catch (NullPointerException nullPinter) {
+      // do nothing and skip the rest of spark steps
     }
 
     // ALSModel will ignore users that have insufficient interaction data
