@@ -24,7 +24,6 @@ import static org.mockito.Mockito.when;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.GeoPt;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.maps.model.LatLng;
@@ -135,8 +134,6 @@ public final class KeywordSearchTest {
       Map<String, Integer> keywordsMap = SearchServlet.getKeywords(name, desc);
       e.setProperty("keywords", SearchServlet.getKeywordMapKeys(keywordsMap));
       e.setProperty("keywordsValues", SearchServlet.getKeywordMapValues(keywordsMap));
-      LatLng location = possibleLatLngs.get(i);
-      e.setProperty("latlng", new GeoPt((float) location.lat, (float) location.lng));
       testEntities.add(e);
     }
 
@@ -152,8 +149,6 @@ public final class KeywordSearchTest {
       Map<String, Integer> keywordsMap = SearchServlet.getKeywords(name, desc);
       e.setProperty("keywords", SearchServlet.getKeywordMapKeys(keywordsMap));
       e.setProperty("keywordsValues", SearchServlet.getKeywordMapValues(keywordsMap));
-      LatLng location = possibleLatLngs.get(i - 5);
-      e.setProperty("latlng", new GeoPt((float) location.lat, (float) location.lng));
       testEntities.add(e);
     }
 
@@ -538,11 +533,9 @@ public final class KeywordSearchTest {
               Utils.getDistance(new LatLng(34.0522342, -118.2436849), possibleLatLngs.get(i)))
           .thenReturn(possibleDistances.get(i));
     }
-    // Call the actual methods
+    // Call the actual getParameter and convertToJson methods
     PowerMockito.when(Utils.getParameter(anyObject(), anyString(), anyString()))
         .thenCallRealMethod();
     PowerMockito.when(Utils.convertToJson(any())).thenCallRealMethod();
-    PowerMockito.when(Utils.getGeopt(anyString())).thenCallRealMethod();
-    PowerMockito.when(Utils.getGeopt(any(LatLng.class))).thenCallRealMethod();
   }
 }
