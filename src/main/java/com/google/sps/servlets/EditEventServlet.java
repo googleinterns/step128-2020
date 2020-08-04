@@ -24,6 +24,7 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
 import com.google.gson.Gson;
+import com.google.maps.model.LatLng;
 import com.google.sps.Firebase;
 import com.google.sps.Utils;
 import java.io.IOException;
@@ -166,6 +167,12 @@ public class EditEventServlet extends HttpServlet {
     event.setProperty("unformattedEnd", endTime);
     event.setProperty("unformattedDate", date);
     event.setProperty("latlng", Utils.getGeopt(fullAddress));
+
+    LatLng latlng = Utils.getLatLng(fullAddress);
+    if (latlng != null) {
+      event.setProperty("lat", latlng.lat);
+      event.setProperty("lng", latlng.lng);
+    }
 
     Gson gson = new Gson();
     String[] tags = gson.fromJson(tagsStr, String[].class);

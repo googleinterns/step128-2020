@@ -27,6 +27,7 @@ import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
+import com.google.maps.model.LatLng;
 import com.google.sps.servlets.EditEventServlet;
 import java.io.IOException;
 import java.util.Arrays;
@@ -67,6 +68,10 @@ public final class EditEventServletTest {
         .thenReturn(new GeoPt(32.858758f, -116.904991f));
     PowerMockito.when(Utils.getGeopt("11852 S Main Street, Los Angeles, California"))
         .thenReturn(new GeoPt(33.925076f, -118.27369f));
+    PowerMockito.when(Utils.getLatLng("13364 Lakeview Way, Lakeside, California"))
+        .thenReturn(new LatLng(32.858758, -116.904991));
+    PowerMockito.when(Utils.getLatLng("11852 S Main Street, Los Angeles, California"))
+        .thenReturn(new LatLng(33.925076, -118.27369));
 
     createGoalEntity();
     createUser("test");
@@ -148,7 +153,8 @@ public final class EditEventServletTest {
     // Assert multiple fields have been updated.
     assertEquals(Arrays.asList(tagsArr), postedEntity.getProperty("tags"));
     assertEquals("", postedEntity.getProperty("endTime"));
-    assertEquals(new GeoPt(33.925076f, -118.27369f), postedEntity.getProperty("latlng"));
+    assertEquals(33.925076, Double.parseDouble(postedEntity.getProperty("lat").toString()), 0.01);
+    assertEquals(-118.27369, Double.parseDouble(postedEntity.getProperty("lng").toString()), 0.01);
   }
 
   @Test(expected = IOException.class)
@@ -400,6 +406,9 @@ public final class EditEventServletTest {
     goalEntity.setProperty("unformattedEnd", "15:00");
     goalEntity.setProperty("unformattedDate", "2020-05-17");
     goalEntity.setProperty("latlng", Utils.getGeopt("13364 Lakeview Way, Lakeside, California"));
+    LatLng location = Utils.getLatLng("13364 Lakeview Way, Lakeside, California");
+    goalEntity.setProperty("lat", location.lat);
+    goalEntity.setProperty("lng", location.lng);
 
     DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
     ds.put(goalEntity);

@@ -23,10 +23,14 @@ import com.google.appengine.api.datastore.GeoPt;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Query.CompositeFilterOperator;
+import com.google.appengine.api.datastore.Query.FilterOperator;
+import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.datastore.Query.GeoRegion.Circle;
 import com.google.appengine.api.datastore.Query.SortDirection;
 import com.google.appengine.api.datastore.Query.StContainsFilter;
 import com.google.gson.Gson;
+import com.google.maps.model.LatLng;
 import com.google.sps.Firebase;
 import com.google.sps.Interactions;
 import com.google.sps.Recommend;
@@ -50,6 +54,8 @@ public class RecommendServlet extends HttpServlet {
   public static final int EVENTS_LIMIT = 15;
   private static final double RADIUS = 300_000;
   private static final int QUERY_LIMIT = 300;
+  // 5 degrees is approx 111 km
+  private static final double DEGREE_OFFSET = 5;
 
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -134,20 +140,35 @@ public class RecommendServlet extends HttpServlet {
     Iterable<Entity> eventQuery = null;
     // limit the number of entities returned: by location (if user has specified)
     // else by attendee count
-    GeoPt latlng = null;
+    LatLng latlng = null;
     if (userEntity.hasProperty("location")) {
       userLocation = userEntity.getProperty("location").toString();
-      latlng = Utils.getGeopt(userLocation);
+      latlng = Utils.getLatLng(userLocation);
     }
     if (latlng != null) {
       LOGGER.info(
           "computing recommendations for " + userId + " using location cutoff @ " + userLocation);
-      eventQuery =
-          datastore
-              .prepare(
-                  new Query("Event")
-                      .setFilter(new StContainsFilter("latlng", new Circle(latlng, RADIUS))))
-              .asIterable(FetchOptions.Builder.withDefaults());
+      double latUpper = latlng.lat + DEGREE_OFFSET;
+      double latLower = latlng.lat - DEGREE_OFFSET;
+      double lngUpper = latlng.lng + DEGREE_OFFSET;
+      double lngLower = latlng.lng - DEGREE_OFFSET;
+
+      Query temp =
+          new Query("Event")
+              .setFilter(
+                  new StContainsFilter(
+                      "latlng",
+                      new Circle(new GeoPt((float) latlng.lat, (float) latlng.lng), RADIUS)));
+      Query want =
+          new Query("Event")
+              .setFilter(
+                  CompositeFilterOperator.and(
+                      //   new FilterPredicate("lat", FilterOperator.GREATER_THAN_OR_EQUAL,
+                      // latLower),
+                      //   new FilterPredicate("lat", FilterOperator.LESS_THAN_OR_EQUAL, latUpper),
+                      new FilterPredicate("lng", FilterOperator.GREATER_THAN_OR_EQUAL, lngLower),
+                      new FilterPredicate("lng", FilterOperator.LESS_THAN_OR_EQUAL, lngUpper)));
+      eventQuery = datastore.prepare(want).asIterable(FetchOptions.Builder.withDefaults());
     } else {
       LOGGER.info("computing recommendations for " + userId + " using attendee count cutoff");
       eventQuery =
