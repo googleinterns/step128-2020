@@ -25,14 +25,12 @@ import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.EntityNotFoundException;
-import com.google.appengine.api.datastore.GeoPt;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.gson.Gson;
-import com.google.gson.internal.LinkedTreeMap;
 import com.google.gson.reflect.TypeToken;
 import com.google.maps.model.LatLng;
 import com.google.sps.servlets.EventServlet;
@@ -76,16 +74,6 @@ public final class UserServletTest {
     assertEquals(goalProperties.size(), resultProperties.size());
     for (String s : goalProperties) {
       if (s.equals("attendeeCount")) {
-        // ignore attendeeCount, which is checked elsewhere
-      } else if (s.equals("latlng")) {
-        if (!goal.getProperty(s).equals(resultEntity.getProperty(s))) {
-          // GeoPt casting is sometimes weird
-          GeoPt goalPoint = (GeoPt) goal.getProperty(s);
-          LinkedTreeMap<String, Double> resultPoint =
-              (LinkedTreeMap<String, Double>) resultEntity.getProperty(s);
-          assertEquals(goalPoint.getLatitude(), resultPoint.get("latitude"), 0.001);
-          assertEquals(goalPoint.getLongitude(), resultPoint.get("longitude"), 0.001);
-        }
       } else {
         assertEquals(goal.getProperty(s), resultEntity.getProperty(s));
       }
@@ -129,12 +117,6 @@ public final class UserServletTest {
     helper.setUp();
 
     TestingUtil.mockUtilsForLocation();
-    PowerMockito.when(Utils.getGeopt("13364 Lakeview Way, Lakeside, California"))
-        .thenReturn(new GeoPt(32.858758f, -116.904991f));
-    PowerMockito.when(Utils.getGeopt("11852 S Main Street, Los Angeles, California"))
-        .thenReturn(new GeoPt(33.925076f, -118.27369f));
-    PowerMockito.when(Utils.getGeopt("9800 Regent Street, Los Angeles, California"))
-        .thenReturn(new GeoPt(34.025995f, -118.399908f));
     PowerMockito.when(Utils.getLatLng("13364 Lakeview Way, Lakeside, California"))
         .thenReturn(new LatLng(32.858758, -116.904991));
     PowerMockito.when(Utils.getLatLng("11852 S Main Street, Los Angeles, California"))
@@ -596,7 +578,6 @@ public final class UserServletTest {
     entity.setProperty("unformattedStart", "14:00");
     entity.setProperty("unformattedEnd", "");
     entity.setProperty("unformattedDate", "2020-05-17");
-    entity.setProperty("latlng", Utils.getGeopt("13364 Lakeview Way, Lakeside, California"));
     LatLng location = Utils.getLatLng("13364 Lakeview Way, Lakeside, California");
     entity.setProperty("lat", location.lat);
     entity.setProperty("lng", location.lng);
@@ -631,7 +612,6 @@ public final class UserServletTest {
     entity.setProperty("unformattedStart", "13:00");
     entity.setProperty("unformattedEnd", "");
     entity.setProperty("unformattedDate", "2020-05-17");
-    entity.setProperty("latlng", Utils.getGeopt("11852 S Main Street, Los Angeles, California"));
     LatLng location = Utils.getLatLng("11852 S Main Street, Los Angeles, California");
     entity.setProperty("lat", location.lat);
     entity.setProperty("lng", location.lng);
@@ -666,7 +646,6 @@ public final class UserServletTest {
     entity.setProperty("unformattedStart", "10:00");
     entity.setProperty("unformattedEnd", "");
     entity.setProperty("unformattedDate", "2020-05-17");
-    entity.setProperty("latlng", Utils.getGeopt("9800 Regent Street, Los Angeles, California"));
     LatLng location = Utils.getLatLng("9800 Regent Street, Los Angeles, California");
     entity.setProperty("lat", location.lat);
     entity.setProperty("lng", location.lng);

@@ -19,16 +19,13 @@ import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.FetchOptions;
-import com.google.appengine.api.datastore.GeoPt;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.CompositeFilterOperator;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
-import com.google.appengine.api.datastore.Query.GeoRegion.Circle;
 import com.google.appengine.api.datastore.Query.SortDirection;
-import com.google.appengine.api.datastore.Query.StContainsFilter;
 import com.google.gson.Gson;
 import com.google.maps.model.LatLng;
 import com.google.sps.Firebase;
@@ -148,27 +145,16 @@ public class RecommendServlet extends HttpServlet {
     if (latlng != null) {
       LOGGER.info(
           "computing recommendations for " + userId + " using location cutoff @ " + userLocation);
-      double latUpper = latlng.lat + DEGREE_OFFSET;
-      double latLower = latlng.lat - DEGREE_OFFSET;
+
       double lngUpper = latlng.lng + DEGREE_OFFSET;
       double lngLower = latlng.lng - DEGREE_OFFSET;
-
-      Query temp =
-          new Query("Event")
-              .setFilter(
-                  new StContainsFilter(
-                      "latlng",
-                      new Circle(new GeoPt((float) latlng.lat, (float) latlng.lng), RADIUS)));
-      Query want =
+      Query query =
           new Query("Event")
               .setFilter(
                   CompositeFilterOperator.and(
-                      //   new FilterPredicate("lat", FilterOperator.GREATER_THAN_OR_EQUAL,
-                      // latLower),
-                      //   new FilterPredicate("lat", FilterOperator.LESS_THAN_OR_EQUAL, latUpper),
                       new FilterPredicate("lng", FilterOperator.GREATER_THAN_OR_EQUAL, lngLower),
                       new FilterPredicate("lng", FilterOperator.LESS_THAN_OR_EQUAL, lngUpper)));
-      eventQuery = datastore.prepare(want).asIterable(FetchOptions.Builder.withDefaults());
+      eventQuery = datastore.prepare(query).asIterable(FetchOptions.Builder.withDefaults());
     } else {
       LOGGER.info("computing recommendations for " + userId + " using attendee count cutoff");
       eventQuery =

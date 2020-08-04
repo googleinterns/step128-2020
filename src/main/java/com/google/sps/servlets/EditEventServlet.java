@@ -166,7 +166,6 @@ public class EditEventServlet extends HttpServlet {
     event.setProperty("unformattedStart", startTime);
     event.setProperty("unformattedEnd", endTime);
     event.setProperty("unformattedDate", date);
-    event.setProperty("latlng", Utils.getGeopt(fullAddress));
 
     LatLng latlng = Utils.getLatLng(fullAddress);
     if (latlng != null) {

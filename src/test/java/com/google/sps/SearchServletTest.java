@@ -17,7 +17,6 @@ package com.google.sps;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
 
-import com.google.appengine.api.datastore.GeoPt;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.maps.DistanceMatrixApi;
@@ -120,27 +119,6 @@ public final class SearchServletTest {
   }
 
   @Test
-  public void getGeoPtWorks() throws Exception {
-    LatLng loc = new LatLng(-31.95220010, 115.85884740);
-    GeoPt geopt = Utils.getGeopt(loc);
-    assertEquals(-31.95220010, geopt.getLatitude(), 0.0001);
-    assertEquals(115.85884740, geopt.getLongitude(), 0.0001);
-  }
-
-  @Test
-  public void getGeoPtStringWorks() throws Exception {
-    LatLng loc = new LatLng(-31.95220010, 115.85884740);
-    String locStr = "3 Forrest Pl, Perth WA 6000, Australia";
-
-    GeocodingResult[] gr = createGeocodingResult(loc);
-    mockGeocodingApiSetup(locStr, gr);
-
-    GeoPt geopt = Utils.getGeopt(locStr);
-    assertEquals(-31.95220010, geopt.getLatitude(), 0.0001);
-    assertEquals(115.85884740, geopt.getLongitude(), 0.0001);
-  }
-
-  @Test
   public void getDistanceStrings() throws Exception {
     LatLng loc = new LatLng(-31.95220010, 115.85884740);
     String locStr = "3 Forrest Pl, Perth WA 6000, Australia";
@@ -165,8 +143,6 @@ public final class SearchServletTest {
 
     assertEquals(null, Utils.getLatLng(nullString));
     assertEquals(null, Utils.getLatLng(""));
-    assertEquals(null, Utils.getGeopt(nullString));
-    assertEquals(null, Utils.getGeopt(""));
 
     assertEquals(-1, Utils.getDistance("", null));
     assertEquals(-1, Utils.getDistance("", ""));

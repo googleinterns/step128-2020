@@ -23,7 +23,6 @@ import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.EntityNotFoundException;
-import com.google.appengine.api.datastore.GeoPt;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.PreparedQuery;
@@ -93,13 +92,6 @@ public final class InteractionsTest {
     helper.setUp();
 
     TestingUtil.mockUtilsForLocation();
-    PowerMockito.when(Utils.getGeopt("13364 Lakeview Way, Lakeside, California"))
-        .thenReturn(new GeoPt(32.858758f, -116.904991f));
-    PowerMockito.when(Utils.getGeopt("11852 S Main Street, Los Angeles, California"))
-        .thenReturn(new GeoPt(33.925076f, -118.27369f));
-    PowerMockito.when(Utils.getGeopt("9800 Regent Street, Los Angeles, California"))
-        .thenReturn(new GeoPt(34.025995f, -118.399908f));
-
     PowerMockito.when(Utils.getLatLng("13364 Lakeview Way, Lakeside, California"))
         .thenReturn(new LatLng(32.858758, -116.904991));
     PowerMockito.when(Utils.getLatLng("11852 S Main Street, Los Angeles, California"))

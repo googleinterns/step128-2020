@@ -127,7 +127,6 @@ public class EventServlet extends HttpServlet {
     eventEntity.setProperty("unformattedStart", startTime);
     eventEntity.setProperty("unformattedEnd", endTime);
     eventEntity.setProperty("unformattedDate", date);
-    eventEntity.setProperty("latlng", Utils.getGeopt(fullAddress));
 
     LatLng latlng = Utils.getLatLng(fullAddress);
     if (latlng != null) {
