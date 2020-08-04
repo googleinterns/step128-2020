@@ -104,14 +104,33 @@ public class Recommend {
       LOGGER.info("sparksession has already been set up");
     }
   }
+  /**
+   * Rebuilds recommendation model and calculates recommendations for users.
+   *
+   * @param skipSpark If true, will skip the spark stage
+   */
+  public static void calculateRecommend(boolean skipSpark) throws IOException {
+    performCalculation(skipSpark);
+  }
 
-  /** Rebuilds recommendation model and calculates recommendations for users. */
+  /**
+   * Rebuilds recommendation model and calculates recommendations for users. Does not skip spark.
+   */
   public static void calculateRecommend() throws IOException {
+    performCalculation(false);
+  }
+
+  private static void performCalculation(boolean skipSpark) throws IOException {
     init();
     getInfoFromDatastore();
     List<Key> toDelete = new ArrayList<>();
 
     try {
+      if (skipSpark) {
+        LOGGER.info("skipping spark");
+        System.out.println("skipping spark");
+        throw new NullPointerException("skipping spark");
+      }
       sparkInit();
 
       Dataset<Row> ratings =
