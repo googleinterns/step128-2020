@@ -39,7 +39,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -47,6 +46,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.logging.Handler;
+import java.util.logging.Logger;
+import java.util.logging.StreamHandler;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.junit.After;
@@ -97,11 +99,23 @@ public final class RecommendTest {
   @Test
   public void checkOutput() throws IOException {
     // a test to make sure everything is in an expected format and runs without hiccups
+
+    Logger log = Logger.getLogger(Recommend.class.getName());
+    ByteArrayOutputStream logCapturingStream = new ByteArrayOutputStream();
+    Handler[] handlers = log.getParent().getHandlers();
+    StreamHandler customLogHandler =
+        new StreamHandler(logCapturingStream, handlers[0].getFormatter());
+    log.addHandler(customLogHandler);
+
     String users = "src/test/data/users-1.csv";
     String ratings = "src/test/data/ratings-1.csv";
     String events = "src/test/data/events-1.csv";
     addInfoToDatastore(events, users, ratings);
     Recommend.calculateRecommend();
+
+    customLogHandler.flush();
+    assertTrue(logCapturingStream.toString().contains("completed spark step of calculations"));
+    assertTrue(!logCapturingStream.toString().contains("skipping spark"));
 
     DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
     PreparedQuery completedRecs = ds.prepare(new Query("Recommendation"));
@@ -347,11 +361,13 @@ public final class RecommendTest {
 
   @Test
   public void skipSpark() throws IOException {
-    PrintStream original = System.out;
-
-    ByteArrayOutputStream bout = new ByteArrayOutputStream();
-    PrintStream out = new PrintStream(bout);
-    System.setOut(out);
+    // check that spark is skipped correctly
+    Logger log = Logger.getLogger(Recommend.class.getName());
+    ByteArrayOutputStream logCapturingStream = new ByteArrayOutputStream();
+    Handler[] handlers = log.getParent().getHandlers();
+    StreamHandler customLogHandler =
+        new StreamHandler(logCapturingStream, handlers[0].getFormatter());
+    log.addHandler(customLogHandler);
 
     String users = "src/test/data/users-2.csv";
     String ratings = "src/test/data/ratings-none.csv";
@@ -359,9 +375,8 @@ public final class RecommendTest {
     addInfoToDatastore(events, users, ratings);
     Recommend.calculateRecommend(true);
 
-    String output = bout.toString();
-    assertTrue(output.contains("skipping spark"));
-    System.setOut(original);
+    customLogHandler.flush();
+    assertTrue(logCapturingStream.toString().contains("skipping spark"));
   }
 
   @Test

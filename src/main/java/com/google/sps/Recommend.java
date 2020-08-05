@@ -128,7 +128,6 @@ public class Recommend {
     try {
       if (skipSpark) {
         LOGGER.info("skipping spark");
-        System.out.println("skipping spark");
         throw new NullPointerException("skipping spark");
       }
       sparkInit();
@@ -161,10 +160,7 @@ public class Recommend {
         LOGGER.info("saved recommendations for " + userId);
         userPrefs.remove(userId);
       }
-
-    } catch (OutOfMemoryError outOfMemory) {
-      LOGGER.info(outOfMemory.getMessage());
-      // do nothing and skip the rest of spark steps if out of memory
+      LOGGER.info("completed spark step of calculations");
     } catch (NullPointerException nullPointer) {
       // do nothing and skip the rest of spark steps
     }
