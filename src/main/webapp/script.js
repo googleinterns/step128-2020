@@ -386,8 +386,6 @@ async function getEvents(events, index, option) {
 
     const eventItemElement = document.createElement('a');
     eventItemElement.className = 'event-item';
-    eventItemElement.setAttribute('onclick', 'openLink("' +
-        event.eventKey + '")');
     eventListElement.appendChild(eventItemElement);
 
     const eventImageElement = document.createElement('div');
@@ -398,12 +396,16 @@ async function getEvents(events, index, option) {
       primaryTag = 'donation';
     }
     eventImageElement.className = 'event-image ' + primaryTag;
+    eventImageElement.setAttribute('onclick', 'openLink("' +
+        event.eventKey + '")');
 
     const eventItemInfoElement = document.createElement('div');
     eventItemInfoElement.className = 'event-item-info';
 
     const eventItemHeaderElement = document.createElement('div');
     eventItemHeaderElement.className = 'event-item-header';
+    eventItemHeaderElement.setAttribute('onclick', 'openLink("' +
+        event.eventKey + '")');
     eventItemInfoElement.appendChild(eventItemHeaderElement);
 
     const eventItemTitleElement = document.createElement('div');
@@ -463,6 +465,8 @@ async function getEvents(events, index, option) {
     const eventItemDescElement = document.createElement('div');
     eventItemDescElement.className = 'event-item-description';
     eventItemDescElement.innerText = event.eventDescription;
+    eventItemDescElement.setAttribute('onclick', 'openLink("' +
+        event.eventKey + '")');
     eventItemInfoElement.appendChild(eventItemDescElement);
 
     const eventItemFooterElement = document.createElement('div');
