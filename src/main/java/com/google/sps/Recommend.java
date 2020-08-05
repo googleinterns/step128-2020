@@ -104,6 +104,7 @@ public class Recommend {
       LOGGER.info("sparksession has already been set up");
     }
   }
+  
   /**
    * Rebuilds recommendation model and calculates recommendations for users.
    *
