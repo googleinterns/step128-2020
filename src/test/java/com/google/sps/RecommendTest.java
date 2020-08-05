@@ -72,10 +72,19 @@ public final class RecommendTest {
       new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
   private static final Gson gson = new Gson();
 
+  private static final Logger log = Logger.getLogger(Recommend.class.getName());
+  private static Handler[] handlers = log.getParent().getHandlers();
+  private static StreamHandler customLogHandler;
+  private static ByteArrayOutputStream logCapturingStream;
+
   /** Sets up the datastore helper. */
   @Before
   public void setUp() throws IOException {
     helper.setUp();
+
+    logCapturingStream = new ByteArrayOutputStream();
+    customLogHandler = new StreamHandler(logCapturingStream, handlers[0].getFormatter());
+    log.addHandler(customLogHandler);
 
     TestingUtil.mockUtilsForLocation();
     PowerMockito.when(Utils.getDistance("90045", "90045")).thenReturn(0);
@@ -94,18 +103,12 @@ public final class RecommendTest {
   @After
   public void tearDown() {
     helper.tearDown();
+    log.removeHandler(customLogHandler);
   }
 
   @Test
   public void checkOutput() throws IOException {
     // a test to make sure everything is in an expected format and runs without hiccups
-
-    Logger log = Logger.getLogger(Recommend.class.getName());
-    ByteArrayOutputStream logCapturingStream = new ByteArrayOutputStream();
-    Handler[] handlers = log.getParent().getHandlers();
-    StreamHandler customLogHandler =
-        new StreamHandler(logCapturingStream, handlers[0].getFormatter());
-    log.addHandler(customLogHandler);
 
     String users = "src/test/data/users-1.csv";
     String ratings = "src/test/data/ratings-1.csv";
@@ -114,8 +117,9 @@ public final class RecommendTest {
     Recommend.calculateRecommend();
 
     customLogHandler.flush();
-    assertTrue(logCapturingStream.toString().contains("completed spark step of calculations"));
-    assertTrue(!logCapturingStream.toString().contains("skipping spark"));
+    String logResult = logCapturingStream.toString();
+    assertTrue(logResult.contains("completed spark step of calculations"));
+    assertTrue(!logResult.contains("skipping spark"));
 
     DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
     PreparedQuery completedRecs = ds.prepare(new Query("Recommendation"));
@@ -362,13 +366,6 @@ public final class RecommendTest {
   @Test
   public void skipSpark() throws IOException {
     // check that spark is skipped correctly
-    Logger log = Logger.getLogger(Recommend.class.getName());
-    ByteArrayOutputStream logCapturingStream = new ByteArrayOutputStream();
-    Handler[] handlers = log.getParent().getHandlers();
-    StreamHandler customLogHandler =
-        new StreamHandler(logCapturingStream, handlers[0].getFormatter());
-    log.addHandler(customLogHandler);
-
     String users = "src/test/data/users-2.csv";
     String ratings = "src/test/data/ratings-none.csv";
     String events = "src/test/data/events-2.csv";
@@ -376,7 +373,9 @@ public final class RecommendTest {
     Recommend.calculateRecommend(true);
 
     customLogHandler.flush();
-    assertTrue(logCapturingStream.toString().contains("skipping spark"));
+    String logResult = logCapturingStream.toString();
+    assertTrue(logResult.contains("skipping spark"));
+    assertTrue(!logResult.contains("completed spark step of calculations"));
   }
 
   @Test
