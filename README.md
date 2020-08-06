@@ -11,7 +11,8 @@ Our focus is on accessibility and ease of use in order to reach the largest audi
 
 ### Desktop Layout
 
-<img src="/readme/home.gif" style="border: 1px black solid; margin: 10px;" alt="Landing page on desktop"/>
+![Landing page on desktop](/readme/home.gif)
+
 
 ![Search page on desktop](/readme/search.gif)
 
@@ -24,6 +25,13 @@ Our focus is on accessibility and ease of use in order to reach the largest audi
 
 ### Mobile Layout
 
+![Kitten](/readme/home-mobile.png#mobile)
+
 ![Landing event page on mobile](/readme/home-mobile.png)    ![Search event page on mobile](/readme/search-mobile.png)  
 
 ![Recommended events on mobile](/readme/recommend-mobile.png)    ![View event page on mobile](/readme/view-mobile.png)  
+
+img[src*="#mobile"] {
+   width:150px;
+   height:100px;
+}
