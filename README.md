@@ -35,10 +35,7 @@ Our focus is on accessibility and ease of use in order to reach the largest audi
 
 ### Mobile Layout
 
-![Landing event page on mobile](/readme/home-mobile.png)&nbsp;&nbsp;&nbsp;&nbsp;
+![Landing event page on mobile](/readme/home-mobile.png)
 ![Search event page on mobile](/readme/search-mobile.png)
-<br />
-<br />
-<br />
-![Recommended events on mobile](/readme/recommend-mobile.png)&nbsp;&nbsp;&nbsp;&nbsp;
+![Recommended events on mobile](/readme/recommend-mobile.png)
 ![View event page on mobile](/readme/view-mobile.png)  
