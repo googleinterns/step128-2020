@@ -9,7 +9,7 @@ Unite by STEP is a centralized platform for creating, sharing, and finding event
 Our focus is on accessibility and ease of use in order to reach the largest audience possible and allow them to engage in movements they care about. We hope that users will be able to make a real difference in their local communities, one step at a time.
 
 
-###Desktop Layout
+### Desktop Layout
 
 ![Landing page on desktop](/readme/home.gif)
 
@@ -23,7 +23,7 @@ Our focus is on accessibility and ease of use in order to reach the largest audi
 ![Create event page on desktop](/readme/create.gif)
 
 
-###Mobile Layout
+### Mobile Layout
 
 ![Landing event page on mobile](/readme/home-mobile.png)    ![Search event page on mobile](/readme/search-mobile.png)  
 
