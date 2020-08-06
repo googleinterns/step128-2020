@@ -168,6 +168,15 @@ public final class UserServletTest {
   }
 
   @Test
+  public void noCreatedEvents() throws IOException {
+    postEventsSetup();
+    List<Entity> resultingEntities = callGet("created", "nobody@example.com");
+
+    List<Entity> goalEntityList = new ArrayList<>();
+    assertListsEqual(goalEntityList, resultingEntities);
+  }
+
+  @Test
   public void saveAnEvent() throws IOException {
     postEventsSetup();
 

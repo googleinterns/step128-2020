@@ -1,0 +1,13 @@
+indexes:
+- kind: Event
+  properties:
+  - name: creator
+    direction: asc
+  - name: eventName
+    direction: asc
+- kind: Interaction
+  properties:
+  - name: user
+    direction: asc
+  - name: event
+    direction: asc
