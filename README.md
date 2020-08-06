@@ -11,8 +11,7 @@ Our focus is on accessibility and ease of use in order to reach the largest audi
 
 ### Desktop Layout
 
-![Landing page on desktop](/readme/home.gif)
-
+<img src="/readme/home.gif" style="border: 1px black solid; margin: 10px;" alt="Landing page on desktop"/>
 
 ![Search page on desktop](/readme/search.gif)
 
