@@ -46,7 +46,7 @@ public class TaskHandler extends HttpServlet {
       throws ServletException, IOException {
     // recalculates the recommendation model
     LOGGER.info("initializing recalculation of model.");
-    Recommend.calculateRecommend();
+    Recommend.calculateRecommend(true);
     LOGGER.info("completed recalculation of model");
 
     // queues new task for next recalculation

@@ -35,6 +35,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.google.maps.model.LatLng;
 import com.google.sps.servlets.RecommendServlet;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -45,6 +46,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.logging.Handler;
+import java.util.logging.Logger;
+import java.util.logging.StreamHandler;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.junit.After;
@@ -68,10 +72,19 @@ public final class RecommendTest {
       new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
   private static final Gson gson = new Gson();
 
+  private static final Logger log = Logger.getLogger(Recommend.class.getName());
+  private static Handler[] handlers = log.getParent().getHandlers();
+  private static StreamHandler customLogHandler;
+  private static ByteArrayOutputStream logCapturingStream;
+
   /** Sets up the datastore helper. */
   @Before
   public void setUp() throws IOException {
     helper.setUp();
+
+    logCapturingStream = new ByteArrayOutputStream();
+    customLogHandler = new StreamHandler(logCapturingStream, handlers[0].getFormatter());
+    log.addHandler(customLogHandler);
 
     TestingUtil.mockUtilsForLocation();
     PowerMockito.when(Utils.getDistance("90045", "90045")).thenReturn(0);
@@ -90,16 +103,23 @@ public final class RecommendTest {
   @After
   public void tearDown() {
     helper.tearDown();
+    log.removeHandler(customLogHandler);
   }
 
   @Test
   public void checkOutput() throws IOException {
     // a test to make sure everything is in an expected format and runs without hiccups
+
     String users = "src/test/data/users-1.csv";
     String ratings = "src/test/data/ratings-1.csv";
     String events = "src/test/data/events-1.csv";
     addInfoToDatastore(events, users, ratings);
     Recommend.calculateRecommend();
+
+    customLogHandler.flush();
+    String logResult = logCapturingStream.toString();
+    assertTrue(logResult.contains("completed spark step of calculations"));
+    assertTrue(!logResult.contains("skipping spark"));
 
     DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
     PreparedQuery completedRecs = ds.prepare(new Query("Recommendation"));
@@ -341,6 +361,21 @@ public final class RecommendTest {
         fail();
       }
     }
+  }
+
+  @Test
+  public void skipSpark() throws IOException {
+    // check that spark is skipped correctly
+    String users = "src/test/data/users-2.csv";
+    String ratings = "src/test/data/ratings-none.csv";
+    String events = "src/test/data/events-2.csv";
+    addInfoToDatastore(events, users, ratings);
+    Recommend.calculateRecommend(true);
+
+    customLogHandler.flush();
+    String logResult = logCapturingStream.toString();
+    assertTrue(logResult.contains("skipping spark"));
+    assertTrue(!logResult.contains("completed spark step of calculations"));
   }
 
   @Test

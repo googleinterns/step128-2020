@@ -105,13 +105,32 @@ public class Recommend {
     }
   }
 
-  /** Rebuilds recommendation model and calculates recommendations for users. */
+  /**
+   * Rebuilds recommendation model and calculates recommendations for users.
+   *
+   * @param skipSpark If true, will skip the spark stage
+   */
+  public static void calculateRecommend(boolean skipSpark) throws IOException {
+    performCalculation(skipSpark);
+  }
+
+  /**
+   * Rebuilds recommendation model and calculates recommendations for users. Does not skip spark.
+   */
   public static void calculateRecommend() throws IOException {
+    performCalculation(false);
+  }
+
+  private static void performCalculation(boolean skipSpark) throws IOException {
     init();
     getInfoFromDatastore();
     List<Key> toDelete = new ArrayList<>();
 
     try {
+      if (skipSpark) {
+        LOGGER.info("skipping spark");
+        throw new NullPointerException("skipping spark");
+      }
       sparkInit();
 
       Dataset<Row> ratings =
@@ -142,10 +161,7 @@ public class Recommend {
         LOGGER.info("saved recommendations for " + userId);
         userPrefs.remove(userId);
       }
-
-    } catch (OutOfMemoryError outOfMemory) {
-      LOGGER.info(outOfMemory.getMessage());
-      // do nothing and skip the rest of spark steps if out of memory
+      LOGGER.info("completed spark step of calculations");
     } catch (NullPointerException nullPointer) {
       // do nothing and skip the rest of spark steps
     }
