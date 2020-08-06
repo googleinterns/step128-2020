@@ -21,27 +21,16 @@ Our focus is on accessibility and ease of use in order to reach the largest audi
 
 
 ![View event page on desktop](/readme/view.gif)
-  
-  
-
+<br />
+<br />
+<br />
 ![Create event page on desktop](/readme/create.gif)
 
 
 
 ### Mobile Layout
 
-<kbd>
-  <img src="/readme/home-mobile.png" alt="Landing event page on mobile">
-</kbd>
-&nbsp;&nbsp;&nbsp;&nbsp;
-<kbd>
-  <img src="/readme/search-mobile.png" alt="Search event page on mobile">
-</kbd>
-&nbsp;&nbsp;&nbsp;&nbsp;
-<kbd>
-  <img src="/readme/recommend-mobile.png" alt="Recommended events page on mobile">
-</kbd>
-&nbsp;&nbsp;&nbsp;&nbsp;
-<kbd>
-  <img src="/readme/view-mobile.png" alt="View event page on mobile">
-</kbd>
+![Landing event page on mobile](/readme/home-mobile.png)&nbsp;&nbsp;&nbsp;&nbsp;
+![Search event page on mobile](/readme/search-mobile.png)&nbsp;&nbsp;&nbsp;&nbsp;
+![Recommended events on mobile](/readme/recommend-mobile.png)&nbsp;&nbsp;&nbsp;&nbsp;
+![View event page on mobile](/readme/view-mobile.png)  
