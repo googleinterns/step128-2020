@@ -25,13 +25,10 @@ Our focus is on accessibility and ease of use in order to reach the largest audi
 
 ### Mobile Layout
 
-![Kitten](/readme/home-mobile.png#mobile)
+<kbd>
+  <img src="/readme/home-mobile.png" alt="Landing event page on mobile">
+</kbd>
 
 ![Landing event page on mobile](/readme/home-mobile.png)    ![Search event page on mobile](/readme/search-mobile.png)  
 
 ![Recommended events on mobile](/readme/recommend-mobile.png)    ![View event page on mobile](/readme/view-mobile.png)  
-
-img[src*="#mobile"] {
-   width:150px;
-   height:100px;
-}
