@@ -20,7 +20,7 @@ Our focus is on accessibility and ease of use in order to reach the largest audi
 ![View event page on desktop](/readme/view.gif)
 
 
-![Create event page on desktop](/readme/create.gif)
+![Create event page on desktop](/readme/create.gif){: style="margin: 50px;" }
 
 
 ### Mobile Layout
