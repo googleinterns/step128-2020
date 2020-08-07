@@ -150,7 +150,7 @@ a:link, a:visited {
 }
 
 .hero-text {
-  font-size: 1.2em;
+  font-size: 1.1em;
   left: 50%;
   position: absolute;
   text-align: center;
@@ -213,8 +213,14 @@ select option{
 }
 
 /* Create Page */
-.start-bttn img {
-  height: 8vh;
+.start-bttn button {
+  background: rgb(245, 245, 245);
+  border: none;
+  cursor: pointer;
+  font-family: Google;
+  font-size: 2.5em;
+  height: 2.8em;
+  padding: 0.5em 1em;
 }
 
 .form-container {
