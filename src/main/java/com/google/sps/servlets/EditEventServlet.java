@@ -162,7 +162,6 @@ public class EditEventServlet extends HttpServlet {
     event.setProperty("startTime", formattedTime);
     event.setProperty("endTime", formattedTimeEnd);
     event.setProperty("coverPhoto", coverPhoto);
-    event.setProperty("attendeeCount", 0);
     event.setProperty("unformattedStart", startTime);
     event.setProperty("unformattedEnd", endTime);
     event.setProperty("unformattedDate", date);
